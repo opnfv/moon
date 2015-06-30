@@ -1,0 +1,26 @@
+{
+    "subject_category_assignments": {
+        "role":{
+            "admin": [
+                "super_user",
+                "super_admin",
+                "super_root",
+                "inter_extension_user",
+                "inter_extension_admin",
+                "inter_extension_root"
+            ]
+        }
+    },
+    "object_category_assignments": {
+        "action": {
+            "intra_extension": [],
+            "mapping": [],
+            "inter_extension": []
+        },
+        "object_id": {
+            "intra_extension": ["intra_extension"],
+            "mapping": ["mapping"],
+            "inter_extension": ["inter_extension"]
+        }
+    }
+}

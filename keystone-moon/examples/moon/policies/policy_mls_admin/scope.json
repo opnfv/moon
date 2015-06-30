@@ -1,0 +1,35 @@
+{
+  "subject_category_scope": {
+    "role": [
+      "admin"
+    ]
+  },
+
+  "action_category_scope": {
+    "ie_action": [
+      "ie_access",
+      "ie_admin"
+    ]
+  },
+
+  "object_category_scope": {
+    "id": [
+        "subjects",
+        "objects",
+        "actions",
+        "subject_categories",
+        "object_categories",
+        "action_categories",
+        "subject_category_scope",
+        "object_category_scope",
+        "action_category_scope",
+        "sub_rules",
+        "sub_meta_rule",
+        "subject_assignments",
+        "object_assignments",
+        "action_assignments",
+        "sub_meta_rule_relations",
+        "aggregation_algorithms"
+      ]
+    }
+}

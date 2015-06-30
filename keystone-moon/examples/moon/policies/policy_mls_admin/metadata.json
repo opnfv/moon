@@ -1,0 +1,18 @@
+{
+    "name": "RBAC_metadata",
+    "model": "RBAC",
+    "genre": "authz",
+    "description": "Role Based access Control authorization policy",
+
+    "subject_categories": [
+        "role"
+    ],
+
+    "action_categories": [
+        "ie_action"
+    ],
+
+    "object_categories": [
+        "id"
+    ]
+}

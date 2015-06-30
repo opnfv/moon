@@ -1,0 +1,10 @@
+{
+    "subjects": [
+        "admin"
+    ],
+    "objects": [
+        "intra_extension",
+        "mapping",
+        "inter_extension"
+    ]
+}

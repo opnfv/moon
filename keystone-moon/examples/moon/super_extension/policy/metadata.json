@@ -1,0 +1,26 @@
+{
+    "name": "RBAC_metadata",
+    "model": "RBAC",
+    "genre": "super",
+    "description": "",
+
+    "subject_categories": [
+        "role"
+    ],
+
+    "object_categories": [
+        "object_id",
+        "action"
+    ],
+
+    "meta_rule": {
+        "sub_meta_rules": {
+            "permission": {
+                    "subject_categories": ["role"],
+                    "object_categories": ["object_id", "action"],
+                    "relation": "permission"
+                }
+            },
+        "aggregation": "and_true_aggregation"
+    }
+}

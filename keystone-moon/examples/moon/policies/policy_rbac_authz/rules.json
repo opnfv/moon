@@ -1,0 +1,6 @@
+{
+  "relation_super":[
+    ["admin", "vm_admin", "vm_admin", "servers"],
+    ["admin", "vm_access", "vm_access", "servers"]
+  ]
+}

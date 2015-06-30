@@ -1,0 +1,13 @@
+{
+  "relation_super":[
+    ["high", "vm_admin", "medium"],
+    ["high", "vm_admin", "low"],
+    ["medium", "vm_admin", "low"],
+    ["high", "vm_access", "high"],
+    ["high", "vm_access", "medium"],
+    ["high", "vm_access", "low"],
+    ["medium", "vm_access", "medium"],
+    ["medium", "vm_access", "low"],
+    ["low", "vm_access", "low"]
+  ]
+}

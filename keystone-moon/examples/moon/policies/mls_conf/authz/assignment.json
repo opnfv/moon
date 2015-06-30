@@ -1,0 +1,25 @@
+{
+    "subject_assignments": {
+        "subject_security_level":{
+            "user1": ["low"],
+            "user2": ["medium"],
+            "user3": ["high"]
+        }
+    },
+
+    "action_assignments": {
+        "computing_action":{
+          "pause": ["vm_admin"],
+          "unpause": ["vm_admin"],
+          "start": ["vm_admin"],
+          "stop": ["vm_admin"]
+        }
+    },
+
+    "object_assignments": {
+        "object_security_level": {
+            "vm1": ["low"],
+            "vm2": ["medium"]
+        }
+    }
+}

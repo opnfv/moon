@@ -1,0 +1,43 @@
+{
+    "subject_category_values": {
+        "role": [
+            "super_user",
+            "super_admin",
+            "super_root",
+            "inter_extension_user",
+            "inter_extension_admin",
+            "inter_extension_root"
+        ]
+    },
+
+    "object_category_values": {
+        "action": [
+            "list",
+            "create",
+            "destroy",
+            "delegate"
+        ],
+        "object_id": [
+            "intra_extension",
+            "mapping",
+            "inter_extension"
+        ]
+    },
+
+    "rules":{
+        "permission": [
+            ["super_user", "intra_extension", "list"],
+            ["super_admin", "intra_extension", "create"],
+            ["super_admin", "intra_extension", "destroy"],
+            ["super_root", "intra_extension", "delegate"],
+            ["super_user", "mapping", "list"],
+            ["super_admin", "mapping", "create"],
+            ["super_admin", "mapping", "destroy"],
+            ["super_root", "mapping", "delegate"],
+            ["inter_extension_user", "inter_extension", "list"],
+            ["inter_extension_admin", "inter_extension", "create"],
+            ["inter_extension_admin", "inter_extension", "destroy"],
+            ["inter_extension_root", "inter_extension", "delegate"]
+        ]
+    }
+}

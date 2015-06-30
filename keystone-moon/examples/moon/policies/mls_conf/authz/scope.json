@@ -1,0 +1,24 @@
+{
+  "subject_category_scope": {
+    "subject_security_level": [
+      "high",
+      "medium",
+      "low"
+    ]
+  },
+
+  "action_category_scope": {
+    "computing_action": [
+      "vm_admin",
+      "vm_access"
+    ]
+  },
+
+  "object_category_scope": {
+    "object_security_level": [
+      "high",
+      "medium",
+      "low"
+      ]
+    }
+}

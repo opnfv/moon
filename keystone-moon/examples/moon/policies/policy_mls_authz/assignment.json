@@ -1,0 +1,23 @@
+{
+    "subject_assignments": {
+        "subject_security_level":{
+        }
+    },
+
+    "action_assignments": {
+        "computing_action":{
+          "pause": ["vm_admin"],
+          "unpause": ["vm_admin"],
+          "start": ["vm_admin"],
+          "stop": ["vm_admin"],
+          "list": ["vm_access", "vm_admin"],
+          "create": ["vm_admin"]
+        }
+    },
+
+    "object_assignments": {
+        "object_security_level": {
+            "servers": ["low"]
+        }
+    }
+}

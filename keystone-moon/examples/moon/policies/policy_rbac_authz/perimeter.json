@@ -1,0 +1,16 @@
+{
+    "subjects": [
+        "admin"
+    ],
+    "actions": [
+        "pause",
+        "unpause",
+        "start",
+        "stop",
+        "create",
+        "list"
+    ],
+    "objects": [
+        "servers"
+    ]
+}

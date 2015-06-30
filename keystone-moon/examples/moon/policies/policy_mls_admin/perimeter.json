@@ -1,0 +1,29 @@
+{
+    "subjects": [
+        "admin"
+    ],
+    "actions": [
+        "read",
+        "write",
+        "create",
+        "delete"
+    ],
+    "objects": [
+        "subjects",
+        "objects",
+        "actions",
+        "subject_categories",
+        "object_categories",
+        "action_categories",
+        "subject_category_scope",
+        "object_category_scope",
+        "action_category_scope",
+        "sub_rules",
+        "subject_assignments",
+        "object_assignments",
+        "action_assignments",
+        "sub_meta_rule_relations",
+        "aggregation_algorithms",
+        "sub_meta_rule"
+    ]
+}
