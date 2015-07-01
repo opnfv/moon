@@ -1,0 +1,57 @@
+[moon.client]
+actions_list = moonclient.actions:ActionsList
+subject_categories_delete = moonclient.subject_categories:SubjectCategoriesDelete
+objects_delete = moonclient.objects:ObjectsDelete
+submetarule_show = moonclient.metarules:SubMetaRuleShow
+actions_add = moonclient.actions:ActionsAdd
+subjects_add = moonclient.subjects:SubjectsAdd
+subject_category_scope_add = moonclient.subject_category_scope:SubjectCategoryScopeAdd
+intraextension_show = moonclient.intraextension:IntraExtensionShow
+rules_add = moonclient.rules:RuleAdd
+subject_categories_list = moonclient.subject_categories:SubjectCategoriesList
+action_categories_delete = moonclient.action_categories:ActionCategoriesDelete
+subjects_delete = moonclient.subjects:SubjectsDelete
+action_category_scope_list = moonclient.action_category_scope:ActionCategoryScopeList
+subject_category_scope_delete = moonclient.subject_category_scope:SubjectCategoryScopeDelete
+subjects_list = moonclient.subjects:SubjectsList
+object_assignments_delete = moonclient.object_assignments:ObjectAssignmentsDelete
+subject_category_scope_list = moonclient.subject_category_scope:SubjectCategoryScopeList
+intraextension_delete = moonclient.intraextension:IntraExtensionDelete
+rules_list = moonclient.rules:RulesList
+logs = moonclient.logs:LogsList
+actions_delete = moonclient.actions:ActionsDelete
+object_assignments_list = moonclient.object_assignments:ObjectAssignmentsList
+object_category_scope_delete = moonclient.object_category_scope:ObjectCategoryScopeDelete
+policies_list = moonclient.authz_policies:AuthzPolicies
+subject_categories_add = moonclient.subject_categories:SubjectCategoriesAdd
+intraextension_tenant_set = moonclient.intraextension:TenantSet
+subject_assignments_add = moonclient.subject_assignments:SubjectAssignmentsAdd
+object_categories_delete = moonclient.object_categories:ObjectCategoriesDelete
+intraextension_create = moonclient.intraextension:IntraExtensionCreate
+object_category_scope_add = moonclient.object_category_scope:ObjectCategoryScopeAdd
+intraextension_list = moonclient.intraextension:IntraExtensionList
+action_assignments_list = moonclient.action_assignments:ActionAssignmentsList
+action_assignments_delete = moonclient.action_assignments:ActionAssignmentsDelete
+aggregation_algorithms_list = moonclient.metarules:AggregationAlgorithmsList
+action_assignments_add = moonclient.action_assignments:ActionAssignmentsAdd
+submetarule_set = moonclient.metarules:SubMetaRuleSet
+action_categories_list = moonclient.action_categories:ActionCategoriesList
+objects_add = moonclient.objects:ObjectsAdd
+object_assignments_add = moonclient.object_assignments:ObjectAssignmentsAdd
+action_categories_add = moonclient.action_categories:ActionCategoriesAdd
+object_categories_add = moonclient.object_categories:ObjectCategoriesAdd
+aggregation_algorithm_set = moonclient.metarules:AggregationAlgorithmSet
+subject_assignments_delete = moonclient.subject_assignments:SubjectAssignmentsDelete
+submetarule_relation_list = moonclient.metarules:SubMetaRuleRelationList
+action_category_scope_delete = moonclient.action_category_scope:ActionCategoryScopeDelete
+action_category_scope_add = moonclient.action_category_scope:ActionCategoryScopeAdd
+rules_delete = moonclient.rules:RuleDelete
+subject_assignments_list = moonclient.subject_assignments:SubjectAssignmentsList
+aggregation_algorithm_show = moonclient.metarules:AggregationAlgorithmShow
+object_categories_list = moonclient.object_categories:ObjectCategoriesList
+objects_list = moonclient.objects:ObjectsList
+object_category_scope_list = moonclient.object_category_scope:ObjectCategoryScopeList
+
+[console_scripts]
+moon = moonclient.shell:main
+
