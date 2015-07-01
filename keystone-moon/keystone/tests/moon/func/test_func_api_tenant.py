@@ -118,7 +118,7 @@ class MappingsTest(unittest.TestCase):
     def test_get_tenants(self):
         data = get_url("/v3/OS-MOON/tenants", authtoken=True)
         self.assertIn("tenants", data)
-        self.assertIsInstance(data["tenants"], list)
+        self.assertIsInstance(data["tenants"], dict)
         print(data)
 
     def test_add_delete_mapping(self):
@@ -140,14 +140,14 @@ class MappingsTest(unittest.TestCase):
         uuid = data["tenant"]["id"]
         data = get_url("/v3/OS-MOON/tenants", authtoken=True)
         self.assertIn("tenants", data)
-        self.assertIsInstance(data["tenants"], list)
+        self.assertIsInstance(data["tenants"], dict)
         print(data)
         data = get_url("/v3/OS-MOON/tenant/{}".format(uuid),
                        method="DELETE",
                        authtoken=True)
         data = get_url("/v3/OS-MOON/tenants", authtoken=True)
         self.assertIn("tenants", data)
-        self.assertIsInstance(data["tenants"], list)
+        self.assertIsInstance(data["tenants"], dict)
         print(data)
 
 if __name__ == "__main__":

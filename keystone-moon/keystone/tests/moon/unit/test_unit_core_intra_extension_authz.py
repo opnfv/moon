@@ -35,7 +35,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
     def setUp(self):
         self.useFixture(database.Database())
-        super(TestIntraExtensionAuthzManager, self).setUp()
+        super(TestIntraExtensionAuthzManagerAuthz, self).setUp()
         self.load_backends()
         self.load_fixtures(default_fixtures)
         self.manager = IntraExtensionAuthzManager()
@@ -52,8 +52,8 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         }
 
     def config_overrides(self):
-        super(TestIntraExtensionAuthzManager, self).config_overrides()
-        self.policy_directory = '../../../examples/moon/policies'
+        super(TestIntraExtensionAuthzManagerAuthz, self).config_overrides()
+        self.policy_directory = 'examples/moon/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')
@@ -84,7 +84,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAuthzManager, self).config_overrides()
-        self.policy_directory = '../../../examples/moon/policies'
+        self.policy_directory = 'examples/moon/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')
