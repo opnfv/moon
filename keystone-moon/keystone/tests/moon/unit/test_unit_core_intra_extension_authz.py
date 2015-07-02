@@ -128,7 +128,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
 
     def delete_admin_intra_extension(self):
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.delete_intra_extension,
             self.ref["id"])
 
@@ -147,19 +147,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_subjects = dict()
         new_subjects[new_subject["id"]] = new_subject["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_subject_dict,
             "admin", self.ref["id"], new_subjects)
 
         # Delete the new subject
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_subject,
             "admin", self.ref["id"], new_subject["id"])
 
         # Add a particular subject
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_subject_dict,
             "admin", self.ref["id"], new_subject["id"])
 
@@ -178,19 +178,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_objects = dict()
         new_objects[new_object["id"]] = new_object["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_object_dict,
             "admin", self.ref["id"], new_object["id"])
 
         # Delete the new object
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_object,
             "admin", self.ref["id"], new_object["id"])
 
         # Add a particular object
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_object_dict,
             "admin", self.ref["id"], new_object["name"])
 
@@ -209,19 +209,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_actions = dict()
         new_actions[new_action["id"]] = new_action["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_action_dict,
             "admin", self.ref["id"], new_actions)
 
         # Delete the new action
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_action,
             "admin", self.ref["id"], new_action["id"])
 
         # Add a particular action
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_action_dict,
             "admin", self.ref["id"], new_action["id"])
 
@@ -240,19 +240,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_subject_categories = dict()
         new_subject_categories[new_subject_category["id"]] = new_subject_category["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_subject_category_dict,
             "admin", self.ref["id"], new_subject_categories)
 
         # Delete the new subject_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_subject_category,
             "admin", self.ref["id"], new_subject_category["id"])
 
         # Add a particular subject_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_subject_category_dict,
             "admin", self.ref["id"], new_subject_category["name"])
 
@@ -271,19 +271,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_object_categories = dict()
         new_object_categories[new_object_category["id"]] = new_object_category["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_object_category_dict,
             "admin", self.ref["id"], new_object_categories)
 
         # Delete the new object_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_object_category,
             "admin", self.ref["id"], new_object_category["id"])
 
         # Add a particular object_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_object_category_dict,
             "admin", self.ref["id"], new_object_category["name"])
 
@@ -302,19 +302,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         new_action_categories = dict()
         new_action_categories[new_action_category["id"]] = new_action_category["name"]
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_action_category_dict,
             "admin", self.ref["id"], new_action_categories)
 
         # Delete the new action_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.del_action_category,
             "admin", self.ref["id"], new_action_category["id"])
 
         # Add a particular action_category
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.add_action_category_dict,
             "admin", self.ref["id"], new_action_category["name"])
 
@@ -346,19 +346,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             new_subject_category_scope_uuid = uuid.uuid4().hex
             new_subject_category_scope[new_subject_category_scope_uuid] = "new_subject_category_scope"
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_subject_category_scope_dict,
                 "admin", self.ref["id"], subject_category, new_subject_category_scope)
 
             # Delete the new subject_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_subject_category_scope,
                 "admin", self.ref["id"], subject_category, new_subject_category_scope_uuid)
 
             # Add a particular subject_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_subject_category_scope_dict,
                 "admin", self.ref["id"], subject_category, new_subject_category_scope[new_subject_category_scope_uuid])
 
@@ -390,19 +390,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             new_object_category_scope_uuid = uuid.uuid4().hex
             new_object_category_scope[new_object_category_scope_uuid] = "new_object_category_scope"
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_object_category_scope_dict,
                 "admin", self.ref["id"], object_category, new_object_category_scope)
 
             # Delete the new object_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_object_category_scope,
                 "admin", self.ref["id"], object_category, new_object_category_scope_uuid)
 
             # Add a particular object_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_object_category_scope_dict,
                 "admin", self.ref["id"], object_category, new_object_category_scope[new_object_category_scope_uuid])
 
@@ -434,19 +434,19 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             new_action_category_scope_uuid = uuid.uuid4().hex
             new_action_category_scope[new_action_category_scope_uuid] = "new_action_category_scope"
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_action_category_scope_dict,
                 "admin", self.ref["id"], action_category, new_action_category_scope)
 
             # Delete the new action_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_action_category_scope,
                 "admin", self.ref["id"], action_category, new_action_category_scope_uuid)
 
             # Add a particular action_category_scope
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_action_category_scope_dict,
                 "admin", self.ref["id"], action_category, new_action_category_scope[new_action_category_scope_uuid])
 
@@ -525,7 +525,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             self.assertEqual({}, subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_subject_category_assignment_dict,
                 "admin", self.ref["id"], new_subject["id"],
                 {
@@ -533,14 +533,14 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
                 })
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_subject_category_assignment,
                 "admin", self.ref["id"], new_subject["id"],
                 new_subject_category_uuid,
                 new_subject_category_scope_uuid)
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_subject_category_assignment_dict,
                 "admin", self.ref["id"], new_subject["id"],
                 new_subject_category_uuid,
@@ -621,7 +621,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             self.assertEqual({}, object_category_assignments["object_category_assignments"][new_object["id"]])
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_object_category_assignment_dict,
                 "admin", self.ref["id"], new_object["id"],
                 {
@@ -629,14 +629,14 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
                 })
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_object_category_assignment,
                 "admin", self.ref["id"], new_object["id"],
                 new_object_category_uuid,
                 new_object_category_scope_uuid)
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_object_category_assignment_dict,
                 "admin", self.ref["id"], new_object["id"],
                 new_object_category_uuid,
@@ -717,7 +717,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             self.assertEqual({}, action_category_assignments["action_category_assignments"][new_action["id"]])
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_action_category_assignment_dict,
                 "admin", self.ref["id"], new_action["id"],
                 {
@@ -725,14 +725,14 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
                 })
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.del_action_category_assignment,
                 "admin", self.ref["id"], new_action["id"],
                 new_action_category_uuid,
                 new_action_category_scope_uuid)
 
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.add_action_category_assignment_dict,
                 "admin", self.ref["id"], new_action["id"],
                 new_action_category_uuid,
@@ -755,7 +755,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
         _aggregation_algorithm = list(aggregation_algorithms["aggregation_algorithms"])
         _aggregation_algorithm.remove(aggregation_algorithm["aggregation"])
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_aggregation_algorithm,
             "admin", self.ref["id"], _aggregation_algorithm[0])
 
@@ -805,7 +805,7 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
             self.assertIn(new_subject_category["id"], subject_categories["subject_categories"])
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
             self.assertRaises(
-                AuthIntraExtensionModificationNotAuthorized,
+                AdminException,
                 self.manager.set_sub_meta_rule,
                 "admin", self.ref["id"], metarule)
 
@@ -856,6 +856,6 @@ class TestIntraExtensionAuthzManager(tests.TestCase):
                 sub_rule.append(scope[func_name][cat_value].keys()[0])
 
         self.assertRaises(
-            AuthIntraExtensionModificationNotAuthorized,
+            AdminException,
             self.manager.set_sub_rule,
             "admin", self.ref["id"], relation, sub_rule)

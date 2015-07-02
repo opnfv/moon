@@ -150,20 +150,20 @@ class TenantManager(manager.Manager):
         """
         try:
             return self.driver.get_tenant_dict()
-        except TenantListEmptyError:
+        except TenantListEmpty:
             self.moonlog_api.error(_("Tenant Mapping list is empty."))
             return {}
 
     def get_tenant_name(self, tenant_uuid):
         _tenant_dict = self.get_tenant_dict()
         if tenant_uuid not in _tenant_dict:
-            raise TenantNotFoundError(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
+            raise TenantNotFound(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
         return _tenant_dict[tenant_uuid]["name"]
 
     def set_tenant_name(self, tenant_uuid, tenant_name):
         _tenant_dict = self.get_tenant_dict()
         if tenant_uuid not in _tenant_dict:
-            raise TenantNotFoundError(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
+            raise TenantNotFound(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
         _tenant_dict[tenant_uuid]['name'] = tenant_name
         return self.driver.set_tenant_dict(_tenant_dict)
 
@@ -177,7 +177,7 @@ class TenantManager(manager.Manager):
         # 1 tenant only with 1 authz extension and 1 admin extension
         _tenant_dict = self.get_tenant_dict()
         if tenant_uuid not in _tenant_dict:
-            raise TenantNotFoundError(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
+            raise TenantNotFound(_("Tenant UUID ({}) was not found.".format(tenant_uuid)))
         if not _tenant_dict[tenant_uuid][scope]:
             raise IntraExtensionNotFound(_("No IntraExtension found for Tenant {}.".format(tenant_uuid)))
         return _tenant_dict[tenant_uuid][scope]
@@ -186,7 +186,7 @@ class TenantManager(manager.Manager):
         for _tenant_uuid, _tenant_value in six.iteritems(self.get_tenant_dict()):
             if extension_uuid == _tenant_value["authz"] or extension_uuid == _tenant_value["admin"]:
                 return _tenant_uuid
-        raise TenantNotFoundError()
+        raise TenantNotFound()
 
     def get_admin_extension_uuid(self, authz_extension_uuid):
         _tenants = self.get_tenant_dict()
@@ -702,7 +702,7 @@ class IntraExtensionManager(manager.Manager):
         for _cat in subject_category.keys():
             try:
                 _ = self.driver.get_subject_category_scope_dict(intra_extension_uuid, _cat)
-            except CategoryNotFound:
+            except AuthzMetadata:
                 self.driver.set_subject_category_scope_dict(intra_extension_uuid, _cat, {})
         return subject_category_dict
 
@@ -733,7 +733,7 @@ class IntraExtensionManager(manager.Manager):
         for _cat in object_category.keys():
             try:
                 _ = self.driver.get_object_category_scope_dict(intra_extension_uuid, _cat)
-            except CategoryNotFound:
+            except AuthzMetadata:
                 self.driver.set_object_category_scope_dict(intra_extension_uuid, _cat, {})
         return object_category_dict
 
@@ -764,7 +764,7 @@ class IntraExtensionManager(manager.Manager):
         for _cat in action_category.keys():
             try:
                 _ = self.driver.get_action_category_scope_dict(intra_extension_uuid, _cat)
-            except CategoryNotFound:
+            except AuthzMetadata:
                 self.driver.set_action_category_scope_dict(intra_extension_uuid, _cat, {})
         return action_category_dict
 
@@ -1241,127 +1241,127 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         return super(IntraExtensionAuthzManager, self).authz(_uuid, sub, obj, act)
 
     def delete_intra_extension(self, intra_extension_id):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_subject_dict(self, user_name, intra_extension_uuid, subject_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_subject_dict(self, user_name, intra_extension_uuid, subject_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_subject(self, user_name, intra_extension_uuid, subject_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_object_dict(self, user_name, intra_extension_uuid, object_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_object_dict(self, user_name, intra_extension_uuid, object_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_object(self, user_name, intra_extension_uuid, object_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_action_dict(self, user_name, intra_extension_uuid, action_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_action_dict(self, user_name, intra_extension_uuid, action_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_action(self, user_name, intra_extension_uuid, action_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_subject_category_dict(self, user_name, intra_extension_uuid, subject_category):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_subject_category_dict(self, user_name, intra_extension_uuid, subject_category_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_subject_category(self, user_name, intra_extension_uuid, subject_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_object_category_dict(self, user_name, intra_extension_uuid, object_category):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_object_category_dict(self, user_name, intra_extension_uuid, object_category_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_object_category(self, user_name, intra_extension_uuid, object_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_action_category_dict(self, user_name, intra_extension_uuid, action_category):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_action_category_dict(self, user_name, intra_extension_uuid, action_category_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_action_category(self, user_name, intra_extension_uuid, action_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_subject_category_scope_dict(self, user_name, intra_extension_uuid, category, scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_subject_category_scope_dict(self, user_name, intra_extension_uuid, subject_category, scope_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_subject_category_scope(self, user_name, intra_extension_uuid, subject_category, subject_category_scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_object_category_scope_dict(self, user_name, intra_extension_uuid, category, scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_object_category_scope_dict(self, user_name, intra_extension_uuid, object_category, scope_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_object_category_scope(self, user_name, intra_extension_uuid, object_category, object_category_scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_action_category_scope_dict(self, user_name, intra_extension_uuid, category, scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_action_category_scope_dict(self, user_name, intra_extension_uuid, action_category, scope_name):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_action_category_scope(self, user_name, intra_extension_uuid, action_category, action_category_scope):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_subject_category_assignment_dict(self, user_name, intra_extension_uuid, subject_uuid, assignment_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_subject_category_assignment(self, user_name, intra_extension_uuid, subject_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_subject_category_assignment_dict(self, user_name, intra_extension_uuid, subject_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_object_category_assignment_dict(self, user_name, intra_extension_uuid, object_uuid, assignment_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_object_category_assignment(self, user_name, intra_extension_uuid, object_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_object_category_assignment_dict(self, user_name, intra_extension_uuid, object_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_action_category_assignment_dict(self, user_name, intra_extension_uuid, action_uuid, assignment_dict):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_action_category_assignment(self, user_name, intra_extension_uuid, action_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def add_action_category_assignment_dict(self, user_name, intra_extension_uuid, action_uuid, category_uuid, scope_uuid):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_aggregation_algorithm(self, user_name, intra_extension_uuid, aggregation_algorithm):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_sub_meta_rule(self, user_name, intra_extension_uuid, sub_meta_rules):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def set_sub_rule(self, user_name, intra_extension_uuid, relation, sub_rule):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
     def del_sub_rule(self, user_name, intra_extension_uuid, relation_name, rule):
-        raise AuthIntraExtensionModificationNotAuthorized()
+        raise AdminException()
 
 @dependency.provider('admin_api')
 @dependency.requires('identity_api', 'moonlog_api', 'tenant_api')

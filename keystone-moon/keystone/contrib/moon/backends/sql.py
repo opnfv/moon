@@ -17,7 +17,7 @@ from keystone.contrib.moon import IntraExtensionDriver
 from keystone.contrib.moon import TenantDriver
 # from keystone.contrib.moon import InterExtensionDriver
 
-from keystone.contrib.moon.exception import TenantError, TenantListEmptyError
+from keystone.contrib.moon.exception import TenantException, TenantListEmpty
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -862,7 +862,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if subject_category not in result["subject_category_scope"].keys():
-                raise CategoryNotFound()
+                raise AuthzMetadata()
             result["subject_category_scope"] = {subject_category: result["subject_category_scope"][subject_category]}
             return result
 
@@ -942,7 +942,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if object_category not in result["object_category_scope"].keys():
-                raise CategoryNotFound()
+                raise AuthzMetadata()
             result["object_category_scope"] = {object_category: result["object_category_scope"][object_category]}
             return result
 
@@ -1022,7 +1022,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if action_category not in result["action_category_scope"].keys():
-                raise CategoryNotFound("Unknown category id {}/{}".format(action_category, result["action_category_scope"].keys()))
+                raise AuthzMetadata("Unknown category id {}/{}".format(action_category, result["action_category_scope"].keys()))
             result["action_category_scope"] = {action_category: result["action_category_scope"][action_category]}
             return result
 
@@ -1442,7 +1442,7 @@ class TenantConnector(TenantDriver):
             # ref = query.first().to_dict()
             tenants = query.all()
             if not tenants:
-                raise TenantListEmptyError()
+                raise TenantListEmpty()
             return {tenant.id: Tenant.to_dict(tenant) for tenant in tenants}
             # return [Tenant.to_dict(tenant) for tenant in tenants]
 
@@ -1474,7 +1474,7 @@ class TenantConnector(TenantDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_tenant, attr))
                 return Tenant.to_dict(ref)
-            raise TenantError()
+            raise TenantException()
 
 
 # class InterExtension(sql.ModelBase, sql.DictBase):

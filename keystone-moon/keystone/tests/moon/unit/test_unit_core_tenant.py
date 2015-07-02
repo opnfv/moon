@@ -139,9 +139,9 @@ class TestTenantManager(tests.TestCase):
         self.assertEqual(data, new_mapping[_uuid]["admin"])
 
     def test_unkown_tenant_uuid(self):
-        self.assertRaises(TenantNotFoundError, self.manager.get_tenant_name, uuid.uuid4().hex)
-        self.assertRaises(TenantNotFoundError, self.manager.set_tenant_name, uuid.uuid4().hex, "new name")
-        self.assertRaises(TenantNotFoundError, self.manager.get_extension_uuid, uuid.uuid4().hex)
+        self.assertRaises(TenantNotFound, self.manager.get_tenant_name, uuid.uuid4().hex)
+        self.assertRaises(TenantNotFound, self.manager.set_tenant_name, uuid.uuid4().hex, "new name")
+        self.assertRaises(TenantNotFound, self.manager.get_extension_uuid, uuid.uuid4().hex)
         _uuid = uuid.uuid4().hex
         new_mapping = {
             _uuid: {
@@ -158,5 +158,5 @@ class TestTenantManager(tests.TestCase):
         )
         self.assertEquals(_uuid, data["id"])
         self.assertRaises(IntraExtensionNotFound, self.manager.get_extension_uuid, _uuid, "admin")
-        self.assertRaises(TenantNotFoundError, self.manager.get_tenant_uuid, uuid.uuid4().hex)
+        self.assertRaises(TenantNotFound, self.manager.get_tenant_uuid, uuid.uuid4().hex)
         # self.assertRaises(AdminIntraExtensionNotFound, self.manager.get_admin_extension_uuid, uuid.uuid4().hex)
