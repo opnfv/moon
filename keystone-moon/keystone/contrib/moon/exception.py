@@ -239,6 +239,9 @@ class AdminAssignment(AuthzException):
 class AdminRule(AuthzException):
     title = 'Rule Exception'
 
+class AdminMetaRule(AuthzException):
+    title = 'MetaRule Exception'
+
 
 class SubjectReadNotAuthorized(AdminPerimeter):
     title = 'Subject Read Not Authorized'
@@ -395,3 +398,15 @@ class RuleAddNotAuthorized(AdminRule):
 
 class RuleDelNotAuthorized(AdminRule):
     title = 'Rule Del Not Authorized'
+
+
+class MetaRuleReadNotAuthorized(AdminRule):
+    title = 'MetaRule Read Not Authorized'
+
+
+class MetaRuleAddNotAuthorized(AdminRule):
+    title = 'MetaRule Add Not Authorized'
+
+
+class MetaRuleDelNotAuthorized(AdminRule):
+    title = 'MetaRule Del Not Authorized'
