@@ -9,6 +9,7 @@ import json
 import copy
 import re
 import six
+import time
 
 from keystone.common import manager
 from keystone import config
@@ -114,8 +115,54 @@ class LogManager(manager.Manager):
         driver = CONF.moon.log_driver
         super(LogManager, self).__init__(driver)
 
-    def get_logs(self, options):
-        return self.driver.get_logs(options)
+    def get_logs(self, logger="authz", options="", event_number=None, time_from=None, time_to=None, filter_str=None):
+
+        if len(options) > 0:
+            options = options.split(",")
+            event_number = None
+            time_from = None
+            time_to = None
+            filter_str = None
+            for opt in options:
+                if "event_number" in opt:
+                    event_number = "".join(re.findall("\d*", opt.split("=")[-1]))
+                    try:
+                        event_number = int(event_number)
+                    except ValueError:
+                        event_number = None
+                elif "from" in opt:
+                    time_from = "".join(re.findall("[\w\-:]*", opt.split("=")[-1]))
+                    try:
+                        time_from = time.strptime(time_from, self.TIME_FORMAT)
+                    except ValueError:
+                        time_from = None
+                elif "to" in opt:
+                    time_to = "".join(re.findall("[\w\-:] *", opt.split("=")[-1]))
+                    try:
+                        time_to = time.strptime(time_to, self.TIME_FORMAT)
+                    except ValueError:
+                        time_to = None
+                elif "filter" in opt:
+                    filter_str = "".join(re.findall("\w*", opt.split("=")[-1]))
+        return self.driver.get_logs(logger, event_number, time_from, time_to, filter_str)
+
+    def get_authz_logs(self, options="", event_number=None, time_from=None, time_to=None, filter_str=None):
+        return self.get_logs(
+            logger="authz",
+            options="",
+            event_number=None,
+            time_from=None,
+            time_to=None,
+            filter_str=None)
+
+    def get_sys_logs(self, options="", event_number=None, time_from=None, time_to=None, filter_str=None):
+        return self.get_logs(
+            logger="sys",
+            options="",
+            event_number=None,
+            time_from=None,
+            time_to=None,
+            filter_str=None)
 
     def authz(self, message):
         return self.driver.authz(message)
