@@ -20,84 +20,75 @@ CONF = config.CONF
 class LogConnector(LogDriver):
 
     AUTHZ_FILE = '/var/log/moon/authz.log'
+    SYS_FILE = '/var/log/moon/system.log'
     TIME_FORMAT = '%Y-%m-%d-%H:%M:%S'
 
     def __init__(self):
         # Fixme (dthom): when logging from an other class, the %appname% in the event
         # is always keystone.contrib.moon.backends.flat
         super(LogConnector, self).__init__()
-        # Configure Log to add new files in /var/log/moon/authz.log and /var/log/moon/system.log
-        self.LOG = log.getLogger(__name__)
+
+        self.SYS_LOG = logging.getLogger(__name__)
+        if not len(self.SYS_LOG.handlers):
+            fh = logging.FileHandler(self.SYS_FILE)
+            fh.setLevel(logging.DEBUG)
+            formatter = logging.Formatter('%(asctime)s ------ %(message)s', self.TIME_FORMAT)
+            fh.setFormatter(formatter)
+            self.SYS_LOG.addHandler(fh)
+
         self.AUTHZ_LOG = logging.getLogger("authz")
-        self.AUTHZ_LOG.setLevel(logging.WARNING)
-        fh = logging.FileHandler(self.AUTHZ_FILE)
-        fh.setLevel(logging.WARNING)
-        formatter = logging.Formatter('%(asctime)s ------ %(message)s', self.TIME_FORMAT)
-        fh.setFormatter(formatter)
-        self.AUTHZ_LOG.addHandler(fh)
+        if not len(self.AUTHZ_LOG.handlers):
+            fh = logging.FileHandler(self.AUTHZ_FILE)
+            fh.setLevel(logging.WARNING)
+            formatter = logging.Formatter('%(asctime)s ------ %(message)s', self.TIME_FORMAT)
+            fh.setFormatter(formatter)
+            self.AUTHZ_LOG.addHandler(fh)
 
     def authz(self, message):
         self.AUTHZ_LOG.warn(message)
 
     def debug(self, message):
-        self.LOG.debug(message)
+        self.SYS_LOG.debug(message)
 
     def info(self, message):
-        self.LOG.info(message)
+        self.SYS_LOG.info(message)
 
     def warning(self, message):
-        self.LOG.warning(message)
+        self.SYS_LOG.warning(message)
 
     def error(self, message):
-        self.LOG.error(message)
+        self.SYS_LOG.error(message)
 
     def critical(self, message):
-        self.LOG.critical(message)
+        self.SYS_LOG.critical(message)
 
-    def get_logs(self, options):
-        options = options.split(",")
-        self.info("Options of logs check : {}".format(options))
-        event_number = None
-        time_from = None
-        time_to = None
-        filter_str = None
-        for opt in options:
-            if "event_number" in opt:
-                event_number = "".join(re.findall("\d*", opt.split("=")[-1]))
-                try:
-                    event_number = int(event_number)
-                except ValueError:
-                    event_number = None
-            elif "from" in opt:
-                time_from = "".join(re.findall("[\w\-:]*", opt.split("=")[-1]))
-                try:
-                    time_from = time.strptime(time_from, self.TIME_FORMAT)
-                except ValueError:
-                    time_from = None
-            elif "to" in opt:
-                time_to = "".join(re.findall("[\w\-:] *", opt.split("=")[-1]))
-                try:
-                    time_to = time.strptime(time_to, self.TIME_FORMAT)
-                except ValueError:
-                    time_to = None
-            elif "filter" in opt:
-                filter_str = "".join(re.findall("\w*", opt.split("=")[-1]))
-        _logs = open(self.AUTHZ_FILE).readlines()
+    def get_logs(self, logger="authz", event_number=None, time_from=None, time_to=None, filter_str=None):
+        if logger == "authz":
+            _logs = open(self.AUTHZ_FILE).readlines()
+        else:
+            _logs = open(self.SYS_FILE).readlines()
         if filter_str:
             _logs = filter(lambda x: filter_str in x, _logs)
-        self.info("Options of logs check : {} {} {} {}".format(event_number, time_from, time_to, filter_str))
         if time_from:
+            time_from = time.strptime(time_from.split(" ")[0], self.TIME_FORMAT)
             try:
+                __logs = []
                 for log in _logs:
-                    __logs = filter(lambda x: time_from <= time.strptime(x.split(" ")[0], self.TIME_FORMAT), _logs)
-                    _logs = __logs
+                    _log = time.strptime(log.split(" ")[0], self.TIME_FORMAT)
+                    if time_from <= _log:
+                        __logs.append(log)
+                _logs = __logs
             except ValueError:
                 self.error("Time format error")
         if time_to:
             try:
+                time_to = time.strptime(time_to.split(" ")[0], self.TIME_FORMAT)
+                __logs = []
                 for log in _logs:
-                    __logs = filter(lambda x: time_to >= time.strptime(x.split(" ")[0], self.TIME_FORMAT), _logs)
-                    _logs = __logs
+                    _log = time.strptime(log.split(" ")[0], self.TIME_FORMAT)
+                    if time_to >= _log:
+                        __logs.append(log)
+                _logs = __logs
             except ValueError:
                 self.error("Time format error")
         if event_number:
