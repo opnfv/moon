@@ -1,0 +1,41 @@
+{
+	"mls_rule":[
+		["high", "vm_admin", "medium"],
+		["high", "vm_admin", "low"],
+		["medium", "vm_admin", "low"],
+		["high", "vm_access", "high"],
+		["high", "vm_access", "medium"],
+		["high", "vm_access", "low"],
+		["medium", "vm_access", "medium"],
+		["medium", "vm_access", "low"],
+		["low", "vm_access", "low"]
+	],
+	"dte_rule":[
+		["ft", "read", "computing"],
+		["ft", "write", "computing"],
+		["ft", "read", "storage"],
+		["ft", "write", "storage"],
+		["xxx", "read", "storage"]
+	],
+	"rbac_rule":[
+		[dev", "xxx", "read", "servers"],
+		["dev", "xxx", "read", "vm1"],
+		["dev", "xxx", "read", "vm2"],
+		["dev", "xxx", "read", "file1"],
+		["dev", "xxx", "read", "file2"],
+		["dev", "xxx", "write", "vm1"],
+		["dev", "xxx", "write", "vm2"],
+		["dev", "xxx", "write", "file1"],
+		["dev", "xxx", "write", "file2"],
+		["admin", "xxx", "read", "servers"],
+		["admin", "ft", "read", "servers"],
+		["admin", "ft", "read", "vm1"],
+		["admin", "ft", "read", "vm2"],
+		["admin", "ft", "read", "file1"],
+		["admin", "ft", "read", "file2"],
+		["admin", "ft", "write", "vm1"],
+		["admin", "ft", "write", "vm2"],
+		["admin", "ft", "write", "file1"],
+		["admin", "ft", "write", "file2"]
+	],
+}

@@ -1,0 +1,70 @@
+{
+    "subject_assignments": {
+        "subject_security_level":{
+			"user1": ["high"],
+			"user2": ["medium"],
+			"user3": ["low"]
+        },
+		"domain":{
+			"user1": ["ft"],
+			"user2": ["ft"],
+			"user3": ["xxx"]
+        },
+		"role": {
+			"user1": ["admin"],
+			"user2": ["dev"],
+			"user3": ["admin", "dev"]
+		}
+    },
+
+    "action_assignments": {
+        "resource_action":{
+			"pause": ["vm_admin"],
+			"unpause": ["vm_admin"],
+			"start": ["vm_admin"],
+			"stop": ["vm_admin"],
+			"list": ["vm_access", "vm_admin"],
+			"create": ["vm_admin"]
+			"storage_list": ["storage_access"],
+			"download": ["storage_access"],
+			"post": ["storage_admin"]
+			"upload": ["storage_admin"]
+        },
+		"access": {
+			"pause": ["write"],
+			"unpause": ["write"],
+			"start": ["write"],
+			"stop": ["write"],
+			"list": ["read"],
+			"create": ["write"]
+			"storage_list": ["read"],
+			"download": ["read"],
+			"post": ["write"]
+			"upload": ["write"]
+		}
+    },
+
+    "object_assignments": {
+        "object_security_level": {
+            "servers": ["low"],
+			"vm1": ["low"],
+			"vm2": ["medium"],
+			"file1": ["low"],
+			"file2": ["medium"]
+        },
+		"type": {
+			"servers": ["computing"],
+			"vm1": ["computing"],
+			"vm2": ["computing"],
+			"file1": ["storage"],
+			"file2": ["storage"]
+		},
+		"id": {
+			"servers": ["servers"],
+			"vm1": ["vm1"],
+			"vm2": ["vm2"],
+			"file1": ["file1"],
+			"file2": ["file2"]
+		}
+    }
+}
