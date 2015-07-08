@@ -288,15 +288,16 @@ class IntraExtensionManager(manager.Manager):
         driver = CONF.moon.intraextension_driver
         super(IntraExtensionManager, self).__init__(driver)
 
-    def authz(self, uuid, sub, obj, act):
+    def authz(self, intra_extension_uuid, subject_uuid, object_uuid, action_uuid):
         """Check authorization for a particular action.
 
-        :param uuid: UUID of an IntraExtension
-        :param sub: subject of the request
-        :param obj: object of the request
-        :param act: action of the request
+        :param intra_extension_uuid: UUID of an IntraExtension
+        :param subject_uuid: subject UUID of the request
+        :param object_uuid: object UUID of the request
+        :param action_uuid: action UUID of the request
         :return: True or False or raise an exception
         :raises: (in that order)
+            IntraExtensionNotFound
             SubjectUnknown
             ObjectUnknown
             ActionUnknown
@@ -307,104 +308,62 @@ class IntraExtensionManager(manager.Manager):
             ObjectCategoryAssignmentUnknown
             ActionCategoryAssignmentUnknown
         """
-        if not self.driver.get_intra_extension(uuid):
+        if not self.driver.get_intra_extension(intra_extension_uuid):
             raise IntraExtensionNotFound()
-        # self.moonlog_api.authz("Unknown: Authorization framework disabled ({} {} {} {})".format(uuid, sub, obj, act))
-        # self.moonlog_api.warning("Unknown: Authorization framework disabled ({} {} {} {})".format(uuid, sub, obj, act))
-        users = self.driver.get_subject_dict(uuid)
-        if sub in users and users[sub] == "admin":
-            return True
-        return False
-        # #TODO (dthom): must raise IntraExtensionNotAuthorized
-        # try:
-        #     _subject_category_dict = self.driver.get_subject_category_dict(extension_uuid)
-        #     _object_category_dict = self.driver.get_object_category_dict(extension_uuid)
-        #     _action_category_dict = self.driver.get_action_category_dict(extension_uuid)
-        #     _subject_category_value_dict = self.driver.get_subject_category_value_dict(extension_uuid, subject_name)
-        #     _object_category_value_dict = self.driver.get_object_category_value_dict(extension_uuid, object_name)
-        #     _action_category_value_dict = self.driver.get_action_category_value_dict(extension_uuid, action_name)
-        #     _meta_rule = self.driver.get_meta_rule(extension_uuid)
-        #     _rules = self.driver.get_rules(extension_uuid)
+
+        try:
+            _subject_category_dict = self.driver.get_subject_category_dict(intra_extension_uuid)
+            _object_category_dict = self.driver.get_object_category_dict(intra_extension_uuid)
+            _action_category_dict = self.driver.get_action_category_dict(intra_extension_uuid)
+            _subject_category_value_dict = self.driver.get_subject_category_value_dict(intra_extension_uuid, subject_uuid)
+            _object_category_value_dict = self.driver.get_object_category_value_dict(intra_extension_uuid, object_uuid)
+            _action_category_value_dict = self.driver.get_action_category_value_dict(intra_extension_uuid, action_uuid)
+            _subject_assignment_dict = self.driver.get_subject_category_assignment_dict(intra_extension_uuid)
+            _action_assignment_dict = self.driver.get_action_category_assignment_dict(intra_extension_uuid)
+            _object_assignment_dict = self.driver.get_object_category_assignment_dict(intra_extension_uuid)
+            _meta_rule = self.driver.get_meta_rule(intra_extension_uuid)
+            _rules = self.driver.get_rules(intra_extension_uuid)
         #     # TODO: algorithm to validate requests
         #     return True
         # except exception:  # TODO: exception.IntraExtension.NotAuthorized
         #     pass
-        # sub_meta_rule = self.driver.get_meta_rule(uuid)
-        # subject_assignments = self.driver.get_subject_category_assignment_dict(uuid)
-        # action_assignments = self.driver.get_action_category_assignment_dict(uuid)
-        # object_assignments = self.driver.get_object_category_assignment_dict(uuid)
-        # # check if subject exists
-        # if sub not in self.driver.get_subject_dict(uuid):
-        #     self.moonlog_api.authz("KO: Subject {} unknown".format(sub))
-        #     return False
-        # # check if object exists
-        # if obj not in self.driver.get_object_dict(uuid):
-        #     self.moonlog_api.authz("KO: Object {} unknown".format(obj))
-        #     return False
-        # # check if action exists
-        # if act not in self.driver.get_action_dict(uuid):
-        #     self.moonlog_api.authz("KO: Action {} unknown".format(act))
-        #     return False
-        # # check if subject is in subject_assignment
-        # for cat in subject_assignments.keys():
-        #     if sub in subject_assignments[cat]:
-        #         break
-        # else:
-        #     self.moonlog_api.authz("KO: Subject no found in categories {}".format(
-        #         subject_assignments.keys()))
-        #     return False
-        # # check if object is in object_assignment
-        # for cat in object_assignments.keys():
-        #     if obj in object_assignments[cat]:
-        #         break
-        # else:
-        #     self.moonlog_api.authz("KO: Object no found in categories {}".format(
-        #         object_assignments))
-        #     return False
-        # # check if action is in action_assignment
-        # for cat in action_assignments.keys():
-        #     if act in action_assignments[cat]:
-        #         break
-        # else:
-        #     self.moonlog_api.authz("KO: Action no found in categories {}".format(
-        #         action_assignments.keys()))
-        #     return False
-        # # get all rules for intra_extension
-        # rules = self.driver.get_rules(uuid)
-        # # check if relation exists in rules
-        # relation_to_check = None
-        # relations = self.driver.get_sub_meta_rule_relations(uuid)
-        # for relation in rules:
-        #     if relation in relations:
-        #         # hypothesis: only one relation to check
-        #         relation_to_check = relation
-        #         break
-        # else:
-        #     self.moonlog_api.authz("KO: No relation can be used {}".format(rules.keys()))
-        #     return False
-        # for sub_rule in rules[relation_to_check]:
-        #     for cat in sub_meta_rule[relation_to_check]["subject_categories"]:
-        #         rule_scope = sub_rule.pop(0)
-        #         if rule_scope in subject_assignments[cat][sub]:
-        #             break
-        #     else:
-        #         continue
-        #     for cat in sub_meta_rule[relation_to_check]["action_categories"]:
-        #         rule_scope = sub_rule.pop(0)
-        #         if rule_scope in action_assignments[cat][act]:
-        #             break
-        #     else:
-        #         continue
-        #     for cat in sub_meta_rule[relation_to_check]["object_categories"]:
-        #         rule_scope = sub_rule.pop(0)
-        #         if rule_scope in object_assignments[cat][obj]:
-        #             break
-        #     else:
-        #         continue
-        #     self.moonlog_api.authz("OK ({} {},{},{})".format(uuid, sub, act, obj))
-        #     return True
-        # self.moonlog_api.authz("KO ({} {},{},{})".format(uuid, sub, act, obj))
-        # return False
+
+        # get all rules for intra_extension
+        rules = self.driver.get_rules(intra_extension_uuid)
+        # check if relation exists in rules
+        relation_to_check = None
+        relations = self.driver.get_sub_meta_rule_relations(intra_extension_uuid)
+        for relation in rules:
+            if relation in relations:
+                # hypothesis: only one relation to check
+                relation_to_check = relation
+                break
+        else:
+            self.moonlog_api.authz("KO: No relation can be used {}".format(rules.keys()))
+            return False
+        for sub_rule in rules[relation_to_check]:
+            for cat in sub_meta_rule[relation_to_check]["subject_categories"]:
+                rule_scope = sub_rule.pop(0)
+                if rule_scope in subject_assignments[cat][subject_uuid]:
+                    break
+            else:
+                continue
+            for cat in sub_meta_rule[relation_to_check]["action_categories"]:
+                rule_scope = sub_rule.pop(0)
+                if rule_scope in action_assignments[cat][action_uuid]:
+                    break
+            else:
+                continue
+            for cat in sub_meta_rule[relation_to_check]["object_categories"]:
+                rule_scope = sub_rule.pop(0)
+                if rule_scope in object_assignments[cat][object_uuid]:
+                    break
+            else:
+                continue
+            self.moonlog_api.authz("OK ({} {},{},{})".format(intra_extension_uuid, subject_uuid, action_uuid, object_uuid))
+            return True
+        self.moonlog_api.authz("KO ({} {},{},{})".format(intra_extension_uuid, subject_uuid, action_uuid, object_uuid))
+        return False
 
     def __get_key_from_value(self, value, values_dict):
         return filter(lambda v: v[1] == value, values_dict.iteritems())[0][0]
@@ -1292,17 +1251,17 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
 
     __genre__ = "authz"
 
-    def authz(self, uuid, sub, obj, act):
+    def authz(self, tenant_uuid, sub, obj, act):
         """Check authorization for a particular action.
 
-        :param uuid: UUID of a tenant
+        :param tenant_uuid: UUID of a tenant
         :param sub: subject of the request
         :param obj: object of the request
         :param act: action of the request
         :return: True or False or raise an exception
         """
-        _uuid = self.tenant_api.get_extension_uuid(uuid, "authz")
-        return super(IntraExtensionAuthzManager, self).authz(_uuid, sub, obj, act)
+        _intra_authz_extention_uuid = self.tenant_api.get_extension_uuid(tenant_uuid, "authz")
+        return super(IntraExtensionAuthzManager, self).authz(_intra_authz_extention_uuid, sub, obj, act)
 
     def delete_intra_extension(self, intra_extension_id):
         raise AdminException()

@@ -193,7 +193,7 @@ class RuleOKNotExisting(AuthzRule):
     message_format = _("The positive rule for that request doen't exist.")
     code = 400
     title = 'Rule OK Not Existing'
-    logger = "WARNING"
+    logger = "ERROR"
 
 
 class RuleKOExisting(AuthzRule):
