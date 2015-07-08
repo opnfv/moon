@@ -2133,7 +2133,7 @@ class IntraExtensionDriver(object):
         """
         raise exception.NotImplemented()  # pragma: no cover
 
-    def set_meta_rule_dict(self, extension_uuid, meta_rule):
+    def set_meta_rule_dict(self, extension_uuid, meta_rule_dict):
         """Set the Meta rule
 
         :param extension_uuid: IntraExtension UUID
@@ -2158,7 +2158,7 @@ class IntraExtensionDriver(object):
 
     # Getter and Setter for rules
 
-    def get_rules(self, extension_uuid):
+    def get_rule_dict(self, extension_uuid):
         """Get all rules
 
         :param extension_uuid: IntraExtension UUID
@@ -2176,7 +2176,7 @@ class IntraExtensionDriver(object):
         """
         raise exception.NotImplemented()  # pragma: no cover
 
-    def set_rules(self, extension_uuid, rules):
+    def set_rule_dict(self, extension_uuid, rule_dict):
         """Set all rules
 
         :param extension_uuid: IntraExtension UUID

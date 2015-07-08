@@ -1385,14 +1385,14 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             return ref.to_dict()
 
-    def set_meta_rule_dict(self, extension_uuid, meta_rule):
+    def set_meta_rule_dict(self, extension_uuid, meta_rule_dict):
         with sql.transaction() as session:
             query = session.query(MetaRule)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
-            meta_rule["id"] = uuid4().hex
-            meta_rule["intra_extension_uuid"] = extension_uuid
-            new_ref = MetaRule.from_dict(meta_rule)
+            meta_rule_dict["id"] = uuid4().hex
+            meta_rule_dict["intra_extension_uuid"] = extension_uuid
+            new_ref = MetaRule.from_dict(meta_rule_dict)
             if not ref:
                 session.add(new_ref)
                 ref = new_ref
@@ -1404,7 +1404,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for rules
 
-    def get_rules(self, extension_uuid):
+    def get_rule_dict(self, extension_uuid):
         with sql.transaction() as session:
             query = session.query(Rule)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1413,7 +1413,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             return ref.to_dict()
 
-    def set_rules(self, extension_uuid, subrules):
+    def set_rule_dict(self, extension_uuid, rule_dict):
         with sql.transaction() as session:
             query = session.query(Rule)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1421,7 +1421,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             rules = dict()
             rules["id"] = uuid4().hex
             rules["intra_extension_uuid"] = extension_uuid
-            rules["rules"] = subrules
+            rules["rules"] = rule_dict
             new_ref = Rule.from_dict(rules)
             if not ref:
                 session.add(new_ref)
