@@ -1951,6 +1951,7 @@ class IntraExtensionDriver(object):
         :param subject_uuid: subject UUID
         :type subject_uuid: string
         :return: a dictionary of assignment for the given subject {"cat1": ["scope_uuid1", "scope_uuid2"]}
+        :raises: IntraExtensionNotFound, SubjectUnknown, SubjectCategoryAssignmentUnknown, SubjectCategoryAssignmentOutOfScope
         """
         raise exception.NotImplemented()  # pragma: no cover
 
@@ -2007,6 +2008,7 @@ class IntraExtensionDriver(object):
         :param object_uuid: object UUID
         :type object_uuid: string
         :return: a dictionary of assignment for the given object {"cat1": ["scope_uuid1", "scope_uuid2"]}
+        :raises: IntraExtensionNotFound, ObjectUnknown, ObjectCategoryAssignmentUnknown, ObjectCategoryAssignmentOutOfScope
         """
         raise exception.NotImplemented()  # pragma: no cover
 
@@ -2063,6 +2065,7 @@ class IntraExtensionDriver(object):
         :param action_uuid: action UUID
         :type action_uuid: string
         :return: a dictionary of assignment for the given action {"cat1": ["scope_uuid1", "scope_uuid2"]}
+        :raises: IntraExtensionNotFound, ActionUnknown, ActionCategoryAssignmentUnknown, ActionCategoryAssignmentOutOfScope
         """
         raise exception.NotImplemented()  # pragma: no cover
 
