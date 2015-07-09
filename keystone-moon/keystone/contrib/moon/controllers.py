@@ -7,7 +7,7 @@ from keystone.common import controller
 from keystone.common import dependency
 from keystone import config
 from keystone.models import token_model
-from keystone import exception
+from keystone.contrib.moon.exception import *
 import os
 import glob
 from oslo_log import log
@@ -23,19 +23,18 @@ class Authz_v3(controller.V3Controller):
         super(Authz_v3, self).__init__()
 
     @controller.protected()
-    def get_authz(self, context, tenant_id, subject_id, object_id, action_id):
-        # TODO (dthom): build the authz functionality
+    def get_authz(self, context, tenant_name, subject_name, object_name, action_name):
         try:
-            _authz = self.authz_api.authz(tenant_id, subject_id, object_id, action_id)
-        except exception.NotFound:
+            _authz = self.authz_api.authz(tenant_name, subject_name, object_name, action_name)
+        except TenantNotFound:
             _authz = True
         except:
             _authz = False
         return {"authz": _authz,
-                "tenant_id": tenant_id,
-                "subject_id": subject_id,
-                "object_id": object_id,
-                "action_id": action_id}
+                "tenant_name": tenant_name,
+                "subject_name": subject_name,
+                "object_name": object_name,
+                "action_name": action_name}
 
 
 @dependency.requires('admin_api', 'authz_api')
