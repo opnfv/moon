@@ -468,7 +468,7 @@ class IntraExtensions(controller.V3Controller):
         user = self._get_user_from_token(context["token_id"])
         ie_uuid = kw["intra_extensions_id"]
         relation_name = kw["relation_name"]
-        rule = kw["rule"]
+        rule = kw["rule"].split("+")
         return self.admin_api.del_sub_rule(
                     user,
                     ie_uuid,

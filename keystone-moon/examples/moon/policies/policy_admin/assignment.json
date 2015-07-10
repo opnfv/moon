@@ -1,0 +1,41 @@
+{
+    "subject_assignments": {
+        "domain":{
+			"admin": ["ft"],
+			"demo": ["xx"]
+        },
+		"role": {
+			"admin": ["admin"]
+		}
+    },
+
+    "action_assignments": {
+        "access": {
+			"read": ["admin", "user"],
+			"write": ["admin"],
+			"create": ["admin"],
+			"delete": ["admin"]
+		}
+    },
+
+    "object_assignments": {
+        "id": {
+		  "subjects": ["subjects"],
+		  "objects": ["objects"],
+		  "actions": ["actions"],
+		  "subject_categories": ["subject_categories"],
+		  "object_categories": ["object_categories"],
+		  "action_categories": ["action_categories"],
+		  "subject_category_scope": ["subject_category_scope"],
+		  "object_category_scope": ["object_category_scope"],
+		  "action_category_scope": ["action_category_scope"],
+		  "sub_rules": ["sub_rules"],
+		  "sub_meta_rule": ["sub_meta_rule"],
+		  "subject_assignments": ["subject_assignments"],
+		  "object_assignments": ["object_assignments"],
+		  "action_assignments": ["action_assignments"],
+		  "sub_meta_rule_relations": ["sub_meta_rule_relations"],
+		  "aggregation_algorithms": ["aggregation_algorithms"]
+		}
+    }
+}

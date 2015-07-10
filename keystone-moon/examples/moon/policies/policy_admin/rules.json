@@ -1,0 +1,22 @@
+{
+  "rbac_rule":[ 
+    
+    ["admin" , "ft", "admin", "subjects"],
+    ["admin" , "ft", "admin", "objects"],
+    ["admin" , "ft", "admin", "actions"],
+    ["admin" , "ft", "admin", "subject_categories"],
+    ["admin" , "ft", "admin", "object_categories"],
+    ["admin" , "ft", "admin", "action_categories"],
+    ["admin" , "ft", "admin", "subject_category_scope"],
+    ["admin" , "ft", "admin", "object_category_scope"],
+    ["admin" , "ft", "admin", "action_category_scope"],
+    ["admin" , "ft", "admin", "sub_rules"],
+    ["admin" , "ft", "admin", "sub_meta_rule"],
+    ["admin" , "ft", "admin", "subject_assignments"],
+    ["admin" , "ft", "admin", "object_assignments"],
+    ["admin" , "ft", "admin", "action_assignments"],
+    ["admin" , "ft", "admin", "sub_meta_rule_relations"],
+    ["admin" , "ft", "admin", "aggregation_algorithms"]
+    
+  ]
+}

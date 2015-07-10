@@ -1,6 +1,7 @@
 {
     "subjects": [
-        "admin"
+        "admin",
+        "demo"
     ],
     "actions": [
         "read",

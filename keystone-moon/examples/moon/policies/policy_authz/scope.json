@@ -1,0 +1,49 @@
+{
+  "subject_category_scope": {
+    "role": [
+      "admin",
+      "dev"
+    ],
+    "subject_security_level": [
+      "high",
+      "medium",
+      "low"
+    ],
+    "domain": [
+      "ft",
+      "xx"
+    ]
+  },
+
+  "action_category_scope": {
+    "resource_action": [
+      "vm_admin",
+      "vm_access",
+      "storage_admin",
+      "storage_access"
+    ],
+    "access": [
+      "write",
+      "read"
+    ]
+  },
+
+  "object_category_scope": {
+    "object_security_level": [
+      "high",
+      "medium",
+      "low"
+      ],
+    "type": [
+      "computing",
+      "storage"
+    ],
+    "id": [
+      "servers",
+      "vm1",
+      "vm2",
+      "file1",
+      "file2"
+    ]
+  }
+}

@@ -1,18 +1,19 @@
 {
     "name": "MLS_metadata",
-    "model": "MLS",
-    "genre": "authz",
+    "model": "RBAC",
+    "genre": "admin",
     "description": "",
 
     "subject_categories": [
-        "subject_security_level"
+        "domain",
+		"role"
     ],
 
     "action_categories": [
-        "computing_action"
+        "access"
     ],
 
     "object_categories": [
-        "object_security_level"
+        "id"
     ]
 }

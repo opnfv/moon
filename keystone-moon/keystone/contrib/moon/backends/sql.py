@@ -424,7 +424,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in Subject.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"subject": {"uuid": subject_uuid, "name": subject_name}}
+            return ref.to_dict()
 
     def remove_subject(self, extension_uuid, subject_uuid):
         with sql.transaction() as session:
@@ -502,7 +502,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in Object.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"object": {"uuid": object_uuid, "name": object_name}}
+            return ref.to_dict()
 
     def remove_object(self, extension_uuid, object_uuid):
         with sql.transaction() as session:
@@ -580,7 +580,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in Action.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"action": {"uuid": action_uuid, "name": action_name}}
+            return ref.to_dict()
 
     def remove_action(self, extension_uuid, action_uuid):
         with sql.transaction() as session:
@@ -660,7 +660,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in SubjectCategory.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"subject_category": {"uuid": subject_category_uuid, "name": subject_category_name}}
+            return ref.to_dict()
 
     def remove_subject_category(self, extension_uuid, subject_category_uuid):
         with sql.transaction() as session:
@@ -741,7 +741,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in ObjectCategory.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"object_category": {"uuid": object_category_uuid, "name": object_category_name}}
+            return ref.to_dict()
 
     def remove_object_category(self, extension_uuid, object_category_uuid):
         with sql.transaction() as session:
@@ -822,7 +822,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for attr in ActionCategory.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_ref, attr))
-            return {"action_category": {"uuid": action_category_uuid, "name": action_category_name}}
+            return ref.to_dict()
 
     def remove_action_category(self, extension_uuid, action_category_uuid):
         with sql.transaction() as session:
@@ -862,8 +862,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if subject_category not in result["subject_category_scope"].keys():
-                raise AuthzMetadata()
-            result["subject_category_scope"] = {subject_category: result["subject_category_scope"][subject_category]}
+                raise SubjectScopeUnknown()
             return result
 
     def set_subject_category_scope_dict(self, extension_uuid, subject_category, scope):
@@ -880,14 +879,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     }
                 )
                 session.add(new_ref)
-                ref = new_ref
             else:
                 tmp_ref = ref.to_dict()
                 tmp_ref['subject_category_scope'].update({subject_category: scope})
                 session.delete(ref)
                 new_ref = SubjectCategoryScope.from_dict(tmp_ref)
                 session.add(new_ref)
-            return ref.to_dict()
+            return new_ref.to_dict()
 
     def add_subject_category_scope_dict(self, extension_uuid, subject_category, scope_uuid, scope_name):
         with sql.transaction() as session:
@@ -901,8 +899,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if subject_category not in scope.keys():
                 scope[subject_category] = dict()
             scope[subject_category][scope_uuid] = scope_name
-            self.set_subject_category_scope_dict(extension_uuid, subject_category, scope[subject_category])
-            return {"subject_category_scope": {"uuid": scope_uuid, "name": scope_name}}
+            return self.set_subject_category_scope_dict(extension_uuid, subject_category, scope[subject_category])
 
     def remove_subject_category_scope_dict(self, extension_uuid, subject_category, scope_uuid):
         with sql.transaction() as session:
@@ -942,8 +939,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if object_category not in result["object_category_scope"].keys():
-                raise AuthzMetadata()
-            result["object_category_scope"] = {object_category: result["object_category_scope"][object_category]}
+                raise ObjectScopeUnknown()
             return result
 
     def set_object_category_scope_dict(self, extension_uuid, object_category, scope):
@@ -960,14 +956,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     }
                 )
                 session.add(new_ref)
-                ref = new_ref
             else:
                 tmp_ref = ref.to_dict()
                 tmp_ref['object_category_scope'].update({object_category: scope})
                 session.delete(ref)
                 new_ref = ObjectCategoryScope.from_dict(tmp_ref)
                 session.add(new_ref)
-            return ref.to_dict()
+            return new_ref.to_dict()
 
     def add_object_category_scope_dict(self, extension_uuid, object_category, scope_uuid, scope_name):
         with sql.transaction() as session:
@@ -981,8 +976,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if object_category not in scope:
                 scope[object_category] = dict()
             scope[object_category][scope_uuid] = scope_name
-            self.set_object_category_scope_dict(extension_uuid, object_category, scope[object_category])
-            return {"object_category_scope": {"uuid": scope_uuid, "name": scope_name}}
+            return self.set_object_category_scope_dict(extension_uuid, object_category, scope[object_category])
 
     def remove_object_category_scope_dict(self, extension_uuid, object_category, scope_uuid):
         with sql.transaction() as session:
@@ -1022,8 +1016,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionNotFound()
             result = copy.deepcopy(ref.to_dict())
             if action_category not in result["action_category_scope"].keys():
-                raise AuthzMetadata("Unknown category id {}/{}".format(action_category, result["action_category_scope"].keys()))
-            result["action_category_scope"] = {action_category: result["action_category_scope"][action_category]}
+                raise ActionScopeUnknown()
             return result
 
     def set_action_category_scope_dict(self, extension_uuid, action_category, scope):
@@ -1040,14 +1033,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     }
                 )
                 session.add(new_ref)
-                ref = new_ref
             else:
                 tmp_ref = ref.to_dict()
                 tmp_ref['action_category_scope'].update({action_category: scope})
                 session.delete(ref)
                 new_ref = ActionCategoryScope.from_dict(tmp_ref)
                 session.add(new_ref)
-            return ref.to_dict()
+            return new_ref.to_dict()
 
     def add_action_category_scope_dict(self, extension_uuid, action_category, scope_uuid, scope_name):
         with sql.transaction() as session:
@@ -1061,8 +1053,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if action_category not in scope:
                 scope[action_category] = dict()
             scope[action_category][scope_uuid] = scope_name
-            self.set_action_category_scope_dict(extension_uuid, action_category, scope[action_category])
-            return {"action_category_scope": {"uuid": scope_uuid, "name": scope_name}}
+            return self.set_action_category_scope_dict(extension_uuid, action_category, scope[action_category])
 
     def remove_action_category_scope_dict(self, extension_uuid, action_category, scope_uuid):
         with sql.transaction() as session:

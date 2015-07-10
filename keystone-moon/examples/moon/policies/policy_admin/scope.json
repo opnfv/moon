@@ -1,14 +1,23 @@
 {
-    "subjects": [
-        "admin"
+  "subject_category_scope": {
+    "role": [
+      "admin"
     ],
-    "actions": [
-        "read",
-        "write",
-        "create",
-        "delete"
-    ],
-    "objects": [
+    "domain": [
+      "ft",
+      "xx"
+    ]
+  },
+
+  "action_category_scope": {
+    "access": [
+      "admin",
+      "user"
+    ]
+  },
+
+  "object_category_scope": {
+    "id": [
         "subjects",
         "objects",
         "actions",
@@ -19,11 +28,12 @@
         "object_category_scope",
         "action_category_scope",
         "sub_rules",
+        "sub_meta_rule",
         "subject_assignments",
         "object_assignments",
         "action_assignments",
         "sub_meta_rule_relations",
-        "aggregation_algorithms",
-        "sub_meta_rule"
-    ]
+        "aggregation_algorithms"
+      ]
+    }
 }

@@ -60,7 +60,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             group='moon',
             policy_directory=self.policy_directory)
 
-    def create_intra_extension(self, policy_model="policy_rbac_admin"):
+    def create_intra_extension(self, policy_model="policy_admin"):
         # Create the admin user because IntraExtension needs it
         #self.admin = self.identity_api.create_user(USER)
         IE["policymodel"] = policy_model
@@ -99,6 +99,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.manager.delete_intra_extension(self.ref["id"])
 
     def test_subjects(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
         
@@ -147,6 +148,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_subject["id"], subjects["subjects"])
 
     def test_objects(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
         
@@ -196,6 +198,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_object["id"], objects["objects"])
 
     def test_actions(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -245,6 +248,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_action["id"], actions["actions"])
 
     def test_subject_categories(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -299,6 +303,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_subject_category["id"], subject_categories["subject_categories"])
 
     def test_object_categories(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -353,6 +358,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_object_category["id"], object_categories["object_categories"])
 
     def test_action_categories(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -407,6 +413,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn(new_action_category["id"], action_categories["action_categories"])
 
     def test_subject_category_scope(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -487,6 +494,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertNotIn(new_subject_category_scope_uuid, subject_category_scope["subject_category_scope"])
 
     def test_object_category_scope(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -567,6 +575,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertNotIn(new_object_category_scope_uuid, object_category_scope["object_category_scope"])
 
     def test_action_category_scope(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -647,6 +656,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertNotIn(new_action_category_scope_uuid, action_category_scope["action_category_scope"])
 
     def test_subject_category_assignment(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -795,6 +805,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
     def test_object_category_assignment(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -943,6 +954,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 object_category_assignments["object_category_assignments"][new_object["id"]])
 
     def test_action_category_assignment(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -1091,6 +1103,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 action_category_assignments["action_category_assignments"][new_action["id"]])
 
     def test_sub_meta_rules(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -1166,6 +1179,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 )
 
     def test_sub_rules(self):
+        self.create_user("demo")
         self.create_user("admin")
         self.create_intra_extension()
 
@@ -1292,7 +1306,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         _USER["name"] = username
         return self.identity_api.create_user(_USER)
 
-    def create_intra_extension(self, policy_model="policy_rbac_authz"):
+    def create_intra_extension(self, policy_model="policy_authz"):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
@@ -1302,8 +1316,8 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_subjects(self):
         admin_user = self.create_user("admin")
-        ref = self.create_intra_extension()
         demo_user = self.create_user("demo")
+        ref = self.create_intra_extension()
 
         self.assertRaises(
             SubjectReadNotAuthorized,
@@ -1372,8 +1386,8 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_objects(self):
         admin_user = self.create_user("admin")
-        ref = self.create_intra_extension()
         demo_user = self.create_user("demo")
+        ref = self.create_intra_extension()
 
         self.assertRaises(
             ObjectReadNotAuthorized,
@@ -1443,8 +1457,8 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_actions(self):
         admin_user = self.create_user("admin")
-        ref = self.create_intra_extension()
         demo_user = self.create_user("demo")
+        ref = self.create_intra_extension()
 
         self.assertRaises(
             ActionReadNotAuthorized,
@@ -1513,9 +1527,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn(new_action["id"], actions["actions"])
 
     def test_subject_categories(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         self.assertRaises(
             SubjectCategoryReadNotAuthorized,
@@ -1589,9 +1603,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn(new_subject_category["id"], subject_categories["subject_categories"])
 
     def test_object_categories(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         self.assertRaises(
             ObjectCategoryReadNotAuthorized,
@@ -1665,9 +1679,15 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn(new_object_category["id"], object_categories["object_categories"])
 
     def test_action_categories(self):
-        admin_user = self.create_user("admin")
-        ref = self.create_intra_extension()
+        admin_user = self.create_user()
         demo_user = self.create_user("demo")
+        tenant = self.create_tenant()
+        ie_authz = self.create_intra_extension("policy_authz")
+        ie_admin = self.create_intra_extension("policy_admin")
+        mapping = self.create_mapping(tenant, ie_authz["id"], ie_admin["id"])
+        ref = ie_authz
+        # admin_user = self.create_user("admin")
+        # ref = self.create_intra_extension()
 
         self.assertRaises(
             ActionCategoryReadNotAuthorized,
@@ -1740,9 +1760,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn(new_action_category["id"], action_categories["action_categories"])
 
     def test_subject_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         subject_categories = self.manager.set_subject_category_dict(
             admin_user["id"],
@@ -1843,9 +1863,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertNotIn(new_subject_category_scope_uuid, subject_category_scope["subject_category_scope"])
 
     def test_object_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         object_categories = self.manager.set_object_category_dict(
             admin_user["id"],
@@ -1947,9 +1967,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertNotIn(new_object_category_scope_uuid, object_category_scope["object_category_scope"])
 
     def test_action_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         action_categories = self.manager.set_action_category_dict(
             admin_user["id"],
@@ -2053,9 +2073,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertNotIn(new_action_category_scope_uuid, action_category_scope["action_category_scope"])
 
     def test_subject_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         new_subject = self.create_user()
         new_subjects = dict()
@@ -2232,9 +2252,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
     def test_object_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         new_object = {"id": uuid.uuid4().hex, "name": "my_object"}
         new_objects = dict()
@@ -2412,9 +2432,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 object_category_assignments["object_category_assignments"][new_object["id"]])
 
     def test_action_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         new_action = {"id": uuid.uuid4().hex, "name": "my_action"}
         new_actions = dict()
@@ -2592,9 +2612,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 action_category_assignments["action_category_assignments"][new_action["id"]])
 
     def test_sub_meta_rules(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         aggregation_algorithms = self.manager.get_aggregation_algorithms(admin_user["id"], ref["id"])
         self.assertIsInstance(aggregation_algorithms, dict)
@@ -2694,9 +2714,9 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 )
 
     def test_sub_rules(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
-        demo_user = self.create_user("demo")
 
         sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
