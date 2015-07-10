@@ -26,8 +26,8 @@ class Routers(wsgi.RoutersBase):
     def append_v3_routers(self, mapper, routers):
         # Controllers creation
         authz_controller = controllers.Authz_v3()
+        configuration_controller = controllers.Configuration()
         intra_ext_controller = controllers.IntraExtensions()
-        authz_policies_controller = controllers.AuthzPolicies()
         tenants_controller = controllers.Tenants()
         logs_controller = controllers.Logs()
         inter_ext_controller = controllers.InterExtensions()
@@ -45,344 +45,345 @@ class Routers(wsgi.RoutersBase):
                 'action_id': self._get_path('actions'),
             })
 
+        # Configuration route
+        self._add_resource(
+            mapper, configuration_controller,
+            path=self.PATH_PREFIX+'/configuration/templetes',
+            get_action='get_templetes',
+            rel=self._get_rel('templetes'),
+            path_vars={})
+        self._add_resource(
+            mapper, configuration_controller,
+            path=self.PATH_PREFIX+'/configuration/aggregation_algorithms',
+            get_action='get_aggregation_algorithms',
+            rel=self._get_rel('aggregation_algorithms'),
+            path_vars={})
+        self._add_resource(
+            mapper, configuration_controller,
+            path=self.PATH_PREFIX+'/configuration/sub_meta_rule_relations',
+            get_action='get_sub_meta_rule_algorithms',
+            rel=self._get_rel('sub_meta_rule_algorithms'),
+            path_vars={})
+
         # IntraExtensions route
         self._add_resource(
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions',
             get_action='get_intra_extensions',
-            post_action='create_intra_extension',
+            post_action='add_intra_extension',
             rel=self._get_rel('intra_extensions'),
             path_vars={})
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}',
             get_action='get_intra_extension',
-            delete_action='delete_intra_extension',
+            delete_action='del_intra_extension',
             rel=self._get_rel('intra_extensions'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-
-        self._add_resource(
-            mapper, authz_policies_controller,
-            path=self.PATH_PREFIX+'/authz_policies',
-            get_action='get_authz_policies',
-            rel=self._get_rel('authz_policies'),
-            path_vars={})
-
-        # Perimeter route
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subjects',
-            get_action='get_subjects',
-            post_action='add_subject',
-            rel=self._get_rel('subjects'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subjects/{subject_id}',
-            delete_action='del_subject',
-            rel=self._get_rel('subjects'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/objects',
-            get_action='get_objects',
-            post_action='add_object',
-            rel=self._get_rel('subjects'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/objects/{object_id}',
-            delete_action='del_object',
-            rel=self._get_rel('objects'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/actions',
-            get_action='get_actions',
-            post_action='add_action',
-            rel=self._get_rel('actions'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/actions/{action_id}',
-            delete_action='del_action',
-            rel=self._get_rel('actions'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
 
         # Metadata route
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_categories',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_categories',
             get_action='get_subject_categories',
             post_action='add_subject_category',
             rel=self._get_rel('subject_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_categories/{subject_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_categories/{subject_category_id}',
+            get_action='get_subject_category',
             delete_action='del_subject_category',
             rel=self._get_rel('subject_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_categories',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_categories',
             get_action='get_object_categories',
             post_action='add_object_category',
             rel=self._get_rel('object_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_categories/{object_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_categories/{object_category_id}',
+            get_action='get_object_category',
             delete_action='del_object_category',
             rel=self._get_rel('object_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_categories',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_categories',
             get_action='get_action_categories',
             post_action='add_action_category',
             rel=self._get_rel('action_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_categories/{action_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_categories/{action_category_id}',
+            get_action='get_action_category',
             delete_action='del_action_category',
             rel=self._get_rel('action_categories'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+
+        # Perimeter route
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subjects',
+            get_action='get_subjects',
+            post_action='add_subject',
+            rel=self._get_rel('subjects'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subjects/{subject_id}',
+            get_action='get_subject',
+            delete_action='del_subject',
+            rel=self._get_rel('subjects'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/objects',
+            get_action='get_objects',
+            post_action='add_object',
+            rel=self._get_rel('subjects'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/objects/{object_id}',
+            get_action='get_object',
+            delete_action='del_object',
+            rel=self._get_rel('objects'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/actions',
+            get_action='get_actions',
+            post_action='add_action',
+            rel=self._get_rel('actions'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/actions/{action_id}',
+            get_action='get_action',
+            delete_action='del_action',
+            rel=self._get_rel('actions'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
 
         # Scope route
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_category_scope',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_category_scopes/{subject_category_id}',
+            get_action='get_subject_category_scopes',
             post_action='add_subject_category_scope',
             rel=self._get_rel('subject_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_category_scope/{subject_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_category_scopes/{subject_category_id}/{subject_category_scope_id}',
             get_action='get_subject_category_scope',
-            rel=self._get_rel('subject_category_scope'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_category_scope/{subject_category_id}/{subject_category_scope_id}',
             delete_action='del_subject_category_scope',
             rel=self._get_rel('subject_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_category_scope',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_category_scopes/{object_category_id}',
+            get_action='get_object_category_scopes',
             post_action='add_object_category_scope',
             rel=self._get_rel('object_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_category_scope/{object_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_category_scopes/{object_category_id}/{object_category_scope_id}',
             get_action='get_object_category_scope',
-            rel=self._get_rel('object_category_scope'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_category_scope/{object_category_id}/{object_category_scope_id}',
             delete_action='del_object_category_scope',
             rel=self._get_rel('object_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_category_scope',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_category_scopes/{action_category_id}',
+            get_action='get_action_category_scopes',
             post_action='add_action_category_scope',
             rel=self._get_rel('action_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_category_scope/{action_category_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_category_scopes/{action_category_id}/{action_category_scope_id}',
             get_action='get_action_category_scope',
-            rel=self._get_rel('action_category_scope'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_category_scope/{action_category_id}/{action_category_scope_id}',
             delete_action='del_action_category_scope',
             rel=self._get_rel('action_category_scope'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
-        
+
         # Assignment route
+        # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_assignments/{subject_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}',
             get_action='get_subject_assignments',
             rel=self._get_rel('subject_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/subject_assignments',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments',
             post_action='add_subject_assignment',
             rel=self._get_rel('subject_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/'
-                                  'subject_assignments/{subject_id}/{subject_category}/{subject_category_scope}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
+                                  'subject_assignments/{subject_id}/{subject_category_id}/{subject_category_scope_id}',
             delete_action='del_subject_assignment',
             rel=self._get_rel('subject_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_assignments/{object_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_assignments/{object_id}',
             get_action='get_object_assignments',
             rel=self._get_rel('object_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/object_assignments',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_assignments',
             post_action='add_object_assignment',
             rel=self._get_rel('object_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/'
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
                                   'object_assignments/{object_id}/{object_category}/{object_category_scope}',
             delete_action='del_object_assignment',
             rel=self._get_rel('object_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_assignments/{action_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_assignments/{action_id}',
             get_action='get_action_assignments',
             rel=self._get_rel('action_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/action_assignments',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_assignments',
             post_action='add_action_assignment',
             rel=self._get_rel('action_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/'
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
                                   'action_assignments/{action_id}/{action_category}/{action_category_scope}',
             delete_action='del_action_assignment',
             rel=self._get_rel('action_assignments'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
 
         # Metarule route
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/aggregation_algorithms',
-            get_action='get_aggregation_algorithms',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithms',
+            post_action='add_aggregation_algorithm',
             rel=self._get_rel('aggregation_algorithms'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
-
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/aggregation_algorithm',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithms/{aggregation_algorithm_id}',
             get_action='get_aggregation_algorithm',
-            post_action='set_aggregation_algorithm',
+            delete_action='del_aggregation_algorithm',
             rel=self._get_rel('aggregation_algorithms'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
-
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/sub_meta_rule',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/sub_meta_rules',
+            get_action='get_sub_meta_rules',
+            post_action='add_sub_meta_rule',
+            rel=self._get_rel('sub_meta_rules'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/sub_meta_rule/{sub_meta_rule_id}',
             get_action='get_sub_meta_rule',
-            post_action='set_sub_meta_rule',
-            rel=self._get_rel('sub_meta_rule'),
+            delete_action='del_sub_meta_rule',
+            rel=self._get_rel('sub_meta_rules'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
-            })
-
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/sub_meta_rule_relations',
-            get_action='get_sub_meta_rule_relations',
-            rel=self._get_rel('sub_meta_rule_relations'),
-            path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
 
         # Rules route
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/sub_rules',
-            get_action='get_sub_rules',
-            post_action='set_sub_rule',
-            rel=self._get_rel('sub_rules'),
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/rules/{sub_meta_rule_id}',
+            get_action='get_rules',
+            post_action='add_rule',
+            rel=self._get_rel('rules'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extensions_id}/sub_rules/{relation_name}/{rule}',
-            delete_action='del_sub_rule',
-            rel=self._get_rel('sub_rules'),
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/rules/{sub_meta_rule_id}/{rule_id}',
+            get_action='get_rule',
+            delete_action='del_rule',
+            rel=self._get_rel('rules'),
             path_vars={
-                'intra_extensions_id': self._get_path('intra_extensions'),
+                'intra_extension_id': self._get_path('intra_extensions'),
             })
 
         # Tenants route
@@ -390,19 +391,14 @@ class Routers(wsgi.RoutersBase):
             mapper, tenants_controller,
             path=self.PATH_PREFIX+'/tenants',
             get_action='get_tenants',
-            rel=self._get_rel('tenants'),
-            path_vars={})
-        self._add_resource(
-            mapper, tenants_controller,
-            path=self.PATH_PREFIX+'/tenant',
-            post_action='set_tenant',
+            post_action='add_tenant',
             rel=self._get_rel('tenants'),
             path_vars={})
         self._add_resource(
             mapper, tenants_controller,
             path=self.PATH_PREFIX+'/tenant/{tenant_uuid}',
             get_action='get_tenant',
-            delete_action='delete_tenant',
+            delete_action='del_tenant',
             rel=self._get_rel('tenants'),
             path_vars={
                 'tenant_uuid': self._get_path('tenants'),
@@ -434,10 +430,10 @@ class Routers(wsgi.RoutersBase):
         #     path_vars={})
         # self._add_resource(
         #     mapper, inter_ext_controller,
-        #     path=self.PATH_PREFIX+'/inter_extensions/{inter_extensions_id}',
+        #     path=self.PATH_PREFIX+'/inter_extensions/{inter_extension_id}',
         #     get_action='get_inter_extension',
         #     delete_action='delete_inter_extension',
         #     rel=self._get_rel('inter_extensions'),
         #     path_vars={
-        #         'inter_extensions_id': self._get_path('inter_extensions'),
+        #         'inter_extension_id': self._get_path('inter_extensions'),
         #     })
