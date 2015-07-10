@@ -27,7 +27,7 @@ USER = {
 
 IE = {
     "name": "test IE",
-    "policymodel": "policy_rbac_authz",
+    "policymodel": "policy_authz",
     "description": "a simple description."
 }
 
@@ -85,7 +85,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         _USER["name"] = username
         return self.identity_api.create_user(_USER)
 
-    def create_intra_extension(self, policy_model="policy_rbac_authz"):
+    def create_intra_extension(self, policy_model="policy_authz"):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
@@ -149,8 +149,8 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ie_authz = self.create_intra_extension("policy_rbac_authz")
-        ie_admin = self.create_intra_extension("policy_rbac_admin")
+        ie_authz = self.create_intra_extension("policy_authz")
+        ie_admin = self.create_intra_extension("policy_admin")
         mapping = self.create_mapping(tenant, ie_authz["id"], ie_admin["id"])
 
         # Test when subject is unknown
@@ -338,10 +338,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         self.assertEqual(True, result)
 
     def test_subjects(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         subjects = self.manager.get_subject_dict(admin_user["id"], tenant["id"])
@@ -373,10 +374,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_subject["id"])
 
     def test_objects(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         objects = self.manager.get_object_dict(admin_user["id"], tenant["id"])
@@ -408,10 +410,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_object["name"])
 
     def test_actions(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         actions = self.manager.get_action_dict(admin_user["id"], tenant["id"])
@@ -443,10 +446,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_action["id"])
 
     def test_subject_categories(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         subject_categories = self.manager.get_subject_category_dict(admin_user["id"], ref["id"])
@@ -478,10 +482,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_subject_category["name"])
 
     def test_object_categories(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         object_categories = self.manager.get_object_category_dict(admin_user["id"], ref["id"])
@@ -513,10 +518,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_object_category["name"])
 
     def test_action_categories(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         action_categories = self.manager.get_action_category_dict(admin_user["id"], ref["id"])
@@ -548,10 +554,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             admin_user["id"], ref["id"], new_action_category["name"])
 
     def test_subject_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         subject_categories = self.admin_manager.set_subject_category_dict(
@@ -596,10 +603,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 admin_user["id"], ref["id"], subject_category, new_subject_category_scope[new_subject_category_scope_uuid])
 
     def test_object_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         object_categories = self.admin_manager.set_object_category_dict(
@@ -644,10 +652,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 admin_user["id"], ref["id"], object_category, new_object_category_scope[new_object_category_scope_uuid])
 
     def test_action_category_scope(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         action_categories = self.admin_manager.set_action_category_dict(
@@ -692,10 +701,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 admin_user["id"], ref["id"], action_category, new_action_category_scope[new_action_category_scope_uuid])
 
     def test_subject_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         new_subject = self.create_user()
@@ -792,10 +802,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 new_subject_category_scope_uuid)
 
     def test_object_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         new_object = {"id": uuid.uuid4().hex, "name": "my_object"}
@@ -892,10 +903,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 new_object_category_scope_uuid)
 
     def test_action_category_assignment(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         new_action = {"id": uuid.uuid4().hex, "name": "my_action"}
@@ -992,10 +1004,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 new_action_category_scope_uuid)
 
     def test_sub_meta_rules(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         aggregation_algorithms = self.manager.get_aggregation_algorithms(admin_user["id"], ref["id"])
@@ -1067,10 +1080,11 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 admin_user["id"], ref["id"], metarule)
 
     def test_sub_rules(self):
+        demo_user = self.create_user("demo")
         admin_user = self.create_user()
         tenant = self.create_tenant()
-        ref = self.create_intra_extension("policy_rbac_authz")
-        ref_admin = self.create_intra_extension("policy_rbac_admin")
+        ref = self.create_intra_extension("policy_authz")
+        ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
         sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"])

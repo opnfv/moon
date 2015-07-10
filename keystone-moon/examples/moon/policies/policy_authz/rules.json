@@ -15,19 +15,19 @@
 		["ft", "write", "computing"],
 		["ft", "read", "storage"],
 		["ft", "write", "storage"],
-		["xxx", "read", "storage"]
+		["xx", "read", "storage"]
 	],
 	"rbac_rule":[
-		[dev", "xxx", "read", "servers"],
-		["dev", "xxx", "read", "vm1"],
-		["dev", "xxx", "read", "vm2"],
-		["dev", "xxx", "read", "file1"],
-		["dev", "xxx", "read", "file2"],
-		["dev", "xxx", "write", "vm1"],
-		["dev", "xxx", "write", "vm2"],
-		["dev", "xxx", "write", "file1"],
-		["dev", "xxx", "write", "file2"],
-		["admin", "xxx", "read", "servers"],
+		["dev", "xx", "read", "servers"],
+		["dev", "xx", "read", "vm1"],
+		["dev", "xx", "read", "vm2"],
+		["dev", "xx", "read", "file1"],
+		["dev", "xx", "read", "file2"],
+		["dev", "xx", "write", "vm1"],
+		["dev", "xx", "write", "vm2"],
+		["dev", "xx", "write", "file1"],
+		["dev", "xx", "write", "file2"],
+		["admin", "xx", "read", "servers"],
 		["admin", "ft", "read", "servers"],
 		["admin", "ft", "read", "vm1"],
 		["admin", "ft", "read", "vm2"],
@@ -37,5 +37,5 @@
 		["admin", "ft", "write", "vm2"],
 		["admin", "ft", "write", "file1"],
 		["admin", "ft", "write", "file2"]
-	],
+	]
 }

@@ -147,6 +147,48 @@ class ActionUnknown(AuthzPerimeter):
     logger = "ERROR"
 
 
+class SubjectCategoryUnknown(AuthzMetadata):
+    message_format = _("The given subject category is unknown.")
+    code = 400
+    title = 'Subject Category Unknown'
+    logger = "ERROR"
+
+
+class ObjectCategoryUnknown(AuthzMetadata):
+    message_format = _("The given object category is unknown.")
+    code = 400
+    title = 'Object Category Unknown'
+    logger = "ERROR"
+
+
+class ActionCategoryUnknown(AuthzMetadata):
+    message_format = _("The given action category is unknown.")
+    code = 400
+    title = 'Action Category Unknown'
+    logger = "ERROR"
+
+
+class SubjectScopeUnknown(AuthzScope):
+    message_format = _("The given subject scope is unknown.")
+    code = 400
+    title = 'Subject Scope Unknown'
+    logger = "ERROR"
+
+
+class ObjectScopeUnknown(AuthzScope):
+    message_format = _("The given object scope is unknown.")
+    code = 400
+    title = 'Object Scope Unknown'
+    logger = "ERROR"
+
+
+class ActionScopeUnknown(AuthzScope):
+    message_format = _("The given action scope is unknown.")
+    code = 400
+    title = 'Action Scope Unknown'
+    logger = "ERROR"
+
+
 class SubjectCategoryAssignmentOutOfScope(AuthzScope):
     message_format = _("The given subject category scope value is out of scope.")
     code = 400

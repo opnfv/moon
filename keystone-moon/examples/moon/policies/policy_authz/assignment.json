@@ -1,19 +1,16 @@
 {
     "subject_assignments": {
         "subject_security_level":{
-			"user1": ["high"],
-			"user2": ["medium"],
-			"user3": ["low"]
+			"admin": ["high"],
+			"demo": ["medium"]
         },
 		"domain":{
-			"user1": ["ft"],
-			"user2": ["ft"],
-			"user3": ["xxx"]
+			"admin": ["ft"],
+			"demo": ["xx"]
         },
 		"role": {
-			"user1": ["admin"],
-			"user2": ["dev"],
-			"user3": ["admin", "dev"]
+			"admin": ["admin"],
+			"demo": ["dev"]
 		}
     },
 
@@ -24,10 +21,10 @@
 			"start": ["vm_admin"],
 			"stop": ["vm_admin"],
 			"list": ["vm_access", "vm_admin"],
-			"create": ["vm_admin"]
+			"create": ["vm_admin"],
 			"storage_list": ["storage_access"],
 			"download": ["storage_access"],
-			"post": ["storage_admin"]
+			"post": ["storage_admin"],
 			"upload": ["storage_admin"]
         },
 		"access": {
@@ -36,10 +33,10 @@
 			"start": ["write"],
 			"stop": ["write"],
 			"list": ["read"],
-			"create": ["write"]
+			"create": ["write"],
 			"storage_list": ["read"],
 			"download": ["read"],
-			"post": ["write"]
+			"post": ["write"],
 			"upload": ["write"]
 		}
     },
