@@ -252,7 +252,6 @@ class Routers(wsgi.RoutersBase):
             })
 
         # Assignment route
-        # XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
         self._add_resource(
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}',
@@ -265,6 +264,15 @@ class Routers(wsgi.RoutersBase):
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments',
             post_action='add_subject_assignment',
+            rel=self._get_rel('subject_assignments'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
+                                  'subject_assignments/{subject_id}/{subject_category_id}',
+            get_action='get_subject_assignment',
             rel=self._get_rel('subject_assignments'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -297,6 +305,15 @@ class Routers(wsgi.RoutersBase):
         self._add_resource(
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
+                                  'object_assignments/{object_id}/{object_category}',
+            get_action='get_object_assignment',
+            rel=self._get_rel('object_assignments'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
                                   'object_assignments/{object_id}/{object_category}/{object_category_scope}',
             delete_action='del_object_assignment',
             rel=self._get_rel('object_assignments'),
@@ -315,6 +332,15 @@ class Routers(wsgi.RoutersBase):
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_assignments',
             post_action='add_action_assignment',
+            rel=self._get_rel('action_assignments'),
+            path_vars={
+                'intra_extension_id': self._get_path('intra_extensions'),
+            })
+        self._add_resource(
+            mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/'
+                                  'action_assignments/{action_id}/{action_category}',
+            get_action='get_action_assignment',
             rel=self._get_rel('action_assignments'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -358,7 +384,7 @@ class Routers(wsgi.RoutersBase):
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/sub_meta_rule/{sub_meta_rule_id}',
+            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/sub_meta_rules/{sub_meta_rule_id}',
             get_action='get_sub_meta_rule',
             delete_action='del_sub_meta_rule',
             rel=self._get_rel('sub_meta_rules'),
