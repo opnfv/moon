@@ -47,10 +47,10 @@ class TestTenantManager(tests.TestCase):
             }
         }
         data = self.manager.set_tenant_dict(
-            tenant_uuid=_uuid,
-            name=new_mapping[_uuid]["name"],
-            authz_extension_uuid=new_mapping[_uuid]["authz"],
-            admin_extension_uuid=new_mapping[_uuid]["admin"]
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=new_mapping[_uuid]["admin"]
         )
         self.assertEquals(_uuid, data["id"])
         self.assertEquals(data["name"], new_mapping[_uuid]["name"])
@@ -79,10 +79,10 @@ class TestTenantManager(tests.TestCase):
             }
         }
         data = self.manager.set_tenant_dict(
-            tenant_uuid=_uuid,
-            name=new_mapping[_uuid]["name"],
-            authz_extension_uuid=new_mapping[_uuid]["authz"],
-            admin_extension_uuid=new_mapping[_uuid]["admin"]
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=new_mapping[_uuid]["admin"]
         )
         self.assertEquals(_uuid, data["id"])
         self.assertEquals(data["name"], new_mapping[_uuid]["name"])
@@ -102,10 +102,10 @@ class TestTenantManager(tests.TestCase):
             }
         }
         data = self.manager.set_tenant_dict(
-            tenant_uuid=_uuid,
-            name=new_mapping[_uuid]["name"],
-            authz_extension_uuid=new_mapping[_uuid]["authz"],
-            admin_extension_uuid=new_mapping[_uuid]["admin"]
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=new_mapping[_uuid]["admin"]
         )
         self.assertEquals(_uuid, data["id"])
         self.assertEquals(data["name"], new_mapping[_uuid]["name"])
@@ -127,21 +127,21 @@ class TestTenantManager(tests.TestCase):
             }
         }
         data = self.manager.set_tenant_dict(
-            tenant_uuid=_uuid,
-            name=new_mapping[_uuid]["name"],
-            authz_extension_uuid=new_mapping[_uuid]["authz"],
-            admin_extension_uuid=new_mapping[_uuid]["admin"]
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=new_mapping[_uuid]["admin"]
         )
         self.assertEquals(_uuid, data["id"])
-        data = self.manager.get_extension_uuid(_uuid)
+        data = self.manager.get_extension_id(_uuid)
         self.assertEqual(data, new_mapping[_uuid]["authz"])
-        data = self.manager.get_extension_uuid(_uuid, "admin")
+        data = self.manager.get_extension_id(_uuid, "admin")
         self.assertEqual(data, new_mapping[_uuid]["admin"])
 
     def test_unkown_tenant_uuid(self):
-        self.assertRaises(TenantNotFound, self.manager.get_tenant_name, uuid.uuid4().hex)
-        self.assertRaises(TenantNotFound, self.manager.set_tenant_name, uuid.uuid4().hex, "new name")
-        self.assertRaises(TenantNotFound, self.manager.get_extension_uuid, uuid.uuid4().hex)
+        self.assertRaises(TenantIDNotFound, self.manager.get_tenant_name, uuid.uuid4().hex)
+        self.assertRaises(TenantIDNotFound, self.manager.set_tenant_name, uuid.uuid4().hex, "new name")
+        self.assertRaises(TenantIDNotFound, self.manager.get_extension_id, uuid.uuid4().hex)
         _uuid = uuid.uuid4().hex
         new_mapping = {
             _uuid: {
@@ -151,12 +151,12 @@ class TestTenantManager(tests.TestCase):
             }
         }
         data = self.manager.set_tenant_dict(
-            tenant_uuid=_uuid,
-            name=new_mapping[_uuid]["name"],
-            authz_extension_uuid=new_mapping[_uuid]["authz"],
-            admin_extension_uuid=""
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=""
         )
         self.assertEquals(_uuid, data["id"])
-        self.assertRaises(IntraExtensionNotFound, self.manager.get_extension_uuid, _uuid, "admin")
-        self.assertRaises(TenantNotFound, self.manager.get_tenant_uuid, uuid.uuid4().hex)
+        self.assertRaises(IntraExtensionNotFound, self.manager.get_extension_id, _uuid, "admin")
+        self.assertRaises(TenantIDNotFound, self.manager.get_tenant_uuid, uuid.uuid4().hex)
         # self.assertRaises(AdminIntraExtensionNotFound, self.manager.get_admin_extension_uuid, uuid.uuid4().hex)

@@ -34,7 +34,7 @@ rule_dict = [
 ]
 """
 
-def algo_inclusion(authz_buffer, sub_meta_rule_dict, rule_dict):
+def inclusion(authz_buffer, sub_meta_rule_dict, rule_dict):
     _cat = []
     for subject_cat in sub_meta_rule_dict['subject_categories']:
         if subject_cat in authz_buffer['subject_attributes']:
@@ -53,11 +53,11 @@ def algo_inclusion(authz_buffer, sub_meta_rule_dict, rule_dict):
     return False
 
 
-def algo_comparison(_authz_buffer, _sub_meta_rule_dict, _rule_dict):
+def comparison(_authz_buffer, _sub_meta_rule_dict, _rule_dict):
     return
 
 
-def aggr_all_true(decision_buffer):
+def all_true(decision_buffer):
     for _rule in decision_buffer:
         if decision_buffer[_rule] is False:
             return False

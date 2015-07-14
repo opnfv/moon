@@ -56,11 +56,16 @@ class TenantListEmpty(TenantException):
     logger = "WARNING"
 
 
-class TenantNotFound(TenantException):
+class TenantIDNotFound(TenantException):
     message_format = _("The tenant UUID was not found.")
     code = 400
     title = 'Tenant UUID Not Found Error'
 
+
+class AddedTenantNameExist(TenantException):
+    message_format = _("The tenant name exists already.")
+    code = 400
+    title = 'Added Tenant Name Exist'
 
 # Exceptions for IntraExtension
 

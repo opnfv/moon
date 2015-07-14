@@ -16,27 +16,7 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-@dependency.requires('authz_api')
-class Authz_v3(controller.V3Controller):
-
-    def __init__(self):
-        super(Authz_v3, self).__init__()
-
-    @controller.protected()
-    def get_authz(self, context, tenant_name, subject_name, object_name, action_name):
-        try:
-            _authz = self.authz_api.authz(tenant_name, subject_name, object_name, action_name)
-        except TenantNotFound:
-            _authz = True
-        except:
-            _authz = False
-        return {"authz": _authz,
-                "tenant_name": tenant_name,
-                "subject_name": subject_name,
-                "object_name": object_name,
-                "action_name": action_name}
-
-
+@dependency.requires('configuration_api')
 class Configuration(controller.V3Controller):
     collection_name = 'configurations'
     member_name = 'configuration'
@@ -45,9 +25,10 @@ class Configuration(controller.V3Controller):
         super(Configuration, self).__init__()
 
     @controller.protected()
-    def get_templetes(self, context, **kw):
+    def get_policy_templetes(self, context, **kw):
         user_id = self._get_user_uuid_from_token(context["token_id"])
-        # TODO: belowing code should be move to core.py in the admin_api
+        # TODO: belowing code should be move to core.py
+        # TODO: return self.configuration_api_get_policy_templete_dict(user_id)
         nodes = glob.glob(os.path.join(CONF.moon.policy_directory, "*"))
         return {
             "authz_templetes":
@@ -62,7 +43,7 @@ class Configuration(controller.V3Controller):
         :return: {aggregation_algorithm_id: description}
         """
         user_id = self._get_user_uuid_from_token(context["token_id"])
-        return self.admin_api.get_aggregation_algorithm_dict(user_id)
+        return self.configuration_api.get_aggregation_algorithm_dict(user_id)
 
     @controller.protected()
     def get_sub_meta_rule_algorithms(self, context, **kw):
@@ -72,7 +53,75 @@ class Configuration(controller.V3Controller):
         :return: {sub_meta_rule_algorithm_id: description}
         """
         user_id = self._get_user_uuid_from_token(context["token_id"])
-        return self.admin_api.get_sub_meta_rule_algorithms(user_id)
+        return self.configuration_api.get_sub_meta_rule_algorithm_dict(user_id)
+
+
+@dependency.requires('tenant_api', 'resource_api')
+class Tenants(controller.V3Controller):
+
+    def __init__(self):
+        super(Tenants, self).__init__()
+
+    def _get_user_id_from_token(self, token_id):
+        response = self.token_provider_api.validate_token(token_id)
+        token_ref = token_model.KeystoneToken(token_id=token_id, token_data=response)
+        return token_ref['user']
+
+    @controller.protected()
+    def get_tenants(self, context, **kw):
+        user_id = self._get_user_id_from_token(context["token_id"])
+        return self.tenant_api.get_tenant_dict(user_id)
+
+    @controller.protected()
+    def add_tenant(self, context, **kw):
+        user_id = self._get_user_id_from_token(context["token_id"])
+        # TODO: get tenant name from keystone
+        tenant_name = kw.get("tenant_name")
+        intra_authz_ext_id = kw.get("intra_authz_ext_id")
+        intra_admin_ext_id = kw.get("intra_admin_ext_id")
+        return self.tenant_api.add_tenant(user_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id)
+
+    @controller.protected()
+    def get_tenant(self, context, **kw):
+        user_id = self._get_user_id_from_token(context["token_id"])
+        tenant_id = kw.get("tenant_id")
+        return self.tenant_api.get_tenant(user_id, tenant_id)
+
+    @controller.protected()
+    def del_tenant(self, context, **kw):
+        user_id = self._get_user_id_from_token(context["token_id"])
+        tenant_id = kw.get("tenant_id")
+        return self.tenant_api.del_tenant(user_id, tenant_id)
+
+    """def load_tenant(self, context, **kw):
+        user_id = self._get_user_id_from_token(context["token_id"])
+        tenant_id = kw["tenant_id"]
+        tenant_name = self.resource_api.get_project(tenant_id)["name"]
+        intra_authz_ext_id = kw.get("intra_authz_ext_id")
+        intra_admin_ext_id = kw.get("intra_admin_ext_id")
+        self.tenant_api.add_tenant_dict(
+            user_id,
+            tenant_id,
+            tenant_name,
+            intra_authz_ext_id,
+            intra_admin_ext_id)
+    """
+
+
+@dependency.requires('authz_api')
+class Authz_v3(controller.V3Controller):
+
+    def __init__(self):
+        super(Authz_v3, self).__init__()
+
+    @controller.protected()
+    def get_authz(self, context, tenant_name, subject_name, object_name, action_name):
+        try:
+            return self.authz_api.authz(tenant_name, subject_name, object_name, action_name)
+        except TenantIDNotFound:
+            return True
+        except:
+            return False
 
 
 @dependency.requires('admin_api', 'authz_api')
@@ -650,58 +699,6 @@ class IntraExtensions(controller.V3Controller):
         rule_id = kw["rule_id"]
         return self.admin_api.del_rule(user_id, ie_id, sub_meta_rule_id, rule_id)
 
-
-@dependency.requires('tenant_api', 'resource_api')
-class Tenants(controller.V3Controller):
-
-    def __init__(self):
-        super(Tenants, self).__init__()
-
-    def _get_user_id_from_token(self, token_id):
-        response = self.token_provider_api.validate_token(token_id)
-        token_ref = token_model.KeystoneToken(token_id=token_id, token_data=response)
-        return token_ref['user']
-
-    @controller.protected()
-    def get_tenants(self, context, **kw):
-        user_id = self._get_user_id_from_token(context["token_id"])
-        return self.tenant_api.get_tenant_dict(user_id)
-
-    @controller.protected()
-    def add_tenant(self, context, **kw):
-        user_id = self._get_user_id_from_token(context["token_id"])
-        tenant_dict = dict()
-        # TODO: get tenant name from keystone
-        tenant_dict["tenant_name"] = kw.get("tenant_name")
-        tenant_dict["intra_authz_ext_id"] = kw.get("intra_authz_ext_id")
-        tenant_dict["intra_admin_ext_id"] = kw.get("intra_admin_ext_id")
-        return self.tenant_api.add_tenant_dict(user_id, tenant_dict)
-
-    @controller.protected()
-    def get_tenant(self, context, **kw):
-        user_id = self._get_user_id_from_token(context["token_id"])
-        tenant_id = kw.get("tenant_id")
-        return self.tenant_api.get_tenant_dict(user_id)[tenant_id]
-
-    @controller.protected()
-    def del_tenant(self, context, **kw):
-        user_id = self._get_user_id_from_token(context["token_id"])
-        tenant_id = kw.get("tenant_id")
-        return self.tenant_api.del_tenant(user_id, tenant_id)
-
-    """def load_tenant(self, context, **kw):
-        user_id = self._get_user_id_from_token(context["token_id"])
-        tenant_id = kw["tenant_id"]
-        tenant_name = self.resource_api.get_project(tenant_id)["name"]
-        intra_authz_ext_id = kw.get("intra_authz_ext_id")
-        intra_admin_ext_id = kw.get("intra_admin_ext_id")
-        self.tenant_api.add_tenant_dict(
-            user_id,
-            tenant_id,
-            tenant_name,
-            intra_authz_ext_id,
-            intra_admin_ext_id)
-    """
 
 @dependency.requires('authz_api')
 class InterExtensions(controller.V3Controller):

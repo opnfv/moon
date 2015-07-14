@@ -99,22 +99,22 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             self.manager.get_tenant_dict
         )
         self.assertRaises(
-            TenantNotFound,
+            TenantIDNotFound,
             self.manager.get_tenant_name,
             uuid.uuid4().hex
         )
         self.assertRaises(
-            TenantNotFound,
+            TenantIDNotFound,
             self.manager.set_tenant_name,
             uuid.uuid4().hex, uuid.uuid4().hex
         )
         self.assertRaises(
-            TenantNotFound,
+            TenantIDNotFound,
             self.manager.get_extension_uuid,
             uuid.uuid4().hex, "authz"
         )
         self.assertRaises(
-            TenantNotFound,
+            TenantIDNotFound,
             self.manager.get_extension_uuid,
             uuid.uuid4().hex, "admin"
         )
