@@ -126,6 +126,11 @@ class AuthzAssignment(AuthzException):
     title = 'Assignment Exception'
 
 
+class AuthzMetaRule(AuthzException):
+    code = 400
+    title = 'Aggregation Algorithm Exception'
+
+
 class AuthzRule(AuthzException):
     code = 400
     title = 'Rule Exception'
@@ -194,45 +199,66 @@ class ActionScopeUnknown(AuthzScope):
     logger = "ERROR"
 
 
-class SubjectCategoryAssignmentOutOfScope(AuthzScope):
-    message_format = _("The given subject category scope value is out of scope.")
+class SubjectAssignmentOutOfScope(AuthzScope):
+    message_format = _("The given subject scope value is out of scope.")
     code = 400
-    title = 'Subject Category Assignment Out Of Scope'
+    title = 'Subject Assignment Out Of Scope'
     logger = "WARNING"
 
 
-class ActionCategoryAssignmentOutOfScope(AuthzScope):
-    message_format = _("The given action category scope value is out of scope.")
+class ActionAssignmentOutOfScope(AuthzScope):
+    message_format = _("The given action scope value is out of scope.")
     code = 400
-    title = 'Action Category Assignment Out Of Scope'
+    title = 'Action Assignment Out Of Scope'
     logger = "WARNING"
 
 
-class ObjectCategoryAssignmentOutOfScope(AuthzScope):
-    message_format = _("The given object category scope value is out of scope.")
+class ObjectAssignmentOutOfScope(AuthzScope):
+    message_format = _("The given object scope value is out of scope.")
     code = 400
-    title = 'Object Category Assignment Out Of Scope'
+    title = 'Object Assignment Out Of Scope'
     logger = "WARNING"
 
 
-class SubjectCategoryAssignmentUnknown(AuthzAssignment):
-    message_format = _("The given subject category assignment value is unknown.")
+class SubjectAssignmentUnknown(AuthzAssignment):
+    message_format = _("The given subject assignment value is unknown.")
     code = 400
-    title = 'Subject Category Assignment Unknown'
+    title = 'Subject Assignment Unknown'
     logger = "ERROR"
 
 
-class ObjectCategoryAssignmentUnknown(AuthzAssignment):
-    message_format = _("The given object category assignment value is unknown.")
+class ObjectAssignmentUnknown(AuthzAssignment):
+    message_format = _("The given object assignment value is unknown.")
     code = 400
-    title = 'Object Category Assignment Unknown'
+    title = 'Object Assignment Unknown'
     logger = "ERROR"
 
 
-class ActionCategoryAssignmentUnknown(AuthzAssignment):
-    message_format = _("The given action category assignment value is unknown.")
+class ActionAssignmentUnknown(AuthzAssignment):
+    message_format = _("The given action assignment value is unknown.")
     code = 400
-    title = 'Action Category Assignment Unknown'
+    title = 'Action Assignment Unknown'
+    logger = "ERROR"
+
+
+class AggregationAlgorithmNotExisting(AuthzMetadata):
+    message_format = _("The given aggregation algorithm is not exsiting.")
+    code = 400
+    title = 'Aggregation Algorithm Not Existing'
+    logger = "ERROR"
+
+
+class AggregationAlgorithmOutOfScope(AuthzMetadata):
+    message_format = _("The given aggregation algorithm is out of scope.")
+    code = 400
+    title = 'Aggregation Algorithm Out Of Scope'
+    logger = "ERROR"
+
+
+class SubMetaRuleOutOfScope(AuthzMetadata):
+    message_format = _("The given sub meta rule is out of scope.")
+    code = 400
+    title = 'Sub Meta Rule Out Of Scope'
     logger = "ERROR"
 
 
@@ -326,40 +352,40 @@ class ActionDelNotAuthorized(AdminPerimeter):
     title = 'Action Del Not Authorized'
 
 
-class SubjectCategoryScopeReadNotAuthorized(AuthzException):
-    title = 'Subject Category Scope Read Not Authorized'
+class SubjectScopeReadNotAuthorized(AuthzException):
+    title = 'Subject Scope Read Not Authorized'
 
 
-class SubjectCategoryScopeAddNotAuthorized(AuthzException):
-    title = 'Subject Category Scope Add Not Authorized'
+class SubjectScopeAddNotAuthorized(AuthzException):
+    title = 'Subject Scope Add Not Authorized'
 
 
-class SubjectCategoryScopeDelNotAuthorized(AuthzException):
-    title = 'Subject Category Scope Del Not Authorized'
+class SubjectScopeDelNotAuthorized(AuthzException):
+    title = 'Subject Scope Del Not Authorized'
 
 
-class ObjectCategoryScopeReadNotAuthorized(AuthzException):
-    title = 'Object Category Scope Read Not Authorized'
+class ObjectScopeReadNotAuthorized(AuthzException):
+    title = 'Object Scope Read Not Authorized'
 
 
-class ObjectCategoryScopeAddNotAuthorized(AuthzException):
-    title = 'Object Category Scope Add Not Authorized'
+class ObjectScopeAddNotAuthorized(AuthzException):
+    title = 'Object Scope Add Not Authorized'
 
 
-class ObjectCategoryScopeDelNotAuthorized(AuthzException):
-    title = 'Object Category Scope Del Not Authorized'
+class ObjectScopeDelNotAuthorized(AuthzException):
+    title = 'Object Scope Del Not Authorized'
 
 
-class ActionCategoryScopeReadNotAuthorized(AuthzException):
-    title = 'Action Category Scope Read Not Authorized'
+class ActionScopeReadNotAuthorized(AuthzException):
+    title = 'Action Scope Read Not Authorized'
 
 
-class ActionCategoryScopeAddNotAuthorized(AuthzException):
-    title = 'Action Category Scope Add Not Authorized'
+class ActionScopeAddNotAuthorized(AuthzException):
+    title = 'Action Scope Add Not Authorized'
 
 
-class ActionCategoryScopeDelNotAuthorized(AuthzException):
-    title = 'Action Category Scope Del Not Authorized'
+class ActionScopeDelNotAuthorized(AuthzException):
+    title = 'Action Scope Del Not Authorized'
 
 
 class SubjectCategoryReadNotAuthorized(AdminMetadata):
@@ -399,40 +425,40 @@ class ActionCategoryDelNotAuthorized(AdminMetadata):
     title = 'Action Category Del Not Authorized'
 
 
-class SubjectCategoryAssignmentReadNotAuthorized(AdminAssignment):
-    title = 'Subject Category Assignment Read Not Authorized'
+class SubjectAssignmentReadNotAuthorized(AdminAssignment):
+    title = 'Subject Assignment Read Not Authorized'
 
 
-class SubjectCategoryAssignmentAddNotAuthorized(AdminAssignment):
-    title = 'Subject Category Assignment Add Not Authorized'
+class SubjectAssignmentAddNotAuthorized(AdminAssignment):
+    title = 'Subject Assignment Add Not Authorized'
 
 
-class SubjectCategoryAssignmentDelNotAuthorized(AdminAssignment):
-    title = 'Subject Category Assignment Del Not Authorized'
+class SubjectAssignmentDelNotAuthorized(AdminAssignment):
+    title = 'Subject Assignment Del Not Authorized'
 
 
-class ObjectCategoryAssignmentReadNotAuthorized(AdminAssignment):
-    title = 'Object Category Assignment Read Not Authorized'
+class ObjectAssignmentReadNotAuthorized(AdminAssignment):
+    title = 'Object Assignment Read Not Authorized'
 
 
-class ObjectCategoryAssignmentAddNotAuthorized(AdminAssignment):
-    title = 'Object Category Assignment Add Not Authorized'
+class ObjectAssignmentAddNotAuthorized(AdminAssignment):
+    title = 'Object Assignment Add Not Authorized'
 
 
-class ObjectCategoryAssignmentDelNotAuthorized(AdminAssignment):
-    title = 'Object Category Assignment Del Not Authorized'
+class ObjectAssignmentDelNotAuthorized(AdminAssignment):
+    title = 'Object Assignment Del Not Authorized'
 
 
-class ActionCategoryAssignmentReadNotAuthorized(AdminAssignment):
-    title = 'Action Category Assignment Read Not Authorized'
+class ActionAssignmentReadNotAuthorized(AdminAssignment):
+    title = 'Action Assignment Read Not Authorized'
 
 
-class ActionCategoryAssignmentAddNotAuthorized(AdminAssignment):
-    title = 'Action Category Assignment Add Not Authorized'
+class ActionAssignmentAddNotAuthorized(AdminAssignment):
+    title = 'Action Assignment Add Not Authorized'
 
 
-class ActionCategoryAssignmentDelNotAuthorized(AdminAssignment):
-    title = 'Action Category Assignment Del Not Authorized'
+class ActionAssignmentDelNotAuthorized(AdminAssignment):
+    title = 'Action Assignment Del Not Authorized'
 
 
 class RuleReadNotAuthorized(AdminRule):

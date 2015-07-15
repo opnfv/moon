@@ -137,7 +137,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
     def test_delete_admin_intra_extension(self):
         self.assertRaises(
             AdminException,
-            self.manager.delete_intra_extension,
+            self.manager.del_intra_extension,
             self.ref["id"])
 
     def test_authz_exceptions(self):
@@ -162,7 +162,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         # Test when subject is known but not the object
         demo_user = self.create_user("demo")
-        self.manager.add_subject_dict(
+        self.manager.add_subject(
             admin_user['id'],
             self.ref["id"],
             demo_user["id"]
@@ -175,7 +175,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Test when subject and object are known but not the action
-        _tmp = self.manager.add_object_dict(
+        _tmp = self.manager.add_object(
             admin_user['id'],
             self.ref["id"],
             "my_object"
@@ -189,7 +189,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Test when subject and object and action are known
-        _tmp = self.manager.add_action_dict(
+        _tmp = self.manager.add_action(
             admin_user['id'],
             self.ref["id"],
             "my_action"
@@ -203,14 +203,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add a subject scope and test ObjectCategoryAssignmentOutOfScope
-        _tmp = self.manager.add_subject_category_dict(
+        _tmp = self.manager.add_subject_category(
             admin_user['id'],
             self.ref["id"],
             "my_subject_category"
         )
         my_subject_category = {"id": _tmp[0], "name": _tmp[1]}
 
-        _tmp = self.manager.add_subject_category_scope_dict(
+        _tmp = self.manager.add_subject_scope(
             admin_user['id'],
             self.ref["id"],
             my_subject_category["id"],
@@ -225,14 +225,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add an object scope and test ActionCategoryAssignmentOutOfScope
-        _tmp = self.manager.add_object_category_dict(
+        _tmp = self.manager.add_object_category(
             admin_user['id'],
             self.ref["id"],
             "my_object_category"
         )
         my_object_category = {"id": _tmp[0], "name": _tmp[1]}
 
-        _tmp = self.manager.add_object_category_scope_dict(
+        _tmp = self.manager.add_object_scope(
             admin_user['id'],
             self.ref["id"],
             my_object_category["id"],
@@ -247,14 +247,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add an action scope and test SubjectCategoryAssignmentUnknown
-        _tmp = self.manager.add_action_category_dict(
+        _tmp = self.manager.add_action_category(
             admin_user['id'],
             self.ref["id"],
             "my_action_category"
         )
         my_action_category = {"id": _tmp[0], "name": _tmp[1]}
 
-        _tmp = self.manager.add_action_category_scope_dict(
+        _tmp = self.manager.add_action_scope(
             admin_user['id'],
             self.ref["id"],
             my_action_category["id"],
@@ -269,7 +269,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add a subject assignment and test ObjectCategoryAssignmentUnknown
-        self.manager.add_subject_category_assignment_dict(
+        self.manager.add_subject_assignment(
             admin_user['id'],
             self.ref["id"],
             demo_user["id"],
@@ -284,7 +284,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add an object assignment and test ActionCategoryAssignmentUnknown
-        self.manager.add_object_category_assignment_dict(
+        self.manager.add_object_assignment(
             admin_user['id'],
             self.ref["id"],
             demo_user["id"],
@@ -299,7 +299,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         # Add an action assignment and test RuleUnknown
-        self.manager.add_action_category_assignment_dict(
+        self.manager.add_action_assignment(
             admin_user['id'],
             self.ref["id"],
             demo_user["id"],
@@ -322,7 +322,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 "relation": "relation_super"
             }
         }
-        self.manager.set_sub_meta_rule(
+        self.manager.set_sub_meta_rule_dict(
             admin_user['id'],
             self.ref["id"],
             my_meta_rule
@@ -370,7 +370,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular subject
         self.assertRaises(
             SubjectAddNotAuthorized,
-            self.manager.add_subject_dict,
+            self.manager.add_subject,
             admin_user["id"], ref["id"], new_subject["id"])
 
     def test_objects(self):
@@ -406,7 +406,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular object
         self.assertRaises(
             ObjectAddNotAuthorized,
-            self.manager.add_object_dict,
+            self.manager.add_object,
             admin_user["id"], ref["id"], new_object["name"])
 
     def test_actions(self):
@@ -442,7 +442,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular action
         self.assertRaises(
             ActionAddNotAuthorized,
-            self.manager.add_action_dict,
+            self.manager.add_action,
             admin_user["id"], ref["id"], new_action["id"])
 
     def test_subject_categories(self):
@@ -478,7 +478,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular subject_category
         self.assertRaises(
             SubjectCategoryAddNotAuthorized,
-            self.manager.add_subject_category_dict,
+            self.manager.add_subject_category,
             admin_user["id"], ref["id"], new_subject_category["name"])
 
     def test_object_categories(self):
@@ -514,7 +514,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular object_category
         self.assertRaises(
             ObjectCategoryAddNotAuthorized,
-            self.manager.add_object_category_dict,
+            self.manager.add_object_category,
             admin_user["id"], ref["id"], new_object_category["name"])
 
     def test_action_categories(self):
@@ -550,7 +550,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular action_category
         self.assertRaises(
             ActionCategoryAddNotAuthorized,
-            self.manager.add_action_category_dict,
+            self.manager.add_action_category,
             admin_user["id"], ref["id"], new_action_category["name"])
 
     def test_subject_category_scope(self):
@@ -571,7 +571,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.manager.get_subject_category_scope_dict(
+            subject_category_scope = self.manager.get_subject_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -587,19 +587,19 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_subject_category_scope[new_subject_category_scope_uuid] = "new_subject_category_scope"
             self.assertRaises(
                 SubjectCategoryScopeAddNotAuthorized,
-                self.manager.set_subject_category_scope_dict,
+                self.manager.set_subject_scope_dict,
                 admin_user["id"], ref["id"], subject_category, new_subject_category_scope)
 
             # Delete the new subject_category_scope
             self.assertRaises(
                 SubjectCategoryScopeDelNotAuthorized,
-                self.manager.del_subject_category_scope,
+                self.manager.del_subject_scope,
                 admin_user["id"], ref["id"], subject_category, new_subject_category_scope_uuid)
 
             # Add a particular subject_category_scope
             self.assertRaises(
                 SubjectCategoryScopeAddNotAuthorized,
-                self.manager.add_subject_category_scope_dict,
+                self.manager.add_subject_scope,
                 admin_user["id"], ref["id"], subject_category, new_subject_category_scope[new_subject_category_scope_uuid])
 
     def test_object_category_scope(self):
@@ -620,7 +620,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for object_category in object_categories["object_categories"]:
-            object_category_scope = self.manager.get_object_category_scope_dict(
+            object_category_scope = self.manager.get_object_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 object_category)
@@ -636,19 +636,19 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_object_category_scope[new_object_category_scope_uuid] = "new_object_category_scope"
             self.assertRaises(
                 ObjectCategoryScopeAddNotAuthorized,
-                self.manager.set_object_category_scope_dict,
+                self.manager.set_object_scope_dict,
                 admin_user["id"], ref["id"], object_category, new_object_category_scope)
 
             # Delete the new object_category_scope
             self.assertRaises(
                 ObjectCategoryScopeDelNotAuthorized,
-                self.manager.del_object_category_scope,
+                self.manager.del_object_scope,
                 admin_user["id"], ref["id"], object_category, new_object_category_scope_uuid)
 
             # Add a particular object_category_scope
             self.assertRaises(
                 ObjectCategoryScopeAddNotAuthorized,
-                self.manager.add_object_category_scope_dict,
+                self.manager.add_object_scope,
                 admin_user["id"], ref["id"], object_category, new_object_category_scope[new_object_category_scope_uuid])
 
     def test_action_category_scope(self):
@@ -669,7 +669,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for action_category in action_categories["action_categories"]:
-            action_category_scope = self.manager.get_action_category_scope_dict(
+            action_category_scope = self.manager.get_action_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 action_category)
@@ -685,19 +685,19 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_action_category_scope[new_action_category_scope_uuid] = "new_action_category_scope"
             self.assertRaises(
                 ActionCategoryScopeAddNotAuthorized,
-                self.manager.set_action_category_scope_dict,
+                self.manager.set_action_scope_dict,
                 admin_user["id"], ref["id"], action_category, new_action_category_scope)
 
             # Delete the new action_category_scope
             self.assertRaises(
                 ActionCategoryScopeDelNotAuthorized,
-                self.manager.del_action_category_scope,
+                self.manager.del_action_scope,
                 admin_user["id"], ref["id"], action_category, new_action_category_scope_uuid)
 
             # Add a particular action_category_scope
             self.assertRaises(
                 ActionCategoryScopeAddNotAuthorized,
-                self.manager.add_action_category_scope_dict,
+                self.manager.add_action_scope,
                 admin_user["id"], ref["id"], action_category, new_action_category_scope[new_action_category_scope_uuid])
 
     def test_subject_category_assignment(self):
@@ -724,7 +724,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.admin_manager.get_subject_category_scope_dict(
+            subject_category_scope = self.admin_manager.get_subject_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -738,7 +738,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_subject_category_scope = dict()
             new_subject_category_scope_uuid = uuid.uuid4().hex
             new_subject_category_scope[new_subject_category_scope_uuid] = admin_user["id"]
-            subject_category_scope = self.admin_manager.set_subject_category_scope_dict(
+            subject_category_scope = self.admin_manager.set_subject_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category,
@@ -754,7 +754,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_subject_category_scope2 = dict()
             new_subject_category_scope2_uuid = uuid.uuid4().hex
             new_subject_category_scope2[new_subject_category_scope2_uuid] = "dev"
-            subject_category_scope = self.admin_manager.set_subject_category_scope_dict(
+            subject_category_scope = self.admin_manager.set_subject_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category,
@@ -767,7 +767,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             self.assertIn(new_subject_category_scope2[new_subject_category_scope2_uuid],
                           subject_category_scope["subject_category_scope"][subject_category].values())
 
-            subject_category_assignments = self.manager.get_subject_category_assignment_dict(
+            subject_category_assignments = self.manager.get_subject_assignment_dict(
                 admin_user["id"],
                 ref["id"],
                 new_subject["id"]
@@ -781,7 +781,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             self.assertRaises(
                 SubjectCategoryAssignmentAddNotAuthorized,
-                self.manager.set_subject_category_assignment_dict,
+                self.manager.set_subject_assignment_dict,
                 admin_user["id"], ref["id"], new_subject["id"],
                 {
                     new_subject_category_uuid: [new_subject_category_scope_uuid, new_subject_category_scope2_uuid],
@@ -789,14 +789,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             self.assertRaises(
                 SubjectCategoryAssignmentDelNotAuthorized,
-                self.manager.del_subject_category_assignment,
+                self.manager.del_subject_assignment,
                 admin_user["id"], ref["id"], new_subject["id"],
                 new_subject_category_uuid,
                 new_subject_category_scope_uuid)
 
             self.assertRaises(
                 SubjectCategoryAssignmentAddNotAuthorized,
-                self.manager.add_subject_category_assignment_dict,
+                self.manager.add_subject_assignment,
                 admin_user["id"], ref["id"], new_subject["id"],
                 new_subject_category_uuid,
                 new_subject_category_scope_uuid)
@@ -825,7 +825,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for object_category in object_categories["object_categories"]:
-            object_category_scope = self.admin_manager.get_object_category_scope_dict(
+            object_category_scope = self.admin_manager.get_object_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 object_category)
@@ -839,7 +839,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_object_category_scope = dict()
             new_object_category_scope_uuid = uuid.uuid4().hex
             new_object_category_scope[new_object_category_scope_uuid] = admin_user["id"]
-            object_category_scope = self.admin_manager.set_object_category_scope_dict(
+            object_category_scope = self.admin_manager.set_object_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 object_category,
@@ -855,7 +855,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_object_category_scope2 = dict()
             new_object_category_scope2_uuid = uuid.uuid4().hex
             new_object_category_scope2[new_object_category_scope2_uuid] = "dev"
-            object_category_scope = self.admin_manager.set_object_category_scope_dict(
+            object_category_scope = self.admin_manager.set_object_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 object_category,
@@ -868,7 +868,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             self.assertIn(new_object_category_scope2[new_object_category_scope2_uuid],
                           object_category_scope["object_category_scope"][object_category].values())
 
-            object_category_assignments = self.manager.get_object_category_assignment_dict(
+            object_category_assignments = self.manager.get_object_assignment_dict(
                 admin_user["id"],
                 ref["id"],
                 new_object["id"]
@@ -890,14 +890,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             self.assertRaises(
                 ObjectCategoryAssignmentDelNotAuthorized,
-                self.manager.del_object_category_assignment,
+                self.manager.del_object_assignment,
                 admin_user["id"], ref["id"], new_object["id"],
                 new_object_category_uuid,
                 new_object_category_scope_uuid)
 
             self.assertRaises(
                 ObjectCategoryAssignmentAddNotAuthorized,
-                self.manager.add_object_category_assignment_dict,
+                self.manager.add_object_assignment,
                 admin_user["id"], ref["id"], new_object["id"],
                 new_object_category_uuid,
                 new_object_category_scope_uuid)
@@ -926,7 +926,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for action_category in action_categories["action_categories"]:
-            action_category_scope = self.admin_manager.get_action_category_scope_dict(
+            action_category_scope = self.admin_manager.get_action_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 action_category)
@@ -940,7 +940,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_action_category_scope = dict()
             new_action_category_scope_uuid = uuid.uuid4().hex
             new_action_category_scope[new_action_category_scope_uuid] = admin_user["id"]
-            action_category_scope = self.admin_manager.set_action_category_scope_dict(
+            action_category_scope = self.admin_manager.set_action_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 action_category,
@@ -956,7 +956,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             new_action_category_scope2 = dict()
             new_action_category_scope2_uuid = uuid.uuid4().hex
             new_action_category_scope2[new_action_category_scope2_uuid] = "dev"
-            action_category_scope = self.admin_manager.set_action_category_scope_dict(
+            action_category_scope = self.admin_manager.set_action_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 action_category,
@@ -969,7 +969,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             self.assertIn(new_action_category_scope2[new_action_category_scope2_uuid],
                           action_category_scope["action_category_scope"][action_category].values())
 
-            action_category_assignments = self.manager.get_action_category_assignment_dict(
+            action_category_assignments = self.manager.get_action_assignment_dict(
                 admin_user["id"],
                 ref["id"],
                 new_action["id"]
@@ -983,7 +983,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             self.assertRaises(
                 ActionCategoryAssignmentAddNotAuthorized,
-                self.manager.set_action_category_assignment_dict,
+                self.manager.set_action_assignment_dict,
                 admin_user["id"], ref["id"], new_action["id"],
                 {
                     new_action_category_uuid: [new_action_category_scope_uuid, new_action_category_scope2_uuid],
@@ -991,14 +991,14 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             self.assertRaises(
                 ActionCategoryAssignmentDelNotAuthorized,
-                self.manager.del_action_category_assignment,
+                self.manager.del_action_assignment,
                 admin_user["id"], ref["id"], new_action["id"],
                 new_action_category_uuid,
                 new_action_category_scope_uuid)
 
             self.assertRaises(
                 ActionCategoryAssignmentAddNotAuthorized,
-                self.manager.add_action_category_assignment_dict,
+                self.manager.add_action_assignment,
                 admin_user["id"], ref["id"], new_action["id"],
                 new_action_category_uuid,
                 new_action_category_scope_uuid)
@@ -1029,7 +1029,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             self.manager.set_aggregation_algorithm,
             admin_user["id"], ref["id"], _aggregation_algorithm[0])
 
-        sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
         sub_meta_rules_conf = json.load(open(os.path.join(self.policy_directory, ref["model"], "metarule.json")))
@@ -1059,7 +1059,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
             new_subject_category = {"id": uuid.uuid4().hex, "name": "subject_category_test"}
             # Add a particular subject_category
-            data = self.admin_manager.add_subject_category_dict(
+            data = self.admin_manager.add_subject_category(
                 admin_user["id"],
                 ref["id"],
                 new_subject_category["name"])
@@ -1076,7 +1076,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
             self.assertRaises(
                 MetaRuleAddNotAuthorized,
-                self.manager.set_sub_meta_rule,
+                self.manager.set_sub_meta_rule_dict,
                 admin_user["id"], ref["id"], metarule)
 
     def test_sub_rules(self):
@@ -1087,7 +1087,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
-        sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
 
@@ -1100,9 +1100,9 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_category_scope_dict, "subject_category_scope"),
-                    ("action_categories", self.manager.get_action_category_scope_dict, "action_category_scope"),
-                    ("object_categories", self.manager.get_object_category_scope_dict, "object_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
+                    ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
                     for cat_value in sub_meta_rules["sub_meta_rules"][relation][cat]:
                         scope = cat_func(
@@ -1118,9 +1118,9 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         relation = sub_rules["rules"].keys()[0]
         sub_rule = []
         for cat, cat_func, func_name in (
-            ("subject_categories", self.manager.get_subject_category_scope_dict, "subject_category_scope"),
-            ("action_categories", self.manager.get_action_category_scope_dict, "action_category_scope"),
-            ("object_categories", self.manager.get_object_category_scope_dict, "object_category_scope"),
+            ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+            ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
+            ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
         ):
             for cat_value in sub_meta_rules["sub_meta_rules"][relation][cat]:
                 scope = cat_func(

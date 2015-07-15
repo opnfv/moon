@@ -1,5 +1,5 @@
 {
-  "subject_category_scope": {
+  "subject_scopes": {
     "role": [
       "admin",
       "dev"
@@ -15,7 +15,7 @@
     ]
   },
 
-  "action_category_scope": {
+  "action_scopes": {
     "resource_action": [
       "vm_admin",
       "vm_access",
@@ -28,7 +28,7 @@
     ]
   },
 
-  "object_category_scope": {
+  "object_scopes": {
     "object_security_level": [
       "high",
       "medium",

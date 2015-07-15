@@ -1,5 +1,5 @@
 {
-  "subject_category_scope": {
+  "subject_scopes": {
     "role": [
       "admin"
     ],
@@ -9,14 +9,14 @@
     ]
   },
 
-  "action_category_scope": {
+  "action_scopes": {
     "access": [
       "admin",
       "user"
     ]
   },
 
-  "object_category_scope": {
+  "object_scopes": {
     "id": [
         "subjects",
         "objects",

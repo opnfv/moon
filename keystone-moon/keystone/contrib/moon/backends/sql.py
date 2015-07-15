@@ -310,7 +310,7 @@ __all_objects__ = (
 
 class IntraExtensionConnector(IntraExtensionDriver):
 
-    def get_intra_extension_list(self):
+    def get_intra_extension_dict(self):
         with sql.transaction() as session:
             query = session.query(IntraExtension.id)
             intraextensions = query.all()
@@ -334,7 +334,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise exception.NotFound
             return ref.to_dict()
 
-    def delete_intra_extension(self, intra_extension_id):
+    def del_intra_extension(self, intra_extension_id):
         with sql.transaction() as session:
             ref = session.query(IntraExtension).get(intra_extension_id)
             # Must delete all references to that IntraExtension
@@ -373,6 +373,8 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     def set_description(self, uuid, args):
         raise exception.NotImplemented()  # pragma: no cover
+
+    # Perimeter
 
     def get_subject_dict(self, extension_uuid):
         with sql.transaction() as session:
@@ -426,7 +428,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_subject(self, extension_uuid, subject_uuid):
+    def del_subject(self, extension_uuid, subject_uuid):
         with sql.transaction() as session:
             query = session.query(Subject)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -504,7 +506,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_object(self, extension_uuid, object_uuid):
+    def del_object(self, extension_uuid, object_uuid):
         with sql.transaction() as session:
             query = session.query(Object)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -582,7 +584,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_action(self, extension_uuid, action_uuid):
+    def del_action(self, extension_uuid, action_uuid):
         with sql.transaction() as session:
             query = session.query(Action)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -640,7 +642,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_subject_category_dict(self, extension_uuid, subject_category_uuid, subject_category_name):
+    def add_subject_category(self, extension_uuid, subject_category_uuid, subject_category_name):
         with sql.transaction() as session:
             query = session.query(SubjectCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -662,7 +664,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_subject_category(self, extension_uuid, subject_category_uuid):
+    def del_subject_category(self, extension_uuid, subject_category_uuid):
         with sql.transaction() as session:
             query = session.query(SubjectCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -721,7 +723,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_object_category_dict(self, extension_uuid, object_category_uuid, object_category_name):
+    def add_object_category(self, extension_uuid, object_category_uuid, object_category_name):
         with sql.transaction() as session:
             query = session.query(ObjectCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -743,7 +745,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_object_category(self, extension_uuid, object_category_uuid):
+    def del_object_category(self, extension_uuid, object_category_uuid):
         with sql.transaction() as session:
             query = session.query(ObjectCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -802,7 +804,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_action_category_dict(self, extension_uuid, action_category_uuid, action_category_name):
+    def add_action_category(self, extension_uuid, action_category_uuid, action_category_name):
         with sql.transaction() as session:
             query = session.query(ActionCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -824,7 +826,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def remove_action_category(self, extension_uuid, action_category_uuid):
+    def del_action_category(self, extension_uuid, action_category_uuid):
         with sql.transaction() as session:
             query = session.query(ActionCategory)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -865,7 +867,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise SubjectScopeUnknown()
             return result
 
-    def set_subject_category_scope_dict(self, extension_uuid, subject_category, scope):
+    def set_subject_scope_dict(self, extension_uuid, subject_category, scope):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -887,7 +889,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 session.add(new_ref)
             return new_ref.to_dict()
 
-    def add_subject_category_scope_dict(self, extension_uuid, subject_category, scope_uuid, scope_name):
+    def add_subject_scope(self, extension_uuid, subject_category, scope_uuid, scope_name):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -899,9 +901,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if subject_category not in scope.keys():
                 scope[subject_category] = dict()
             scope[subject_category][scope_uuid] = scope_name
-            return self.set_subject_category_scope_dict(extension_uuid, subject_category, scope[subject_category])
+            return self.set_subject_scope_dict(extension_uuid, subject_category, scope[subject_category])
 
-    def remove_subject_category_scope_dict(self, extension_uuid, subject_category, scope_uuid):
+    def del_subject_scope(self, extension_uuid, subject_category, scope_uuid):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -930,7 +932,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for object_category_scope
 
-    def get_object_category_scope_dict(self, extension_uuid, object_category):
+    def get_object_scope_dict(self, extension_uuid, object_category):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -942,7 +944,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise ObjectScopeUnknown()
             return result
 
-    def set_object_category_scope_dict(self, extension_uuid, object_category, scope):
+    def set_object_scope_dict(self, extension_uuid, object_category, scope):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -964,7 +966,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 session.add(new_ref)
             return new_ref.to_dict()
 
-    def add_object_category_scope_dict(self, extension_uuid, object_category, scope_uuid, scope_name):
+    def add_object_scope(self, extension_uuid, object_category, scope_uuid, scope_name):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -976,9 +978,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if object_category not in scope:
                 scope[object_category] = dict()
             scope[object_category][scope_uuid] = scope_name
-            return self.set_object_category_scope_dict(extension_uuid, object_category, scope[object_category])
+            return self.set_object_scope_dict(extension_uuid, object_category, scope[object_category])
 
-    def remove_object_category_scope_dict(self, extension_uuid, object_category, scope_uuid):
+    def del_object_scope(self, extension_uuid, object_category, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1007,7 +1009,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for action_category_scope
  
-    def get_action_category_scope_dict(self, extension_uuid, action_category):
+    def get_action_scope_dict(self, extension_uuid, action_category):
         with sql.transaction() as session:
             query = session.query(ActionCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1019,7 +1021,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise ActionScopeUnknown()
             return result
 
-    def set_action_category_scope_dict(self, extension_uuid, action_category, scope):
+    def set_action_scope_dict(self, extension_uuid, action_category, scope):
         with sql.transaction() as session:
             query = session.query(ActionCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1041,7 +1043,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 session.add(new_ref)
             return new_ref.to_dict()
 
-    def add_action_category_scope_dict(self, extension_uuid, action_category, scope_uuid, scope_name):
+    def add_action_scope(self, extension_uuid, action_category, scope_uuid, scope_name):
         with sql.transaction() as session:
             query = session.query(ActionCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1053,9 +1055,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if action_category not in scope:
                 scope[action_category] = dict()
             scope[action_category][scope_uuid] = scope_name
-            return self.set_action_category_scope_dict(extension_uuid, action_category, scope[action_category])
+            return self.set_action_scope_dict(extension_uuid, action_category, scope[action_category])
 
-    def remove_action_category_scope_dict(self, extension_uuid, action_category, scope_uuid):
+    def del_action_scope(self, extension_uuid, action_category, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ActionCategoryScope)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1084,7 +1086,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for subject_category_assignment
 
-    def get_subject_category_assignment_dict(self, extension_uuid, subject_uuid):
+    def get_subject_assignment_dict(self, extension_uuid, subject_uuid):
         """ From a subject_uuid, return a dictionary of (category: scope for that subject)
 
         :param extension_uuid: intra extension UUID
@@ -1107,7 +1109,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 _ref["subject_category_assignments"][subject_uuid] = dict()
             return _ref
 
-    def set_subject_category_assignment_dict(self, extension_uuid, subject_uuid=None, assignment_dict={}):
+    def set_subject_assignment_dict(self, extension_uuid, subject_uuid=None, assignment_dict={}):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1138,7 +1140,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_subject_category_assignment_dict(self, extension_uuid, subject_uuid, category_uuid, scope_uuid):
+    def add_subject_assignment(self, extension_uuid, subject_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1152,12 +1154,12 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 assignments[subject_uuid][category_uuid] = list()
             if scope_uuid not in assignments[subject_uuid][category_uuid]:
                 assignments[subject_uuid][category_uuid].append(scope_uuid)
-            return self.set_subject_category_assignment_dict(
+            return self.set_subject_assignment_dict(
                 extension_uuid,
                 subject_uuid,
                 assignments[subject_uuid])
 
-    def remove_subject_category_assignment(self, extension_uuid, subject_uuid, category_uuid, scope_uuid):
+    def del_subject_assignment(self, extension_uuid, subject_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(SubjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1173,19 +1175,19 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if not old_ref["subject_category_assignments"][subject_uuid]:
                         old_ref["subject_category_assignments"].pop(subject_uuid)
             try:
-                self.set_subject_category_assignment_dict(
+                self.set_subject_assignment_dict(
                     extension_uuid,
                     subject_uuid,
                     old_ref["subject_category_assignments"][subject_uuid])
             except KeyError:
-                self.set_subject_category_assignment_dict(
+                self.set_subject_assignment_dict(
                     extension_uuid,
                     subject_uuid,
                     {})
 
     # Getter and Setter for object_category_assignment
 
-    def get_object_category_assignment_dict(self, extension_uuid, object_uuid):
+    def get_object_assignment_dict(self, extension_uuid, object_uuid):
         """ From a object_uuid, return a dictionary of (category: scope for that object)
 
         :param extension_uuid: intra extension UUID
@@ -1208,7 +1210,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 _ref["object_category_assignments"][object_uuid] = dict()
             return _ref
 
-    def set_object_category_assignment_dict(self, extension_uuid, object_uuid=None, assignment_dict={}):
+    def set_object_assignment_dict(self, extension_uuid, object_uuid=None, assignment_dict={}):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1235,7 +1237,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_object_category_assignment_dict(self, extension_uuid, object_uuid, category_uuid, scope_uuid):
+    def add_object_assignment(self, extension_uuid, object_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1249,12 +1251,12 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 assignments[object_uuid][category_uuid] = list()
             if scope_uuid not in assignments[object_uuid][category_uuid]:
                 assignments[object_uuid][category_uuid].append(scope_uuid)
-            return self.set_object_category_assignment_dict(
+            return self.set_object_assignment_dict(
                 extension_uuid,
                 object_uuid,
                 assignments[object_uuid])
 
-    def remove_object_category_assignment(self, extension_uuid, object_uuid, category_uuid, scope_uuid):
+    def del_object_assignment(self, extension_uuid, object_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ObjectCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1269,14 +1271,14 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         old_ref["object_category_assignments"][object_uuid].pop(category_uuid)
                     if not old_ref["object_category_assignments"][object_uuid]:
                         old_ref["object_category_assignments"].pop(object_uuid)
-            self.set_object_category_assignment_dict(
+            self.set_object_assignment_dict(
                 extension_uuid,
                 object_uuid,
                 old_ref["object_category_assignments"][object_uuid])
 
     # Getter and Setter for action_category_assignment
 
-    def get_action_category_assignment_dict(self, extension_uuid, action_uuid):
+    def get_action_assignment_dict(self, extension_uuid, action_uuid):
         """ From a action_uuid, return a dictionary of (category: scope for that action)
 
         :param extension_uuid: intra extension UUID
@@ -1299,7 +1301,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 _ref["action_category_assignments"][action_uuid] = dict()
             return _ref
 
-    def set_action_category_assignment_dict(self, extension_uuid, action_uuid=None, assignment_dict={}):
+    def set_action_assignment_dict(self, extension_uuid, action_uuid=None, assignment_dict={}):
         with sql.transaction() as session:
             query = session.query(ActionCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1326,7 +1328,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_action_category_assignment_dict(self, extension_uuid, action_uuid, category_uuid, scope_uuid):
+    def add_action_assignment(self, extension_uuid, action_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ActionCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1340,12 +1342,12 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 assignments[action_uuid][category_uuid] = list()
             if scope_uuid not in assignments[action_uuid][category_uuid]:
                 assignments[action_uuid][category_uuid].append(scope_uuid)
-            return self.set_action_category_assignment_dict(
+            return self.set_action_assignment_dict(
                 extension_uuid,
                 action_uuid,
                 assignments[action_uuid])
 
-    def remove_action_category_assignment(self, extension_uuid, action_uuid, category_uuid, scope_uuid):
+    def del_action_assignment(self, extension_uuid, action_uuid, category_uuid, scope_uuid):
         with sql.transaction() as session:
             query = session.query(ActionCategoryAssignment)
             query = query.filter_by(intra_extension_uuid=extension_uuid)
@@ -1360,7 +1362,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         old_ref["action_category_assignments"][action_uuid].pop(category_uuid)
                     if not old_ref["action_category_assignments"][action_uuid]:
                         old_ref["action_category_assignments"].pop(action_uuid)
-            self.set_action_category_assignment_dict(
+            self.set_action_assignment_dict(
                 extension_uuid,
                 action_uuid,
                 old_ref["action_category_assignments"][action_uuid])

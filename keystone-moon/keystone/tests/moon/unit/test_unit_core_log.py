@@ -98,7 +98,7 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         return _user
 
     def delete_admin_intra_extension(self):
-        self.manager.delete_intra_extension(self.ref["id"])
+        self.manager.del_intra_extension(self.ref["id"])
 
     def send_logs(self):
         log_authz = "Test for authz " + uuid.uuid4().hex
