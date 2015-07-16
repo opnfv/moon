@@ -34,7 +34,7 @@ rule_dict = [
 ]
 """
 
-def inclusion(authz_buffer, sub_meta_rule_dict, rule_dict):
+def inclusion(authz_buffer, sub_meta_rule_dict, rule_list):
     _cat = []
     for subject_cat in sub_meta_rule_dict['subject_categories']:
         if subject_cat in authz_buffer['subject_attributes']:
@@ -47,13 +47,13 @@ def inclusion(authz_buffer, sub_meta_rule_dict, rule_dict):
             _cat.append(authz_buffer['object_attributes'][object_cat])
 
     for _element in itertools.product(*_cat):
-        if list(_element) in rule_dict:
+        if list(_element) in rule_list:
             return True
 
     return False
 
 
-def comparison(_authz_buffer, _sub_meta_rule_dict, _rule_dict):
+def comparison(authz_buffer, sub_meta_rule_dict, rule_list):
     return
 
 

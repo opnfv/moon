@@ -67,7 +67,7 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         # Create the admin user because IntraExtension needs it
         self.admin = self.identity_api.create_user(USER_ADMIN)
         IE["policymodel"] = policy_model
-        self.ref = self.manager.load_intra_extension(IE)
+        self.ref = self.manager.load_intra_extension_dict(IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 

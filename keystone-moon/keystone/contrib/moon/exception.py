@@ -41,7 +41,6 @@ class MoonError(Error):
 
 # Exceptions for Tenant
 
-
 class TenantException(MoonError):
     message_format = _("There is an error requesting this tenant.")
     code = 400
@@ -49,23 +48,33 @@ class TenantException(MoonError):
     logger = "ERROR"
 
 
-class TenantListEmpty(TenantException):
-    message_format = _("The tenant list mapping is empty, you must set the mapping first.")
+class TenantDictEmpty(TenantException):
+    message_format = _("The tenant dict mapping is empty, you must set the mapping first.")
     code = 400
-    title = 'Tenant List Empty Error'
+    title = 'Tenant Dict Empty'
     logger = "WARNING"
 
 
-class TenantIDNotFound(TenantException):
-    message_format = _("The tenant UUID was not found.")
+class TenantUnknown(TenantException):
+    message_format = _("The tenant is unknown.")
     code = 400
-    title = 'Tenant UUID Not Found Error'
+    title = 'Tenant Unknown'
+    logger = "ERROR"
 
 
-class AddedTenantNameExist(TenantException):
-    message_format = _("The tenant name exists already.")
+class TenantAddedNameExisting(TenantException):
+    message_format = _("The tenant name is existing.")
     code = 400
-    title = 'Added Tenant Name Exist'
+    title = 'Added Tenant Name Existing'
+    logger = "ERROR"
+
+
+class TenantNoIntraExtension(TenantException):
+    message_format = _("The tenant has not intra_extension.")
+    code = 400
+    title = 'Tenant No Intra_Extension'
+    logger = "ERROR"
+
 
 # Exceptions for IntraExtension
 
@@ -83,11 +92,11 @@ class IntraExtensionUnMapped(IntraExtensionException):
     logger = "WARNING"
 
 
-class IntraExtensionNotFound(IntraExtensionException):
-    message_format = _("The Extension for that tenant is unknown.")
+class IntraExtensionUnknown(IntraExtensionException):
+    message_format = _("The intra_extension is unknown.")
     code = 400
-    title = 'Extension UUID Not Found Error'
-    logger = "WARNING"
+    title = 'Intra Extension Unkonw'
+    logger = "Error"
 
 
 class IntraExtensionCreationError(IntraExtensionException):
@@ -136,24 +145,24 @@ class AuthzRule(AuthzException):
     title = 'Rule Exception'
 
 
-class SubjectUnknown(AuthzPerimeter):
-    message_format = _("The given subject is unknown.")
+class SubjectCategoryNameExisting(AuthzMetadata):
+    message_format = _("The given subject category name is existing.")
     code = 400
-    title = 'Subject Unknown'
+    title = 'Subject Category Name Existing'
     logger = "ERROR"
 
 
-class ObjectUnknown(AuthzPerimeter):
-    message_format = _("The given object is unknown.")
+class ObjectCategoryNameExisting(AuthzMetadata):
+    message_format = _("The given object category name is existing.")
     code = 400
-    title = 'Object Unknown'
+    title = 'Object Category Name Existing'
     logger = "ERROR"
 
 
-class ActionUnknown(AuthzPerimeter):
-    message_format = _("The given action is unknown.")
+class ActionCategoryNameExisting(AuthzMetadata):
+    message_format = _("The given action category name is existing.")
     code = 400
-    title = 'Action Unknown'
+    title = 'Action Category Name Existing'
     logger = "ERROR"
 
 
@@ -178,6 +187,48 @@ class ActionCategoryUnknown(AuthzMetadata):
     logger = "ERROR"
 
 
+class SubjectUnknown(AuthzPerimeter):
+    message_format = _("The given subject is unknown.")
+    code = 400
+    title = 'Subject Unknown'
+    logger = "ERROR"
+
+
+class ObjectUnknown(AuthzPerimeter):
+    message_format = _("The given object is unknown.")
+    code = 400
+    title = 'Object Unknown'
+    logger = "ERROR"
+
+
+class ActionUnknown(AuthzPerimeter):
+    message_format = _("The given action is unknown.")
+    code = 400
+    title = 'Action Unknown'
+    logger = "ERROR"
+
+
+class SubjectNameExisting(AuthzPerimeter):
+    message_format = _("The given subject name is existing.")
+    code = 400
+    title = 'Subject Name Existing'
+    logger = "ERROR"
+
+
+class ObjectNameExisting(AuthzPerimeter):
+    message_format = _("The given object name is existing.")
+    code = 400
+    title = 'Object Name Existing'
+    logger = "ERROR"
+
+
+class ActionNameExisting(AuthzPerimeter):
+    message_format = _("The given action name is existing.")
+    code = 400
+    title = 'Action Name Existing'
+    logger = "ERROR"
+
+
 class SubjectScopeUnknown(AuthzScope):
     message_format = _("The given subject scope is unknown.")
     code = 400
@@ -196,6 +247,27 @@ class ActionScopeUnknown(AuthzScope):
     message_format = _("The given action scope is unknown.")
     code = 400
     title = 'Action Scope Unknown'
+    logger = "ERROR"
+
+
+class SubjectScopeNameExisting(AuthzScope):
+    message_format = _("The given subject scope name is existing.")
+    code = 400
+    title = 'Subject Scope Name Existing'
+    logger = "ERROR"
+
+
+class ObjectScopeNameExisting(AuthzScope):
+    message_format = _("The given object scope name is existing.")
+    code = 400
+    title = 'Object Scope Name Existing'
+    logger = "ERROR"
+
+
+class ActionScopeNameExisting(AuthzScope):
+    message_format = _("The given action scope name is existing.")
+    code = 400
+    title = 'Action Scope Name Existing'
     logger = "ERROR"
 
 
@@ -241,24 +313,65 @@ class ActionAssignmentUnknown(AuthzAssignment):
     logger = "ERROR"
 
 
+class SubjectAssignmentExisting(AuthzAssignment):
+    message_format = _("The given subject assignment value is existing.")
+    code = 400
+    title = 'Subject Assignment Existing'
+    logger = "ERROR"
+
+
+class ObjectAssignmentExisting(AuthzAssignment):
+    message_format = _("The given object assignment value is existing.")
+    code = 400
+    title = 'Object Assignment Existing'
+    logger = "ERROR"
+
+
+class ActionAssignmentExisting(AuthzAssignment):
+    message_format = _("The given action assignment value is existing.")
+    code = 400
+    title = 'Action Assignment Existing'
+    logger = "ERROR"
+
+
+class AggregationAlgorithmExisting(AuthzMetadata):
+    message_format = _("The given aggregation algorithm is existing.")
+    code = 400
+    title = 'Aggregation Algorithm Existing'
+    logger = "ERROR"
+
+
 class AggregationAlgorithmNotExisting(AuthzMetadata):
-    message_format = _("The given aggregation algorithm is not exsiting.")
+    message_format = _("The given aggregation algorithm is not existing.")
     code = 400
     title = 'Aggregation Algorithm Not Existing'
     logger = "ERROR"
 
 
-class AggregationAlgorithmOutOfScope(AuthzMetadata):
-    message_format = _("The given aggregation algorithm is out of scope.")
+class AggregationAlgorithmUnknown(AuthzMetadata):
+    message_format = _("The given aggregation algorithm is unknown.")
     code = 400
-    title = 'Aggregation Algorithm Out Of Scope'
+    title = 'Aggregation Algorithm Unknown'
     logger = "ERROR"
 
 
-class SubMetaRuleOutOfScope(AuthzMetadata):
-    message_format = _("The given sub meta rule is out of scope.")
+class SubMetaRuleUnknown(AuthzMetadata):
+    message_format = _("The given sub meta rule is unknown.")
     code = 400
-    title = 'Sub Meta Rule Out Of Scope'
+    title = 'Sub Meta Rule Unknown'
+    logger = "ERROR"
+
+class SubMetaRuleNameExisting(AuthzMetadata):
+    message_format = _("The sub meta rule name is existing.")
+    code = 400
+    title = 'Sub Meta Rule Name Existing'
+    logger = "ERROR"
+
+
+class SubMetaRuleExisting(AuthzMetadata):
+    message_format = _("The sub meta rule is existing.")
+    code = 400
+    title = 'Sub Meta Rule Existing'
     logger = "ERROR"
 
 
@@ -276,10 +389,24 @@ class RuleKOExisting(AuthzRule):
     logger = "ERROR"
 
 
+class RuleExisting(AuthzRule):
+    message_format = _("The rule is existing.")
+    code = 400
+    title = 'Rule Existing'
+    logger = "ERROR"
+
+
 class RuleUnknown(AuthzRule):
     message_format = _("The rule for that request doesn't exist.")
     code = 400
     title = 'Rule Unknown'
+    logger = "ERROR"
+
+
+class AddedRuleExisting(AuthzRule):
+    message_format = _("The added rule for that request is existing.")
+    code = 400
+    title = 'Added Rule Existing'
     logger = "ERROR"
 
 

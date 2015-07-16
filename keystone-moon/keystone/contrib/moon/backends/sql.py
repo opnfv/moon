@@ -382,7 +382,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_subject_dict(self, extension_uuid, subject_uuid):
@@ -412,7 +412,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             subjects = dict(old_ref["subjects"])
             subjects[subject_uuid] = subject_name
@@ -434,7 +434,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 subjects = dict(old_ref["subjects"])
@@ -460,7 +460,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_object_dict(self, extension_uuid, object_uuid):
@@ -490,7 +490,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             objects = dict(old_ref["objects"])
             objects[object_uuid] = object_name
@@ -512,7 +512,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 objects = dict(old_ref["objects"])
@@ -538,7 +538,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_action_dict(self, extension_uuid, action_uuid):
@@ -568,7 +568,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             actions = dict(old_ref["actions"])
             actions[action_uuid] = action_name
@@ -590,7 +590,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 actions = dict(old_ref["actions"])
@@ -618,7 +618,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_subject_category_dict(self, extension_uuid, subject_categories):
@@ -648,7 +648,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             subject_categories = dict(old_ref["subject_categories"])
             subject_categories[subject_category_uuid] = subject_category_name
@@ -670,7 +670,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 subject_categories = dict(old_ref["subject_categories"])
@@ -699,7 +699,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_object_category_dict(self, extension_uuid, object_categories):
@@ -729,7 +729,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             object_categories = dict(old_ref["object_categories"])
             object_categories[object_category_uuid] = object_category_name
@@ -751,7 +751,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 object_categories = dict(old_ref["object_categories"])
@@ -780,7 +780,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_action_category_dict(self, extension_uuid, action_categories):
@@ -810,7 +810,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             action_categories = dict(old_ref["action_categories"])
             action_categories[action_category_uuid] = action_category_name
@@ -832,7 +832,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             else:
                 old_ref = ref.to_dict()
                 action_categories = dict(old_ref["action_categories"])
@@ -861,7 +861,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             result = copy.deepcopy(ref.to_dict())
             if subject_category not in result["subject_category_scope"].keys():
                 raise SubjectScopeUnknown()
@@ -895,7 +895,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = copy.deepcopy(old_ref["subject_category_scope"])
             if subject_category not in scope.keys():
@@ -909,7 +909,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = dict(old_ref["subject_category_scope"])
             if subject_category not in scope:
@@ -938,7 +938,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             result = copy.deepcopy(ref.to_dict())
             if object_category not in result["object_category_scope"].keys():
                 raise ObjectScopeUnknown()
@@ -972,7 +972,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = dict(old_ref["object_category_scope"])
             if object_category not in scope:
@@ -986,7 +986,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = dict(old_ref["object_category_scope"])
             if object_category not in scope:
@@ -1015,7 +1015,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             result = copy.deepcopy(ref.to_dict())
             if action_category not in result["action_category_scope"].keys():
                 raise ActionScopeUnknown()
@@ -1049,7 +1049,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = dict(old_ref["action_category_scope"])
             if action_category not in scope:
@@ -1063,7 +1063,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             scope = dict(old_ref["action_category_scope"])
             if action_category not in scope:
@@ -1098,7 +1098,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound("get_subject_category_assignment_dict")
+                raise IntraExtensionUnknown("get_subject_category_assignment_dict")
             _ref = ref.to_dict()
             if subject_uuid in _ref["subject_category_assignments"]:
                 _backup_dict = _ref["subject_category_assignments"][subject_uuid]
@@ -1146,7 +1146,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             assignments = ref.to_dict()['subject_category_assignments']
             if subject_uuid not in assignments:
                 assignments[subject_uuid] = dict()
@@ -1165,7 +1165,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             if subject_uuid in old_ref["subject_category_assignments"]:
                 if category_uuid in old_ref["subject_category_assignments"][subject_uuid]:
@@ -1199,7 +1199,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             _ref = ref.to_dict()
             if object_uuid in _ref["object_category_assignments"]:
                 _backup_dict = _ref["object_category_assignments"][object_uuid]
@@ -1243,7 +1243,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             assignments = ref.to_dict()['object_category_assignments']
             if object_uuid not in assignments:
                 assignments[object_uuid] = dict()
@@ -1262,7 +1262,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             if object_uuid in old_ref["object_category_assignments"]:
                 if category_uuid in old_ref["object_category_assignments"][object_uuid]:
@@ -1290,7 +1290,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             _ref = ref.to_dict()
             if action_uuid in _ref["action_category_assignments"]:
                 _backup_dict = _ref["action_category_assignments"][action_uuid]
@@ -1334,7 +1334,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             assignments = ref.to_dict()['action_category_assignments']
             if action_uuid not in assignments:
                 assignments[action_uuid] = dict()
@@ -1353,7 +1353,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             old_ref = ref.to_dict()
             if action_uuid in old_ref["action_category_assignments"]:
                 if category_uuid in old_ref["action_category_assignments"][action_uuid]:
@@ -1375,7 +1375,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_meta_rule_dict(self, extension_uuid, meta_rule_dict):
@@ -1403,7 +1403,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_uuid=extension_uuid)
             ref = query.first()
             if not ref:
-                raise IntraExtensionNotFound()
+                raise IntraExtensionUnknown()
             return ref.to_dict()
 
     def set_rule_dict(self, extension_uuid, rule_dict):

@@ -65,7 +65,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         #self.admin = self.identity_api.create_user(USER)
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        self.ref = self.manager.load_intra_extension(IE)
+        self.ref = self.manager.load_intra_extension_dict(IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 
@@ -1170,7 +1170,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertEqual(self.ref["id"], subject_categories["intra_extension_uuid"])
             self.assertIn(new_subject_category["id"], subject_categories["subject_categories"])
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
-            _sub_meta_rules = self.manager.set_sub_meta_rule_dict("admin", self.ref["id"], metarule)
+            _sub_meta_rules = self.manager.del_sub_meta_rule("admin", self.ref["id"], metarule)
             self.assertIn(relation, metarule)
             for item in ("subject_categories", "object_categories", "action_categories"):
                 self.assertEqual(
@@ -1310,7 +1310,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        ref = self.admin_manager.load_intra_extension(IE)
+        ref = self.admin_manager.load_intra_extension_dict(IE)
         self.assertIsInstance(ref, dict)
         return ref
 
@@ -2701,11 +2701,11 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             self.assertRaises(
                 MetaRuleAddNotAuthorized,
-                self.manager.set_sub_meta_rule_dict,
+                self.manager.get_sub_meta_rule,
                 demo_user["id"], ref["id"], metarule
             )
 
-            _sub_meta_rules = self.manager.set_sub_meta_rule_dict(admin_user["id"], ref["id"], metarule)
+            _sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"], metarule)
             self.assertIn(relation, metarule)
             for item in ("subject_categories", "object_categories", "action_categories"):
                 self.assertEqual(

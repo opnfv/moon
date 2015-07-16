@@ -176,7 +176,7 @@ class IntraExtensions(controller.V3Controller):
     def del_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context["token_id"])
         if "ie_id" not in kw:
-            raise IntraExtensionNotFound
+            raise IntraExtensionUnknown
         ie_id = kw.get('intra_extension_id', None)
         return self.admin_api.del_intra_extension(user_id, ie_id)
 
@@ -490,7 +490,7 @@ class IntraExtensions(controller.V3Controller):
         ie_id = kw.get("intra_extension_id", None)
         subject_id = kw["subject_id"]
         subject_category_id = kw["subject_category_id"]
-        return self.admin_api.get_subject_assignment_dict(user_id, ie_id, subject_id)[subject_category_id]
+        return self.admin_api.get_subject_assignment_dict(user_id, ie_id, subject_id, subject_category_id)
 
     @controller.protected()
     def del_subject_assignment(self, context, **kw):
@@ -635,7 +635,7 @@ class IntraExtensions(controller.V3Controller):
         action_category_list = kw["action_categories"]
         sub_meta_rule_algorithm = kw["sub_meta_rule_algorithm"]
 
-        return self.admin_api.add_sub_meta_rule_dict(
+        return self.admin_api.add_sub_meta_rule(
             user_id,
             ie_id,
             sub_meta_rule_name,
@@ -657,7 +657,7 @@ class IntraExtensions(controller.V3Controller):
         user_id = self._get_user_id_from_token(context["token_id"])
         ie_id = kw.get("intra_extension_id")
         sub_meta_rule_id = kw["sub_meta_rule_id"]
-        return self.admin_api.del_sub_meta_rule(user_id, ie_id, sub_meta_rule_id)
+        return self.admin_api.get_sub_meta_rule(user_id, ie_id, sub_meta_rule_id)
 
     # Rules functions
     @controller.protected()

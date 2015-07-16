@@ -89,7 +89,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        ref = self.admin_manager.load_intra_extension(IE)
+        ref = self.admin_manager.load_intra_extension_dict(IE)
         self.assertIsInstance(ref, dict)
         return ref
 
@@ -123,12 +123,12 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         tenant = self.create_tenant()
         self.assertRaises(
-            IntraExtensionNotFound,
+            IntraExtensionUnknown,
             self.manager.get_extension_uuid,
             tenant["id"], "authz"
         )
         self.assertRaises(
-            IntraExtensionNotFound,
+            IntraExtensionUnknown,
             self.manager.get_extension_uuid,
             tenant["id"], "admin"
         )
@@ -142,7 +142,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
     def test_authz_exceptions(self):
         self.assertRaises(
-            IntraExtensionNotFound,
+            IntraExtensionUnknown,
             self.manager.authz,
             uuid.uuid4().hex, uuid.uuid4().hex, uuid.uuid4().hex, uuid.uuid4().hex
         )
@@ -322,7 +322,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 "relation": "relation_super"
             }
         }
-        self.manager.set_sub_meta_rule_dict(
+        self.manager.get_sub_meta_rule(
             admin_user['id'],
             self.ref["id"],
             my_meta_rule
@@ -1076,7 +1076,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
             self.assertRaises(
                 MetaRuleAddNotAuthorized,
-                self.manager.set_sub_meta_rule_dict,
+                self.manager.get_sub_meta_rule,
                 admin_user["id"], ref["id"], metarule)
 
     def test_sub_rules(self):
