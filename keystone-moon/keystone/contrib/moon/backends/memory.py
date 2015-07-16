@@ -18,21 +18,21 @@ class ConfigurationConnector(ConfigurationDriver):
 
     def __init__(self):
         super(ConfigurationConnector, self).__init__()
+        self.aggregation_algorithm_dict = dict()
+        self.aggregation_algorithm_dict[uuid4()] = "all_true"
+        self.sub_meta_rule_algorithm_dict = dict()
+        self.sub_meta_rule_algorithm_dict[uuid4()] = "inclusion"
+        self.sub_meta_rule_algorithm_dict[uuid4()] = "comparison"
 
     def get_policy_templete_dict(self):
         # TODO (dthom)
         pass
 
     def get_aggregation_algorithm_dict(self):
-        aggregation_algorithm_dict = dict()
-        aggregation_algorithm_dict[uuid4()] = "all_true"
-        return aggregation_algorithm_dict
+        return self.aggregation_algorithm_dict
 
     def get_sub_meta_rule_algorithm_dict(self):
-        sub_meta_rule_algorithm_dict = dict()
-        sub_meta_rule_algorithm_dict[uuid4()] = "inclusion"
-        sub_meta_rule_algorithm_dict[uuid4()] = "comparison"
-        return sub_meta_rule_algorithm_dict
+        return self.sub_meta_rule_algorithm_dict
 
 
 class TenantConnector(TenantDriver):
