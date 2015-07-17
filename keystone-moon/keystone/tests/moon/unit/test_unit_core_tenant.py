@@ -65,7 +65,28 @@ class TestTenantManager(tests.TestCase):
         data = self.manager.get_admin_extension_uuid(new_mapping[_uuid]["authz"])
         self.assertEquals(new_mapping[_uuid]["admin"], data)
 
-    def test_tenant_list_empty(self):
+    def test_del_tenant(self):
+        _uuid = uuid.uuid4().hex
+        new_mapping = {
+            _uuid: {
+                "name": uuid.uuid4().hex,
+                "authz": uuid.uuid4().hex,
+                "admin": uuid.uuid4().hex,
+            }
+        }
+        data = self.manager.set_tenant_dict(
+            tenant_id=_uuid,
+            tenant_name=new_mapping[_uuid]["name"],
+            intra_authz_ext_id=new_mapping[_uuid]["authz"],
+            intra_admin_ext_id=new_mapping[_uuid]["admin"]
+        )
+        self.assertEquals(_uuid, data["id"])
+        self.assertEquals(data["name"], new_mapping[_uuid]["name"])
+        self.assertEquals(data["authz"], new_mapping[_uuid]["authz"])
+        self.assertEquals(data["admin"], new_mapping[_uuid]["admin"])
+        data = self.manager.get_tenant_dict()
+        self.assertNotEqual(data, {})
+        self.manager.delete(new_mapping[_uuid]["authz"])
         data = self.manager.get_tenant_dict()
         self.assertEqual(data, {})
 
@@ -92,32 +113,7 @@ class TestTenantManager(tests.TestCase):
         data = self.manager.get_tenant_name_from_id(_uuid)
         self.assertEquals(data, "new name")
 
-    def test_delete_tenant(self):
-        _uuid = uuid.uuid4().hex
-        new_mapping = {
-            _uuid: {
-                "name": uuid.uuid4().hex,
-                "authz": uuid.uuid4().hex,
-                "admin": uuid.uuid4().hex,
-            }
-        }
-        data = self.manager.set_tenant_dict(
-            tenant_id=_uuid,
-            tenant_name=new_mapping[_uuid]["name"],
-            intra_authz_ext_id=new_mapping[_uuid]["authz"],
-            intra_admin_ext_id=new_mapping[_uuid]["admin"]
-        )
-        self.assertEquals(_uuid, data["id"])
-        self.assertEquals(data["name"], new_mapping[_uuid]["name"])
-        self.assertEquals(data["authz"], new_mapping[_uuid]["authz"])
-        self.assertEquals(data["admin"], new_mapping[_uuid]["admin"])
-        data = self.manager.get_tenant_dict()
-        self.assertNotEqual(data, {})
-        self.manager.delete(new_mapping[_uuid]["authz"])
-        data = self.manager.get_tenant_dict()
-        self.assertEqual(data, {})
-
-    def test_get_extension_uuid(self):
+    def test_get_tenant_intra_extension_id(self):
         _uuid = uuid.uuid4().hex
         new_mapping = {
             _uuid: {
@@ -138,7 +134,7 @@ class TestTenantManager(tests.TestCase):
         data = self.manager.get_extension_id(_uuid, "admin")
         self.assertEqual(data, new_mapping[_uuid]["admin"])
 
-    def test_unkown_tenant_uuid(self):
+    def test_exception_tenantunknown(self):
         self.assertRaises(TenantIDNotFound, self.manager.get_tenant_name_from_id, uuid.uuid4().hex)
         self.assertRaises(TenantIDNotFound, self.manager.set_tenant_name, uuid.uuid4().hex, "new name")
         self.assertRaises(TenantIDNotFound, self.manager.get_extension_id, uuid.uuid4().hex)
@@ -160,3 +156,9 @@ class TestTenantManager(tests.TestCase):
         self.assertRaises(IntraExtensionUnknown, self.manager.get_extension_id, _uuid, "admin")
         self.assertRaises(TenantIDNotFound, self.manager.get_tenant_uuid, uuid.uuid4().hex)
         # self.assertRaises(AdminIntraExtensionNotFound, self.manager.get_admin_extension_uuid, uuid.uuid4().hex)
+
+    def test_exception_tenantaddednameexisting(self):
+        pass
+
+    def test_exception_tenantnointraextension(self):
+        pass

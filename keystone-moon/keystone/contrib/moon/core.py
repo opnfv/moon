@@ -187,7 +187,10 @@ class TenantManager(manager.Manager):
         :return: dict
         """
         # TODO: check user right with user_id in SuperExtension
-        return self.driver.get_tenant_dict()
+        tenant_dict = self.driver.get_tenant_dict()
+        if not tenant_dict:
+            raise TenantDictEmpty()
+        return tenant_dict
 
     def add_tenant(self, user_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
         # TODO: check user right with user_id in SuperExtension
@@ -229,7 +232,6 @@ class TenantManager(manager.Manager):
         if tenant_id not in tenant_dict:
             raise TenantUnknown()
         return self.driver.set_tenant(
-            self,
             tenant_id,
             tenant_name,
             tenant_dict[tenant_id]['intra_authz_ext_id'],
@@ -308,14 +310,14 @@ class IntraExtensionManager(manager.Manager):
             'subject_uuid': xxx,
             'object_uuid': yyy,
             'action_uuid': zzz,
-            'subject_attributes': {
+            'subject_assignments': {
                 'subject_category1': [],
                 'subject_category2': [],
                 ...
                 'subject_categoryn': []
             },
-            'object_attributes': {},
-            'action_attributes': {},
+            'object_assignments': {},
+            'action_assignments': {},
         }
         """
         authz_buffer = dict()
@@ -323,30 +325,30 @@ class IntraExtensionManager(manager.Manager):
         authz_buffer['object_id'] = object_id
         authz_buffer['action_id'] = action_id
         meta_data_dict = dict()
-        meta_data_dict["subject_categories"] = self.driver.get_subject_category_dict(intra_extension_id)["subject_categories"]
-        meta_data_dict["object_categories"] = self.driver.get_object_category_dict(intra_extension_id)["object_categories"]
-        meta_data_dict["action_categories"] = self.driver.get_action_category_dict(intra_extension_id)["action_categories"]
+        meta_data_dict["subject_categories"] = self.driver.get_subject_category_dict(intra_extension_id)
+        meta_data_dict["object_categories"] = self.driver.get_object_category_dict(intra_extension_id)
+        meta_data_dict["action_categories"] = self.driver.get_action_category_dict(intra_extension_id)
         subject_assignment_dict = dict()
         for category in meta_data_dict["subject_categories"]:
             subject_assignment_dict[category] = self.driver.get_subject_assignment_dict(
-                intra_extension_id, category)["subject_category_assignments"]
+                intra_extension_id, subject_id)[category]
         object_assignment_dict = dict()
         for category in meta_data_dict["object_categories"]:
             object_assignment_dict[category] = self.driver.get_object_assignment_dict(
-                intra_extension_id, category)["object_category_assignments"]
+                intra_extension_id, object_id)[category]
         action_assignment_dict = dict()
         for category in meta_data_dict["action_categories"]:
             action_assignment_dict[category] = self.driver.get_action_assignment_dict(
-                intra_extension_id, category)["action_category_assignments"]
+                intra_extension_id, action_id)[category]
         authz_buffer['subject_attributes'] = dict()
         authz_buffer['object_attributes'] = dict()
         authz_buffer['action_attributes'] = dict()
         for _subject_category in meta_data_dict['subject_categories']:
-            authz_buffer['subject_attributes'][_subject_category] = subject_assignment_dict[_subject_category]
+            authz_buffer['subject_assignments'][_subject_category] = subject_assignment_dict[_subject_category]
         for _object_category in meta_data_dict['object_categories']:
-            authz_buffer['object_attributes'][_object_category] = object_assignment_dict[_object_category]
+            authz_buffer['object_assignments'][_object_category] = object_assignment_dict[_object_category]
         for _action_category in meta_data_dict['action_categories']:
-            authz_buffer['action_attributes'][_action_category] = action_assignment_dict[_action_category]
+            authz_buffer['action_assignments'][_action_category] = action_assignment_dict[_action_category]
         return authz_buffer
 
     def authz(self, intra_extension_id, subject_id, object_id, action_id):
@@ -369,7 +371,7 @@ class IntraExtensionManager(manager.Manager):
         authz_buffer = self.__get_authz_buffer(intra_extension_id, subject_id, object_id, action_id)
         decision_buffer = dict()
 
-        meta_rule_dict = self.driver.get_meta_rule_dict(intra_extension_id)
+        meta_rule_dict = self.driver.get_sub_meta_rule_dict(intra_extension_id)
 
         for sub_meta_rule_id in meta_rule_dict['sub_meta_rules']:
             if meta_rule_dict['sub_meta_rules'][sub_meta_rule_id]['algorithm'] == 'inclusion':
@@ -592,7 +594,7 @@ class IntraExtensionManager(manager.Manager):
             "aggregation": json_metarule["aggregation"],
             "sub_meta_rules": metarule
         }
-        self.driver.set_meta_rule_dict(intra_extension_dict["id"], submetarules)
+        self.driver.set_sub_meta_rule_dict(intra_extension_dict["id"], submetarules)
 
     def __load_rule_file(self, intra_extension_dict, policy_dir):
 
@@ -602,7 +604,7 @@ class IntraExtensionManager(manager.Manager):
         intra_extension_dict["rule"] = {"rule": copy.deepcopy(json_rules)}
         # Translate value from JSON file to UUID for Database
         rules = dict()
-        sub_meta_rules = self.driver.get_meta_rule_dict(intra_extension_dict["id"])
+        sub_meta_rules = self.driver.get_sub_meta_rule_dict(intra_extension_dict["id"])
         for relation in json_rules:
             # print(relation)
             # print(self.get_sub_meta_rule_relations("admin", ie["id"]))
@@ -1831,7 +1833,7 @@ class IntraExtensionDriver(object):
         """
         raise exception.NotImplemented()  # pragma: no cover
 
-    def set_subject_category_dict(self, intra_extension_id, subject_category_dict):
+    def set_subject_category_dict(self, intra_extension_id, subject_category_id, subject_category_dict):
         """Set the list of all subject categories
 
         :param intra_extension_id: IntraExtension UUID
@@ -2409,7 +2411,7 @@ class IntraExtensionDriver(object):
 
     # Meta_rule functions
 
-    def get_meta_rule_dict(self, extension_uuid):
+    def get_sub_meta_rule_dict(self, extension_uuid):
         """Get the Meta rule
 
         :param extension_uuid: IntraExtension UUID
@@ -2431,7 +2433,7 @@ class IntraExtensionDriver(object):
         """
         raise exception.NotImplemented()  # pragma: no cover
 
-    def set_meta_rule_dict(self, extension_uuid, meta_rule_dict):
+    def set_sub_meta_rule_dict(self, extension_uuid, meta_rule_dict):
         """Set the Meta rule
 
         :param extension_uuid: IntraExtension UUID

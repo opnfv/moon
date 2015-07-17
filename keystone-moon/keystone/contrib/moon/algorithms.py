@@ -37,14 +37,14 @@ rule_dict = [
 def inclusion(authz_buffer, sub_meta_rule_dict, rule_list):
     _cat = []
     for subject_cat in sub_meta_rule_dict['subject_categories']:
-        if subject_cat in authz_buffer['subject_attributes']:
-            _cat.append(authz_buffer['subject_attributes'][subject_cat])
+        if subject_cat in authz_buffer['subject_assignments']:
+            _cat.append(authz_buffer['subject_assignments'][subject_cat])
     for action_cat in sub_meta_rule_dict['action_categories']:
-        if action_cat in authz_buffer['action_attributes']:
-            _cat.append(authz_buffer['action_attributes'][action_cat])
+        if action_cat in authz_buffer['action_assignments']:
+            _cat.append(authz_buffer['action_assignments'][action_cat])
     for object_cat in sub_meta_rule_dict['object_categories']:
-        if object_cat in authz_buffer['object_attributes']:
-            _cat.append(authz_buffer['object_attributes'][object_cat])
+        if object_cat in authz_buffer['object_assignments']:
+            _cat.append(authz_buffer['object_assignments'][object_cat])
 
     for _element in itertools.product(*_cat):
         if list(_element) in rule_list:
