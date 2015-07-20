@@ -184,10 +184,20 @@ class TenantManager(manager.Manager):
     def get_tenant_dict(self, user_id):
         """
         Return a dictionary with all tenants
-        :return: dict
+        :return: {
+            tenant_id1: {
+                name: xxx,
+                description: yyy,
+                intra_authz_extension_id: zzz,
+                intra_admin_extension_id: zzz,
+                },
+            tenant_id2: {...},
+            ...
+            }
         """
         # TODO: check user right with user_id in SuperExtension
         tenant_dict = self.driver.get_tenant_dict()
+        # TODO: check whether we need this exception
         if not tenant_dict:
             raise TenantDictEmpty()
         return tenant_dict
@@ -198,7 +208,7 @@ class TenantManager(manager.Manager):
         for tenant_id in tenant_dict:
             if tenant_dict[tenant_id]['name'] is tenant_name:
                 raise TenantAddedNameExisting()
-        return self.driver.add_tenant(uuid4().hex, tenant_name, intra_authz_ext_id, intra_admin_ext_id)
+        return self.driver.add_tenant(uuid4().hex(), tenant_name, intra_authz_ext_id, intra_admin_ext_id)
 
     def get_tenant(self, user_id, tenant_id):
         # TODO: check user right with user_id in SuperExtension
@@ -209,8 +219,7 @@ class TenantManager(manager.Manager):
 
     def del_tenant(self, user_id, tenant_id):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
-        if tenant_id not in tenant_dict:
+        if tenant_id not in self.driver.get_tenant_dict():
             raise TenantUnknown()
         return self.driver.del_tenant(tenant_id)
 

@@ -9,6 +9,17 @@ intra_extensions = {
     ...
 }
 
+tenants = {
+    tenant_id1: {
+        name: xxx,
+        description: yyy,
+        intra_authz_extension_id: zzz,
+        intra_admin_extension_id: zzz,
+        },
+    tenant_id2: {...},
+    ...
+}
+
 --------------- for each intra-extension -----------------
 
 subject_categories = {
