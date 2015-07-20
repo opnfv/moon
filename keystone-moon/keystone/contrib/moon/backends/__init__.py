@@ -48,6 +48,8 @@ subject_scopes = {
             name: yyy,
             description: bbb},
         ...},
+        subject_scope_id3: {
+        ...}
     subject_category_id2: {...},
     ...
 }
@@ -66,7 +68,12 @@ subject_assignments = {
     ...
 }
 
-aggregation_algorithm = aggregation_algorithm_id
+aggregation_algorithm = {
+    aggregation_algorithm_id: {
+         name: xxx,
+         description: yyy
+         }
+    }
 
 sub_meta_rules = {
     sub_meta_rule_id_1: {

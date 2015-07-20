@@ -19,12 +19,12 @@
         "subject_category_scope",
         "object_category_scope",
         "action_category_scope",
-        "sub_rules",
+        "rules",
         "subject_assignments",
         "object_assignments",
         "action_assignments",
-        "sub_meta_rule_relations",
-        "aggregation_algorithms",
-        "sub_meta_rule"
+        "sub_meta_rule_algorithm",
+        "aggregation_algorithm",
+        "sub_meta_rules"
     ]
 }

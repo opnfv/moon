@@ -118,6 +118,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_categories/{subject_category_id}',
             get_action='get_subject_category',
             delete_action='del_subject_category',
+            post_action='set_subject_category',
             rel=self._get_rel('subject_categories'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -174,6 +175,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subjects/{subject_id}',
             get_action='get_subject',
             delete_action='del_subject',
+            post_action='set_subject',
             rel=self._get_rel('subjects'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -230,6 +232,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}/{subject_scope_id}',
             get_action='get_subject_scope',
             delete_action='del_subject_scope',
+            post_action='set_subject_scope',
             rel=self._get_rel('subject_scope'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -271,15 +274,6 @@ class Routers(wsgi.RoutersBase):
                 'intra_extension_id': self._get_path('intra_extensions'),
             })
 
-        # Assignment route
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}',
-            get_action='get_subject_assignments',
-            rel=self._get_rel('subject_assignments'),
-            path_vars={
-                'intra_extension_id': self._get_path('intra_extensions'),
-            })
         self._add_resource(
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/subject_assignments',
@@ -379,7 +373,7 @@ class Routers(wsgi.RoutersBase):
         self._add_resource(
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithm',
-            post_action='add_aggregation_algorithm',
+            post_action='set_aggregation_algorithm',
             rel=self._get_rel('aggregation_algorithms'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -388,7 +382,6 @@ class Routers(wsgi.RoutersBase):
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithm/{aggregation_algorithm_id}',
             get_action='get_aggregation_algorithm',
-            delete_action='del_aggregation_algorithm',
             rel=self._get_rel('aggregation_algorithms'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -407,6 +400,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/sub_meta_rules/{sub_meta_rule_id}',
             get_action='get_sub_meta_rule',
             delete_action='del_sub_meta_rule',
+            post_action='set_sub_meta_rule',
             rel=self._get_rel('sub_meta_rules'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -427,6 +421,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}/{rule_id}',
             get_action='get_rule',
             delete_action='del_rule',
+            post_action='set_rule',
             rel=self._get_rel('rules'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),

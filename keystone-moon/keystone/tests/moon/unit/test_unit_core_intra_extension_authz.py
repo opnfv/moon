@@ -162,7 +162,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         # Test when subject is known but not the object
         demo_user = self.create_user("demo")
-        self.manager.add_subject(
+        self.manager.add_subject_dict(
             admin_user['id'],
             self.ref["id"],
             demo_user["id"]
@@ -210,7 +210,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
         my_subject_category = {"id": _tmp[0], "name": _tmp[1]}
 
-        _tmp = self.manager.add_subject_scope(
+        _tmp = self.manager.add_subject_scope_dict(
             admin_user['id'],
             self.ref["id"],
             my_subject_category["id"],
@@ -322,7 +322,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 "relation": "relation_super"
             }
         }
-        self.manager.get_sub_meta_rule(
+        self.manager.get_sub_meta_rule_dict(
             admin_user['id'],
             self.ref["id"],
             my_meta_rule
@@ -345,7 +345,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
-        subjects = self.manager.get_subject_dict(admin_user["id"], tenant["id"])
+        subjects = self.manager.get_subjects_dict(admin_user["id"], tenant["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -370,7 +370,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         # Add a particular subject
         self.assertRaises(
             SubjectAddNotAuthorized,
-            self.manager.add_subject,
+            self.manager.add_subject_dict,
             admin_user["id"], ref["id"], new_subject["id"])
 
     def test_objects(self):
@@ -453,7 +453,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
-        subject_categories = self.manager.get_subject_category_dict(admin_user["id"], ref["id"])
+        subject_categories = self.manager.get_subject_categories_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subject_categories, dict)
         self.assertIn("subject_categories", subject_categories)
         self.assertIn("id", subject_categories)
@@ -571,7 +571,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -599,7 +599,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             # Add a particular subject_category_scope
             self.assertRaises(
                 SubjectCategoryScopeAddNotAuthorized,
-                self.manager.add_subject_scope,
+                self.manager.add_subject_scope_dict,
                 admin_user["id"], ref["id"], subject_category, new_subject_category_scope[new_subject_category_scope_uuid])
 
     def test_object_category_scope(self):
@@ -724,7 +724,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.admin_manager.get_subject_scope_dict(
+            subject_category_scope = self.admin_manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -1017,7 +1017,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         self.assertIn("and_true_aggregation", aggregation_algorithms["aggregation_algorithms"])
         self.assertIn("test_aggregation", aggregation_algorithms["aggregation_algorithms"])
 
-        aggregation_algorithm = self.manager.get_aggregation_algorithm(admin_user["id"], ref["id"])
+        aggregation_algorithm = self.manager.get_aggregation_algorithm_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(aggregation_algorithm, dict)
         self.assertIn("aggregation", aggregation_algorithm)
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
@@ -1026,16 +1026,16 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         _aggregation_algorithm.remove(aggregation_algorithm["aggregation"])
         self.assertRaises(
             MetaRuleAddNotAuthorized,
-            self.manager.set_aggregation_algorithm,
+            self.manager.set_aggregation_algorithm_dict,
             admin_user["id"], ref["id"], _aggregation_algorithm[0])
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
         sub_meta_rules_conf = json.load(open(os.path.join(self.policy_directory, ref["model"], "metarule.json")))
         metarule = dict()
         categories = {
-            "subject_categories": self.manager.get_subject_category_dict(admin_user["id"], ref["id"]),
+            "subject_categories": self.manager.get_subject_categories_dict(admin_user["id"], ref["id"]),
             "object_categories": self.manager.get_object_category_dict(admin_user["id"], ref["id"]),
             "action_categories": self.manager.get_action_category_dict(admin_user["id"], ref["id"])
         }
@@ -1064,7 +1064,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
                 ref["id"],
                 new_subject_category["name"])
             new_subject_category["id"] = data["subject_category"]["uuid"]
-            subject_categories = self.manager.get_subject_category_dict(
+            subject_categories = self.manager.get_subject_categories_dict(
                 admin_user["id"],
                 ref["id"])
             self.assertIsInstance(subject_categories, dict)
@@ -1076,7 +1076,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
             self.assertRaises(
                 MetaRuleAddNotAuthorized,
-                self.manager.get_sub_meta_rule,
+                self.manager.get_sub_meta_rule_dict,
                 admin_user["id"], ref["id"], metarule)
 
     def test_sub_rules(self):
@@ -1087,7 +1087,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         ref_admin = self.create_intra_extension("policy_admin")
         self.create_mapping(tenant, ref["id"], ref_admin["id"])
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
 
@@ -1100,7 +1100,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
                     ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
                     ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
@@ -1118,7 +1118,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
         relation = sub_rules["rules"].keys()[0]
         sub_rule = []
         for cat, cat_func, func_name in (
-            ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+            ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
             ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
             ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
         ):

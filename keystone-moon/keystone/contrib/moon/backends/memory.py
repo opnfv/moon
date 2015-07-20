@@ -21,10 +21,10 @@ class ConfigurationConnector(ConfigurationDriver):
     def __init__(self):
         super(ConfigurationConnector, self).__init__()
         self.aggregation_algorithm_dict = dict()
-        self.aggregation_algorithm_dict[uuid4().hex] = "all_true"
+        self.aggregation_algorithm_dict[uuid4().hex] = {'name': 'all_true', 'description': 'all_true'}
         self.sub_meta_rule_algorithm_dict = dict()
-        self.sub_meta_rule_algorithm_dict[uuid4().hex] = "inclusion"
-        self.sub_meta_rule_algorithm_dict[uuid4().hex] = "comparison"
+        self.sub_meta_rule_algorithm_dict[uuid4().hex] = {'name': 'inclusion', 'description': 'inclusion'}
+        self.sub_meta_rule_algorithm_dict[uuid4().hex] = {'name': 'comparison', 'description': 'comparison'}
 
     def get_policy_template_dict(self):
         nodes = glob(os.path.join(CONF.moon.policy_directory, "*"))

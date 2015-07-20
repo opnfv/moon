@@ -78,13 +78,6 @@ class IntraExtensionException(MoonError):
     title = 'Extension Error'
 
 
-class IntraExtensionUnMapped(IntraExtensionException):
-    message_format = _("The Extension is not mapped to a tenant.")
-    code = 400
-    title = 'Extension UUID Not Found Error'
-    logger = "WARNING"
-
-
 class IntraExtensionUnknown(IntraExtensionException):
     message_format = _("The intra_extension is unknown.")
     code = 400
@@ -327,13 +320,6 @@ class ActionAssignmentExisting(AuthzAssignment):
     logger = "ERROR"
 
 
-class AggregationAlgorithmExisting(AuthzMetadata):
-    message_format = _("The given aggregation algorithm is existing.")
-    code = 400
-    title = 'Aggregation Algorithm Existing'
-    logger = "ERROR"
-
-
 class AggregationAlgorithmNotExisting(AuthzMetadata):
     message_format = _("The given aggregation algorithm is not existing.")
     code = 400
@@ -353,6 +339,7 @@ class SubMetaRuleUnknown(AuthzMetadata):
     code = 400
     title = 'Sub Meta Rule Unknown'
     logger = "ERROR"
+
 
 class SubMetaRuleNameExisting(AuthzMetadata):
     message_format = _("The sub meta rule name is existing.")

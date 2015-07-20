@@ -103,7 +103,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.create_user("admin")
         self.create_intra_extension()
         
-        subjects = self.manager.get_subject_dict("admin", self.ref["id"])
+        subjects = self.manager.get_subjects_dict("admin", self.ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -125,7 +125,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         
         # Delete the new subject
         self.manager.del_subject("admin", self.ref["id"], new_subject["id"])
-        subjects = self.manager.get_subject_dict("admin", self.ref["id"])
+        subjects = self.manager.get_subjects_dict("admin", self.ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -134,12 +134,12 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertNotIn(new_subject["id"], subjects["subjects"])
         
         # Add a particular subject
-        subjects = self.manager.add_subject("admin", self.ref["id"], new_subject["id"])
+        subjects = self.manager.add_subject_dict("admin", self.ref["id"], new_subject["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subject", subjects)
         self.assertIn("uuid", subjects["subject"])
         self.assertEqual(new_subject["name"], subjects["subject"]["name"])
-        subjects = self.manager.get_subject_dict("admin", self.ref["id"])
+        subjects = self.manager.get_subjects_dict("admin", self.ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -252,7 +252,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.create_user("admin")
         self.create_intra_extension()
 
-        subject_categories = self.manager.get_subject_category_dict("admin", self.ref["id"])
+        subject_categories = self.manager.get_subject_categories_dict("admin", self.ref["id"])
         self.assertIsInstance(subject_categories, dict)
         self.assertIn("subject_categories", subject_categories)
         self.assertIn("id", subject_categories)
@@ -274,7 +274,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         # Delete the new subject_category
         self.manager.del_subject_category("admin", self.ref["id"], new_subject_category["id"])
-        subject_categories = self.manager.get_subject_category_dict("admin", self.ref["id"])
+        subject_categories = self.manager.get_subject_categories_dict("admin", self.ref["id"])
         self.assertIsInstance(subject_categories, dict)
         self.assertIn("subject_categories", subject_categories)
         self.assertIn("id", subject_categories)
@@ -292,7 +292,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn("uuid", subject_categories["subject_category"])
         self.assertEqual(new_subject_category["name"], subject_categories["subject_category"]["name"])
         new_subject_category["id"] = subject_categories["subject_category"]["uuid"]
-        subject_categories = self.manager.get_subject_category_dict(
+        subject_categories = self.manager.get_subject_categories_dict(
             "admin",
             self.ref["id"])
         self.assertIsInstance(subject_categories, dict)
@@ -427,7 +427,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 "admin",
                 self.ref["id"],
                 subject_category)
@@ -460,7 +460,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 self.ref["id"],
                 subject_category,
                 new_subject_category_scope_uuid)
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 "admin",
                 self.ref["id"],
                 subject_category)
@@ -472,7 +472,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertNotIn(new_subject_category_scope_uuid, subject_category_scope["subject_category_scope"])
 
             # Add a particular subject_category_scope
-            subject_category_scope = self.manager.add_subject_scope(
+            subject_category_scope = self.manager.add_subject_scope_dict(
                 "admin",
                 self.ref["id"],
                 subject_category,
@@ -482,7 +482,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.assertIn("uuid", subject_category_scope["subject_category_scope"])
             self.assertEqual(new_subject_category_scope[new_subject_category_scope_uuid],
                              subject_category_scope["subject_category_scope"]["name"])
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 "admin",
                 self.ref["id"],
                 subject_category)
@@ -676,7 +676,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 "admin",
                 self.ref["id"],
                 subject_category)
@@ -1113,25 +1113,25 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIn("and_true_aggregation", aggregation_algorithms["aggregation_algorithms"])
         self.assertIn("test_aggregation", aggregation_algorithms["aggregation_algorithms"])
 
-        aggregation_algorithm = self.manager.get_aggregation_algorithm("admin", self.ref["id"])
+        aggregation_algorithm = self.manager.get_aggregation_algorithm_dict("admin", self.ref["id"])
         self.assertIsInstance(aggregation_algorithm, dict)
         self.assertIn("aggregation", aggregation_algorithm)
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
 
         _aggregation_algorithm = list(aggregation_algorithms["aggregation_algorithms"])
         _aggregation_algorithm.remove(aggregation_algorithm["aggregation"])
-        aggregation_algorithm = self.manager.set_aggregation_algorithm("admin", self.ref["id"], _aggregation_algorithm[0])
+        aggregation_algorithm = self.manager.set_aggregation_algorithm_dict("admin", self.ref["id"], _aggregation_algorithm[0])
         self.assertIsInstance(aggregation_algorithm, dict)
         self.assertIn("aggregation", aggregation_algorithm)
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict("admin", self.ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict("admin", self.ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
         sub_meta_rules_conf = json.load(open(os.path.join(self.policy_directory, self.ref["model"], "metarule.json")))
         metarule = dict()
         categories = {
-            "subject_categories": self.manager.get_subject_category_dict("admin", self.ref["id"]),
+            "subject_categories": self.manager.get_subject_categories_dict("admin", self.ref["id"]),
             "object_categories": self.manager.get_object_category_dict("admin", self.ref["id"]),
             "action_categories": self.manager.get_action_category_dict("admin", self.ref["id"])
         }
@@ -1160,7 +1160,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                 self.ref["id"],
                 new_subject_category["name"])
             new_subject_category["id"] = data["subject_category"]["uuid"]
-            subject_categories = self.manager.get_subject_category_dict(
+            subject_categories = self.manager.get_subject_categories_dict(
                 "admin",
                 self.ref["id"])
             self.assertIsInstance(subject_categories, dict)
@@ -1183,7 +1183,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.create_user("admin")
         self.create_intra_extension()
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict("admin", self.ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict("admin", self.ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
 
@@ -1196,7 +1196,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
                     ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
                     ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
@@ -1215,7 +1215,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         relation = sub_rules["rules"].keys()[0]
         sub_rule = []
         for cat, cat_func, func_name in (
-            ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+            ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
             ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
             ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
         ):
@@ -1238,7 +1238,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
                     ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
                     ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
@@ -1321,10 +1321,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         self.assertRaises(
             SubjectReadNotAuthorized,
-            self.manager.get_subject_dict,
+            self.manager.get_subjects_dict,
             demo_user["id"], ref["id"])
 
-        subjects = self.manager.get_subject_dict(admin_user["id"], ref["id"])
+        subjects = self.manager.get_subjects_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -1357,7 +1357,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             demo_user["id"], ref["id"], new_subject["id"])
 
         self.manager.del_subject(admin_user["id"], ref["id"], new_subject["id"])
-        subjects = self.manager.get_subject_dict(admin_user["id"], ref["id"])
+        subjects = self.manager.get_subjects_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -1368,15 +1368,15 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         # Add a particular subject
         self.assertRaises(
             SubjectAddNotAuthorized,
-            self.manager.add_subject,
+            self.manager.add_subject_dict,
             demo_user["id"], ref["id"], new_subject["id"])
 
-        subjects = self.manager.add_subject(admin_user["id"], ref["id"], new_subject["id"])
+        subjects = self.manager.add_subject_dict(admin_user["id"], ref["id"], new_subject["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subject", subjects)
         self.assertIn("uuid", subjects["subject"])
         self.assertEqual(new_subject["name"], subjects["subject"]["name"])
-        subjects = self.manager.get_subject_dict(admin_user["id"], ref["id"])
+        subjects = self.manager.get_subjects_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subjects, dict)
         self.assertIn("subjects", subjects)
         self.assertIn("id", subjects)
@@ -1533,10 +1533,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         self.assertRaises(
             SubjectCategoryReadNotAuthorized,
-            self.manager.get_subject_category_dict,
+            self.manager.get_subject_categories_dict,
             demo_user["id"], ref["id"])
 
-        subject_categories = self.manager.get_subject_category_dict(admin_user["id"], ref["id"])
+        subject_categories = self.manager.get_subject_categories_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subject_categories, dict)
         self.assertIn("subject_categories", subject_categories)
         self.assertIn("id", subject_categories)
@@ -1569,7 +1569,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             demo_user["id"], ref["id"], new_subject_category["id"])
 
         self.manager.del_subject_category(admin_user["id"], ref["id"], new_subject_category["id"])
-        subject_categories = self.manager.get_subject_category_dict(admin_user["id"], ref["id"])
+        subject_categories = self.manager.get_subject_categories_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(subject_categories, dict)
         self.assertIn("subject_categories", subject_categories)
         self.assertIn("id", subject_categories)
@@ -1592,7 +1592,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn("uuid", subject_categories["subject_category"])
         self.assertEqual(new_subject_category["name"], subject_categories["subject_category"]["name"])
         new_subject_category["id"] = subject_categories["subject_category"]["uuid"]
-        subject_categories = self.manager.get_subject_category_dict(
+        subject_categories = self.manager.get_subject_categories_dict(
             admin_user["id"],
             ref["id"])
         self.assertIsInstance(subject_categories, dict)
@@ -1776,10 +1776,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         for subject_category in subject_categories["subject_categories"]:
             self.assertRaises(
                 SubjectCategoryScopeReadNotAuthorized,
-                self.manager.get_subject_scope_dict,
+                self.manager.get_subject_scopes_dict,
                 demo_user["id"], ref["id"], subject_category)
 
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -1823,7 +1823,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 ref["id"],
                 subject_category,
                 new_subject_category_scope_uuid)
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -1837,11 +1837,11 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             # Add a particular subject_category_scope
             self.assertRaises(
                 SubjectCategoryScopeAddNotAuthorized,
-                self.manager.add_subject_scope,
+                self.manager.add_subject_scope_dict,
                 demo_user["id"], ref["id"], subject_category,
                 new_subject_category_scope[new_subject_category_scope_uuid])
 
-            subject_category_scope = self.manager.add_subject_scope(
+            subject_category_scope = self.manager.add_subject_scope_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category,
@@ -1851,7 +1851,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertIn("uuid", subject_category_scope["subject_category_scope"])
             self.assertEqual(new_subject_category_scope[new_subject_category_scope_uuid],
                              subject_category_scope["subject_category_scope"]["name"])
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -2093,7 +2093,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         )
 
         for subject_category in subject_categories["subject_categories"]:
-            subject_category_scope = self.manager.get_subject_scope_dict(
+            subject_category_scope = self.manager.get_subject_scopes_dict(
                 admin_user["id"],
                 ref["id"],
                 subject_category)
@@ -2624,11 +2624,11 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         self.assertRaises(
             MetaRuleReadNotAuthorized,
-            self.manager.get_aggregation_algorithm,
+            self.manager.get_aggregation_algorithm_dict,
             demo_user["id"], ref["id"]
         )
 
-        aggregation_algorithm = self.manager.get_aggregation_algorithm(admin_user["id"], ref["id"])
+        aggregation_algorithm = self.manager.get_aggregation_algorithm_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(aggregation_algorithm, dict)
         self.assertIn("aggregation", aggregation_algorithm)
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
@@ -2642,24 +2642,24 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             demo_user["id"], ref["id"], _aggregation_algorithm[0]
         )
 
-        aggregation_algorithm = self.manager.set_aggregation_algorithm(admin_user["id"], ref["id"], _aggregation_algorithm[0])
+        aggregation_algorithm = self.manager.set_aggregation_algorithm_dict(admin_user["id"], ref["id"], _aggregation_algorithm[0])
         self.assertIsInstance(aggregation_algorithm, dict)
         self.assertIn("aggregation", aggregation_algorithm)
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
 
         self.assertRaises(
             MetaRuleReadNotAuthorized,
-            self.manager.get_sub_meta_rule_dict,
+            self.manager.get_sub_meta_rules_dict,
             demo_user["id"], ref["id"]
         )
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
         sub_meta_rules_conf = json.load(open(os.path.join(self.policy_directory, ref["model"], "metarule.json")))
         metarule = dict()
         categories = {
-            "subject_categories": self.manager.get_subject_category_dict(admin_user["id"], ref["id"]),
+            "subject_categories": self.manager.get_subject_categories_dict(admin_user["id"], ref["id"]),
             "object_categories": self.manager.get_object_category_dict(admin_user["id"], ref["id"]),
             "action_categories": self.manager.get_action_category_dict(admin_user["id"], ref["id"])
         }
@@ -2688,7 +2688,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 ref["id"],
                 new_subject_category["name"])
             new_subject_category["id"] = data["subject_category"]["uuid"]
-            subject_categories = self.manager.get_subject_category_dict(
+            subject_categories = self.manager.get_subject_categories_dict(
                 admin_user["id"],
                 ref["id"])
             self.assertIsInstance(subject_categories, dict)
@@ -2701,11 +2701,11 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             self.assertRaises(
                 MetaRuleAddNotAuthorized,
-                self.manager.get_sub_meta_rule,
+                self.manager.get_sub_meta_rule_dict,
                 demo_user["id"], ref["id"], metarule
             )
 
-            _sub_meta_rules = self.manager.get_sub_meta_rule(admin_user["id"], ref["id"], metarule)
+            _sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"], metarule)
             self.assertIn(relation, metarule)
             for item in ("subject_categories", "object_categories", "action_categories"):
                 self.assertEqual(
@@ -2718,7 +2718,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         admin_user = self.create_user("admin")
         ref = self.create_intra_extension()
 
-        sub_meta_rules = self.manager.get_sub_meta_rule_dict(admin_user["id"], ref["id"])
+        sub_meta_rules = self.manager.get_sub_meta_rules_dict(admin_user["id"], ref["id"])
         self.assertIsInstance(sub_meta_rules, dict)
         self.assertIn("sub_meta_rules", sub_meta_rules)
 
@@ -2737,7 +2737,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
                     ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
                     ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
@@ -2756,7 +2756,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         relation = sub_rules["rules"].keys()[0]
         sub_rule = []
         for cat, cat_func, func_name in (
-            ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+            ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
             ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
             ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
         ):
@@ -2785,7 +2785,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             rules[relation] = list()
             for rule in sub_rules["rules"][relation]:
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.manager.get_subject_scope_dict, "subject_category_scope"),
+                    ("subject_categories", self.manager.get_subject_scopes_dict, "subject_category_scope"),
                     ("action_categories", self.manager.get_action_scope_dict, "action_category_scope"),
                     ("object_categories", self.manager.get_object_scope_dict, "object_category_scope"),
                 ):
