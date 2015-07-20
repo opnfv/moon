@@ -56,7 +56,7 @@ class TestTenantManager(tests.TestCase):
         self.assertEquals(data["name"], new_mapping[_uuid]["name"])
         self.assertEquals(data["authz"], new_mapping[_uuid]["authz"])
         self.assertEquals(data["admin"], new_mapping[_uuid]["admin"])
-        data = self.manager.get_tenant_dict()
+        data = self.manager.get_tenants_dict()
         self.assertNotEqual(data, {})
         data = self.manager.get_tenant_uuid(new_mapping[_uuid]["authz"])
         self.assertEquals(_uuid, data)
@@ -84,10 +84,10 @@ class TestTenantManager(tests.TestCase):
         self.assertEquals(data["name"], new_mapping[_uuid]["name"])
         self.assertEquals(data["authz"], new_mapping[_uuid]["authz"])
         self.assertEquals(data["admin"], new_mapping[_uuid]["admin"])
-        data = self.manager.get_tenant_dict()
+        data = self.manager.get_tenants_dict()
         self.assertNotEqual(data, {})
         self.manager.delete(new_mapping[_uuid]["authz"])
-        data = self.manager.get_tenant_dict()
+        data = self.manager.get_tenants_dict()
         self.assertEqual(data, {})
 
     def test_set_tenant_name(self):

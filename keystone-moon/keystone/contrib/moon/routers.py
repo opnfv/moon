@@ -35,9 +35,9 @@ class Routers(wsgi.RoutersBase):
         # Configuration route
         self._add_resource(
             mapper, configuration_controller,
-            path=self.PATH_PREFIX+'/configuration/templetes',
-            get_action='get_templetes',
-            rel=self._get_rel('templetes'),
+            path=self.PATH_PREFIX+'/configuration/templates',
+            get_action='get_templates',
+            rel=self._get_rel('templates'),
             path_vars={})
         self._add_resource(
             mapper, configuration_controller,
@@ -62,25 +62,26 @@ class Routers(wsgi.RoutersBase):
             path_vars={})
         self._add_resource(
             mapper, tenants_controller,
-            path=self.PATH_PREFIX+'/tenant/{tenant_uuid}',
+            path=self.PATH_PREFIX+'/tenants/{tenant_id}',
             get_action='get_tenant',
             delete_action='del_tenant',
+            post_action='set_tenant',
             rel=self._get_rel('tenants'),
             path_vars={
-                'tenant_uuid': self._get_path('tenants'),
+                'tenant_id': self._get_path('tenants'),
             })
 
         # Authz route
         self._add_resource(
             mapper, authz_controller,
-            path=self.PATH_PREFIX+'/authz/{tenant_id}/{subject_id}/{object_id}/{action_id}',
+            path=self.PATH_PREFIX+'/authz/{tenant_name}/{subject_name}/{object_name}/{action_name}',
             get_action='get_authz',
             rel=self._get_rel('authz'),
             path_vars={
-                'tenant_id': self._get_path('tenants'),
-                'subject_id': self._get_path('subjects'),
-                'object_id': self._get_path('objects'),
-                'action_id': self._get_path('actions'),
+                'tenant_name': self._get_path('tenants'),
+                'subject_name': self._get_path('subjects'),
+                'object_name': self._get_path('objects'),
+                'action_name': self._get_path('actions'),
             })
 
         # IntraExtensions/Admin route
@@ -96,6 +97,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}',
             get_action='get_intra_extension',
             delete_action='del_intra_extension',
+            post_action='set_intra_extension',
             rel=self._get_rel('intra_extensions'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),

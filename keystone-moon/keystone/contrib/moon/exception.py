@@ -48,13 +48,6 @@ class TenantException(MoonError):
     logger = "ERROR"
 
 
-class TenantDictEmpty(TenantException):
-    message_format = _("The tenant dict mapping is empty, you must set the mapping first.")
-    code = 400
-    title = 'Tenant Dict Empty'
-    logger = "WARNING"
-
-
 class TenantUnknown(TenantException):
     message_format = _("The tenant is unknown.")
     code = 400

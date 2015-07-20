@@ -24,7 +24,7 @@ from keystone.contrib.moon.algorithms import *
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
-DEFAULT_USER = uuid4().hex()  # default user_id for internal invocation
+DEFAULT_USER = uuid4().hex  # default user_id for internal invocation
 
 
 _OPTS = [
@@ -119,7 +119,7 @@ def filter_input(data):
 
 
 @dependency.provider('configuration_api')
-@dependency.requires('moonlog_api')  # TODO: log should be totally removed to exception.py
+@dependency.requires('moonlog_api')
 class ConfigurationManager(manager.Manager):
 
     def __init__(self):
@@ -175,13 +175,13 @@ class ConfigurationManager(manager.Manager):
 
 
 @dependency.provider('tenant_api')
-@dependency.requires('moonlog_api')  # TODO: log should be totally removed to exception.py
+@dependency.requires('moonlog_api')
 class TenantManager(manager.Manager):
 
     def __init__(self):
         super(TenantManager, self).__init__(CONF.moon.tenant_driver)
 
-    def get_tenant_dict(self, user_id):
+    def get_tenants_dict(self, user_id):
         """
         Return a dictionary with all tenants
         :return: {
@@ -196,48 +196,45 @@ class TenantManager(manager.Manager):
             }
         """
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
-        # TODO: check whether we need this exception
-        if not tenant_dict:
-            raise TenantDictEmpty()
-        return tenant_dict
+        return self.driver.get_tenants_dict()
 
-    def add_tenant(self, user_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
+    def add_tenant_dict(self, user_id, tenant_dict):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
-        for tenant_id in tenant_dict:
-            if tenant_dict[tenant_id]['name'] is tenant_name:
+        tenants_dict = self.driver.get_tenants_dict()
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]['name'] is tenant_dict['name']:
                 raise TenantAddedNameExisting()
-        return self.driver.add_tenant(uuid4().hex(), tenant_name, intra_authz_ext_id, intra_admin_ext_id)
+        return self.driver.add_tenant_dict(uuid4().hex, tenant_dict)
 
-    def get_tenant(self, user_id, tenant_id):
+    def get_tenant_dict(self, user_id, tenant_id):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
-        if tenant_id not in tenant_dict:
+        tenants_dict = self.driver.get_tenants_dict()
+        if tenant_id not in tenants_dict:
             raise TenantUnknown()
-        return tenant_dict[tenant_id]
+        return tenants_dict[tenant_id]
 
     def del_tenant(self, user_id, tenant_id):
         # TODO: check user right with user_id in SuperExtension
-        if tenant_id not in self.driver.get_tenant_dict():
+        if tenant_id not in self.driver.get_tenants_dict():
             raise TenantUnknown()
-        return self.driver.del_tenant(tenant_id)
+        self.driver.del_tenant(tenant_id)
 
-    # def set_tenant_dict(self, user_id, tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
-    #     # TODO: check user right with user_id in SuperExtension
-    #     # TODO (dthom): Tenant must be checked against Keystone database.
-    #     return self.driver.set_tenant(tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id)
+    def set_tenant_dict(self, user_id, tenant_id, tenant_dict):
+        # TODO: check user right with user_id in SuperExtension
+        if tenant_id not in self.driver.get_tenants_dict():
+            raise TenantUnknown()
+        return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 
     def get_tenant_name_from_id(self, user_id, tenant_id):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
+        tenant_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenant_dict:
             raise TenantUnknown()
         return tenant_dict[tenant_id]["name"]
 
     def set_tenant_name(self, user_id, tenant_id, tenant_name):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
+        tenant_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenant_dict:
             raise TenantUnknown()
         return self.driver.set_tenant(
@@ -249,9 +246,9 @@ class TenantManager(manager.Manager):
 
     def get_tenant_id_from_name(self, user_id, tenant_name):
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
-        for tenant_id in tenant_dict:
-            if tenant_dict[tenant_id]["name"] is tenant_name:
+        tenants_dict = self.driver.get_tenants_dict()
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["name"] is tenant_name:
                 return tenant_id
         return None
 
@@ -264,7 +261,7 @@ class TenantManager(manager.Manager):
         """
         # 1 tenant only with 1 authz extension and 1 admin extension
         # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenant_dict()
+        tenant_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenant_dict:
             raise TenantUnknown()
         elif not tenant_dict[tenant_id][genre]:
@@ -273,14 +270,14 @@ class TenantManager(manager.Manager):
 
     # TODO: check if we need the func
     def get_tenant_uuid(self, extension_uuid):
-        for _tenant_uuid, _tenant_value in six.iteritems(self.get_tenant_dict()):
+        for _tenant_uuid, _tenant_value in six.iteritems(self.get_tenants_dict()):
             if extension_uuid == _tenant_value["authz"] or extension_uuid == _tenant_value["admin"]:
                 return _tenant_uuid
         raise TenantIDNotFound()
 
     # TODO: check if we need the func
     def get_admin_extension_uuid(self, authz_extension_uuid):
-        _tenants = self.get_tenant_dict()
+        _tenants = self.get_tenants_dict()
         for _tenant_uuid in _tenants:
             if authz_extension_uuid == _tenants[_tenant_uuid]['authz'] and _tenants[_tenant_uuid]['admin']:
                     return _tenants[_tenant_uuid]['admin']
@@ -292,7 +289,7 @@ class TenantManager(manager.Manager):
 
     # TODO: check if we need the func
     def delete(self, authz_extension_uuid):
-        _tenants = self.get_tenant_dict()
+        _tenants = self.get_tenants_dict()
         for _tenant_uuid in _tenants:
             if authz_extension_uuid == _tenants[_tenant_uuid]['authz']:
                 return self.set_tenant_dict(_tenant_uuid, "", "", "")
@@ -399,7 +396,7 @@ class IntraExtensionManager(manager.Manager):
 
         return False
 
-    def get_intra_extension_dict(self, user_id):
+    def get_intra_extensions_dict(self, user_id):
         """
         :param user_id:
         :return: {
@@ -412,7 +409,7 @@ class IntraExtensionManager(manager.Manager):
             ...}
         """
         # TODO: check will be done through super_extension later
-        return self.driver.get_intra_extension_dict()
+        return self.driver.get_intra_extensions_dict()
 
     # load policy from policy directory
     # TODO (dthom) re-check these funcs
@@ -694,13 +691,13 @@ class IntraExtensionManager(manager.Manager):
         :return: {intra_extension_id: intra_extension_name, ...}
         """
         # TODO: check will be done through super_extension later
-        if intra_extension_id not in self.driver.get_intra_extension_dict():
+        if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
-        return self.driver.get_intra_extension_dict()[intra_extension_id]
+        return self.driver.get_intra_extensions_dict()[intra_extension_id]
 
     def del_intra_extension(self, user_id, intra_extension_id):
         # TODO: check will be done through super_extension later
-        if intra_extension_id not in self.driver.get_intra_extension_dict():
+        if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
         return self.driver.del_intra_extension(intra_extension_id)
 
@@ -1429,24 +1426,24 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         """
         tenant_id = self.tenant_api.get_tenant_id_from_name(DEFAULT_USER, tenant_name)
         intra_extension_id = self.tenant_api.get_tenant_intra_extension_id(DEFAULT_USER, tenant_id, self.__genre__)
-        subject_dict = self.driver.get_subject_dict(intra_extension_id)
+        subjects_dict = self.driver.get_subject_dict(intra_extension_id)
         subject_id = None
-        for _subject_id in subject_dict:
-            if subject_dict[_subject_id]['name'] is subject_name:
+        for _subject_id in subjects_dict:
+            if subjects_dict[_subject_id]['name'] is subject_name:
                 subject_id = _subject_id
         if not subject_id:
             raise SubjectUnknown()
-        object_dict = self.driver.get_object_dict(intra_extension_id)
+        objects_dict = self.driver.get_object_dict(intra_extension_id)
         object_id = None
-        for _object_id in object_dict:
-            if object_dict[_object_id]['name'] is object_name:
+        for _object_id in objects_dict:
+            if objects_dict[_object_id]['name'] is object_name:
                 object_id = _object_id
         if not object_id:
             raise ObjectUnknown()
-        action_dict = self.driver.get_action_dict(intra_extension_id)
+        actions_dict = self.driver.get_action_dict(intra_extension_id)
         action_id = None
-        for _action_id in action_dict:
-            if action_dict[_action_id] is action_name:
+        for _action_id in actions_dict:
+            if actions_dict[_action_id] is action_name:
                 action_id = _action_id
         if not action_id:
             raise ActionUnknown()
@@ -1672,13 +1669,16 @@ class ConfigurationDriver(object):
 
 class TenantDriver(object):
 
-    def get_tenant_dict(self):
-        # TODO: should implement TenantListEmpty exception
+    def get_tenants_dict(self):
         raise exception.NotImplemented()  # pragma: no cover
 
-    def set_tenant(self, tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
-        # if tenant_id exists, then modify; if the tenant_id not exists, then add the tenant
-        # TODO: should implement AddedTenantNameExist exception
+    def add_tenant_dict(self, tenant_id, tenant_dict):
+        raise exception.NotImplemented()  # pragma: no cover
+
+    def del_tenant_dict(self, tenant_id):
+        raise exception.NotImplemented()  # pragma: no cover
+
+    def set_tenant_dict(self, tenant_id, tenant_dict):
         raise exception.NotImplemented()  # pragma: no cover
 
 

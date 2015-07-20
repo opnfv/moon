@@ -23,11 +23,9 @@ LOG = log.getLogger(__name__)
 
 class IntraExtension(sql.ModelBase, sql.DictBase):
     __tablename__ = 'intra_extensions'
-    attributes = ['id', 'name', 'model', 'description']
+    attributes = ['id', 'intra_extension']
     id = sql.Column(sql.String(64), primary_key=True)
-    name = sql.Column(sql.String(64), nullable=False)
-    model = sql.Column(sql.String(64), nullable=True)
-    description = sql.Column(sql.Text())
+    intra_extension = sql.Column(sql.JsonBlob(), nullable=True)
 
     @classmethod
     def from_dict(cls, d):
@@ -40,15 +38,9 @@ class IntraExtension(sql.ModelBase, sql.DictBase):
 
 class Tenant(sql.ModelBase, sql.DictBase):
     __tablename__ = 'tenants'
-    # attributes = ['id', 'tenant', 'intra_authz_extension_id', 'intra_adminextension_id']
     attributes = ['id', 'tenant']
     id = sql.Column(sql.String(64), primary_key=True, nullable=False)
     tenant = sql.Column(sql.JsonBlob(), nullable=True)
-    # intra_authz_extension_id = sql.Column(sql.ForeignKey("intra_extensions.id"), nullable=False)
-    # intra_admin_extension_id = sql.Column(sql.ForeignKey("intra_extensions.id"), nullable=False)
-    # name = sql.Column(sql.String(128), nullable=True)
-    # authz = sql.Column(sql.String(64), nullable=True)
-    # admin = sql.Column(sql.String(64), nullable=True)
 
     @classmethod
     def from_dict(cls, d):
@@ -336,50 +328,45 @@ __all_objects__ = (
 
 class TenantConnector(TenantDriver):
 
-    def get_tenant_dict(self):
+    def get_tenants_dict(self):
         with sql.transaction() as session:
             query = session.query(Tenant)
-            # query = query.filter_by(uuid=tenant_uuid)
-            # ref = query.first().to_dict()
             tenants = query.all()
             return {tenant.id: Tenant.to_dict(tenant) for tenant in tenants}
 
-    def add_tenant(self, tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
-        pass
+    def add_tenant_dict(self, tenant_id, tenant_dict):
+        with sql.transaction() as session:
+            new_ref = Tenant.from_dict(
+                {
+                    "id": tenant_id,
+                    'tenant': tenant_dict
+                }
+            )
+            session.add(new_ref)
+            return new_ref.to_dict()
 
     def del_tenant(self, tenant_id):
-        pass
-
-    # TODO: def set_tenant(self, tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id)
-    def set_tenant_dict(self, tenant):
         with sql.transaction() as session:
-            uuid = tenant.keys()[0]
             query = session.query(Tenant)
-            query = query.filter_by(id=uuid)
+            query = query.filter_by(id=tenant_id)
+            tenant = query.first()
+            session.delete(tenant)
+
+    def set_tenant_dict(self, tenant_id, tenant_dict):
+        with sql.transaction() as session:
+            query = session.query(Tenant)
+            query = query.filter_by(id=tenant_id)
             ref = query.first()
-            if not ref:
-                # if not result, create the database line
-                ref = Tenant.from_dict(tenant)
-                session.add(ref)
-                return Tenant.to_dict(ref)
-            elif not tenant[uuid]["authz"] and not tenant[uuid]["admin"]:
-                # if admin and authz extensions are not set, delete the mapping
-                session.delete(ref)
-                return
-            elif tenant[uuid]["authz"] or tenant[uuid]["admin"]:
-                tenant_ref = ref.to_dict()
-                tenant_ref.update(tenant[uuid])
-                new_tenant = Tenant(
-                    id=uuid,
-                    name=tenant[uuid]["name"],
-                    authz=tenant[uuid]["intra_authz_extension_id"],
-                    admin=tenant[uuid]["intra_admin_extension_id"],
-                )
-                for attr in Tenant.attributes:
-                    if attr != 'id':
-                        setattr(ref, attr, getattr(new_tenant, attr))
-                return Tenant.to_dict(ref)
-            raise TenantException()
+            tenant_ref = ref.to_dict()
+            tenant_ref.update(tenant_dict)
+            new_tenant = Tenant(
+                id=tenant_id,
+                tenant=tenant_ref
+            )
+            for attr in Tenant.attributes:
+                if attr != 'id':
+                    setattr(ref, attr, getattr(new_tenant, attr))
+            return Tenant.to_dict(ref)
 
 
 class IntraExtensionConnector(IntraExtensionDriver):

@@ -30,15 +30,9 @@ class Configuration(controller.V3Controller):
         return token_ref.get('user')
 
     @controller.protected()
-    def get_policy_templetes(self, context, **kw):
+    def get_policy_templates(self, context, **kw):
         user_id = self._get_user_uuid_from_token(context.get("token_id"))
-        # TODO: belowing code should be move to core.py
-        # TODO: return self.configuration_api_get_policy_templete_dict(user_id)
-        nodes = glob.glob(os.path.join(CONF.moon.policy_directory, "*"))
-        return {
-            "authz_templetes":
-                [os.path.basename(n) for n in nodes if os.path.isdir(n)]
-        }
+        return self.configuration_api_get_policy_templete_dict(user_id)
 
     @controller.protected()
     def get_aggregation_algorithms(self, context, **kw):
@@ -75,22 +69,24 @@ class Tenants(controller.V3Controller):
     @controller.protected()
     def get_tenants(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get("token_id"))
-        return self.tenant_api.get_tenant_dict(user_id)
+        return self.tenant_api.get_tenants_dict(user_id)
 
     @controller.protected()
     def add_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get("token_id"))
         # TODO: get tenant name from keystone
-        tenant_name = kw.get("tenant_name")
-        intra_authz_ext_id = kw.get("intra_authz_ext_id")
-        intra_admin_ext_id = kw.get("intra_admin_ext_id")
-        return self.tenant_api.add_tenant(user_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id)
+        tenant_dict = dict()
+        tenant_dict['name'] = kw.get("name")
+        tenant_dict['description'] = kw.get("description")
+        tenant_dict['intra_authz_ext_id'] = kw.get("intra_authz_ext_id")
+        tenant_dict['intra_admin_ext_id'] = kw.get("intra_admin_ext_id")
+        return self.tenant_api.add_tenant_dict(user_id, tenant_dict)
 
     @controller.protected()
     def get_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         tenant_id = kw.get("tenant_id")
-        return self.tenant_api.get_tenant(user_id, tenant_id)
+        return self.tenant_api.get_tenants_dict(user_id, tenant_id)
 
     @controller.protected()
     def del_tenant(self, context, **kw):
@@ -98,19 +94,15 @@ class Tenants(controller.V3Controller):
         tenant_id = kw.get("tenant_id")
         return self.tenant_api.del_tenant(user_id, tenant_id)
 
-    """def load_tenant(self, context, **kw):
+    def set_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        tenant_id = kw["tenant_id"]
-        tenant_name = self.resource_api.get_project(tenant_id)["name"]
-        intra_authz_ext_id = kw.get("intra_authz_ext_id")
-        intra_admin_ext_id = kw.get("intra_admin_ext_id")
-        self.tenant_api.add_tenant_dict(
-            user_id,
-            tenant_id,
-            tenant_name,
-            intra_authz_ext_id,
-            intra_admin_ext_id)
-    """
+        tenant_id = kw["id"]
+        tenant_dict = dict()
+        tenant_dict['name'] = kw.get("name")
+        tenant_dict['description'] = kw.get("description")
+        tenant_dict['intra_authz_ext_id'] = kw.get("intra_authz_ext_id")
+        tenant_dict['intra_admin_ext_id'] = kw.get("intra_admin_ext_id")
+        self.tenant_api.set_tenant_dict(user_id, tenant_id, tenant_dict)
 
 
 @dependency.requires('authz_api')
@@ -123,8 +115,6 @@ class Authz_v3(controller.V3Controller):
     def get_authz(self, context, tenant_name, subject_name, object_name, action_name):
         try:
             return self.authz_api.authz(tenant_name, subject_name, object_name, action_name)
-        except TenantUnknown:
-            return True
         except:
             return False
 
@@ -146,13 +136,12 @@ class IntraExtensions(controller.V3Controller):
     @controller.protected()
     def get_intra_extensions(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        return self.admin_api.get_intra_extension_dict(user_id)
+        return self.admin_api.get_intra_extensions_dict(user_id)
 
     @controller.protected()
     def add_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         intra_extension_dict = dict()
-        # TODO: replace kw by a tangible dict with known variables
         intra_extension_dict["intra_extension_name"] = kw.get("intra_extension_name", dict())
         intra_extension_dict["subject_categories"] = kw.get("subject_categories", dict())
         intra_extension_dict["object_categories"] = kw.get("object_categories", dict())
@@ -172,10 +161,10 @@ class IntraExtensions(controller.V3Controller):
         return self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict)
 
     @controller.protected()
-    def get_intra_extension(self, context, **kw):
+    def get_intra_extension_dict(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        return self.admin_api.get_intra_extension_dict(user_id)[ie_id]
+        return self.admin_api.get_intra_extensions_dict(user_id)[ie_id]
 
     @controller.protected()
     def del_intra_extension(self, context, **kw):
@@ -183,7 +172,15 @@ class IntraExtensions(controller.V3Controller):
         if "ie_id" not in kw:
             raise IntraExtensionUnknown
         ie_id = kw.get('intra_extension_id', None)
-        return self.admin_api.del_intra_extension(user_id, ie_id)
+        self.admin_api.del_intra_extension(user_id, ie_id)
+
+    @controller.protected()
+    def set_intra_extension(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        if "ie_id" not in kw:
+            raise IntraExtensionUnknown
+        ie_id = kw.get('intra_extension_id', None)
+        self.admin_api.set_intra_extension(user_id, ie_id)
 
     # Metadata functions
     @controller.protected()

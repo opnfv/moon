@@ -4,6 +4,8 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from uuid import uuid4
+from glob import glob
+import os
 from keystone import config
 from keystone.contrib.moon.core import ConfigurationDriver
 from keystone.contrib.moon.core import TenantDriver
@@ -19,32 +21,23 @@ class ConfigurationConnector(ConfigurationDriver):
     def __init__(self):
         super(ConfigurationConnector, self).__init__()
         self.aggregation_algorithm_dict = dict()
-        self.aggregation_algorithm_dict[uuid4()] = "all_true"
+        self.aggregation_algorithm_dict[uuid4().hex] = "all_true"
         self.sub_meta_rule_algorithm_dict = dict()
-        self.sub_meta_rule_algorithm_dict[uuid4()] = "inclusion"
-        self.sub_meta_rule_algorithm_dict[uuid4()] = "comparison"
+        self.sub_meta_rule_algorithm_dict[uuid4().hex] = "inclusion"
+        self.sub_meta_rule_algorithm_dict[uuid4().hex] = "comparison"
 
-    def get_policy_templete_dict(self):
-        # TODO (dthom)
-        pass
+    def get_policy_template_dict(self):
+        nodes = glob(os.path.join(CONF.moon.policy_directory, "*"))
+        return {
+            "authz_templates":
+                [os.path.basename(n) for n in nodes if os.path.isdir(n)]
+        }
 
     def get_aggregation_algorithm_dict(self):
         return self.aggregation_algorithm_dict
 
     def get_sub_meta_rule_algorithm_dict(self):
         return self.sub_meta_rule_algorithm_dict
-
-
-class TenantConnector(TenantDriver):
-
-    def get_tenant_dict(self):
-        # TODO (dthom)
-        pass
-
-    def set_tenant(self, tenant_id, tenant_name, intra_authz_ext_id, intra_admin_ext_id):
-        # TODO (dthom)
-        pass
-
 
 # class SuperExtensionConnector(SuperExtensionDriver):
 #
