@@ -1,0 +1,15 @@
+{
+    "subjects": [
+        "super_admin"
+    ],
+    "actions": [
+        "read",
+        "write"
+    ],
+    "objects": [
+        "templates",
+        "aggregation_algorithms",
+        "sub_meta_rule_algorithms",
+        "tenants"
+    ]
+}

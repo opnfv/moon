@@ -95,7 +95,7 @@ def enforce(action_names, object_name, **extra):
 
             # func.func_globals["_admin_extension_uuid"] = _admin_extension_uuid
             if not intra_admin_extension_id:
-                args[0].moonlog_api.warning("No admin IntraExtension found, authorization granted by default.")
+                raise TenantNoIntraAdminExtension()
                 return func(*args)
             else:
                 authz_result = False
@@ -115,6 +115,7 @@ def enforce(action_names, object_name, **extra):
     return wrap
 
 
+# TODO (dthom) join with filer_args
 def filter_input(data):
     if type(data) not in (str, unicode):
         return data
@@ -1399,6 +1400,7 @@ class IntraExtensionManager(manager.Manager):
             raise RuleUnknown()
         return self.driver.set_rule_dict(intra_extension_id, sub_meta_rule_id, rule_id, rule_list)
 
+
 @dependency.provider('authz_api')
 @dependency.requires('identity_api', 'tenant_api', 'moonlog_api')
 class IntraExtensionAuthzManager(IntraExtensionManager):
@@ -1436,129 +1438,6 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         if not action_id:
             raise ActionUnknown()
         return super(IntraExtensionAuthzManager, self).authz(intra_extension_id, subject_id, object_id, action_id)
-
-    def del_intra_extension(self, user_id, intra_extension_id):
-        raise AdminException()
-
-    def set_subject_dict(self, user_id, intra_extension_uuid, subject_dict):
-        raise SubjectAddNotAuthorized()
-
-    def add_subject_dict(self, user_id, intra_extension_uuid, subject_name):
-        raise SubjectAddNotAuthorized()
-
-    def del_subject(self, user_id, intra_extension_uuid, subject_name):
-        raise SubjectDelNotAuthorized()
-
-    def set_object_dict(self, user_id, intra_extension_uuid, object_dict):
-        raise ObjectAddNotAuthorized()
-
-    def add_object(self, user_id, intra_extension_uuid, object_name):
-        raise ObjectAddNotAuthorized()
-
-    def del_object(self, user_id, intra_extension_uuid, object_uuid):
-        raise ObjectDelNotAuthorized()
-
-    def set_action_dict(self, user_id, intra_extension_uuid, action_dict):
-        raise ActionAddNotAuthorized()
-
-    def add_action(self, user_id, intra_extension_uuid, action_dict):
-        raise ActionAddNotAuthorized()
-
-    def del_action(self, user_id, intra_extension_uuid, action_uuid):
-        raise ActionDelNotAuthorized()
-
-    def set_subject_category_dict(self, user_id, intra_extension_uuid, subject_category):
-        raise SubjectCategoryAddNotAuthorized()
-
-    def add_subject_category(self, user_id, intra_extension_uuid, subject_category_name):
-        raise SubjectCategoryAddNotAuthorized()
-
-    def del_subject_category(self, user_id, intra_extension_uuid, subject_uuid):
-        raise SubjectCategoryDelNotAuthorized()
-
-    def set_object_category_dict(self, user_id, intra_extension_uuid, object_category):
-        raise ObjectCategoryAddNotAuthorized()
-
-    def add_object_category(self, user_id, intra_extension_uuid, object_category_name):
-        raise ObjectCategoryAddNotAuthorized()
-
-    def del_object_category(self, user_id, intra_extension_uuid, object_uuid):
-        raise ObjectCategoryDelNotAuthorized()
-
-    def set_action_category_dict(self, user_id, intra_extension_uuid, action_category):
-        raise ActionCategoryAddNotAuthorized()
-
-    def add_action_category(self, user_id, intra_extension_uuid, action_category_name):
-        raise ActionCategoryAddNotAuthorized()
-
-    def del_action_category(self, user_id, intra_extension_uuid, action_uuid):
-        raise ActionCategoryDelNotAuthorized()
-
-    def set_subject_scope_dict(self, user_id, intra_extension_uuid, category, scope):
-        raise SubjectCategoryScopeAddNotAuthorized()
-
-    def add_subject_scope_dict(self, user_id, intra_extension_uuid, subject_category, scope_name):
-        raise SubjectCategoryScopeAddNotAuthorized()
-
-    def del_subject_scope(self, user_id, intra_extension_uuid, subject_category, subject_category_scope):
-        raise SubjectCategoryScopeDelNotAuthorized()
-
-    def set_object_scope_dict(self, user_id, intra_extension_uuid, category, scope):
-        raise ObjectCategoryScopeAddNotAuthorized()
-
-    def add_object_scope(self, user_id, intra_extension_uuid, object_category, scope_name):
-        raise ObjectCategoryScopeAddNotAuthorized()
-
-    def del_object_scope(self, user_id, intra_extension_uuid, object_category, object_category_scope):
-        raise ObjectCategoryScopeDelNotAuthorized()
-
-    def set_action_scope_dict(self, user_id, intra_extension_uuid, category, scope):
-        raise ActionCategoryScopeAddNotAuthorized()
-
-    def add_action_scope(self, user_id, intra_extension_uuid, action_category, scope_name):
-        raise ActionCategoryScopeAddNotAuthorized()
-
-    def del_action_scope(self, user_id, intra_extension_uuid, action_category, action_category_scope):
-        raise ActionCategoryScopeDelNotAuthorized()
-
-    def set_subject_assignment_dict(self, user_id, intra_extension_uuid, subject_uuid, assignment_dict):
-        raise SubjectCategoryAssignmentAddNotAuthorized()
-
-    def del_subject_assignment(self, user_id, intra_extension_uuid, subject_uuid, category_uuid, scope_uuid):
-        raise SubjectCategoryAssignmentAddNotAuthorized()
-
-    def add_subject_assignment(self, user_id, intra_extension_uuid, subject_uuid, category_uuid, scope_uuid):
-        raise SubjectCategoryAssignmentDelNotAuthorized()
-
-    def set_object_category_assignment_dict(self, user_id, intra_extension_uuid, object_uuid, assignment_dict):
-        raise ObjectCategoryAssignmentAddNotAuthorized()
-
-    def del_object_assignment(self, user_id, intra_extension_uuid, object_uuid, category_uuid, scope_uuid):
-        raise ObjectCategoryAssignmentAddNotAuthorized()
-
-    def add_object_assignment(self, user_id, intra_extension_uuid, object_uuid, category_uuid, scope_uuid):
-        raise ObjectCategoryAssignmentDelNotAuthorized()
-
-    def set_action_assignment_dict(self, user_id, intra_extension_uuid, action_uuid, assignment_dict):
-        raise ActionCategoryAssignmentAddNotAuthorized()
-
-    def del_action_assignment(self, user_id, intra_extension_uuid, action_uuid, category_uuid, scope_uuid):
-        raise ActionCategoryAssignmentAddNotAuthorized()
-
-    def add_action_assignment(self, user_id, intra_extension_uuid, action_uuid, category_uuid, scope_uuid):
-        raise ActionCategoryAssignmentDelNotAuthorized()
-
-    def set_aggregation_algorithm_dict(self, user_id, intra_extension_uuid, aggregation_algorithm):
-        raise MetaRuleAddNotAuthorized()
-
-    def get_sub_meta_rule_dict(self, user_id, intra_extension_uuid, sub_meta_rules):
-        raise MetaRuleAddNotAuthorized()
-
-    def set_sub_rule(self, user_id, intra_extension_uuid, relation, sub_rule):
-        raise RuleAddNotAuthorized()
-
-    def del_sub_rule(self, user_id, intra_extension_uuid, relation_name, rule):
-        raise RuleAddNotAuthorized()
 
 
 @dependency.provider('admin_api')

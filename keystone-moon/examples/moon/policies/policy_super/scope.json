@@ -1,0 +1,23 @@
+{
+  "subject_scopes": {
+    "role": [
+      "admin"
+    ]
+  },
+
+  "action_scopes": {
+    "action_id": [
+      "read",
+      "write"
+    ]
+  },
+
+  "object_scopes": {
+    "object_id": [
+        "templates",
+        "aggregation_algorithms",
+        "sub_meta_rule_algorithms",
+        "tenants"
+      ]
+    }
+}

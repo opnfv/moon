@@ -1,0 +1,12 @@
+{
+    "sub_meta_rules": {
+		"rbac_rule": {
+			"subject_categories": ["role"],
+			"action_categories": ["action_id"],
+			"object_categories": ["object_id"],
+			"algorithm": "inclusion"
+		}
+	},
+	"aggregation": "all_true"
+}
+

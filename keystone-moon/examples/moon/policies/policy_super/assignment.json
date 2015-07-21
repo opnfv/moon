@@ -1,0 +1,23 @@
+{
+    "subject_assignments": {
+        "role": {
+			"super_admin": ["admin"]
+		}
+    },
+
+    "action_assignments": {
+        "action_id": {
+			"read": ["read"],
+			"write": ["write"]
+		}
+    },
+
+    "object_assignments": {
+        "object_id": {
+            "templates": ["templates"],
+		    "sub_meta_rule_algorithm": ["sub_meta_rule_relations"],
+		    "aggregation_algorithms": ["aggregation_algorithms"],
+            "tenants": ["tenants"]
+		}
+    }
+}
