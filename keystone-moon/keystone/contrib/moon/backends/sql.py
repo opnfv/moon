@@ -226,11 +226,12 @@ class SubjectAssignment(sql.ModelBase, sql.DictBase):
 
 class ObjectAssignment(sql.ModelBase, sql.DictBase):
     __tablename__ = 'object_assignments'
-    attributes = ['id', 'object_assignment', 'intra_extension_id', 'object_id']
+    attributes = ['id', 'object_assignment', 'intra_extension_id', 'object_id', 'object_category_id']
     id = sql.Column(sql.String(64), primary_key=True)
     object_assignment = sql.Column(sql.JsonBlob(), nullable=True)
     intra_extension_id = sql.Column(sql.ForeignKey("intra_extensions.id"), nullable=False)
     object_id = sql.Column(sql.ForeignKey("objects.id"), nullable=False)
+    object_category_id = sql.Column(sql.ForeignKey("object_categories.id"), nullable=False)
 
     @classmethod
     def from_dict(cls, d):
@@ -243,11 +244,12 @@ class ObjectAssignment(sql.ModelBase, sql.DictBase):
 
 class ActionAssignment(sql.ModelBase, sql.DictBase):
     __tablename__ = 'action_assignments'
-    attributes = ['id', 'action_assignment', 'intra_extension_id', 'action_id']
+    attributes = ['id', 'action_assignment', 'intra_extension_id', 'action_id', 'action_category_id']
     id = sql.Column(sql.String(64), primary_key=True)
     action_assignment = sql.Column(sql.JsonBlob(), nullable=True)
     intra_extension_id = sql.Column(sql.ForeignKey("intra_extensions.id"), nullable=False)
     action_id = sql.Column(sql.ForeignKey("actions.id"), nullable=False)
+    action_category_id = sql.Column(sql.ForeignKey("action_categories.id"), nullable=False)
 
     @classmethod
     def from_dict(cls, d):
@@ -377,8 +379,8 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def get_intra_extensions_dict(self):
         with sql.transaction() as session:
             query = session.query(IntraExtension.id)
-            intraextensions = query.all()
-            return {intraextension.id: IntraExtension.to_dict(intraextension) for intraextension in intraextensions}
+            ref_list = query.all()
+            return {_ref.id: _ref.intraextension for _ref in ref_list}
 
     # TODO (dthom): load_intra_extension(self):
 
@@ -402,10 +404,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             ref = query.first()
             intra_extension_ref = ref.to_dict()
             intra_extension_ref.update(intra_extension_dict)
-            new_intra_extension = IntraExtension(
-                id=intra_extension_id,
-                intra_extension=intra_extension_ref
-            )
+            new_intra_extension = IntraExtension(id=intra_extension_id, intra_extension=intra_extension_ref)
             for attr in Tenant.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_intra_extension, attr))
@@ -418,7 +417,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(SubjectCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id)
             ref_list = query.all()
-            return {_ref.id: _ref.to_dict()['subject_category'] for _ref in ref_list}
+            return {_ref.id: _ref.subject_category for _ref in ref_list}
 
     def set_subject_category_dict(self, intra_extension_id, subject_category_id, subject_category_dict):
         with sql.transaction() as session:
@@ -450,7 +449,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for object_category
 
-    def get_object_category_dict(self, intra_extension_id):
+    def get_object_categories_dict(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(ObjectCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -459,8 +458,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionUnknown()
             return ref.to_dict()
 
-    # TODO: to recheck
-    def set_object_category_dict(self, intra_extension_id, object_categories):
+    def set_object_category_dict(self, intra_extension_id, object_category_id, object_category_dict):
         with sql.transaction() as session:
             query = session.query(ObjectCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -479,29 +477,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 for attr in ObjectCategory.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
-            return ref.to_dict()
-
-    def add_object_category(self, intra_extension_id, object_category_id, object_category_name):
-        with sql.transaction() as session:
-            query = session.query(ObjectCategory)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            object_categories = dict(old_ref["object_categories"])
-            # TODO: object_categories[object_category_id] is a dict
-            object_categories[object_category_id] = object_category_name
-            new_ref = ObjectCategory.from_dict(
-                {
-                    "id": old_ref["id"],
-                    'object_categories': object_categories,
-                    'intra_extension_id': old_ref["intra_extension_id"]
-                }
-            )
-            for attr in ObjectCategory.attributes:
-                if attr != 'id':
-                    setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
     def del_object_category(self, intra_extension_id, object_category_id):
@@ -533,7 +508,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for action_category
 
-    def get_action_category_dict(self, intra_extension_id):
+    def get_action_categories_dict(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(ActionCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -542,8 +517,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionUnknown()
             return ref.to_dict()
 
-    # TODO: to recheck
-    def set_action_category_dict(self, intra_extension_id, action_categories):
+    def set_action_category_dict(self, intra_extension_id, action_category_id, action_category_dict):
         with sql.transaction() as session:
             query = session.query(ActionCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -562,29 +536,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 for attr in ActionCategory.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
-            return ref.to_dict()
-
-    def add_action_category(self, intra_extension_id, action_category_id, action_category_name):
-        with sql.transaction() as session:
-            query = session.query(ActionCategory)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            action_categories = dict(old_ref["action_categories"])
-            # TODO: action_categories[action_category_id] is a dict
-            action_categories[action_category_id] = action_category_name
-            new_ref = ActionCategory.from_dict(
-                {
-                    "id": old_ref["id"],
-                    'action_categories': action_categories,
-                    'intra_extension_id': old_ref["intra_extension_id"]
-                }
-            )
-            for attr in ActionCategory.attributes:
-                if attr != 'id':
-                    setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
     def del_action_category(self, intra_extension_id, action_category_id):
@@ -651,7 +602,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             ref = query.first()
             session.delete(ref)
 
-    def get_object_dict(self, intra_extension_id):
+    def get_objects_dict(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(Object)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -660,8 +611,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionUnknown()
             return ref.to_dict()
 
-    # TODO: to recheck
-    def set_object_dict(self, intraa_extension_id, object_id):
+    def set_object_dict(self, intra_extension_id, object_id, object_dict):
         with sql.transaction() as session:
             query = session.query(Object)
             query = query.filter_by(intra_extension_id=intraa_extension_id)
@@ -680,29 +630,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 for attr in Object.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
-            return ref.to_dict()
-
-    def add_object(self, intra_extension_id, object_id, object_name):
-        with sql.transaction() as session:
-            query = session.query(Object)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            objects = dict(old_ref["objects"])
-            # TODO: objects[object_id] is a dict
-            objects[object_id] = object_name
-            new_ref = Object.from_dict(
-                {
-                    "id": old_ref["id"],
-                    'objects': objects,
-                    'intra_extension_id': old_ref["intra_extension_id"]
-                }
-            )
-            for attr in Object.attributes:
-                if attr != 'id':
-                    setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
     def del_object(self, intra_extension_id, object_id):
@@ -731,7 +658,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         if attr != 'id':
                             setattr(ref, attr, getattr(new_ref, attr))
 
-    def get_action_dict(self, intra_extension_id):
+    def get_actions_dict(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(Action)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -740,8 +667,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise IntraExtensionUnknown()
             return ref.to_dict()
 
-    # TODO: to recheck
-    def set_action_dict(self, intra_extension_id, action_id):
+    def set_action_dict(self, intra_extension_id, action_id, action_dict):
         with sql.transaction() as session:
             query = session.query(Action)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -760,29 +686,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 for attr in Action.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
-            return ref.to_dict()
-
-    def add_action(self, intra_extension_id, action_id, action_name):
-        with sql.transaction() as session:
-            query = session.query(Action)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            actions = dict(old_ref["actions"])
-            # TODO: actions[action_id] is a dict
-            actions[action_id] = action_name
-            new_ref = Action.from_dict(
-                {
-                    "id": old_ref["id"],
-                    'actions': actions,
-                    'intra_extension_id': old_ref["intra_extension_id"]
-                }
-            )
-            for attr in Action.attributes:
-                if attr != 'id':
-                    setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
     def del_action(self, intra_extension_id, action_id):
@@ -853,7 +756,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for object_category_scope
 
-    def get_object_scope_dict(self, intra_extension_id, object_category_id):
+    def get_object_scopes_dict(self, intra_extension_id, object_category_id):
         with sql.transaction() as session:
             query = session.query(ObjectScope)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -865,7 +768,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise ObjectScopeUnknown()
             return result
 
-    def set_object_scope_dict(self, intra_extension_id, object_category_id, object_scope_id):
+    def set_object_scope_dict(self, intra_extension_id, object_category_id, object_scope_id, object_scope_dict):
         with sql.transaction() as session:
             query = session.query(ObjectScope)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -886,20 +789,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 new_ref = ObjectScope.from_dict(tmp_ref)
                 session.add(new_ref)
             return new_ref.to_dict()
-
-    def add_object_scope(self, intra_extension_id, object_category_id, object_scope_id, object_scope_name):
-        with sql.transaction() as session:
-            query = session.query(ObjectScope)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            scope = dict(old_ref["object_scope"])
-            if object_category_id not in scope:
-                scope[object_category_id] = dict()
-            scope[object_category_id][object_scope_id] = object_scope_name
-            return self.set_object_scope_dict(intra_extension_id, object_category_id, scope[object_category_id])
 
     def del_object_scope(self, intra_extension_id, object_category_id, object_scope_id):
         with sql.transaction() as session:
@@ -930,7 +819,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for action_scope
  
-    def get_action_scope_dict(self, intra_extension_id, action_category_id):
+    def get_action_scopes_dict(self, intra_extension_id, action_category_id):
         with sql.transaction() as session:
             query = session.query(ActionScope)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -942,7 +831,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 raise ActionScopeUnknown()
             return result
 
-    def set_action_scope_dict(self, intra_extension_id, action_category_id, action_scope_id):
+    def set_action_scope_dict(self, intra_extension_id, action_category_id, action_scope_id, action_scope_dict):
         with sql.transaction() as session:
             query = session.query(ActionScope)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -963,20 +852,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 new_ref = ActionScope.from_dict(tmp_ref)
                 session.add(new_ref)
             return new_ref.to_dict()
-
-    def add_action_scope(self, intra_extension_id, action_category_id, action_scope_id, action_scope_name):
-        with sql.transaction() as session:
-            query = session.query(ActionScope)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            if not ref:
-                raise IntraExtensionUnknown()
-            old_ref = ref.to_dict()
-            scope = dict(old_ref["action_scope"])
-            if action_category_id not in scope:
-                scope[action_category_id] = dict()
-            scope[action_category_id][action_scope_id] = action_scope_name
-            return self.set_action_scope_dict(intra_extension_id, action_category_id, scope[action_category_id])
 
     def del_action_scope(self, intra_extension_id, action_category_id, action_scope_id):
         with sql.transaction() as session:
@@ -1049,7 +924,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for object_category_assignment
 
-    def get_object_assignment_dict(self, intra_extension_id, object_id):
+    def get_object_assignment_list(self, intra_extension_id, object_id, object_category_id):
         """ From a object_uuid, return a dictionary of (category: scope for that object)
 
         :param intra_extension_id: intra extension UUID
@@ -1072,7 +947,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 _ref["object_assignment"][object_id] = dict()
             return _ref
 
-    def set_object_assignment_dict(self, intra_extension_id, object_id=None, object_assignment_dict={}):
+    def set_object_assignment_list(self, intra_extension_id, object_id, object_category_id, object_assignment_list=[]):
         with sql.transaction() as session:
             query = session.query(ObjectAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -1099,7 +974,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_object_assignment(self, intra_extension_id, object_id, object_category_id, object_scope_id):
+    def add_object_assignment_list(self, intra_extension_id, object_id, object_category_id, object_scope_id):
         with sql.transaction() as session:
             query = session.query(ObjectAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -1113,7 +988,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 assignments[object_id][object_category_id] = list()
             if object_scope_id not in assignments[object_id][object_category_id]:
                 assignments[object_id][object_category_id].append(object_scope_id)
-            return self.set_object_assignment_dict(
+            return self.set_object_assignment_list(
                 intra_extension_id,
                 object_id,
                 assignments[object_id])
@@ -1133,14 +1008,14 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         old_ref["object_assignment"][object_id].pop(object_category_id)
                     if not old_ref["object_assignment"][object_id]:
                         old_ref["object_assignment"].pop(object_id)
-            self.set_object_assignment_dict(
+            self.set_object_assignment_list(
                 intra_extension_id,
                 object_id,
                 old_ref["object_assignment"][object_id])
 
     # Getter and Setter for action_category_assignment
 
-    def get_action_assignment_dict(self, intra_extension_id, action_id):
+    def get_action_assignment_list(self, intra_extension_id, action_id, action_category_id):
         """ From a action_id, return a dictionary of (category: scope for that action)
 
         :param intra_extension_id: intra extension UUID
@@ -1163,7 +1038,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 _ref["action_assignment"][action_id] = dict()
             return _ref
 
-    def set_action_assignment_dict(self, intra_extension_id, action_id=None, action_assignment_dict={}):
+    def set_action_assignment_list(self, intra_extension_id, action_id, action_category_id, action_assignment_list=[]):
         with sql.transaction() as session:
             query = session.query(ActionAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -1190,7 +1065,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return ref.to_dict()
 
-    def add_action_assignment(self, intra_extension_id, action_id, action_category_id, action_scope_id):
+    def add_action_assignment_list(self, intra_extension_id, action_id, action_category_id, action_scope_id):
         with sql.transaction() as session:
             query = session.query(ActionAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -1204,7 +1079,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 assignments[action_id][action_category_id] = list()
             if action_scope_id not in assignments[action_id][action_category_id]:
                 assignments[action_id][action_category_id].append(action_scope_id)
-            return self.set_action_assignment_dict(
+            return self.set_action_assignment_list(
                 intra_extension_id,
                 action_id,
                 assignments[action_id])
@@ -1224,7 +1099,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         old_ref["action_assignment"][action_id].pop(action_category_id)
                     if not old_ref["action_assignment"][action_id]:
                         old_ref["action_assignment"].pop(action_id)
-            self.set_action_assignment_dict(
+            self.set_action_assignment_list(
                 intra_extension_id,
                 action_id,
                 old_ref["action_assignment"][action_id])
@@ -1324,7 +1199,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                         setattr(ref, attr, getattr(new_ref, attr))
             return self.get_rules_dict(intra_extension_id, sub_meta_rule_id)[rule_id]
 
-    def del_rule_dict(self, intra_extension_id, sub_meta_rule_id, rule_id):
+    def del_rule(self, intra_extension_id, sub_meta_rule_id, rule_id):
         with sql.transaction() as session:
             query = session.query(Rule)
             query = query.filter_by(rule_id=rule_id)
