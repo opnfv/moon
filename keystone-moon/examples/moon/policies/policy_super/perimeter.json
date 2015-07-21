@@ -10,6 +10,7 @@
         "templates",
         "aggregation_algorithms",
         "sub_meta_rule_algorithms",
-        "tenants"
+        "tenants",
+        "intra_extensions"
     ]
 }

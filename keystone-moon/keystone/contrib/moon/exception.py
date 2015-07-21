@@ -69,20 +69,6 @@ class TenantNoIntraExtension(TenantException):
     logger = "ERROR"
 
 
-class TenantNoIntraAuthzExtension(TenantNoIntraExtension):
-    message_format = _("The tenant has not intra_authz_extension.")
-    code = 400
-    title = 'Tenant No Intra_Authz_Extension'
-    logger = "ERROR"
-
-
-class TenantNoIntraAdminExtension(TenantNoIntraExtension):
-    message_format = _("The tenant has not intra_admin_extension.")
-    code = 400
-    title = 'Tenant No Intra_Admin_Extension'
-    logger = "ERROR"
-
-
 # Exceptions for IntraExtension
 
 
@@ -95,7 +81,14 @@ class IntraExtensionException(MoonError):
 class IntraExtensionUnknown(IntraExtensionException):
     message_format = _("The intra_extension is unknown.")
     code = 400
-    title = 'Intra Extension Unkonw'
+    title = 'Intra Extension Unknown'
+    logger = "Error"
+
+
+class SuperExtensionUnknown(IntraExtensionUnknown):
+    message_format = _("The super_extension is unknown.")
+    code = 400
+    title = 'Super Extension Unknown'
     logger = "Error"
 
 

@@ -4,9 +4,11 @@
         ["admin" , "read", "aggregation_algorithms"],
         ["admin" , "read", "sub_meta_rule_algorithms"],
         ["admin" , "read", "tenants"],
+        ["admin" , "read", "intra_extensions"],
         ["admin" , "write", "templates"],
         ["admin" , "write", "aggregation_algorithms"],
         ["admin" , "write", "sub_meta_rule_algorithms"],
-        ["admin" , "write", "tenants"]
+        ["admin" , "write", "tenants"],
+        ["admin" , "write", "intra_extensions"]
     ]
 }

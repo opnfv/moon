@@ -1,7 +1,7 @@
 {
-    "name": "MLS_metadata",
+    "name": "Super_Extension",
     "model": "RBAC",
-    "genre": "admin",
+    "genre": "authz",
     "description": "",
 
     "subject_categories": [

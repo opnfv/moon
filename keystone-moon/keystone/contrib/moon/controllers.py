@@ -42,7 +42,7 @@ class Configuration(controller.V3Controller):
         :return: {aggregation_algorithm_id: description}
         """
         user_id = self._get_user_uuid_from_token(context.get("token_id"))
-        return self.configuration_api.get_aggregation_algorithm_dict(user_id)
+        return self.configuration_api.get_aggregation_algorithms_dict(user_id)
 
     @controller.protected()
     def get_sub_meta_rule_algorithms(self, context, **kw):
@@ -52,7 +52,7 @@ class Configuration(controller.V3Controller):
         :return: {sub_meta_rule_algorithm_id: description}
         """
         user_id = self._get_user_uuid_from_token(context.get("token_id"))
-        return self.configuration_api.get_sub_meta_rule_algorithm_dict(user_id)
+        return self.configuration_api.get_sub_meta_rule_algorithms_dict(user_id)
 
 
 @dependency.requires('tenant_api', 'resource_api')
@@ -644,7 +644,7 @@ class IntraExtensions(controller.V3Controller):
     def get_aggregation_algorithm(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        return self.admin_api.get_aggregation_algorithm_dict(user_id, ie_id)
+        return self.admin_api.get_aggregation_algorithms_dict(user_id, ie_id)
 
     @controller.protected()
     def get_sub_meta_rules(self, context, **kw):

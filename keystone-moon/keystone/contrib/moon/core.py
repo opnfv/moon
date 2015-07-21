@@ -25,12 +25,14 @@ from keystone.contrib.moon.algorithms import *
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
-DEFAULT_USER = uuid4().hex  # default user_id for internal invocation
+DEFAULT_USER_ID = uuid4().hex  # default user_id for internal invocation
+SUPER_TENANT_ID = uuid4().hex
+SUPER_EXTENSION_ID = uuid4().hex
 
 
 _OPTS = [
     cfg.StrOpt('configuration_driver',
-               default='keystone.contrib.moon.backends.sql.ConfigurationConnector',
+               default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
                help='Configuration backend driver.'),
     cfg.StrOpt('tenant_driver',
                default='keystone.contrib.moon.backends.sql.TenantConnector',
@@ -44,9 +46,6 @@ _OPTS = [
     cfg.StrOpt('interextension_driver',
                default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
                help='InterExtension backend driver.'),
-    cfg.StrOpt('superextension_driver',
-               default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
-               help='SuperExtension backend driver.'),
     cfg.StrOpt('log_driver',
                default='keystone.contrib.moon.backends.flat.LogConnector',
                help='Logs backend driver.'),
@@ -112,10 +111,10 @@ def enforce(action_names, object_name, **extra):
             self = args[0]
             user_name = args[1]
             intra_extension_id = args[2]
-            if intra_extension_id not in self.admin_api.get_intra_extensions(DEFAULT_USER):
+            if intra_extension_id not in self.admin_api.get_intra_extensions(DEFAULT_USER_ID):
                 raise IntraExtensionUnknown()
 
-            tenants_dict = self.tenant_api.get_tenants_dict(DEFAULT_USER)
+            tenants_dict = self.tenant_api.get_tenants_dict(DEFAULT_USER_ID)
             intra_admin_extension_id = None
             tenant_name = None
             for tenant_id in tenants_dict:
@@ -144,6 +143,41 @@ def enforce(action_names, object_name, **extra):
     return wrap
 
 
+def super_enforce(action_names, object_name, **extra):
+    _action_name_list = action_names
+
+    def wrap(func):
+        def wrapped(*args):
+            # global actions
+            self = args[0]
+            user_name = args[1]
+            intra_extension_id = SUPER_EXTENSION_ID
+            if intra_extension_id not in self.admin_api.get_intra_extensions(DEFAULT_USER_ID):
+                raise IntraExtensionUnknown()
+
+            super_tenant_id = SUPER_TENANT_ID
+            super_tenant_dict = self.tenant_api.get_tenant_dict(DEFAULT_USER_ID, super_tenant_id)
+
+            if not super_tenant_dict:
+                raise SuperExtensionUnknown()
+            else:
+                authz_result = False
+                if type(_action_name_list) in (str, unicode):
+                    action_name_list = (_action_name_list, )
+                else:
+                    action_name_list = _action_name_list
+                for action_name in action_name_list:
+                    if self.authz_api.authz(super_tenant_dict['name'], user_name, object_name, action_name, 'authz'):
+                        authz_result = True
+                    else:
+                        authz_result = False
+                        break
+                if authz_result:
+                    return func(*args)
+        return wrapped
+    return wrap
+
+
 @dependency.provider('configuration_api')
 @dependency.requires('moonlog_api')
 class ConfigurationManager(manager.Manager):
@@ -151,49 +185,49 @@ class ConfigurationManager(manager.Manager):
     def __init__(self):
         super(ConfigurationManager, self).__init__(CONF.moon.configuration_driver)
 
-    def get_policy_template_dict(self, user_id):
+    @super_enforce("read", "templates")
+    def get_policy_templates_dict(self, user_id):
         """
         Return a dictionary of all policy templates
         :return: {template_id: {name: temp_name, description: template_description}, ...}
         """
-        # TODO: check user right with user_id in SuperExtension
-        return self.driver.get_policy_template_dict()
+        return self.driver.get_policy_templates_dict()
 
+    @super_enforce("read", "templates")
     def get_policy_template_id_from_name(self, user_id, policy_template_name):
-        # TODO: check user right with user_id in SuperExtension
-        policy_template_dict = self.driver.get_policy_template_dict()
+        policy_template_dict = self.driver.get_policy_templates_dict()
         for policy_template_id in policy_template_dict:
             if policy_template_dict[policy_template_id]['name'] is policy_template_name:
                 return policy_template_id
         return None
 
-    def get_aggregation_algorithm_dict(self, user_id):
+    @super_enforce("read", "aggregation_algorithms")
+    def get_aggregation_algorithms_dict(self, user_id):
         """
         Return a dictionary of all aggregation algorithm
         :return: {aggre_algo_id: {name: aggre_name, description: aggre_algo_description}, ...}
         """
-        # TODO: check user right with user_id in SuperExtension
-        return self.driver.get_aggregation_algorithm_dict()
+        return self.driver.get_aggregation_algorithms_dict()
 
+    @super_enforce("read", "aggregation_algorithms")
     def get_aggregation_algorithm_id_from_name(self, user_id, aggregation_algorithm_name):
-        # TODO: check user right with user_id in SuperExtension
-        aggregation_algorithm_dict = self.driver.get_aggregation_algorithm_dict()
+        aggregation_algorithm_dict = self.driver.get_aggregation_algorithms_dict()
         for aggregation_algorithm_id in aggregation_algorithm_dict:
             if aggregation_algorithm_dict[aggregation_algorithm_id]['name'] is aggregation_algorithm_name:
                 return aggregation_algorithm_id
         return None
 
-    def get_sub_meta_rule_algorithm_dict(self, user_id):
+    @super_enforce("read", "sub_meta_rule_algorithms")
+    def get_sub_meta_rule_algorithms_dict(self, user_id):
         """
         Return a dictionary of sub_meta_rule algorithm
         :return: {sub_meta_rule_id: {name: sub_meta_rule_name, description: sub_meta_rule_description}, }
         """
-        # TODO: check user right with user_id in SuperExtension
-        return self.driver.get_sub_meta_rule_algorithm_dict()
+        return self.driver.get_sub_meta_rule_algorithms_dict()
 
+    @super_enforce("read", "sub_meta_rule_algorithms")
     def get_sub_meta_rule_algorithm_id_from_name(self, sub_meta_rule_algorithm_name):
-        # TODO: check user right with user_id in SuperExtension
-        sub_meta_rule_algorithm_dict = self.driver.get_sub_meta_rule_algorithm_dict()
+        sub_meta_rule_algorithm_dict = self.driver.get_sub_meta_rule_algorithms_dict()
         for sub_meta_rule_algorithm_id in sub_meta_rule_algorithm_dict:
             if sub_meta_rule_algorithm_dict[sub_meta_rule_algorithm_id]['name'] is sub_meta_rule_algorithm_name:
                 return sub_meta_rule_algorithm_id
@@ -207,6 +241,7 @@ class TenantManager(manager.Manager):
     def __init__(self):
         super(TenantManager, self).__init__(CONF.moon.tenant_driver)
 
+    @super_enforce("read", "tenants")
     def get_tenants_dict(self, user_id):
         """
         Return a dictionary with all tenants
@@ -221,78 +256,34 @@ class TenantManager(manager.Manager):
             ...
             }
         """
-        # TODO: check user right with user_id in SuperExtension
         return self.driver.get_tenants_dict()
 
+    @super_enforce(("read", "write"), "tenants")
     def add_tenant_dict(self, user_id, tenant_dict):
-        # TODO: check user right with user_id in SuperExtension
         tenants_dict = self.driver.get_tenants_dict()
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]['name'] is tenant_dict['name']:
                 raise TenantAddedNameExisting()
         return self.driver.add_tenant_dict(uuid4().hex, tenant_dict)
 
+    @super_enforce("read", "tenants")
     def get_tenant_dict(self, user_id, tenant_id):
-        # TODO: check user right with user_id in SuperExtension
         tenants_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenants_dict:
             raise TenantUnknown()
         return tenants_dict[tenant_id]
 
+    @super_enforce(("read", "write"), "tenants")
     def del_tenant(self, user_id, tenant_id):
-        # TODO: check user right with user_id in SuperExtension
         if tenant_id not in self.driver.get_tenants_dict():
             raise TenantUnknown()
         self.driver.del_tenant(tenant_id)
 
+    @super_enforce(("read", "write"), "tenants")
     def set_tenant_dict(self, user_id, tenant_id, tenant_dict):
-        # TODO: check user right with user_id in SuperExtension
         if tenant_id not in self.driver.get_tenants_dict():
             raise TenantUnknown()
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
-
-    def get_tenant_name_from_id(self, user_id, tenant_id):
-        # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenants_dict()
-        if tenant_id not in tenant_dict:
-            raise TenantUnknown()
-        return tenant_dict[tenant_id]["name"]
-
-    def set_tenant_name(self, user_id, tenant_id, tenant_name):
-        # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenants_dict()
-        if tenant_id not in tenant_dict:
-            raise TenantUnknown()
-        return self.driver.set_tenant(
-            tenant_id,
-            tenant_name,
-            tenant_dict[tenant_id]['intra_authz_ext_id'],
-            tenant_dict[tenant_id]['intra_admin_ext_id']
-        )
-
-    def get_tenant_id_from_name(self, user_id, tenant_name):
-        # TODO: check user right with user_id in SuperExtension
-        tenants_dict = self.driver.get_tenants_dict()
-        for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]["name"] is tenant_name:
-                return tenant_id
-        return None
-
-    def get_tenant_intra_extension_id(self, user_id, tenant_id, genre="authz"):
-        """
-        Return the UUID of the scoped extension for a particular tenant.
-        :param tenant_id: UUID of the tenant
-        :param genre: "admin" or "authz"
-        :return (str): the UUID of the scoped extension
-        """
-        # 1 tenant only with 1 authz extension and 1 admin extension
-        # TODO: check user right with user_id in SuperExtension
-        tenant_dict = self.driver.get_tenants_dict()
-        if tenant_id not in tenant_dict:
-            raise TenantUnknown()
-        elif not tenant_dict[tenant_id][genre]:
-            raise TenantNoIntraExtension()
-        return tenant_dict[tenant_id][genre]
 
 
 @dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'moonlog_api')
@@ -393,6 +384,7 @@ class IntraExtensionManager(manager.Manager):
 
         return False
 
+    @super_enforce("read", "intra_extensions")
     def get_intra_extensions_dict(self, user_id):
         """
         :param user_id:
@@ -405,11 +397,9 @@ class IntraExtensionManager(manager.Manager):
             intra_extension_id2: {...},
             ...}
         """
-        # TODO: check will be done through super_extension later
         return self.driver.get_intra_extensions_dict()
 
     # load policy from policy directory
-    # TODO (dthom) re-check these funcs
 
     def __load_metadata_file(self, intra_extension_dict, policy_dir):
 
@@ -656,8 +646,8 @@ class IntraExtensionManager(manager.Manager):
                 rules[sub_rule_id].append(subrule)
             self.driver.set_rule_dict(intra_extension_dict["id"], sub_rule_id, uuid4().hex, rules)
 
+    @super_enforce(("read", "write"), "intra_extensions")
     def load_intra_extension_dict(self, user_id, intra_extension_dict):
-        # TODO: check will be done through super_extension later
         ie_dict = dict()
         # TODO: clean some values
         ie_dict['id'] = uuid4().hex
@@ -676,31 +666,31 @@ class IntraExtensionManager(manager.Manager):
         self.__load_rule_file(ie_dict, policy_dir)
         return ref
 
+    @super_enforce("read", "intra_extensions")
     def get_intra_extension_dict(self, user_id, intra_extension_id):
         """
         :param user_id:
         :return: {intra_extension_id: intra_extension_name, ...}
         """
-        # TODO: check will be done through super_extension later
         if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
         return self.driver.get_intra_extensions_dict()[intra_extension_id]
 
+    @super_enforce(("read", "write"), "intra_extensions")
     def del_intra_extension(self, user_id, intra_extension_id):
-        # TODO: check will be done through super_extension later
         if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
         return self.driver.del_intra_extension(intra_extension_id)
 
+    @super_enforce(("read", "write"), "intra_extensions")
     def set_intra_extension_dict(self, user_id, intra_extension_id, intra_extension_dict):
-        # TODO: check will be done through super_extension later
         if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
         return self.driver.set_intra_extension_dict(intra_extension_id, intra_extension_dict)
 
     # Metadata functions
 
-    @filter_input  # TODO: check for each function if intra_entension_id exists
+    @filter_input
     @enforce("read", "subject_categories")
     def get_subject_categories_dict(self, user_id, intra_extension_id):
         """
@@ -1315,7 +1305,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce(("read", "write"), "aggregation_algorithm")
     def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
         if aggregation_algorithm_id:
-            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms(DEFAULT_USER):
+            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms(DEFAULT_USER_ID):
                 raise AggregationAlgorithmUnknown()
         else:
             aggregation_algorithm_id = uuid4().hex
@@ -1334,9 +1324,9 @@ class IntraExtensionManager(manager.Manager):
                  }
             }
         """
-        if not self.driver.get_aggregation_algorithm_dict(intra_extension_id):
+        if not self.driver.get_aggregation_algorithms_dict(intra_extension_id):
             raise AggregationAlgorithmNotExisting()
-        return self.driver.get_aggregation_algorithm_dict(intra_extension_id)
+        return self.driver.get_aggregation_algorithms_dict(intra_extension_id)
 
     @filter_input
     @enforce("read", "sub_meta_rules")
@@ -1476,8 +1466,17 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         """Check authorization for a particular action.
         :return: True or False or raise an exception
         """
-        tenant_id = self.tenant_api.get_tenant_id_from_name(DEFAULT_USER, tenant_name)
-        intra_extension_id = self.tenant_api.get_tenant_intra_extension_id(DEFAULT_USER, tenant_id, genre)
+        tenants_dict = self.tenant_api.get_tenants_dict(DEFAULT_USER_ID)
+        tenant_id = None
+        for _tenant_id in tenants_dict:
+            if tenants_dict[_tenant_id] is tenant_name:
+                tenant_id = _tenant_id
+                break
+
+        intra_extension_id = self.tenant_api.get_tenant_dict(DEFAULT_USER_ID, tenant_id)[genre]
+        if not intra_extension_id:
+            raise TenantNoIntraExtension()
+
         subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
         subject_id = None
         for _subject_id in subjects_dict:
