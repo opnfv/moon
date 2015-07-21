@@ -137,6 +137,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_categories/{object_category_id}',
             get_action='get_object_category',
             delete_action='del_object_category',
+            post_action='set_object_category',
             rel=self._get_rel('object_categories'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -155,6 +156,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_categories/{action_category_id}',
             get_action='get_action_category',
             delete_action='del_action_category',
+            post_action='set_action_category',
             rel=self._get_rel('action_categories'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -194,6 +196,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/objects/{object_id}',
             get_action='get_object',
             delete_action='del_object',
+            post_action='set_object',
             rel=self._get_rel('objects'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -212,6 +215,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/actions/{action_id}',
             get_action='get_action',
             delete_action='del_action',
+            post_action='set_action',
             rel=self._get_rel('actions'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -251,6 +255,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}/{object_scope_id}',
             get_action='get_object_scope',
             delete_action='del_object_scope',
+            post_action='set_object_scope',
             rel=self._get_rel('object_scope'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -269,6 +274,7 @@ class Routers(wsgi.RoutersBase):
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}/{action_scope_id}',
             get_action='get_action_scope',
             delete_action='del_action_scope',
+            post_action='set_action_scope',
             rel=self._get_rel('action_scope'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
@@ -302,14 +308,6 @@ class Routers(wsgi.RoutersBase):
             })
         self._add_resource(
             mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_assignments/{object_id}',
-            get_action='get_object_assignments',
-            rel=self._get_rel('object_assignments'),
-            path_vars={
-                'intra_extension_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/object_assignments',
             post_action='add_object_assignment',
             rel=self._get_rel('object_assignments'),
@@ -331,14 +329,6 @@ class Routers(wsgi.RoutersBase):
                                   'object_assignments/{object_id}/{object_category_id}/{object_scope_id}',
             delete_action='del_object_assignment',
             rel=self._get_rel('object_assignments'),
-            path_vars={
-                'intra_extension_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/action_assignments/{action_id}',
-            get_action='get_action_assignments',
-            rel=self._get_rel('action_assignments'),
             path_vars={
                 'intra_extension_id': self._get_path('intra_extensions'),
             })

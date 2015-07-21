@@ -8,7 +8,6 @@ from glob import glob
 import os
 from keystone import config
 from keystone.contrib.moon.core import ConfigurationDriver
-from keystone.contrib.moon.core import TenantDriver
 # from keystone.contrib.moon.core import SuperExtensionDriver
 
 

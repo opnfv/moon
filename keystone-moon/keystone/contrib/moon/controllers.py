@@ -163,23 +163,23 @@ class IntraExtensions(controller.V3Controller):
     @controller.protected()
     def get_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        ie_id = kw.get('id', None)
+        ie_id = kw.get('intra_extension_id', None)
         return self.admin_api.get_intra_extensions_dict(user_id, ie_id)
 
     @controller.protected()
     def del_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        ie_id = kw.get('id', None)
+        ie_id = kw.get('intra_extension_id', None)
         self.admin_api.del_intra_extension(user_id, ie_id)
 
     @controller.protected()
     def set_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        ie_id = kw.get('id', None)
+        ie_id = kw.get('intra_extension_id', None)
         intra_extension_dict = dict()
-        intra_extension_dict["name"] = kw.get("name", None)
-        intra_extension_dict["model"] = kw.get("model", None)
-        intra_extension_dict["description"] = kw.get("description", None)
+        intra_extension_dict["name"] = kw.get("intra_extension_name", None)
+        intra_extension_dict["model"] = kw.get("intra_extension_model", None)
+        intra_extension_dict["description"] = kw.get("intra_extension_description", None)
         return self.admin_api.set_intra_extension_dict(user_id, ie_id, intra_extension_dict)
 
     # Metadata functions
@@ -194,8 +194,8 @@ class IntraExtensions(controller.V3Controller):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
         subject_category_dict = dict()
-        subject_category_dict['name'] = kw.get("name", None)
-        subject_category_dict['description'] = kw.get("description", None)
+        subject_category_dict['name'] = kw.get("subject_category_name", None)
+        subject_category_dict['description'] = kw.get("subject_category_description", None)
         return self.admin_api.add_subject_category(user_id, ie_id, subject_category_dict)
 
     @controller.protected()
@@ -203,7 +203,7 @@ class IntraExtensions(controller.V3Controller):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
         subject_category_id = kw.get("subject_category_id", None)
-        return self.admin_api.get_subject_categories_dict(user_id, ie_id)[subject_category_id]
+        return self.admin_api.get_subject_category_dict(user_id, ie_id, subject_category_id)
 
     @controller.protected()
     def del_subject_category(self, context, **kw):
@@ -218,63 +218,87 @@ class IntraExtensions(controller.V3Controller):
         ie_id = kw.get('intra_extension_id', None)
         subject_category_id = kw.get('subject_category_id', None)
         subject_category_dict = dict()
-        subject_category_dict['name'] = kw.get("name", None)
-        subject_category_dict['description'] = kw.get("description", None)
+        subject_category_dict['name'] = kw.get("subject_category_name", None)
+        subject_category_dict['description'] = kw.get("subject_category_description", None)
         return self.admin_api.set_subject_category(user_id, ie_id, subject_category_id, subject_category_dict)
 
     @controller.protected()
     def get_object_categories(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        return self.admin_api.get_object_category_dict(user_id, ie_id)
+        return self.admin_api.get_object_categories_dict(user_id, ie_id)
 
     @controller.protected()
     def add_object_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        object_category_name = kw["object_category_name"]
-        return self.admin_api.add_object_category(user_id, ie_id, object_category_name)
+        object_category_dict = dict()
+        object_category_dict['name'] = kw.get('object_category_name', None)
+        object_category_dict['description'] = kw.get('object_category_description', None)
+        return self.admin_api.add_object_category(user_id, ie_id, object_category_dict)
 
     @controller.protected()
     def get_object_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        object_category_id = kw["object_category_id"]
-        return self.admin_api.get_object_category_dict(user_id, ie_id)[object_category_id]
+        object_category_id = kw.get("object_category_id", None)
+        return self.admin_api.get_object_category_dict(user_id, ie_id, object_category_id)
 
     @controller.protected()
     def del_object_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        object_category_id = kw["object_category_id"]
-        return self.admin_api.del_object_category(user_id, ie_id, object_category_id)
+        object_category_id = kw.get("object_category_id", None)
+        self.admin_api.del_object_category(user_id, ie_id, object_category_id)
+
+    @controller.protected()
+    def set_object_category(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        ie_id = kw.get('intra_extension_id', None)
+        object_category_id = kw.get('object_category_id', None)
+        object_category_dict = dict()
+        object_category_dict['name'] = kw.get("object_category_name", None)
+        object_category_dict['description'] = kw.get("object_category_description", None)
+        return self.admin_api.set_object_category(user_id, ie_id, object_category_id, object_category_dict)
 
     @controller.protected()
     def get_action_categories(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        return self.admin_api.get_action_category_dict(user_id, ie_id)
+        return self.admin_api.get_action_categories_dict(user_id, ie_id)
 
     @controller.protected()
     def add_action_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        action_category_name = kw["action_category_name"]
-        return self.admin_api.add_action_category(user_id, ie_id, action_category_name)
+        action_category_dict = dict()
+        action_category_dict['name'] = kw.get("action_category_name", None)
+        action_category_dict['description'] = kw.get("action_category_description", None)
+        return self.admin_api.add_action_category(user_id, ie_id, action_category_dict)
 
     @controller.protected()
     def get_action_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        action_category_id = kw["action_category_id"]
-        return self.admin_api.get_action_category_dict(user_id, ie_id)[action_category_id]
+        action_category_id = kw.get("action_category_id", None)
+        return self.admin_api.get_action_category_dict(user_id, ie_id, action_category_id)
 
     @controller.protected()
     def del_action_category(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        action_category_id = kw["action_category_id"]
-        return self.admin_api.del_action_category(user_id, ie_id, action_category_id)
+        action_category_id = kw.get("action_category_id", None)
+        self.admin_api.del_action_category(user_id, ie_id, action_category_id)
+
+    @controller.protected()
+    def set_action_category(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        ie_id = kw.get('intra_extension_id', None)
+        action_category_id = kw.get('action_category_id', None)
+        action_category_dict = dict()
+        action_category_dict['name'] = kw.get("action_category_name", None)
+        action_category_dict['description'] = kw.get("action_category_description", None)
+        return self.admin_api.set_action_category(user_id, ie_id, action_category_id, action_category_dict)
 
     # Perimeter functions
     @controller.protected()
@@ -287,76 +311,110 @@ class IntraExtensions(controller.V3Controller):
     def add_subject(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        subject_name = kw["subject_name"]
-        return self.admin_api.add_subject_dict(user_id, ie_id, subject_name)
+        subject_dict = dict()
+        subject_dict['name'] = kw.get("subject_name", None)
+        subject_dict['description'] = kw.get("description", None)
+        return self.admin_api.add_subject_dict(user_id, ie_id, subject_dict)
 
     @controller.protected()
     def get_subject(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        subject_id = kw["subject_id"]
-        return self.admin_api.get_subjects_dict(user_id, ie_id)[subject_id]
+        subject_id = kw.get("subject_id", None)
+        return self.admin_api.get_subject_dict(user_id, ie_id, subject_id)
 
     @controller.protected()
     def del_subject(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get('intra_extension_id', None)
-        subject_id = kw["subject_id"]
+        subject_id = kw.get("subject_id", None)
         self.admin_api.del_subject(user_id, ie_id, subject_id)
+
+    @controller.protected()
+    def set_subject(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        ie_id = kw.get('intra_extension_id', None)
+        subject_id = kw.get("subject_id", None)
+        subject_dict = dict()
+        subject_dict['name'] = kw.get("subject_name", None)
+        subject_dict['description'] = kw.get("subject_description", None)
+        return self.admin_api.set_subject_dict(user_id, ie_id, subject_id, subject_dict)
 
     @controller.protected()
     def get_objects(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        return self.admin_api.get_object_dict(user_id, ie_id)
+        return self.admin_api.get_objects_dict(user_id, ie_id)
 
     @controller.protected()
     def add_object(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        object_name = kw["object_name"]
-        return self.admin_api.add_object(user_id, ie_id, object_name)
+        object_dict = dict()
+        object_dict['name'] = kw.get("object_name", None)
+        return self.admin_api.add_object(user_id, ie_id, object_dict)
 
     @controller.protected()
     def get_object(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        object_id = kw["object_id"]
-        return self.admin_api.get_object_dict(user_id, ie_id)[object_id]
+        object_id = kw.get("object_id", None)
+        return self.admin_api.get_object_dict(user_id, ie_id, object_id)
 
     @controller.protected()
     def del_object(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        object_id = kw["object_id"]
-        return self.admin_api.del_object(user_id, ie_id, object_id)
+        object_id = kw.get("object_id", None)
+        self.admin_api.del_object(user_id, ie_id, object_id)
+
+    @controller.protected()
+    def set_object(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        ie_id = kw.get('intra_extension_id', None)
+        object_id = kw.get("object_id", None)
+        object_dict = dict()
+        object_dict['name'] = kw.get("object_name", None)
+        object_dict['description'] = kw.get("object_description", None)
+        return self.admin_api.set_object_dict(user_id, ie_id, object_id, object_dict)
 
     @controller.protected()
     def get_actions(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        return self.admin_api.get_action_dict(user_id, ie_id)
+        return self.admin_api.get_actions_dict(user_id, ie_id)
 
     @controller.protected()
     def add_action(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        action_name = kw["action_name"]
-        return self.admin_api.add_action(user_id, ie_id, action_name)
+        action_dict = dict()
+        action_dict['name'] = kw.get("action_name", None)
+        return self.admin_api.add_action(user_id, ie_id, action_dict)
 
     @controller.protected()
     def get_action(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        action_id = kw["action_id"]
-        return self.admin_api.get_action_dict(user_id, ie_id)[action_id]
+        action_id = kw.get("action_id", None)
+        return self.admin_api.get_action_dict(user_id, ie_id, action_id)
 
     @controller.protected()
     def del_action(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         ie_id = kw.get("intra_extension_id", None)
-        action_id = kw["action_id"]
-        return self.admin_api.del_action(user_id, ie_id, action_id)
+        action_id = kw.get("action_id", None)
+        self.admin_api.del_action(user_id, ie_id, action_id)
+
+    @controller.protected()
+    def set_action(self, context, **kw):
+        user_id = self._get_user_id_from_token(context.get('token_id'))
+        ie_id = kw.get('intra_extension_id', None)
+        action_id = kw.get("action_id", None)
+        action_dict = dict()
+        action_dict['name'] = kw.get("action_name", None)
+        action_dict['description'] = kw.get("action_description", None)
+        return self.admin_api.set_action_dict(user_id, ie_id, action_id, action_dict)
 
     # Scope functions
     @controller.protected()
@@ -382,7 +440,7 @@ class IntraExtensions(controller.V3Controller):
         ie_id = kw.get("intra_extension_id", None)
         subject_category_id = kw.get("subject_category_id", None)
         subject_scope_id = kw.get("subject_scope_id", None)
-        return self.admin_api.get_subject_scopes_dict(user_id, ie_id, subject_category_id, subject_scope_id)
+        return self.admin_api.get_subject_scope_dict(user_id, ie_id, subject_category_id, subject_scope_id)
 
     @controller.protected()
     def del_subject_scope(self, context, **kw):
@@ -436,7 +494,7 @@ class IntraExtensions(controller.V3Controller):
         ie_id = kw.get("intra_extension_id", None)
         object_category_id = kw["object_category_id"]
         object_scope_id = kw["object_scope_id"]
-        return self.admin_api.del_object_scope(
+        self.admin_api.del_object_scope(
             user_id,
             ie_id,
             object_category_id,
@@ -475,7 +533,7 @@ class IntraExtensions(controller.V3Controller):
         ie_id = kw.get("intra_extension_id", None)
         action_category_id = kw["action_category_id"]
         action_scope_id = kw["action_scope_id"]
-        return self.admin_api.del_action_scope(
+        self.admin_api.del_action_scope(
             user_id,
             ie_id,
             action_category_id,
@@ -512,7 +570,7 @@ class IntraExtensions(controller.V3Controller):
         subject_id = kw.get("subject_id", None)
         subject_category_id = kw.get("subject_category_id", None)
         subject_scope_id = kw.get("subject_scope_id", None)
-        return self.admin_api.del_subject_assignment(
+        self.admin_api.del_subject_assignment(
             user_id,
             ie_id,
             subject_id,
@@ -555,7 +613,7 @@ class IntraExtensions(controller.V3Controller):
         object_id = kw["object_id"]
         object_category_id = kw["object_category_id"]
         object_scope_id = kw["object_scope_id"]
-        return self.admin_api.del_object_assignment(
+        self.admin_api.del_object_assignment(
             user_id,
             ie_id,
             object_id,
@@ -598,7 +656,7 @@ class IntraExtensions(controller.V3Controller):
         action_id = kw["action_id"]
         action_category_id = kw["action_category_id"]
         action_scope_id = kw["action_scope_id"]
-        return self.admin_api.del_action_assignment(
+        self.admin_api.del_action_assignment(
             user_id,
             ie_id,
             action_id,
