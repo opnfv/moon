@@ -91,10 +91,10 @@ class IntraExtensionUnknown(IntraExtensionException):
     logger = "Error"
 
 
-class SuperExtensionUnknown(IntraExtensionUnknown):
-    message_format = _("The super_extension is unknown.")
+class RootExtensionUnknown(IntraExtensionUnknown):
+    message_format = _("The root_extension is unknown.")
     code = 400
-    title = 'Super Extension Unknown'
+    title = 'Root Extension Unknown'
     logger = "Error"
 
 

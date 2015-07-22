@@ -1317,7 +1317,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce(("read", "write"), "aggregation_algorithm")
     def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
         if aggregation_algorithm_id:
-            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms(ROOT_ID):
+            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms(ADMIN_ID):
                 raise AggregationAlgorithmUnknown()
         else:
             aggregation_algorithm_id = uuid4().hex

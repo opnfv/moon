@@ -87,7 +87,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
     def create_intra_extension(self, policy_model="policy_authz"):
 
-        IE["policymodel"] = policy_model
+        IE["model"] = policy_model
         IE["name"] = uuid.uuid4().hex
         ref = self.admin_manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
         self.assertIsInstance(ref, dict)
