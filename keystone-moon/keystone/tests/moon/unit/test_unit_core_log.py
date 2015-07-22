@@ -17,6 +17,7 @@ from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
+from keystone.contrib.moon.core import DEFAULT_USER_ID
 
 CONF = cfg.CONF
 
@@ -67,7 +68,7 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         # Create the admin user because IntraExtension needs it
         self.admin = self.identity_api.create_user(USER_ADMIN)
         IE["policymodel"] = policy_model
-        self.ref = self.manager.load_intra_extension_dict(IE)
+        self.ref = self.manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 

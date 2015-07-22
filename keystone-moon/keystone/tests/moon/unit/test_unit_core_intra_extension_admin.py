@@ -16,6 +16,7 @@ from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
+from keystone.contrib.moon.core import DEFAULT_USER_ID
 
 CONF = cfg.CONF
 
@@ -65,7 +66,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         #self.admin = self.identity_api.create_user(USER)
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        self.ref = self.manager.load_intra_extension_dict(IE)
+        self.ref = self.manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 
@@ -1310,7 +1311,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        ref = self.admin_manager.load_intra_extension_dict(IE)
+        ref = self.admin_manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
         self.assertIsInstance(ref, dict)
         return ref
 
@@ -1320,7 +1321,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         ref = self.create_intra_extension()
 
         self.assertRaises(
-            SubjectReadNotAuthorized,
+            AuthzException,
             self.manager.get_subjects_dict,
             demo_user["id"], ref["id"])
 
@@ -1337,7 +1338,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_subjects[new_subject["id"]] = new_subject["name"]
 
         self.assertRaises(
-            SubjectAddNotAuthorized,
+            AuthzException,
             self.manager.set_subject_dict,
             demo_user["id"], ref["id"], new_subjects)
 
@@ -1352,7 +1353,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new subject
         self.assertRaises(
-            SubjectDelNotAuthorized,
+            AuthzException,
             self.manager.del_subject_dict,
             demo_user["id"], ref["id"], new_subject["id"])
 
@@ -1367,7 +1368,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular subject
         self.assertRaises(
-            SubjectAddNotAuthorized,
+            AuthzException,
             self.manager.add_subject_dict,
             demo_user["id"], ref["id"], new_subject["id"])
 
@@ -1390,7 +1391,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         ref = self.create_intra_extension()
 
         self.assertRaises(
-            ObjectReadNotAuthorized,
+            AuthzException,
             self.manager.get_objects_dict,
             demo_user["id"], ref["id"])
 
@@ -1407,7 +1408,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_objects[new_object["id"]] = new_object["name"]
 
         self.assertRaises(
-            ObjectAddNotAuthorized,
+            AuthzException,
             self.manager.set_object_dict,
             demo_user["id"], ref["id"], new_objects)
 
@@ -1422,7 +1423,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new object
         self.assertRaises(
-            ObjectDelNotAuthorized,
+            AuthzException,
             self.manager.del_object_dict,
             demo_user["id"], ref["id"], new_object["id"])
 
@@ -1437,7 +1438,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular object
         self.assertRaises(
-            ObjectAddNotAuthorized,
+            AuthzException,
             self.manager.add_object_dict,
             demo_user["id"], ref["id"], new_object["name"])
 
@@ -1461,7 +1462,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         ref = self.create_intra_extension()
 
         self.assertRaises(
-            ActionReadNotAuthorized,
+            AuthzException,
             self.manager.get_actions_dict,
             demo_user["id"], ref["id"])
 
@@ -1478,7 +1479,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_actions[new_action["id"]] = new_action["name"]
 
         self.assertRaises(
-            ActionAddNotAuthorized,
+            AuthzException,
             self.manager.set_action_dict,
             demo_user["id"], ref["id"], new_actions)
 
@@ -1493,7 +1494,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new action
         self.assertRaises(
-            ActionDelNotAuthorized,
+            AuthzException,
             self.manager.del_action_dict,
             demo_user["id"], ref["id"], new_action["id"])
 
@@ -1508,7 +1509,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular action
         self.assertRaises(
-            ActionAddNotAuthorized,
+            AuthzException,
             self.manager.add_action_dict,
             demo_user["id"], ref["id"], new_action["name"])
 
@@ -1532,7 +1533,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         ref = self.create_intra_extension()
 
         self.assertRaises(
-            SubjectCategoryReadNotAuthorized,
+            AuthzException,
             self.manager.get_subject_categories_dict,
             demo_user["id"], ref["id"])
 
@@ -1549,7 +1550,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_subject_categories[new_subject_category["id"]] = new_subject_category["name"]
 
         self.assertRaises(
-            SubjectCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.set_subject_category_dict,
             demo_user["id"], ref["id"], new_subject_categories)
 
@@ -1564,7 +1565,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new subject_category
         self.assertRaises(
-            SubjectCategoryDelNotAuthorized,
+            AuthzException,
             self.manager.del_subject_category_dict,
             demo_user["id"], ref["id"], new_subject_category["id"])
 
@@ -1579,7 +1580,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular subject_category
         self.assertRaises(
-            SubjectCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.add_subject_category,
             demo_user["id"], ref["id"], new_subject_category["name"])
 
@@ -1608,7 +1609,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         ref = self.create_intra_extension()
 
         self.assertRaises(
-            ObjectCategoryReadNotAuthorized,
+            AuthzException,
             self.manager.get_object_category_dict,
             demo_user["id"], ref["id"])
 
@@ -1625,7 +1626,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_object_categories[new_object_category["id"]] = new_object_category["name"]
 
         self.assertRaises(
-            ObjectCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.set_object_category_dict,
             demo_user["id"], ref["id"], new_object_categories)
 
@@ -1640,7 +1641,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new object_category
         self.assertRaises(
-            ObjectCategoryDelNotAuthorized,
+            AuthzException,
             self.manager.del_object_category,
             demo_user["id"], ref["id"], new_object_category["id"])
 
@@ -1655,7 +1656,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular object_category
         self.assertRaises(
-            ObjectCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.add_object_category,
             demo_user["id"], ref["id"], new_object_category["name"])
 
@@ -1690,7 +1691,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         # ref = self.create_intra_extension()
 
         self.assertRaises(
-            ActionCategoryReadNotAuthorized,
+            AuthzException,
             self.manager.get_action_category_dict,
             demo_user["id"], ref["id"])
 
@@ -1706,7 +1707,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_action_categories = dict()
         new_action_categories[new_action_category["id"]] = new_action_category["name"]
         self.assertRaises(
-            ActionCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.set_action_category_dict,
             demo_user["id"], ref["id"], new_action_categories)
 
@@ -1721,7 +1722,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Delete the new action_category
         self.assertRaises(
-            ActionCategoryDelNotAuthorized,
+            AuthzException,
             self.manager.del_action_category_dict,
             demo_user["id"], ref["id"], new_action_category["id"])
 
@@ -1736,7 +1737,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         # Add a particular action_category
         self.assertRaises(
-            ActionCategoryAddNotAuthorized,
+            AuthzException,
             self.manager.add_action_category,
             demo_user["id"], ref["id"], new_action_category["name"])
 
@@ -1775,7 +1776,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         for subject_category in subject_categories["subject_categories"]:
             self.assertRaises(
-                SubjectCategoryScopeReadNotAuthorized,
+                AuthzException,
                 self.manager.get_subject_scopes_dict,
                 demo_user["id"], ref["id"], subject_category)
 
@@ -1795,7 +1796,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             new_subject_category_scope[new_subject_category_scope_uuid] = "new_subject_category_scope"
 
             self.assertRaises(
-                SubjectCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.set_subject_scope_dict,
                 demo_user["id"], ref["id"], subject_category, new_subject_category_scope)
 
@@ -1814,7 +1815,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Delete the new subject_category_scope
             self.assertRaises(
-                SubjectCategoryScopeDelNotAuthorized,
+                AuthzException,
                 self.manager.del_subject_category_scope_dict,
                 demo_user["id"], ref["id"], subject_category, new_subject_category_scope_uuid)
 
@@ -1836,7 +1837,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Add a particular subject_category_scope
             self.assertRaises(
-                SubjectCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.add_subject_scope_dict,
                 demo_user["id"], ref["id"], subject_category,
                 new_subject_category_scope[new_subject_category_scope_uuid])
@@ -1878,7 +1879,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         for object_category in object_categories["object_categories"]:
             self.assertRaises(
-                ObjectCategoryScopeReadNotAuthorized,
+                AuthzException,
                 self.manager.get_object_scopes_dict,
                 demo_user["id"], ref["id"], object_category)
 
@@ -1898,7 +1899,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             new_object_category_scope[new_object_category_scope_uuid] = "new_object_category_scope"
 
             self.assertRaises(
-                ObjectCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.set_object_scope_dict,
                 demo_user["id"], ref["id"], object_category, new_object_category_scope)
 
@@ -1917,7 +1918,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Delete the new object_category_scope
             self.assertRaises(
-                ObjectCategoryScopeDelNotAuthorized,
+                AuthzException,
                 self.manager.del_object_category_scope_dict,
                 demo_user["id"], ref["id"], object_category, new_object_category_scope)
 
@@ -1939,7 +1940,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Add a particular object_category_scope
             self.assertRaises(
-                ObjectCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.add_object_scope_dict,
                 demo_user["id"], ref["id"], object_category,
                 new_object_category_scope[new_object_category_scope_uuid]
@@ -1982,7 +1983,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         for action_category in action_categories["action_categories"]:
             self.assertRaises(
-                ActionCategoryScopeReadNotAuthorized,
+                AuthzException,
                 self.manager.get_object_scopes_dict,
                 demo_user["id"], ref["id"], action_category)
 
@@ -2002,7 +2003,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             new_action_category_scope[new_action_category_scope_uuid] = "new_action_category_scope"
 
             self.assertRaises(
-                ActionCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.set_action_scope_dict,
                 demo_user["id"], ref["id"], action_category, new_action_category_scope)
 
@@ -2021,7 +2022,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Delete the new action_category_scope
             self.assertRaises(
-                ActionCategoryScopeDelNotAuthorized,
+                AuthzException,
                 self.manager.del_action_category_scope_dict,
                 demo_user["id"], ref["id"], action_category,
                 new_action_category_scope_uuid
@@ -2045,7 +2046,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
             # Add a particular action_category_scope
             self.assertRaises(
-                ActionCategoryScopeAddNotAuthorized,
+                AuthzException,
                 self.manager.add_action_scope_dict,
                 demo_user["id"], ref["id"], action_category,
                 new_action_category_scope[new_action_category_scope_uuid]
@@ -2137,7 +2138,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                           subject_category_scope["subject_category_scope"][subject_category].values())
 
             self.assertRaises(
-                SubjectCategoryAssignmentReadNotAuthorized,
+                AuthzException,
                 self.manager.get_subject_assignment_dict,
                 demo_user["id"], ref["id"], new_subject["id"])
 
@@ -2154,7 +2155,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertEqual({}, subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
             self.assertRaises(
-                SubjectCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.set_subject_assignment_dict,
                 demo_user["id"], ref["id"], new_subject["id"],
                 {
@@ -2193,7 +2194,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
             self.assertRaises(
-                SubjectCategoryAssignmentDelNotAuthorized,
+                AuthzException,
                 self.manager.del_subject_category_assignment_dict,
                 demo_user["id"], ref["id"], new_subject["id"],
                 new_subject_category_uuid,
@@ -2222,7 +2223,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 subject_category_assignments["subject_category_assignments"][new_subject["id"]])
 
             self.assertRaises(
-                SubjectCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.add_subject_assignment_list,
                 demo_user["id"], ref["id"], new_subject["id"],
                 new_subject_category_uuid,
@@ -2316,7 +2317,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                           object_category_scope["object_category_scope"][object_category].values())
 
             self.assertRaises(
-                ObjectCategoryAssignmentReadNotAuthorized,
+                AuthzException,
                 self.manager.get_object_assignment_list,
                 demo_user["id"], ref["id"], new_object["id"]
             )
@@ -2334,7 +2335,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertEqual({}, object_category_assignments["object_category_assignments"][new_object["id"]])
 
             self.assertRaises(
-                ObjectCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.set_object_category_assignment_dict,
                 demo_user["id"], ref["id"], new_object["id"],
                 {
@@ -2373,7 +2374,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 object_category_assignments["object_category_assignments"][new_object["id"]])
 
             self.assertRaises(
-                ObjectCategoryAssignmentDelNotAuthorized,
+                AuthzException,
                 self.manager.del_object_category_assignment_dict,
                 demo_user["id"], ref["id"], new_object["id"],
                 new_object_category_uuid,
@@ -2402,7 +2403,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 object_category_assignments["object_category_assignments"][new_object["id"]])
 
             self.assertRaises(
-                ObjectCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.add_object_assignment_list,
                 demo_user["id"], ref["id"], new_object["id"],
                 new_object_category_uuid,
@@ -2496,7 +2497,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                           action_category_scope["action_category_scope"][action_category].values())
 
             self.assertRaises(
-                ActionCategoryAssignmentReadNotAuthorized,
+                AuthzException,
                 self.manager.get_action_assignment_list,
                 demo_user["id"], ref["id"], new_action["id"]
             )
@@ -2514,7 +2515,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.assertEqual({}, action_category_assignments["action_category_assignments"][new_action["id"]])
 
             self.assertRaises(
-                ActionCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.set_action_assignment_dict,
                 demo_user["id"], ref["id"], new_action["id"],
                 {
@@ -2553,7 +2554,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 action_category_assignments["action_category_assignments"][new_action["id"]])
 
             self.assertRaises(
-                ActionCategoryAssignmentDelNotAuthorized,
+                AuthzException,
                 self.manager.del_action_category_assignment_dict,
                 demo_user["id"], ref["id"], new_action["id"],
                 new_action_category_uuid,
@@ -2582,7 +2583,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                 action_category_assignments["action_category_assignments"][new_action["id"]])
 
             self.assertRaises(
-                ActionCategoryAssignmentAddNotAuthorized,
+                AuthzException,
                 self.manager.add_action_assignment_list,
                 demo_user["id"], ref["id"], new_action["id"],
                 new_action_category_uuid,
@@ -2623,7 +2624,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn("test_aggregation", aggregation_algorithms["aggregation_algorithms"])
 
         self.assertRaises(
-            MetaRuleReadNotAuthorized,
+            AuthzException,
             self.manager.get_aggregation_algorithm_dict,
             demo_user["id"], ref["id"]
         )
@@ -2637,7 +2638,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         _aggregation_algorithm.remove(aggregation_algorithm["aggregation"])
 
         self.assertRaises(
-            MetaRuleAddNotAuthorized,
+            AuthzException,
             self.manager.set_aggregation_algorithms,
             demo_user["id"], ref["id"], _aggregation_algorithm[0]
         )
@@ -2648,7 +2649,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn(aggregation_algorithm["aggregation"], aggregation_algorithms["aggregation_algorithms"])
 
         self.assertRaises(
-            MetaRuleReadNotAuthorized,
+            AuthzException,
             self.manager.get_sub_meta_rules_dict,
             demo_user["id"], ref["id"]
         )
@@ -2700,7 +2701,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             metarule[relation]["subject_categories"].append(new_subject_category["id"])
 
             self.assertRaises(
-                MetaRuleAddNotAuthorized,
+                AuthzException,
                 self.manager.get_sub_meta_rule_dict,
                 demo_user["id"], ref["id"], metarule
             )
@@ -2723,7 +2724,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIn("sub_meta_rules", sub_meta_rules)
 
         self.assertRaises(
-            RuleReadNotAuthorized,
+            AuthzException,
             self.manager.get_sub_rules,
             demo_user["id"], ref["id"]
         )
@@ -2770,7 +2771,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         sub_rule.append(True)
         self.assertRaises(
-            RuleAddNotAuthorized,
+            AuthzException,
             self.manager.set_sub_rules,
             demo_user["id"], ref["id"], relation, sub_rule
         )

@@ -149,31 +149,32 @@ def super_enforce(action_names, object_name, **extra):
     def wrap(func):
         def wrapped(*args):
             # global actions
-            self = args[0]
-            user_name = args[1]
-            intra_extension_id = SUPER_EXTENSION_ID
-            if intra_extension_id not in self.admin_api.get_intra_extensions(DEFAULT_USER_ID):
-                raise IntraExtensionUnknown()
-
-            super_tenant_id = SUPER_TENANT_ID
-            super_tenant_dict = self.tenant_api.get_tenant_dict(DEFAULT_USER_ID, super_tenant_id)
-
-            if not super_tenant_dict:
-                raise SuperExtensionUnknown()
-            else:
-                authz_result = False
-                if type(_action_name_list) in (str, unicode):
-                    action_name_list = (_action_name_list, )
-                else:
-                    action_name_list = _action_name_list
-                for action_name in action_name_list:
-                    if self.authz_api.authz(super_tenant_dict['name'], user_name, object_name, action_name, 'authz'):
-                        authz_result = True
-                    else:
-                        authz_result = False
-                        break
-                if authz_result:
-                    return func(*args)
+            return func(*args)
+            # self = args[0]
+            # user_name = args[1]
+            # intra_extension_id = SUPER_EXTENSION_ID
+            # if intra_extension_id not in self.admin_api.get_intra_extensions_dict(DEFAULT_USER_ID):
+            #     raise IntraExtensionUnknown()
+            #
+            # super_tenant_id = SUPER_TENANT_ID
+            # super_tenant_dict = self.tenant_api.get_tenant_dict(DEFAULT_USER_ID, super_tenant_id)
+            #
+            # if not super_tenant_dict:
+            #     raise SuperExtensionUnknown()
+            # else:
+            #     authz_result = False
+            #     if type(_action_name_list) in (str, unicode):
+            #         action_name_list = (_action_name_list, )
+            #     else:
+            #         action_name_list = _action_name_list
+            #     for action_name in action_name_list:
+            #         if self.authz_api.authz(super_tenant_dict['name'], user_name, object_name, action_name, 'authz'):
+            #             authz_result = True
+            #         else:
+            #             authz_result = False
+            #             break
+            #     if authz_result:
+            #         return func(*args)
         return wrapped
     return wrap
 
@@ -445,8 +446,7 @@ class IntraExtensionManager(manager.Manager):
         for _subject in json_perimeter['subjects']:
             user = self.identity_api.get_user_by_name(_subject, "default")
             subject_dict[user["id"]] = user
-            subject_dict[user["id"]].pop("id")
-            self.driver.set_subject_dict(intra_extension_dict["id"], user["id"])
+            self.driver.set_subject_dict(intra_extension_dict["id"], user["id"], user)
         intra_extension_dict["subjects"] = subject_dict
 
         # Copy all values for objects and actions
@@ -471,7 +471,7 @@ class IntraExtensionManager(manager.Manager):
         json_perimeter = json.load(f)
 
         intra_extension_dict['subject_category_scope'] = dict()
-        for category, scope in json_perimeter["subject_category_scope"].iteritems():
+        for category, scope in json_perimeter["subject_scopes"].iteritems():
             category_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], category, self.driver.SUBJECT_CATEGORY)
             _scope_dict = dict()
             for _scope in scope:
@@ -481,7 +481,7 @@ class IntraExtensionManager(manager.Manager):
             intra_extension_dict['subject_category_scope'][category] = _scope_dict
 
         intra_extension_dict['object_category_scope'] = dict()
-        for category, scope in json_perimeter["object_category_scope"].iteritems():
+        for category, scope in json_perimeter["object_scopes"].iteritems():
             category_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], category, self.driver.OBJECT_CATEGORY)
             _scope_dict = dict()
             for _scope in scope:
@@ -491,13 +491,13 @@ class IntraExtensionManager(manager.Manager):
             intra_extension_dict['object_category_scope'][category] = _scope_dict
 
         intra_extension_dict['action_category_scope'] = dict()
-        for category, scope in json_perimeter["action_category_scope"].iteritems():
+        for category, scope in json_perimeter["action_scopes"].iteritems():
             category_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], category, self.driver.ACTION_CATEGORY)
             _scope_dict = dict()
             for _scope in scope:
                 _id = uuid4().hex
                 _scope_dict[_id] = {"name": _scope, "description": _scope}
-                self.driver.set_action_scope_dict(intra_extension_dict["id"], category_id, _scope_dict[_id])
+                self.driver.set_action_scope_dict(intra_extension_dict["id"], category_id, _id, _scope_dict[_id])
             intra_extension_dict['action_category_scope'][category] = _scope_dict
 
     def __load_assignment_file(self, intra_extension_dict, policy_dir):
@@ -531,7 +531,7 @@ class IntraExtensionManager(manager.Manager):
                 object_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], object_name, self.driver.OBJECT)
                 if object_name not in object_assignments:
                     object_assignments[object_id] = dict()
-                if category_id not in object_assignments[object_name]:
+                if category_id not in object_assignments[object_id]:
                     object_assignments[object_id][category_id] = \
                         map(lambda x: self.driver.get_uuid_from_name(intra_extension_dict["id"], x, self.driver.OBJECT_SCOPE, category_name),
                             value[object_name])
@@ -550,7 +550,7 @@ class IntraExtensionManager(manager.Manager):
                 action_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], action_name, self.driver.ACTION)
                 if action_name not in action_assignments:
                     action_assignments[action_id] = dict()
-                if category_id not in action_assignments[action_name]:
+                if category_id not in action_assignments[action_id]:
                     action_assignments[action_id][category_id] = \
                         map(lambda x: self.driver.get_uuid_from_name(intra_extension_dict["id"], x, self.driver.ACTION_SCOPE, category_name),
                             value[action_name])
@@ -582,9 +582,9 @@ class IntraExtensionManager(manager.Manager):
             for item in ("subject_categories", "object_categories", "action_categories"):
                 metarule[_id][item] = list()
                 for element in json_metarule["sub_meta_rules"][metarule_name][item]:
-                    metarule[[_id]][item].append(self.driver.get_uuid_from_name(intra_extension_dict["id"], element, categories[item]))
-            metarule[[_id]]["algorithm"] = json_metarule["sub_meta_rules"][metarule_name]["algorithm"]
-            self.driver.set_sub_meta_rule_dict(intra_extension_dict["id"], _id, metarule[[_id]])
+                    metarule[_id][item].append(self.driver.get_uuid_from_name(intra_extension_dict["id"], element, categories[item]))
+            metarule[_id]["algorithm"] = json_metarule["sub_meta_rules"][metarule_name]["algorithm"]
+            self.driver.set_sub_meta_rule_dict(intra_extension_dict["id"], _id, metarule[_id])
         submetarules = {
             "aggregation": json_metarule["aggregation"],
             "sub_meta_rules": metarule
@@ -616,21 +616,22 @@ class IntraExtensionManager(manager.Manager):
             for rule in json_rules[sub_rule_name]:
                 subrule = list()
                 _rule = list(rule)
-                for category_uuid in sub_meta_rules["rule"][sub_rule_name]["subject_categories"]:
+                # sub_rule_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], sub_rule_name, self.driver.SUB_META_RULE)
+                for category_uuid in sub_meta_rules[sub_rule_id]["subject_categories"]:
                     scope_name = _rule.pop(0)
                     scope_uuid = self.driver.get_uuid_from_name(intra_extension_dict["id"],
                                                                 scope_name,
                                                                 self.driver.SUBJECT_SCOPE,
                                                                 category_uuid=category_uuid)
                     subrule.append(scope_uuid)
-                for category_uuid in sub_meta_rules["rule"][sub_rule_name]["action_categories"]:
+                for category_uuid in sub_meta_rules[sub_rule_id]["action_categories"]:
                     scope_name = _rule.pop(0)
                     scope_uuid = self.driver.get_uuid_from_name(intra_extension_dict["id"],
                                                                 scope_name,
                                                                 self.driver.ACTION_SCOPE,
                                                                 category_uuid=category_uuid)
                     subrule.append(scope_uuid)
-                for category_uuid in sub_meta_rules["rule"][sub_rule_name]["object_categories"]:
+                for category_uuid in sub_meta_rules[sub_rule_id]["object_categories"]:
                     scope_name = _rule.pop(0)
                     scope_uuid = self.driver.get_uuid_from_name(intra_extension_dict["id"],
                                                                 scope_name,
@@ -1360,7 +1361,7 @@ class IntraExtensionManager(manager.Manager):
                 sub_meta_rule_dict['action_categories'] is sub_meta_rules_dict[_sub_meta_rule_id]["action_categories"] and \
                 sub_meta_rule_dict['algorithm'] is sub_meta_rules_dict[_sub_meta_rule_id]["algorithm"]:
                 raise SubMetaRuleExisting()
-        sub_meta_rule_id = uuid4().hex()
+        sub_meta_rule_id = uuid4().hex
         # TODO (dthom): add new sub-meta-rule to rule
         # self.driver.add_rule(intra_extension_id, sub_meta_rule_id, [])
         return self.driver.set_sub_meta_rule_dict(intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict)
@@ -1644,69 +1645,77 @@ class IntraExtensionDriver(object):
         data_values = list()
 
         if data_name == self.SUBJECT:
-            data_values = self.get_subjects_dict(intra_extension_uuid)["subjects"]
+            data_values = self.get_subjects_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise SubjectUnknown()
         elif data_name == self.OBJECT:
-            data_values = self.get_objects_dict(intra_extension_uuid)["objects"]
+            data_values = self.get_objects_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise ObjectUnknown()
         elif data_name == self.ACTION:
-            data_values = self.get_actions_dict(intra_extension_uuid)["actions"]
+            data_values = self.get_actions_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise ActionUnknown()
         elif data_name == self.SUBJECT_CATEGORY:
-            data_values = self.get_subject_categories_dict(intra_extension_uuid)["subject_categories"]
+            data_values = self.get_subject_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise SubjectCategoryUnknown()
         elif data_name == self.OBJECT_CATEGORY:
-            data_values = self.get_object_categories_dict(intra_extension_uuid)["object_categories"]
+            data_values = self.get_object_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise ObjectCategoryUnknown()
         elif data_name == self.ACTION_CATEGORY:
-            data_values = self.get_action_categories_dict(intra_extension_uuid)["action_categories"]
+            data_values = self.get_action_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise ActionCategoryUnknown()
         elif data_name == self.SUBJECT_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.SUBJECT_CATEGORY)
             data_values = self.get_subject_scopes_dict(intra_extension_uuid,
-                                                       category_uuid)["subject_category_scope"]
+                                                       category_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise SubjectScopeUnknown()
         elif data_name == self.OBJECT_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.OBJECT_CATEGORY)
             data_values = self.get_object_scopes_dict(intra_extension_uuid,
-                                                      category_uuid)["object_category_scope"]
+                                                      category_uuid)
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise ObjectScopeUnknown()
         elif data_name == self.ACTION_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.ACTION_CATEGORY)
             data_values = self.get_action_scopes_dict(intra_extension_uuid,
-                                                      category_uuid)["action_category_scope"]
+                                                      category_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
                 raise ActionScopeUnknown()
         elif data_name == self.SUB_META_RULE:
-            data_values = self.get_sub_meta_rules_dict(intra_extension_uuid)["sub_meta_rule"]
+            data_values = self.get_sub_meta_rules_dict(intra_extension_uuid)
+            print("name = {}".format(name))
+            print("data_values = {}".format(data_values))
             if (name and name not in extract_name(data_values)) or \
-                (uuid and uuid not in data_values.keys()):
+                    (uuid and uuid not in data_values.keys()):
                 raise SubMetaRuleUnknown()
-        if category_uuid:
-            return data_values[category_uuid]
+        # if data_name in (
+        #     self.SUBJECT_SCOPE,
+        #     self.OBJECT_SCOPE,
+        #     self.ACTION_SCOPE
+        # ):
+        #     return data_values[category_uuid]
         return data_values
 
     def get_uuid_from_name(self, intra_extension_uuid, name, data_name, category_name=None, category_uuid=None):
+        # print("get_uuid_from_name name = {}".format(name))
+        # print("get_uuid_from_name data_name = {}".format(data_name))
         data_values = self.__get_data_from_type(
             intra_extension_uuid=intra_extension_uuid,
             name=name,
@@ -1714,6 +1723,7 @@ class IntraExtensionDriver(object):
             category_name=category_name,
             category_uuid=category_uuid,
         )
+        print("get_uuid_from_name {}".format(data_values))
         return filter(lambda v: v[1]["name"] == name, data_values.iteritems())[0][0]
 
     def get_name_from_uuid(self, intra_extension_uuid, uuid, data_name, category_name=None, category_uuid=None):

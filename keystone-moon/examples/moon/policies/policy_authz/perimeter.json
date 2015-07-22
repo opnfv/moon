@@ -9,7 +9,11 @@
         "start",
         "stop",
         "create",
-        "list"
+        "list",
+        "upload",
+        "download",
+        "post",
+        "storage_list"
     ],
     "objects": [
         "servers",
