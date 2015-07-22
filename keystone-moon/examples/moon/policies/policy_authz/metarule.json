@@ -15,7 +15,7 @@
 		"rbac_rule": {
 			"subject_categories": ["role", "domain"],
 			"action_categories": ["access"],
-			"object_categories": ["id"],
+			"object_categories": ["object_id"],
 			"algorithm": "inclusion"
 		}
 	},

@@ -1,39 +1,47 @@
 {
-  "subject_scopes": {
-    "role": [
-      "admin"
-    ],
-    "domain": [
-      "ft",
-      "xx"
-    ]
-  },
-
-  "action_scopes": {
-    "access": [
-      "admin",
-      "user"
-    ]
-  },
-
-  "object_scopes": {
-    "id": [
-        "subjects",
-        "objects",
-        "actions",
-        "subject_categories",
-        "object_categories",
-        "action_categories",
-        "subject_category_scope",
-        "object_category_scope",
-        "action_category_scope",
-        "sub_rules",
-        "sub_meta_rule",
-        "subject_assignments",
-        "object_assignments",
-        "action_assignments",
-        "sub_meta_rule_relations",
-        "aggregation_algorithms"
-      ]
+    "subject_scopes": {
+        "role": [
+            "root_role"
+        ]
+    },
+    "action_scopes": {
+        "action_id": [
+            "read",
+            "write"
+        ]
+    },
+    "object_scopes": {
+        "action_id": [
+            "authz.subjects",
+            "authz.objects",
+            "authz.actions",
+            "authz.subject_categories",
+            "authz.object_categories",
+            "authz.action_categories",
+            "authz.subject_category_scopes",
+            "authz.object_category_scopes",
+            "authz.action_category_scopes",
+            "authz.subject_assignments",
+            "authz.object_assignments",
+            "authz.action_assignments",
+            "authz.aggregation_algorithm",
+            "authz.sub_meta_rules",
+            "authz.rules",
+            "admin.subjects",
+            "admin.objects",
+            "admin.actions",
+            "admin.subject_categories",
+            "admin.object_categories",
+            "admin.action_categories",
+            "admin.subject_category_scopes",
+            "admin.object_category_scopes",
+            "admin.action_category_scopes",
+            "admin.subject_assignments",
+            "admin.object_assignments",
+            "admin.action_assignments",
+            "admin.aggregation_algorithm",
+            "admin.sub_meta_rules",
+            "admin.rules"
+        ]
     }
 }

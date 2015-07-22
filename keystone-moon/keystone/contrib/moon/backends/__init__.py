@@ -90,6 +90,7 @@ rules = {
     sub_meta_rule_id1: {
         rule_id1: [subject_scope1, subject_scope2, ..., action_scope1, ..., object_scope1, ... ],
         rule_id2: [subject_scope3, subject_scope4, ..., action_scope3, ..., object_scope3, ... ],
+        rule_id3: [thomas, write, admin.subjects]
         ...},
     sub_meta_rule_id2: { },
     ...}

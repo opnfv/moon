@@ -56,7 +56,7 @@
 			"file1": ["storage"],
 			"file2": ["storage"]
 		},
-		"id": {
+		"object_id": {
 			"servers": ["servers"],
 			"vm1": ["vm1"],
 			"vm2": ["vm2"],

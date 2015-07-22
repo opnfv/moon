@@ -94,6 +94,7 @@ class Tenants(controller.V3Controller):
         tenant_id = kw.get("tenant_id", None)
         return self.tenant_api.del_tenant(user_id, tenant_id)
 
+    @controller.protected()
     def set_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         tenant_id = kw.get('id', None)
@@ -142,22 +143,25 @@ class IntraExtensions(controller.V3Controller):
     def add_intra_extension(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         intra_extension_dict = dict()
-        intra_extension_dict["intra_extension_name"] = kw.get("intra_extension_name", dict())
-        intra_extension_dict["subject_categories"] = kw.get("subject_categories", dict())
-        intra_extension_dict["object_categories"] = kw.get("object_categories", dict())
-        intra_extension_dict["action_categories"] = kw.get("action_categories", dict())
-        intra_extension_dict["subjects"] = kw.get("subjects", dict())
-        intra_extension_dict["objects"] = kw.get("objects", dict())
-        intra_extension_dict["actions"] = kw.get("actions", dict())
-        intra_extension_dict["subject_category_scopes"] = kw.get("subject_category_scopes", dict())
-        intra_extension_dict["object_category_scopes"] = kw.get("object_category_scopes", dict())
-        intra_extension_dict["action_category_scopes"] = kw.get("action_category_scopes", dict())
-        intra_extension_dict["subject_assignments"] = kw.get("subject_assignments", dict())
-        intra_extension_dict["object_assignments"] = kw.get("object_assignments", dict())
-        intra_extension_dict["action_assignments"] = kw.get("action_assignments", dict())
-        intra_extension_dict["aggregation_algorithm"] = kw.get("aggregation_algorithm", dict())
-        intra_extension_dict["sub_meta_rules"] = kw.get("sub_meta_rules", dict())
-        intra_extension_dict["rules"] = kw.get("rules", dict())
+        intra_extension_dict["name"] = kw.get("intra_extension_name", None)
+        intra_extension_dict["model"] = kw.get("intra_extension_model", None)
+        intra_extension_dict["genre"] = kw.get("intra_extension_genre", None)
+        intra_extension_dict["description"] = kw.get("intra_extension_description", None)
+        intra_extension_dict["subject_categories"] = kw.get("intra_extension_subject_categories", dict())
+        intra_extension_dict["object_categories"] = kw.get("intra_extension_object_categories", dict())
+        intra_extension_dict["action_categories"] = kw.get("intra_extension_action_categories", dict())
+        intra_extension_dict["subjects"] = kw.get("intra_extension_subjects", dict())
+        intra_extension_dict["objects"] = kw.get("intra_extension_objects", dict())
+        intra_extension_dict["actions"] = kw.get("intra_extension_actions", dict())
+        intra_extension_dict["subject_category_scopes"] = kw.get("intra_extension_subject_category_scopes", dict())
+        intra_extension_dict["object_category_scopes"] = kw.get("intra_extension_object_category_scopes", dict())
+        intra_extension_dict["action_category_scopes"] = kw.get("intra_extension_action_category_scopes", dict())
+        intra_extension_dict["subject_assignments"] = kw.get("intra_extension_subject_assignments", dict())
+        intra_extension_dict["object_assignments"] = kw.get("intra_extension_object_assignments", dict())
+        intra_extension_dict["action_assignments"] = kw.get("intra_extension_action_assignments", dict())
+        intra_extension_dict["aggregation_algorithm"] = kw.get("intra_extension_aggregation_algorithm", dict())
+        intra_extension_dict["sub_meta_rules"] = kw.get("intra_extension_sub_meta_rules", dict())
+        intra_extension_dict["rules"] = kw.get("intra_extension_rules", dict())
         return self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict)
 
     @controller.protected()
@@ -179,6 +183,7 @@ class IntraExtensions(controller.V3Controller):
         intra_extension_dict = dict()
         intra_extension_dict["name"] = kw.get("intra_extension_name", None)
         intra_extension_dict["model"] = kw.get("intra_extension_model", None)
+        intra_extension_dict["genre"] = kw.get("intra_extension_genre", None)
         intra_extension_dict["description"] = kw.get("intra_extension_description", None)
         return self.admin_api.set_intra_extension_dict(user_id, ie_id, intra_extension_dict)
 
@@ -781,13 +786,6 @@ class InterExtensions(controller.V3Controller):
     #     return self.interextension_api.delete_inter_extension(kw["inter_extension_id"])
 
 
-@dependency.requires('authz_api')
-class SuperExtensions(controller.V3Controller):
-
-    def __init__(self):
-        super(SuperExtensions, self).__init__()
-
-
 @dependency.requires('moonlog_api', 'authz_api')
 class Logs(controller.V3Controller):
 
@@ -803,7 +801,5 @@ class Logs(controller.V3Controller):
     def get_logs(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         options = kw.get("options", "")
-        # FIXME (dthom): the authorization for get_logs must be done with an intra_extension
-        #if self.authz_api.admin(user["name"], "logs", "read"):
         return self.moonlog_api.get_logs(user_id, options)
 

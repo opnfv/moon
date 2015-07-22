@@ -4,30 +4,22 @@
 			"admin": ["root_role"]
 		}
     },
+
     "action_assignments": {
         "action_id": {
 			"read": ["read"],
 			"write": ["write"]
 		}
     },
+
     "object_assignments": {
-        "object_id": {	
-		  	"authz.subjects": ["authz.subjects"],
-            "authz.objects": ["authz.objects"],
-            "authz.actions": ["authz.actions"],
-            "authz.subject_categories": ["authz.subject_categories"],
-            "authz.object_categories": ["authz.object_categories"],
-            "authz.action_categories": ["authz.action_categories"],
-            "authz.subject_category_scopes": ["authz.subject_category_scopes"],
-            "authz.object_category_scopes": ["authz.object_category_scopes"],
-            "authz.action_category_scopes": ["authz.action_category_scopes"],
-            "authz.subject_assignments": ["authz.subject_assignments"],
-            "authz.object_assignments": ["authz.object_assignments"],
-            "authz.action_assignments": ["authz.action_assignments"],
-            "authz.aggregation_algorithm": ["authz.aggregation_algorithm"],
-            "authz.sub_meta_rules": ["authz.sub_meta_rules"],
-            "authz.rules": ["authz.rules"],
-		  	"admin.subjects": ["admin.subjects"],
+        "object_id": {
+            "templates": ["templates"],
+		    "sub_meta_rule_algorithm": ["sub_meta_rule_relations"],
+		    "aggregation_algorithms": ["aggregation_algorithms"],
+            "tenants": ["tenants"],
+            "intra_extensions": ["intra_extensions"],
+            "admin.subjects": ["admin.subjects"],
             "admin.objects": ["admin.objects"],
             "admin.actions": ["admin.actions"],
             "admin.subject_categories": ["admin.subject_categories"],

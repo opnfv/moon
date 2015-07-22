@@ -1,8 +1,8 @@
 {
-    "name": "Super_Extension",
+    "name": "Root Policy",
     "model": "RBAC",
-    "genre": "authz",
-    "description": "",
+    "genre": "admin",
+    "description": "root extension",
 
     "subject_categories": [
         "role"

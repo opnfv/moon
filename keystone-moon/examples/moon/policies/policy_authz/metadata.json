@@ -1,8 +1,8 @@
 {
-    "name": "MLS_metadata",
-    "model": "MLS",
+    "name": "Multiple_Policy",
+    "model": "Multiple",
     "genre": "authz",
-    "description": "Multi Layer Security authorization policy",
+    "description": "Multiple Security Policies",
 
     "subject_categories": [
         "subject_security_level",
@@ -18,6 +18,6 @@
     "object_categories": [
         "object_security_level",
 		"type",
-		"id"
+		"object_id"
     ]
 }

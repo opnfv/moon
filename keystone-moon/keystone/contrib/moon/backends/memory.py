@@ -37,20 +37,3 @@ class ConfigurationConnector(ConfigurationDriver):
 
     def get_sub_meta_rule_algorithm_dict(self):
         return self.sub_meta_rule_algorithm_dict
-
-# class SuperExtensionConnector(SuperExtensionDriver):
-#
-#     def __init__(self):
-#         super(SuperExtensionConnector, self).__init__()
-#         # Super_Extension is loaded every time the server is started
-#         self.__uuid = uuid4().hex
-#         # self.__super_extension = Extension()
-#         _policy_abs_dir = os.path.join(CONF.moon.super_extension_directory, 'policy')
-#         # self.__super_extension.load_from_json(_policy_abs_dir)
-#
-#     def get_super_extensions(self):
-#         return None
-#
-#     def admin(self, sub, obj, act):
-#         # return self.__super_extension.authz(sub, obj, act)
-#         return True

@@ -12,156 +12,183 @@ def upgrade(migrate_engine):
     meta.bind = migrate_engine
 
     intra_extension_table = sql.Table(
-        'intra_extension',
+        'intra_extensions',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('name', sql.String(64), nullable=False),
-        sql.Column('model', sql.String(64), nullable=True),
-        sql.Column('description', sql.Text(), nullable=True),
+        sql.Column('intra_extension', k_sql.JsonBlob(), nullable=True),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     intra_extension_table.create(migrate_engine, checkfirst=True)
 
-    subjects_table = sql.Table(
-        'subject',
+    tenant_table = sql.Table(
+        'tenants',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('subjects', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('tenant', k_sql.JsonBlob(), nullable=True),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    subjects_table.create(migrate_engine, checkfirst=True)
-
-    objects_table = sql.Table(
-        'object',
-        meta,
-        sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('objects', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
-        mysql_engine='InnoDB',
-        mysql_charset='utf8')
-    objects_table.create(migrate_engine, checkfirst=True)
-
-    actions_table = sql.Table(
-        'action',
-        meta,
-        sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('actions', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
-        mysql_engine='InnoDB',
-        mysql_charset='utf8')
-    actions_table.create(migrate_engine, checkfirst=True)
+    tenant_table.create(migrate_engine, checkfirst=True)
 
     subject_categories_table = sql.Table(
-        'subject_category',
+        'subject_categories',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('subject_categories', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('subject_category', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     subject_categories_table.create(migrate_engine, checkfirst=True)
 
     object_categories_table = sql.Table(
-        'object_category',
+        'object_categories',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('object_categories', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('object_category', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     object_categories_table.create(migrate_engine, checkfirst=True)
 
     action_categories_table = sql.Table(
-        'action_category',
+        'action_categories',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('action_categories', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('action_category', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     action_categories_table.create(migrate_engine, checkfirst=True)
 
-    subject_category_values_table = sql.Table(
-        'subject_category_scope',
+    subjects_table = sql.Table(
+        'subjects',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('subject_category_scope', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('subject', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    subject_category_values_table.create(migrate_engine, checkfirst=True)
+    subjects_table.create(migrate_engine, checkfirst=True)
 
-    object_category_values_table = sql.Table(
-        'object_category_scope',
+    objects_table = sql.Table(
+        'objects',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('object_category_scope', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('object', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    object_category_values_table.create(migrate_engine, checkfirst=True)
+    objects_table.create(migrate_engine, checkfirst=True)
 
-    action_category_values_table = sql.Table(
-        'action_category_scope',
+    actions_table = sql.Table(
+        'actions',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('action_category_scope', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('action', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    action_category_values_table.create(migrate_engine, checkfirst=True)
+    actions_table.create(migrate_engine, checkfirst=True)
 
-    subject_category_assignments_table = sql.Table(
-        'subject_category_assignment',
+    subject_scopes_table = sql.Table(
+        'subject_scopes',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('subject_category_assignments', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('subject_scope', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('subject_category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    subject_category_assignments_table.create(migrate_engine, checkfirst=True)
+    subject_scopes_table.create(migrate_engine, checkfirst=True)
 
-    object_category_assignments_table = sql.Table(
-        'object_category_assignment',
+    object_scopes_table = sql.Table(
+        'object_scopes',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('object_category_assignments', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('object_scope', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('object_category_id', sql.ForeignKey("object_categories.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    object_category_assignments_table.create(migrate_engine, checkfirst=True)
+    object_scopes_table.create(migrate_engine, checkfirst=True)
 
-    action_category_assignments_table = sql.Table(
-        'action_category_assignment',
+    action_scopes_table = sql.Table(
+        'action_category_scopes',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('action_category_assignments', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('action_scope', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('action_category_id', sql.ForeignKey("action_categories.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    action_category_assignments_table.create(migrate_engine, checkfirst=True)
+    action_scopes_table.create(migrate_engine, checkfirst=True)
 
-    meta_rule_table = sql.Table(
-        'metarule',
+    subject_assignments_table = sql.Table(
+        'subject_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('sub_meta_rules', k_sql.JsonBlob(), nullable=True),
-        sql.Column('aggregation', sql.Text(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('subject_category_assignment', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('subject_id', sql.ForeignKey("subjects.id"), nullable=False),
+        sql.Column('subject_category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    meta_rule_table.create(migrate_engine, checkfirst=True)
+    subject_assignments_table.create(migrate_engine, checkfirst=True)
 
-    rule_table = sql.Table(
-        'rule',
+    object_assignments_table = sql.Table(
+        'object_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('rules', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_uuid', sql.ForeignKey("intra_extension.id"), nullable=False),
+        sql.Column('object_assignments', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('object_id', sql.ForeignKey("objects.id"), nullable=False),
+        sql.Column('object_category_id', sql.ForeignKey("object_categories.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
-    rule_table.create(migrate_engine, checkfirst=True)
+    object_assignments_table.create(migrate_engine, checkfirst=True)
+
+    action_assignments_table = sql.Table(
+        'action_assignments',
+        meta,
+        sql.Column('id', sql.String(64), primary_key=True),
+        sql.Column('action_assignment', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('action_id', sql.ForeignKey("actions.id"), nullable=False),
+        sql.Column('action_category_id', sql.ForeignKey("action_categories.id"), nullable=False),
+        mysql_engine='InnoDB',
+        mysql_charset='utf8')
+    action_assignments_table.create(migrate_engine, checkfirst=True)
+
+    aggregation_algorithm_table = sql.Table(
+        'aggregation_algorithm',
+        meta,
+        sql.Column('id', sql.String(64), primary_key=True),
+        sql.Column('aggregation_algorithm', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        mysql_engine='InnoDB',
+        mysql_charset='utf8')
+    aggregation_algorithm_table.create(migrate_engine, checkfirst=True)
+
+    sub_meta_rules_table = sql.Table(
+        'sub_meta_rules',
+        meta,
+        sql.Column('id', sql.String(64), primary_key=True),
+        sql.Column('sub_meta_rule', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        mysql_engine='InnoDB',
+        mysql_charset='utf8')
+    sub_meta_rules_table.create(migrate_engine, checkfirst=True)
+
+    rules_table = sql.Table(
+        'rules',
+        meta,
+        sql.Column('id', sql.String(64), primary_key=True),
+        sql.Column('rule', k_sql.JsonBlob(), nullable=True),
+        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        mysql_engine='InnoDB',
+        mysql_charset='utf8')
+    rules_table.create(migrate_engine, checkfirst=True)
+
+    # TODO: load root_extension
 
 
 def downgrade(migrate_engine):
@@ -169,21 +196,22 @@ def downgrade(migrate_engine):
     meta.bind = migrate_engine
 
     for _table in (
-        'subject',
-        'object',
-        'action',
-        'subject_category',
-        'object_category',
-        'action_category',
-        'subject_category_scope',
-        'object_category_scope',
-        'action_category_scope',
-        'subject_category_assignment',
-        'object_category_assignment',
-        'action_category_assignment',
-        'metarule',
-        'rule',
-        'intra_extension',
+        'rules',
+        'sub_meta_rules',
+        'action_category_assignments',
+        'object_category_assignments',
+        'subject_category_assignments',
+        'action_category_scopes',
+        'object_category_scopes',
+        'subject_category_scopes',
+        'actions',
+        'objects',
+        'subjects',
+        'action_categories',
+        'object_categories',
+        'subject_categories',
+        'tenants',
+        'intra_extensions'
     ):
         try:
             table = sql.Table(_table, meta, autoload=True)

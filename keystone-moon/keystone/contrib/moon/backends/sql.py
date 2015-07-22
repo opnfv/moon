@@ -310,7 +310,6 @@ class Rule(sql.ModelBase, sql.DictBase):
 
 
 __all_objects__ = (
-    IntraExtensionUnknown,
     Tenant,
     Subject,
     Object,
@@ -362,10 +361,7 @@ class TenantConnector(TenantDriver):
             ref = query.first()
             tenant_ref = ref.to_dict()
             tenant_ref.update(tenant_dict)
-            new_tenant = Tenant(
-                id=tenant_id,
-                tenant=tenant_ref
-            )
+            new_tenant = Tenant(id=tenant_id, tenant=tenant_ref)
             for attr in Tenant.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_tenant, attr))
@@ -381,8 +377,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(IntraExtension.id)
             ref_list = query.all()
             return {_ref.id: _ref.intraextension for _ref in ref_list}
-
-    # TODO (dthom): load_intra_extension(self):
 
     def del_intra_extension(self, intra_extension_id):
         with sql.transaction() as session:

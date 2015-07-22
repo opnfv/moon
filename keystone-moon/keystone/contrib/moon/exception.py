@@ -69,6 +69,12 @@ class TenantNoIntraExtension(TenantException):
     logger = "ERROR"
 
 
+class TenantNoIntraAuthzExtension(TenantNoIntraExtension):
+    message_format = _("The tenant has not intra_admin_extension.")
+    code = 400
+    title = 'Tenant No Intra_Admin_Extension'
+    logger = "ERROR"
+
 # Exceptions for IntraExtension
 
 
@@ -228,6 +234,20 @@ class ActionNameExisting(AdminPerimeter):
     code = 400
     title = 'Action Name Existing'
     logger = "ERROR"
+
+
+class ObjectsWriteNoAuthorized(AdminPerimeter):
+    message_format = _("The modification on Objects is not authorized.")
+    code = 400
+    title = 'Objects Write No Authorized'
+    logger = "AUTHZ"
+
+
+class ActionsWriteNoAuthorized(AdminPerimeter):
+    message_format = _("The modification on Actions is not authorized.")
+    code = 400
+    title = 'Actions Write No Authorized'
+    logger = "AUTHZ"
 
 
 class SubjectScopeUnknown(AdminScope):
