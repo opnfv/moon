@@ -62,7 +62,8 @@ CONF.register_opts(_OPTS, group='moon')
 def filter_input(func_or_str):
 
     def __filter(string):
-        return "".join(re.findall("[\w\-+]*", string))
+        if string:
+            return "".join(re.findall("[\w\-+]*", string))
 
     def wrapped(*args, **kwargs):
         _args = []
@@ -70,11 +71,11 @@ def filter_input(func_or_str):
             if isinstance(arg, str) or isinstance(arg, unicode):
                 arg = __filter(arg)
             elif isinstance(arg, list):
-                arg =  [__filter(item) for item in arg]
+                arg = [__filter(item) for item in arg]
             elif isinstance(arg, tuple):
-                arg =  (__filter(item) for item in arg)
+                arg = (__filter(item) for item in arg)
             elif isinstance(arg, dict):
-                arg =  {item: __filter(arg[item]) for item in arg.keys()}
+                arg = {item: __filter(arg[item]) for item in arg.keys()}
             _args.append(arg)
         for arg in kwargs:
             if type(kwargs[arg]) in (unicode, str):
@@ -82,11 +83,11 @@ def filter_input(func_or_str):
             if isinstance(kwargs[arg], str) or isinstance(kwargs[arg], unicode):
                 kwargs[arg] = __filter(kwargs[arg])
             elif isinstance(kwargs[arg], list):
-                kwargs[arg] =  [__filter(item) for item in kwargs[arg]]
+                kwargs[arg] = [__filter(item) for item in kwargs[arg]]
             elif isinstance(kwargs[arg], tuple):
-                kwargs[arg] =  (__filter(item) for item in kwargs[arg])
+                kwargs[arg] = (__filter(item) for item in kwargs[arg])
             elif isinstance(kwargs[arg], dict):
-                kwargs[arg] =  {item: __filter(kwargs[arg][item]) for item in kwargs[arg].keys()}
+                kwargs[arg] = {item: __filter(kwargs[arg][item]) for item in kwargs[arg].keys()}
         return func_or_str(*_args, **kwargs)
 
     if isinstance(func_or_str, str) or isinstance(func_or_str, unicode):
@@ -107,30 +108,41 @@ def enforce(action_names, object_name, **extra):
     _object_name = object_name
 
     def wrap(func):
-        def wrapped(*args):
-            # global actions
+
+        def wrapped(*args, **kwargs):
             self = args[0]
-            user_id = args[1]
+            try:
+                user_id = args[1]
+            except IndexError:
+                user_id = kwargs['user_id']
+            intra_extension_id = None
             intra_admin_extension_id = None
+
+            if user_id == ADMIN_ID:
+                # TODO: check if there is no security hole here
+                return func(*args, **kwargs)
 
             try:
                 intra_extension_id = args[2]
-            except:
-                intra_admin_extension_id = ROOT_EXTENSION_ID
+            except IndexError:
+                if 'intra_extension_id' in kwargs:
+                    intra_extension_id = kwargs['intra_extension_id']
+                else:
+                    intra_admin_extension_id = ROOT_EXTENSION_ID
 
-            intra_extensions_dict = self.admin_api.get_intra_extensions(ADMIN_ID)
+            intra_extensions_dict = self.admin_api.driver.get_intra_extensions_dict()
             if intra_extension_id not in intra_extensions_dict:
                 raise IntraExtensionUnknown()
-            tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+            tenants_dict = self.tenant_api.driver.get_tenants_dict(ADMIN_ID)
             for _tenant_id in tenants_dict:
                 if tenants_dict[_tenant_id]['intra_authz_extension_id'] is intra_extension_id or \
                                 tenants_dict[_tenant_id]['intra_admin_extension_id'] is intra_extension_id:
                     intra_admin_extension_id = tenants_dict[_tenant_id]['intra_admin_extension_id']
             if not intra_admin_extension_id:
-                args[0].moonlog_api.warning("No Intra_Admin_Extension found, authorization granted by default.")
-                return func(*args)
+                self.moonlog_api.driver.warning("No Intra_Admin_Extension found, authorization granted by default.")
+                return func(*args, **kwargs)
             else:
-                objects_dict = self.admin_api.get_objects_dict(ADMIN_ID, intra_admin_extension_id)
+                objects_dict = self.admin_api.driver.get_objects_dict(ADMIN_ID, intra_admin_extension_id)
                 object_name = intra_extensions_dict[intra_extension_id]['genre'] + '.' + _object_name
                 object_id = None
                 for _object_id in objects_dict:
@@ -141,7 +153,7 @@ def enforce(action_names, object_name, **extra):
                     action_name_list = (_action_name_list, )
                 else:
                     action_name_list = _action_name_list
-                actions_dict = self.admin_api.get_actions_dict(ADMIN_ID, intra_admin_extension_id)
+                actions_dict = self.admin_api.driver.get_actions_dict(ADMIN_ID, intra_admin_extension_id)
                 action_id_list = list()
                 for _action_name in action_name_list:
                     for _action_id in actions_dict:
@@ -157,7 +169,7 @@ def enforce(action_names, object_name, **extra):
                         authz_result = False
                         break
                 if authz_result:
-                    return func(*args)
+                    return func(*args, **kwargs)
         return wrapped
     return wrap
 
@@ -217,14 +229,14 @@ class ConfigurationManager(manager.Manager):
                 return sub_meta_rule_algorithm_id
         return None
 
-
 @dependency.provider('tenant_api')
-@dependency.requires('moonlog_api')
+@dependency.requires('moonlog_api', 'admin_api')
 class TenantManager(manager.Manager):
 
     def __init__(self):
         super(TenantManager, self).__init__(CONF.moon.tenant_driver)
 
+    @filter_input
     @enforce("read", "tenants")
     def get_tenants_dict(self, user_id):
         """
@@ -242,17 +254,20 @@ class TenantManager(manager.Manager):
         """
         return self.driver.get_tenants_dict()
 
+    @filter_input
     @enforce(("read", "write"), "tenants")
     def add_tenant_dict(self, user_id, tenant_dict):
         tenants_dict = self.driver.get_tenants_dict()
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]['name'] is tenant_dict['name']:
+            print(tenants_dict[tenant_id])
+            print(tenant_dict)
+            if tenants_dict[tenant_id]['name'] == tenant_dict['name']:
                 raise TenantAddedNameExisting()
 
         # Sync users between intra_authz_extension and intra_admin_extension
         if tenant_dict['intra_admin_extension']:
             if not tenant_dict['intra_authz_extension']:
-                raise TenantNoIntraAuthzExtension
+                raise TenantNoIntraAuthzExtension()
             else:
                 authz_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_authz_extension'])
                 admin_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_admin_extension'])
@@ -262,8 +277,10 @@ class TenantManager(manager.Manager):
                 for _subject_id in admin_subjects_dict:
                     if _subject_id not in authz_subjects_dict:
                         self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension'], admin_subjects_dict[_subject_id])
-        return self.driver.add_tenant_dict(uuid4().hex, tenant_dict)
 
+        return self.driver.add_tenant_dict(tenant_dict['id'], tenant_dict)
+
+    @filter_input
     @enforce("read", "tenants")
     def get_tenant_dict(self, user_id, tenant_id):
         tenants_dict = self.driver.get_tenants_dict()
@@ -271,12 +288,14 @@ class TenantManager(manager.Manager):
             raise TenantUnknown()
         return tenants_dict[tenant_id]
 
+    @filter_input
     @enforce(("read", "write"), "tenants")
     def del_tenant(self, user_id, tenant_id):
         if tenant_id not in self.driver.get_tenants_dict():
             raise TenantUnknown()
         self.driver.del_tenant(tenant_id)
 
+    @filter_input
     @enforce(("read", "write"), "tenants")
     def set_tenant_dict(self, user_id, tenant_id, tenant_dict):
         tenants_dict = self.driver.get_tenants_dict()
@@ -296,6 +315,7 @@ class TenantManager(manager.Manager):
                 for _subject_id in admin_subjects_dict:
                     if _subject_id not in authz_subjects_dict:
                         self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension'], admin_subjects_dict[_subject_id])
+
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 
 
@@ -455,9 +475,12 @@ class IntraExtensionManager(manager.Manager):
         subject_dict = dict()
         # We suppose that all subjects can be mapped to a true user in Keystone
         for _subject in json_perimeter['subjects']:
-            user = self.identity_api.get_user_by_name(_subject, "default")
-            subject_dict[user["id"]] = user
-            self.driver.set_subject_dict(intra_extension_dict["id"], user["id"], user)
+            keystone_user = self.identity_api.get_user_by_name(_subject, "default")
+            subject_id = uuid4().hex
+            subject_dict[subject_id] = keystone_user
+            subject_dict[subject_id]['keystone_id'] = keystone_user["id"]
+            subject_dict[subject_id]['keystone_name'] = keystone_user["name"]
+            self.driver.set_subject_dict(intra_extension_dict["id"], subject_id, subject_dict[subject_id])
         intra_extension_dict["subjects"] = subject_dict
 
         # Copy all values for objects and actions
@@ -655,8 +678,8 @@ class IntraExtensionManager(manager.Manager):
                 else:
                     # if value doesn't exist add a default value
                     subrule.append(True)
-                rules[sub_rule_id].append(subrule)
-            self.driver.set_rule_dict(intra_extension_dict["id"], sub_rule_id, uuid4().hex, rules)
+                # rules[sub_rule_id].append(subrule)
+                self.driver.set_rule_dict(intra_extension_dict["id"], sub_rule_id, uuid4().hex, subrule)
 
     @enforce(("read", "write"), "intra_extensions")
     def load_intra_extension_dict(self, user_id, intra_extension_dict):
@@ -859,8 +882,10 @@ class IntraExtensionManager(manager.Manager):
             if subjects_dict[subject_id]["name"] is subject_dict['name']:
                 raise SubjectNameExisting()
         # Next line will raise an error if user is not present in Keystone database
-        subject_item_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
-        return self.driver.set_subject_dict(intra_extension_id, subject_item_dict["id"], subject_dict)
+        subject_keystone_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
+        subject_dict["keystone_id"] = subject_keystone_dict["id"]
+        subject_dict["keystone_name"] = subject_keystone_dict["name"]
+        return self.driver.set_subject_dict(intra_extension_id, uuid4().hex, subject_dict)
 
     @filter_input
     @enforce("read", "subjects")
@@ -890,8 +915,10 @@ class IntraExtensionManager(manager.Manager):
             if subjects_dict[subject_id]["name"] is subject_dict['name']:
                 raise SubjectNameExisting()
         # Next line will raise an error if user is not present in Keystone database
-        subject_item_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
-        return self.driver.set_subject_dict(intra_extension_id, subject_item_dict["id"], subject_dict)
+        subject_keystone_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
+        subject_dict["keystone_id"] = subject_keystone_dict["id"]
+        subject_dict["keystone_name"] = subject_keystone_dict["name"]
+        return self.driver.set_subject_dict(intra_extension_id, subject_dict["id"], subject_dict)
 
     @filter_input
     @enforce("read", "objects")
@@ -1490,7 +1517,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
         subject_id = None
         for _subject_id in subjects_dict:
-            if subjects_dict[_subject_id]['name'] is subject_name:
+            if subjects_dict[_subject_id]['keystone_name'] is subject_name:
                 subject_id = _subject_id
         if not subject_id:
             raise SubjectUnknown()
@@ -1563,6 +1590,8 @@ class IntraExtensionAdminManager(IntraExtensionManager):
 
 
 @dependency.provider('moonlog_api')
+# Next line is mandatory in order to force keystone to process dependencies.
+@dependency.requires('admin_api')
 class LogManager(manager.Manager):
 
     def __init__(self):
@@ -1699,32 +1728,32 @@ class IntraExtensionDriver(object):
             data_values = self.get_subjects_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise SubjectUnknown()
+                raise SubjectUnknown("{} / {}".format(name, data_values))
         elif data_name == self.OBJECT:
             data_values = self.get_objects_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ObjectUnknown()
+                raise ObjectUnknown("{} / {}".format(name, data_values))
         elif data_name == self.ACTION:
             data_values = self.get_actions_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ActionUnknown()
+                raise ActionUnknown("{} / {}".format(name, data_values))
         elif data_name == self.SUBJECT_CATEGORY:
             data_values = self.get_subject_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise SubjectCategoryUnknown()
+                raise SubjectCategoryUnknown("{} / {}".format(name, data_values))
         elif data_name == self.OBJECT_CATEGORY:
             data_values = self.get_object_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ObjectCategoryUnknown()
+                raise ObjectCategoryUnknown("{} / {}".format(name, data_values))
         elif data_name == self.ACTION_CATEGORY:
             data_values = self.get_action_categories_dict(intra_extension_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ActionCategoryUnknown()
+                raise ActionCategoryUnknown("{} / {}".format(name, data_values))
         elif data_name == self.SUBJECT_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.SUBJECT_CATEGORY)
@@ -1732,7 +1761,7 @@ class IntraExtensionDriver(object):
                                                        category_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise SubjectScopeUnknown()
+                raise SubjectScopeUnknown("{} / {}".format(name, data_values))
         elif data_name == self.OBJECT_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.OBJECT_CATEGORY)
@@ -1740,7 +1769,7 @@ class IntraExtensionDriver(object):
                                                       category_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ObjectScopeUnknown()
+                raise ObjectScopeUnknown("{} / {}".format(name, data_values))
         elif data_name == self.ACTION_SCOPE:
             if not category_uuid:
                 category_uuid = self.get_uuid_from_name(intra_extension_uuid, category_name, self.ACTION_CATEGORY)
@@ -1748,14 +1777,12 @@ class IntraExtensionDriver(object):
                                                       category_uuid)
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise ActionScopeUnknown()
+                raise ActionScopeUnknown("{} / {}".format(name, data_values))
         elif data_name == self.SUB_META_RULE:
             data_values = self.get_sub_meta_rules_dict(intra_extension_uuid)
-            print("name = {}".format(name))
-            print("data_values = {}".format(data_values))
             if (name and name not in extract_name(data_values)) or \
                     (uuid and uuid not in data_values.keys()):
-                raise SubMetaRuleUnknown()
+                raise SubMetaRuleUnknown("{} / {}".format(name, data_values))
         # if data_name in (
         #     self.SUBJECT_SCOPE,
         #     self.OBJECT_SCOPE,
@@ -1774,7 +1801,6 @@ class IntraExtensionDriver(object):
             category_name=category_name,
             category_uuid=category_uuid,
         )
-        print("get_uuid_from_name {}".format(data_values))
         return filter(lambda v: v[1]["name"] == name, data_values.iteritems())[0][0]
 
     def get_name_from_uuid(self, intra_extension_uuid, uuid, data_name, category_name=None, category_uuid=None):

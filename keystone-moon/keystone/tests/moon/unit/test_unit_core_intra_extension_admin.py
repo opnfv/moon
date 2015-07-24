@@ -66,7 +66,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         #self.admin = self.identity_api.create_user(USER)
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        self.ref = self.manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
+        self.ref = self.manager.load_intra_extension_dict(DEFAULT_USER_ID, intra_extension_dict=IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 
@@ -1311,7 +1311,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         IE["policymodel"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        ref = self.admin_manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
+        ref = self.admin_manager.load_intra_extension_dict(DEFAULT_USER_ID, intra_extension_dict=IE)
         self.assertIsInstance(ref, dict)
         return ref
 

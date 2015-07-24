@@ -3,6 +3,7 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
+from uuid import uuid4
 import sqlalchemy as sql
 from keystone.common import sql as k_sql
 
@@ -19,6 +20,12 @@ def upgrade(migrate_engine):
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     intra_extension_table.create(migrate_engine, checkfirst=True)
+
+    intra_extension_table.insert().values(id=uuid4().hex, intra_extension={
+        'name': "Root Extension",
+        'description': "The root intra extension",
+        'model': 'admin'
+    })
 
     tenant_table = sql.Table(
         'tenants',

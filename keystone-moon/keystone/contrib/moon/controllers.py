@@ -74,8 +74,10 @@ class Tenants(controller.V3Controller):
     @controller.protected()
     def add_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get("token_id"))
-        # TODO: get tenant name from keystone
+        # Next line will raise an error if tenant doesn't exist
+        k_tenant_dict = self.resource_api.get_project_by_name(kw.get("name", None))
         tenant_dict = dict()
+        tenant_dict['id'] = k_tenant_dict['id']
         tenant_dict['name'] = kw.get("name", None)
         tenant_dict['description'] = kw.get("description", None)
         tenant_dict['intra_authz_ext_id'] = kw.get("intra_authz_ext_id", None)
@@ -97,9 +99,11 @@ class Tenants(controller.V3Controller):
     @controller.protected()
     def set_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
+        # Next line will raise an error if tenant doesn't exist
+        k_tenant_dict = self.resource_api.get_project(kw.get('id', None))
         tenant_id = kw.get('id', None)
         tenant_dict = dict()
-        tenant_dict['name'] = kw.get("name", None)
+        tenant_dict['name'] = k_tenant_dict.get("name", None)
         tenant_dict['description'] = kw.get("description", None)
         tenant_dict['intra_authz_ext_id'] = kw.get("intra_authz_ext_id", None)
         tenant_dict['intra_admin_ext_id'] = kw.get("intra_admin_ext_id", None)
@@ -162,7 +166,7 @@ class IntraExtensions(controller.V3Controller):
         intra_extension_dict["aggregation_algorithm"] = kw.get("intra_extension_aggregation_algorithm", dict())
         intra_extension_dict["sub_meta_rules"] = kw.get("intra_extension_sub_meta_rules", dict())
         intra_extension_dict["rules"] = kw.get("intra_extension_rules", dict())
-        return self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict)
+        return self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict=intra_extension_dict)
 
     @controller.protected()
     def get_intra_extension(self, context, **kw):

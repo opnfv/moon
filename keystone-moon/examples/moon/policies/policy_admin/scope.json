@@ -11,7 +11,7 @@
         ]
     },
     "object_scopes": {
-        "action_id": [
+        "object_id": [
             "authz.subjects",
             "authz.objects",
             "authz.actions",

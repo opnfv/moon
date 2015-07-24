@@ -15,7 +15,7 @@ from keystone.tests.unit.ksfixtures import database
 from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
-from keystone.contrib.moon.core import LogManager, TenantManager
+from keystone.contrib.moon.core import LogManager, TenantManager, ADMIN_ID
 
 CONF = cfg.CONF
 
@@ -89,7 +89,7 @@ class TestIntraExtensionAuthzManagerAuthz(tests.TestCase):
 
         IE["model"] = policy_model
         IE["name"] = uuid.uuid4().hex
-        ref = self.admin_manager.load_intra_extension_dict(DEFAULT_USER_ID, IE)
+        ref = self.admin_manager.load_intra_extension_dict(ADMIN_ID, intra_extension_dict=IE)
         self.assertIsInstance(ref, dict)
         return ref
 

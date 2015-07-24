@@ -15,7 +15,7 @@
     "object_assignments": {
         "object_id": {
             "templates": ["templates"],
-		    "sub_meta_rule_algorithm": ["sub_meta_rule_relations"],
+		    "sub_meta_rule_algorithms": ["sub_meta_rule_algorithms"],
 		    "aggregation_algorithms": ["aggregation_algorithms"],
             "tenants": ["tenants"],
             "intra_extensions": ["intra_extensions"],

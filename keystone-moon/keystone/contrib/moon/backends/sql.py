@@ -47,16 +47,12 @@ class Tenant(sql.ModelBase, sql.DictBase):
         """Override parent from_dict() method with a different implementation.
         """
         new_d = d.copy()
-        uuid = new_d.keys()[0]
-        return cls(id=uuid, **new_d[uuid])
+        return cls(**new_d)
 
     def to_dict(self):
         """
         """
-        tenant_dict = {}
-        for key in ("id", "name", "authz", "admin"):
-            tenant_dict[key] = getattr(self, key)
-        return tenant_dict
+        return dict(six.iteritems(self))
 
 
 class SubjectCategory(sql.ModelBase, sql.DictBase):
@@ -334,7 +330,7 @@ class TenantConnector(TenantDriver):
         with sql.transaction() as session:
             query = session.query(Tenant)
             tenants = query.all()
-            return {tenant.id: Tenant.to_dict(tenant) for tenant in tenants}
+            return {tenant.id: tenant.tenant for tenant in tenants}
 
     def add_tenant_dict(self, tenant_id, tenant_dict):
         with sql.transaction() as session:
@@ -374,9 +370,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     def get_intra_extensions_dict(self):
         with sql.transaction() as session:
-            query = session.query(IntraExtension.id)
+            query = session.query(IntraExtension)
             ref_list = query.all()
-            return {_ref.id: _ref.intraextension for _ref in ref_list}
+            return {_ref.id: _ref.intra_extension for _ref in ref_list}
 
     def del_intra_extension(self, intra_extension_id):
         with sql.transaction() as session:
@@ -947,7 +943,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def get_rules_dict(self, intra_extension_id, sub_meta_rule_id):
         with sql.transaction() as session:
             query = session.query(Rule)
-            query = query.filter_by(intra_extension_id=intra_extension_id, id=sub_meta_rule_id)
+            query = query.filter_by(intra_extension_id=intra_extension_id, sub_meta_rule_id=sub_meta_rule_id)
             ref_list = query.all()
             return {_ref.id: _ref.rule for _ref in ref_list}
 
