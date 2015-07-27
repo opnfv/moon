@@ -1538,16 +1538,39 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         return super(IntraExtensionAuthzManager, self).authz(intra_extension_id, subject_id, object_id, action_id)
 
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
-        # TODO: sync with intra_admin_extension subjects table, need double check in both authz and admin
-        return
+        subject = super(IntraExtensionAuthzManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], subject['id'], subject_dict)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], subject['id'], subject_dict)
+                break
+        return subject
 
     def del_subject(self, user_id, intra_extension_id, subject_id):
-        # TODO: sync with intra_admin_extension subjects table, need double check in both authz and admin
-        pass
+        super(IntraExtensionAuthzManager, self).del_subject(user_id, intra_extension_id, subject_id)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.del_subject(tenants_dict[tenant_id]["intra_admin_extension_id"], subject_id)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.del_subject(tenants_dict[tenant_id]["intra_authz_extension_id"], subject_id)
+                break
 
     def set_subject_dict(self, user_id, intra_extension_id, subject_id, subject_dict):
-        # TODO: sync with intra_admin_extension subjects table, need double check in both authz and admin
-        return
+        subject = super(IntraExtensionAuthzManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], subject['id'], subject_dict)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], subject['id'], subject_dict)
+                break
+        return subject
 
     # TODO: for other no heritaged functions, add raise AuthzException()
 
@@ -1559,16 +1582,39 @@ class IntraExtensionAdminManager(IntraExtensionManager):
         super(IntraExtensionAdminManager, self).__init__()
 
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
-        # TODO: sync with intra_authz_extension subjects table, need double check in both authz and admin
-        return
+        subject = super(IntraExtensionAdminManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], subject['id'], subject_dict)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], subject['id'], subject_dict)
+                break
+        return subject
 
     def del_subject(self, user_id, intra_extension_id, subject_id):
-        # TODO: sync with intra_authz_extension subjects table, need double check in both authz and admin
-        pass
+        super(IntraExtensionAdminManager, self).del_subject(user_id, intra_extension_id, subject_id)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.del_subject(tenants_dict[tenant_id]["intra_admin_extension_id"], subject_id)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.del_subject(tenants_dict[tenant_id]["intra_authz_extension_id"], subject_id)
+                break
 
     def set_subject_dict(self, user_id, intra_extension_id, subject_id, subject_dict):
-        # TODO: sync with intra_authz_extension subjects table, need double check in both authz and admin
-        return
+        subject = super(IntraExtensionAdminManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
+        tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
+        for tenant_id in tenants_dict:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], subject['id'], subject_dict)
+                break
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+                self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], subject['id'], subject_dict)
+                break
+        return subject
 
     def add_object_dict(self, user_id, intra_extension_id, object_name):
         raise ObjectsWriteNoAuthorized()
