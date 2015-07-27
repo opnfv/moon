@@ -97,6 +97,12 @@ class RootExtensionUnknown(IntraExtensionUnknown):
     title = 'Root Extension Unknown'
     logger = "Error"
 
+class RootExtensionNotInitialized(IntraExtensionException):
+    message_format = _("The root_extension is not initialized.")
+    code = 400
+    title = 'Root Extension Not Initialized'
+    logger = "Error"
+
 
 class IntraExtensionCreationError(IntraExtensionException):
     message_format = _("The arguments for the creation of this Extension were malformed.")
