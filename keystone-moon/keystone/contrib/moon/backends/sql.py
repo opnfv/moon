@@ -306,7 +306,6 @@ class Rule(sql.ModelBase, sql.DictBase):
 
 
 __all_objects__ = (
-    Tenant,
     Subject,
     Object,
     Action,
@@ -900,6 +899,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(intra_extension_id=intra_extension_id)
             ref = query.first()
             return {ref.id: ref.aggregation_algorithm}
+
+    def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
+        with sql.transaction() as session:
+            query = session.query(AggregationAlgorithm)
+            query = query.filter_by(intra_extension_id=intra_extension_id, id=aggregation_algorithm_id)
+            ref = query.first()
+            session.delete(ref)
 
     # Getter and Setter for sub_meta_rule
 

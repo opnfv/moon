@@ -756,6 +756,33 @@ class IntraExtensionManager(manager.Manager):
     def del_intra_extension(self, user_id, intra_extension_id):
         if intra_extension_id not in self.driver.get_intra_extensions_dict():
             raise IntraExtensionUnknown()
+        for sub_meta_rule_id in self.driver.get_sub_meta_rules_dict(intra_extension_id):
+            for rule_id in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id):
+                self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
+            self.driver.del_sub_meta_rule(intra_extension_id, sub_meta_rule_id)
+        for aggregation_algorithm_id in self.driver.get_aggregation_algorithms_dict(intra_extension_id):
+            self.driver.del_aggregation_algorithm(intra_extension_id, aggregation_algorithm_id)
+        for subject_id in self.driver.get_subjects_dict(intra_extension_id):
+            self.driver.del_subject(intra_extension_id, subject_id)
+        for object_id in self.driver.get_objects_dict(intra_extension_id):
+            self.driver.del_object(intra_extension_id, object_id)
+        for action_id in self.driver.get_actions_dict(intra_extension_id):
+            self.driver.del_action(intra_extension_id, action_id)
+        for subject_category_id in self.driver.get_subject_categories_dict(intra_extension_id):
+            for subject_scope_id in self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id):
+                self.driver.del_subject_assignment(intra_extension_id, subject_id, subject_category_id, subject_scope_id)
+                self.driver.del_subject_scope(intra_extension_id, subject_category_id, subject_scope_id)
+            self.driver.del_subject_category(intra_extension_id, subject_category_id)
+        for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
+            for object_scope_id in self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id):
+                self.driver.del_object_assignment(intra_extension_id, object_id, object_category_id, object_scope_id)
+                self.driver.del_object_scope(intra_extension_id, object_category_id, object_scope_id)
+            self.driver.del_object_category(intra_extension_id, object_category_id)
+        for action_category_id in self.driver.get_action_categories_dict(intra_extension_id):
+            for action_scope_id in self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id):
+                self.driver.del_action_assignment(intra_extension_id, action_id, action_category_id, action_scope_id)
+                self.driver.del_action_scope(intra_extension_id, action_category_id, action_scope_id)
+            self.driver.del_action_category(intra_extension_id, action_category_id)
         return self.driver.del_intra_extension(intra_extension_id)
 
     @enforce(("read", "write"), "intra_extensions")
@@ -1459,8 +1486,8 @@ class IntraExtensionManager(manager.Manager):
     def del_sub_meta_rule(self, user_id, intra_extension_id, sub_meta_rule_id):
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
-        # TODO (dthom): destroy sub-meta-rule-related rules
-        # self.driver.del_rule(intra_extension_id, sub_meta_rule_id, "*")
+        for rule_id in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id):
+            self.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
         self.driver.del_sub_meta_rule(intra_extension_id, sub_meta_rule_id)
 
     @filter_input
@@ -2003,6 +2030,9 @@ class IntraExtensionDriver(object):
         raise exception.NotImplemented()  # pragma: no cover
 
     def get_aggregation_algorithm(self, intra_extension_id):
+        raise exception.NotImplemented()  # pragma: no cover
+
+    def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
         raise exception.NotImplemented()  # pragma: no cover
 
     def get_sub_meta_rules_dict(self, intra_extension_id):
