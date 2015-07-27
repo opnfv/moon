@@ -1641,7 +1641,83 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
                 break
         return subject
 
-    # TODO: for other no heritaged functions, add raise AuthzException()
+    def get_subject_categories_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_subject_category(self, user_id, intra_extension_id, subject_category_id):
+        raise AuthzException()
+
+    def get_object_category_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_object_category(self, user_id, intra_extension_id, object_category_id):
+        raise AuthzException()
+
+    def get_action_category_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_action_category(self, user_id, intra_extension_id, action_category_id):
+        raise AuthzException()
+
+    def get_subjects_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_subject_dict(self, user_id, intra_extension_id, subject_id):
+        raise AuthzException()
+
+    def get_objects_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_object_dict(self, user_id, intra_extension_id, object_id):
+        raise AuthzException()
+
+    def get_actions_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_action_dict(self, user_id, intra_extension_id, action_id):
+        raise AuthzException()
+
+    def get_subject_scopes_dict(self, user_id, intra_extension_id, subject_category_id):
+        raise AuthzException()
+
+    def get_subject_scope_dict(self, user_id, intra_extension_id, subject_category_id, subject_scope_id):
+        raise AuthzException()
+
+    def get_object_scopes_dict(self, user_id, intra_extension_id, object_category_id):
+        raise AuthzException()
+
+    def get_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_id):
+        raise AuthzException()
+
+    def get_action_scopes_dict(self, user_id, intra_extension_id, action_category_id):
+        raise AuthzException()
+
+    def get_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_id):
+        raise AuthzException()
+
+    def get_subject_assignment_list(self, user_id, intra_extension_id, subject_id, subject_category_id):
+        raise AuthzException()
+
+    def get_object_assignment_list(self, user_id, intra_extension_id, object_id, object_category_id):
+        raise AuthzException()
+
+    def get_action_assignment_list(self, user_id, intra_extension_id, action_id, action_category_id):
+        raise AuthzException()
+
+    def get_aggregation_algorithm_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_sub_meta_rules_dict(self, user_id, intra_extension_id):
+        raise AuthzException()
+
+    def get_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id):
+        raise AuthzException()
+
+    def get_rules_dict(self, user_id, intra_extension_id, sub_meta_rule_id):
+        raise AuthzException()
+
+    def get_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id, rule_id):
+        raise AuthzException()
 
 
 @dependency.provider('admin_api')
