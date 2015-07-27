@@ -396,6 +396,7 @@ class IntraExtensionManager(manager.Manager):
         """
         authz_buffer = self.__get_authz_buffer(intra_extension_id, subject_id, object_id, action_id)
         decision_buffer = dict()
+        decision = False
 
         meta_rule_dict = self.driver.get_sub_meta_rules_dict(intra_extension_id)
 
@@ -412,9 +413,10 @@ class IntraExtensionManager(manager.Manager):
                     self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values())
 
         if meta_rule_dict['aggregation'] == 'all_true':
-            return all_true(decision_buffer)
-
-        return False
+            decision = all_true(decision_buffer)
+        if not decision:
+            raise AuthzException()
+        return decision
 
     @enforce("read", "intra_extensions")
     def get_intra_extensions_dict(self, user_id):
@@ -1499,7 +1501,6 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         super(IntraExtensionAuthzManager, self).__init__()
 
     def authz(self, tenant_name, subject_name, object_name, action_name, genre="authz"):
-        # TODO (dthom) add moon log
         """Check authorization for a particular action.
         :return: True or False or raise an exception
         """
