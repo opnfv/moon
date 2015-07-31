@@ -46,8 +46,15 @@ def inclusion(authz_buffer, sub_meta_rule_dict, rule_list):
         if object_cat in authz_buffer['object_assignments']:
             _cat.append(authz_buffer['object_assignments'][object_cat])
 
+    print("authz_buffer", authz_buffer)
+    print("rule_list", rule_list)
+    print("_cat", _cat)
     for _element in itertools.product(*_cat):
-        if list(_element) in rule_list:
+        # Add the boolean at the end
+        _element = list(_element)
+        _element.append(True)
+        print("_element", _element)
+        if _element in rule_list:
             return True
 
     return False

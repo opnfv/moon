@@ -30,7 +30,7 @@ IE = {
     "description": "a simple description."
 }
 
-@dependency.requires('admin_api')
+@dependency.requires('admin_api', 'tenant_api', 'configuration_api')
 class TestTenantManager(tests.TestCase):
     ADMIN_ID = None
 
@@ -45,8 +45,8 @@ class TestTenantManager(tests.TestCase):
         # force re-initialization of the ADMIN_ID variable
         from keystone.contrib.moon.core import ADMIN_ID
         self.ADMIN_ID = ADMIN_ID
-        self.manager = TenantManager()
-        self.configuration_api = ConfigurationManager()
+        self.manager = self.tenant_api
+        # self.configuration_api = self.configuration_api
         # self.configuration_api.init_default_variables()
 
     def load_extra_backends(self):
@@ -95,20 +95,20 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
-        data = self.admin_api.get_intra_extension_dict(self.ADMIN_ID, new_tenant["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data["id"])
-        data = self.admin_api.get_intra_extension_dict(self.ADMIN_ID, new_tenant["intra_admin_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data["id"])
+        data = self.admin_api.get_intra_extension_dict(self.ADMIN_ID, new_tenant["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data["id"])
+        data = self.admin_api.get_intra_extension_dict(self.ADMIN_ID, new_tenant["intra_admin_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data["id"])
 
     def test_del_tenant(self):
         authz_intra_extension = self.create_intra_extension(policy_model="policy_authz")
@@ -117,14 +117,14 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
         self.manager.del_tenant(self.ADMIN_ID, new_tenant["id"])
@@ -138,14 +138,14 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
 
@@ -153,8 +153,8 @@ class TestTenantManager(tests.TestCase):
         data = self.manager.set_tenant_dict(user_id=self.ADMIN_ID, tenant_id=new_tenant["id"], tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
 
     def test_exception_tenant_unknown(self):
         self.assertRaises(TenantUnknown, self.manager.get_tenant_dict, self.ADMIN_ID, uuid.uuid4().hex)
@@ -167,14 +167,14 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
 
@@ -187,14 +187,14 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
 
@@ -207,20 +207,20 @@ class TestTenantManager(tests.TestCase):
             "id": uuid.uuid4().hex,
             "name": "demo",
             "description": uuid.uuid4().hex,
-            "intra_authz_extension": authz_intra_extension['id'],
-            "intra_admin_extension": admin_intra_extension['id'],
+            "intra_authz_extension_id": authz_intra_extension['id'],
+            "intra_admin_extension_id": admin_intra_extension['id'],
         }
-        new_tenant['intra_authz_extension'] = None
+        new_tenant['intra_authz_extension_id'] = None
         self.assertRaises(TenantNoIntraAuthzExtension, self.manager.add_tenant_dict, self.ADMIN_ID, new_tenant)
-        new_tenant['intra_authz_extension'] = authz_intra_extension['id']
+        new_tenant['intra_authz_extension_id'] = authz_intra_extension['id']
         data = self.manager.add_tenant_dict(user_id=self.ADMIN_ID, tenant_dict=new_tenant)
         self.assertEquals(new_tenant["id"], data["id"])
         self.assertEquals(new_tenant["name"], data['tenant']["name"])
-        self.assertEquals(new_tenant["intra_authz_extension"], data['tenant']["intra_authz_extension"])
-        self.assertEquals(new_tenant["intra_admin_extension"], data['tenant']["intra_admin_extension"])
+        self.assertEquals(new_tenant["intra_authz_extension_id"], data['tenant']["intra_authz_extension_id"])
+        self.assertEquals(new_tenant["intra_admin_extension_id"], data['tenant']["intra_admin_extension_id"])
         data = self.manager.get_tenants_dict(self.ADMIN_ID)
         self.assertNotEqual(data, {})
 
-        new_tenant['intra_authz_extension'] = None
+        new_tenant['intra_authz_extension_id'] = None
         new_tenant['name'] = "demo2"
         self.assertRaises(TenantNoIntraAuthzExtension, self.manager.set_tenant_dict, self.ADMIN_ID, new_tenant["id"], new_tenant)

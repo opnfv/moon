@@ -354,6 +354,13 @@ class AggregationAlgorithmUnknown(AdminMetaRule):
     logger = "ERROR"
 
 
+class SubMetaRuleAlgorithmNotExisting(AdminMetaRule):
+    message_format = _("The given sub_meta_rule algorithm is unknown.")
+    code = 400
+    title = 'Sub_meta_rule Algorithm Unknown'
+    logger = "ERROR"
+
+
 class SubMetaRuleUnknown(AdminMetaRule):
     message_format = _("The given sub meta rule is unknown.")
     code = 400
@@ -362,21 +369,21 @@ class SubMetaRuleUnknown(AdminMetaRule):
 
 
 class SubMetaRuleNameExisting(AdminMetaRule):
-    message_format = _("The sub meta rule name is existing.")
+    message_format = _("The sub meta rule name already exists.")
     code = 400
     title = 'Sub Meta Rule Name Existing'
     logger = "ERROR"
 
 
 class SubMetaRuleExisting(AdminMetaRule):
-    message_format = _("The sub meta rule is existing.")
+    message_format = _("The sub meta rule already exists.")
     code = 400
     title = 'Sub Meta Rule Existing'
     logger = "ERROR"
 
 
 class RuleExisting(AdminRule):
-    message_format = _("The rule is existing.")
+    message_format = _("The rule already exists.")
     code = 400
     title = 'Rule Existing'
     logger = "ERROR"

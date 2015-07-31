@@ -340,7 +340,7 @@ class TenantConnector(TenantDriver):
                 }
             )
             session.add(new_ref)
-            return new_ref.to_dict()
+            return {new_ref.id: new_ref.tenant}
 
     def del_tenant(self, tenant_id):
         with sql.transaction() as session:
@@ -360,7 +360,7 @@ class TenantConnector(TenantDriver):
             for attr in Tenant.attributes:
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_tenant, attr))
-            return Tenant.to_dict(ref)
+            return {ref.id: ref.tenant}
 
 
 class IntraExtensionConnector(IntraExtensionDriver):
@@ -437,7 +437,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_subject_categories_dict(intra_extension_id)[subject_category_id]
+            return {subject_category_id: self.get_subject_categories_dict(intra_extension_id)[subject_category_id]}
 
     def del_subject_category(self, intra_extension_id, subject_category_id):
         with sql.transaction() as session:
@@ -474,7 +474,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_object_categories_dict(intra_extension_id)[object_category_id]
+            return {object_category_id: self.get_object_categories_dict(intra_extension_id)[object_category_id]}
 
     def del_object_category(self, intra_extension_id, object_category_id):
         with sql.transaction() as session:
@@ -511,7 +511,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_action_categories_dict(intra_extension_id)[action_category_id]
+            return {action_category_id: self.get_action_categories_dict(intra_extension_id)[action_category_id]}
 
     def del_action_category(self, intra_extension_id, action_category_id):
         with sql.transaction() as session:
@@ -534,6 +534,8 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(Subject)
             query = query.filter_by(intra_extension_id=intra_extension_id, id=subject_id)
             ref = query.first()
+            # if 'id' in subject_dict:
+            #     subject_dict['id'] = subject_id
             new_ref = Subject.from_dict(
                 {
                     "id": subject_id,
@@ -548,7 +550,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_subjects_dict(intra_extension_id)[subject_id]
+            return {subject_id: self.get_subjects_dict(intra_extension_id)[subject_id]}
 
     def del_subject(self, intra_extension_id, subject_id):
         with sql.transaction() as session:
@@ -583,7 +585,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_objects_dict(intra_extension_id)[object_id]
+            return {object_id: self.get_objects_dict(intra_extension_id)[object_id]}
 
     def del_object(self, intra_extension_id, object_id):
         with sql.transaction() as session:
@@ -618,7 +620,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_actions_dict(intra_extension_id)[action_id]
+            return {action_id: self.get_actions_dict(intra_extension_id)[action_id]}
 
     def del_action(self, intra_extension_id, action_id):
         with sql.transaction() as session:
@@ -656,7 +658,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_subject_scopes_dict(intra_extension_id, subject_category_id)[subject_scope_id]
+            return {subject_scope_id: self.get_subject_scopes_dict(intra_extension_id, subject_category_id)[subject_scope_id]}
 
     def del_subject_scope(self, intra_extension_id, subject_category_id, subject_scope_id):
         with sql.transaction() as session:
@@ -694,7 +696,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_object_scopes_dict(intra_extension_id, object_category_id)[object_scope_id]
+            return {object_scope_id: self.get_object_scopes_dict(intra_extension_id, object_category_id)[object_scope_id]}
 
     def del_object_scope(self, intra_extension_id, object_category_id, object_scope_id):
         with sql.transaction() as session:
@@ -732,7 +734,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_action_scopes_dict(intra_extension_id, action_category_id)[action_scope_id]
+            return {action_scope_id: self.get_action_scopes_dict(intra_extension_id, action_category_id)[action_scope_id]}
 
     def del_action_scope(self, intra_extension_id, action_category_id, action_scope_id):
         with sql.transaction() as session:
@@ -748,7 +750,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(SubjectAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id, subject_id=subject_id, subject_category_id=subject_category_id)
             ref = query.first()
-            return ref.subject_assignment
+            if not ref:
+                return list()
+            return list(ref.subject_assignment)
 
     def set_subject_assignment_list(self, intra_extension_id, subject_id, subject_category_id, subject_assignment_list=[]):
         with sql.transaction() as session:
@@ -791,7 +795,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(ObjectAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id, object_id=object_id, object_category_id=object_category_id)
             ref = query.first()
-            return ref.object_assignment
+            if not ref:
+                return list()
+            return list(ref.object_assignment)
 
     def set_object_assignment_list(self, intra_extension_id, object_id, object_category_id, object_assignment_list=[]):
         with sql.transaction() as session:
@@ -834,7 +840,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(ActionAssignment)
             query = query.filter_by(intra_extension_id=intra_extension_id, action_id=action_id, action_category_id=action_category_id)
             ref = query.first()
-            return ref.action_assignment
+            if not ref:
+                return list()
+            return list(ref.action_assignment)
 
     def set_action_assignment_list(self, intra_extension_id, action_id, action_category_id, action_assignment_list=[]):
         with sql.transaction() as session:
@@ -872,7 +880,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for sub_meta_rule
 
-    def set_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+    def set_aggregation_algorithm_dict(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
         with sql.transaction() as session:
             query = session.query(AggregationAlgorithm)
             query = query.filter_by(intra_extension_id=intra_extension_id, id=aggregation_algorithm_id)
@@ -891,9 +899,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_aggregation_algorithm(intra_extension_id)
+            return self.get_aggregation_algorithm_dict(intra_extension_id)
 
-    def get_aggregation_algorithm(self, intra_extension_id):
+    def get_aggregation_algorithm_dict(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(AggregationAlgorithm)
             query = query.filter_by(intra_extension_id=intra_extension_id)
@@ -973,7 +981,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_rules_dict(intra_extension_id, sub_meta_rule_id)[rule_id]
+            return {rule_id: self.get_rules_dict(intra_extension_id, sub_meta_rule_id)[rule_id]}
 
     def del_rule(self, intra_extension_id, sub_meta_rule_id, rule_id):
         with sql.transaction() as session:

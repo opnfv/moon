@@ -25,7 +25,7 @@ class ConfigurationConnector(ConfigurationDriver):
         self.sub_meta_rule_algorithm_dict[uuid4().hex] = {'name': 'inclusion', 'description': 'inclusion'}
         self.sub_meta_rule_algorithm_dict[uuid4().hex] = {'name': 'comparison', 'description': 'comparison'}
 
-    def get_policy_template_dict(self):
+    def get_policy_templates_dict(self):
         nodes = glob(os.path.join(CONF.moon.policy_directory, "*"))
         return {
             "authz_templates":
@@ -35,5 +35,5 @@ class ConfigurationConnector(ConfigurationDriver):
     def get_aggregation_algorithm_dict(self):
         return self.aggregation_algorithm_dict
 
-    def get_sub_meta_rule_algorithm_dict(self):
+    def get_sub_meta_rule_algorithms_dict(self):
         return self.sub_meta_rule_algorithm_dict

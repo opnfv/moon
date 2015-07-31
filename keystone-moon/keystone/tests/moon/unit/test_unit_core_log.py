@@ -17,7 +17,7 @@ from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
-from keystone.contrib.moon.core import DEFAULT_USER_ID
+from keystone.contrib.moon.core import ADMIN_ID
 
 CONF = cfg.CONF
 
@@ -35,6 +35,7 @@ IE = {
 
 TIME_FORMAT = '%Y-%m-%d-%H:%M:%S'
 
+@dependency.requires('admin_api', 'tenant_api', 'configuration_api')
 class TestIntraExtensionAdminManager(tests.TestCase):
 
     def setUp(self):
@@ -42,6 +43,12 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         super(TestIntraExtensionAdminManager, self).setUp()
         self.load_backends()
         self.load_fixtures(default_fixtures)
+        self.admin = self.create_user(username="admin")
+        self.demo = self.create_user(username="demo")
+        self.root_intra_extension = self.create_intra_extension(policy_model="policy_root")
+        # force re-initialization of the ADMIN_ID variable
+        from keystone.contrib.moon.core import ADMIN_ID
+        self.ADMIN_ID = ADMIN_ID
         self.manager = IntraExtensionAdminManager()
 
     def __get_key_from_value(self, value, values_dict):
@@ -68,7 +75,7 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         # Create the admin user because IntraExtension needs it
         self.admin = self.identity_api.create_user(USER_ADMIN)
         IE["policymodel"] = policy_model
-        self.ref = self.manager.load_intra_extension_dict(DEFAULT_USER_ID, intra_extension_dict=IE)
+        self.ref = self.manager.load_intra_extension_dict(ADMIN_ID, intra_extension_dict=IE)
         self.assertIsInstance(self.ref, dict)
         self.create_tenant(self.ref["id"])
 
