@@ -365,7 +365,7 @@ class TenantConnector(TenantDriver):
 
 class IntraExtensionConnector(IntraExtensionDriver):
 
-    # Tenant functions
+    # IntraExtension functions
 
     def get_intra_extensions_dict(self):
         with sql.transaction() as session:
@@ -401,9 +401,6 @@ class IntraExtensionConnector(IntraExtensionDriver):
                 session.add(new_intra_extension)
                 ref = new_intra_extension
             else:
-                # intra_extension_ref = ref.to_dict()
-                # intra_extension_ref.update(intra_extension_dict)
-                # new_intra_extension = IntraExtension.from_dict(id=intra_extension_id, intra_extension=intra_extension_ref)
                 for attr in IntraExtension.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_intra_extension, attr))

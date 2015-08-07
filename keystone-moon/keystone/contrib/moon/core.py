@@ -266,31 +266,39 @@ class ConfigurationManager(manager.Manager):
     def get_policy_templates_dict(self, user_id):
         """
         Return a dictionary of all policy templates
-        :return: {template_id: {name: temp_name, description: template_description}, ...}
+        :return: {
+            template_id1: {name: template_name, description: template_description},
+            template_id2: {name: template_name, description: template_description},
+            ...
+            }
         """
         return self.driver.get_policy_templates_dict()
 
     @enforce("read", "templates")
     def get_policy_template_id_from_name(self, user_id, policy_template_name):
-        policy_template_dict = self.driver.get_policy_templates_dict()
-        for policy_template_id in policy_template_dict:
-            if policy_template_dict[policy_template_id]['name'] == policy_template_name:
+        policy_templates_dict = self.driver.get_policy_templates_dict()
+        for policy_template_id in policy_templates_dict:
+            if policy_templates_dict[policy_template_id]['name'] is policy_template_name:
                 return policy_template_id
         return None
 
     @enforce("read", "aggregation_algorithms")
     def get_aggregation_algorithms_dict(self, user_id):
         """
-        Return a dictionary of all aggregation algorithm
-        :return: {aggre_algo_id: {name: aggre_name, description: aggre_algo_description}, ...}
+        Return a dictionary of all aggregation algorithms
+        :return: {
+            aggre_algo_id1: {name: aggre_name, description: aggre_algo_description},
+            aggre_algo_id2: {name: aggre_name, description: aggre_algo_description},
+            ...
+            }
         """
         return self.driver.get_aggregation_algorithms_dict()
 
     @enforce("read", "aggregation_algorithms")
     def get_aggregation_algorithm_id_from_name(self, user_id, aggregation_algorithm_name):
-        aggregation_algorithm_dict = self.driver.get_aggregation_algorithms_dict()
-        for aggregation_algorithm_id in aggregation_algorithm_dict:
-            if aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == aggregation_algorithm_name:
+        aggregation_algorithms_dict = self.driver.get_aggregation_algorithms_dict()
+        for aggregation_algorithm_id in aggregation_algorithms_dict:
+            if aggregation_algorithms_dict[aggregation_algorithm_id]['name'] is aggregation_algorithm_name:
                 return aggregation_algorithm_id
         return None
 
@@ -298,17 +306,22 @@ class ConfigurationManager(manager.Manager):
     def get_sub_meta_rule_algorithms_dict(self, user_id):
         """
         Return a dictionary of sub_meta_rule algorithm
-        :return: {sub_meta_rule_id: {name: sub_meta_rule_name, description: sub_meta_rule_description}, }
+        :return: {
+            sub_meta_rule_id1: {name: sub_meta_rule_name, description: sub_meta_rule_description},
+            sub_meta_rule_id2: {name: sub_meta_rule_name, description: sub_meta_rule_description},
+            ...
+        }
         """
         return self.driver.get_sub_meta_rule_algorithms_dict()
 
     @enforce("read", "sub_meta_rule_algorithms")
     def get_sub_meta_rule_algorithm_id_from_name(self, sub_meta_rule_algorithm_name):
-        sub_meta_rule_algorithm_dict = self.driver.get_sub_meta_rule_algorithms_dict()
-        for sub_meta_rule_algorithm_id in sub_meta_rule_algorithm_dict:
-            if sub_meta_rule_algorithm_dict[sub_meta_rule_algorithm_id]['name'] == sub_meta_rule_algorithm_name:
+        sub_meta_rule_algorithms_dict = self.driver.get_sub_meta_rule_algorithms_dict()
+        for sub_meta_rule_algorithm_id in sub_meta_rule_algorithms_dict:
+            if sub_meta_rule_algorithms_dict[sub_meta_rule_algorithm_id]['name'] is sub_meta_rule_algorithm_name:
                 return sub_meta_rule_algorithm_id
         return None
+
 
 @dependency.provider('tenant_api')
 @dependency.requires('moonlog_api', 'admin_api', 'configuration_api')
@@ -340,23 +353,33 @@ class TenantManager(manager.Manager):
     def add_tenant_dict(self, user_id, tenant_dict):
         tenants_dict = self.driver.get_tenants_dict()
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]['name'] == tenant_dict['name']:
+            if tenants_dict[tenant_id]['name'] is tenant_dict['name']:
                 raise TenantAddedNameExisting()
 
-        # Sync users between intra_authz_extension_id and intra_admin_extension_id
+        # Sync users between intra_authz_extension and intra_admin_extension
         if tenant_dict['intra_admin_extension_id']:
             if not tenant_dict['intra_authz_extension_id']:
                 raise TenantNoIntraAuthzExtension()
             authz_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'])
             admin_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'])
-            admin_subjects__name_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
-            authz_subjects__name_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
             for _subject_id in authz_subjects_dict:
-                if authz_subjects_dict[_subject_id]["name"] not in authz_subjects__name_list:
+                if _subject_id not in admin_subjects_dict:
                     self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
             for _subject_id in admin_subjects_dict:
-                if admin_subjects_dict[_subject_id]["name"] not in admin_subjects__name_list:
+                if _subject_id not in authz_subjects_dict:
                     self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+
+            # TODO (dthom): check whether we can replace the below code by the above one
+            # authz_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'])
+            # authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
+            # admin_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'])
+            # admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
+            # for _subject_id in authz_subjects_dict:
+            #     if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
+            #         self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+            # for _subject_id in admin_subjects_dict:
+            #     if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
+            #         self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.add_tenant_dict(tenant_dict['id'], tenant_dict)
 
@@ -364,7 +387,6 @@ class TenantManager(manager.Manager):
     @enforce("read", "tenants")
     def get_tenant_dict(self, user_id, tenant_id):
         tenants_dict = self.driver.get_tenants_dict()
-        print("get_tenant_dict", tenant_id, tenants_dict)
         if tenant_id not in tenants_dict:
             raise TenantUnknown()
         return tenants_dict[tenant_id]
@@ -383,24 +405,24 @@ class TenantManager(manager.Manager):
         if tenant_id not in tenants_dict:
             raise TenantUnknown()
 
-        # Sync users between intra_authz_extension_id and intra_admin_extension_id
+        # Sync users between intra_authz_extension and intra_admin_extension
         if tenant_dict['intra_admin_extension_id']:
             if not tenant_dict['intra_authz_extension_id']:
                 raise TenantNoIntraAuthzExtension
-            else:
-                authz_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'])
-                admin_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'])
-                for _subject_id in authz_subjects_dict:
-                    if _subject_id not in admin_subjects_dict:
-                        self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
-                for _subject_id in admin_subjects_dict:
-                    if _subject_id not in authz_subjects_dict:
-                        self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+            authz_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'])
+            admin_subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'])
+            for _subject_id in authz_subjects_dict:
+                if _subject_id not in admin_subjects_dict:
+                    self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+            for _subject_id in admin_subjects_dict:
+                if _subject_id not in authz_subjects_dict:
+                    self.admin_api.add_subject_dict(ADMIN_ID, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 
+    # TODO (dthom): move the following 2 functions to perimeter functions
     @filter_input
-    def get_subject_from_keystone_id(self, tenant_id, intra_extension_id, keystone_id):
+    def get_subject_dict_from_keystone_id(self, tenant_id, intra_extension_id, keystone_id):
         tenants_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenants_dict:
             raise TenantUnknown()
@@ -411,11 +433,11 @@ class TenantManager(manager.Manager):
         # and not the subject ID in the requested intra_extension.
         subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, intra_extension_id)
         for subject_id in subjects_dict:
-            if keystone_id == subjects_dict[subject_id]['keystone_id']:
+            if keystone_id is subjects_dict[subject_id]['keystone_id']:
                 return {subject_id: subjects_dict[subject_id]}
 
     @filter_input
-    def get_subject_from_keystone_name(self, tenant_id, intra_extension_id, keystone_name):
+    def get_subject_dict_from_keystone_name(self, tenant_id, intra_extension_id, keystone_name):
         tenants_dict = self.driver.get_tenants_dict()
         if tenant_id not in tenants_dict:
             raise TenantUnknown()
@@ -426,7 +448,7 @@ class TenantManager(manager.Manager):
         # keystone_name and not the subject ID in the requested intra_extension.
         subjects_dict = self.admin_api.get_subjects_dict(ADMIN_ID, intra_extension_id)
         for subject_id in subjects_dict:
-            if keystone_name == subjects_dict[subject_id]['keystone_name']:
+            if keystone_name is subjects_dict[subject_id]['keystone_name']:
                 return {subject_id: subjects_dict[subject_id]}
 
 
@@ -444,14 +466,13 @@ class IntraExtensionManager(manager.Manager):
         :param object_id:
         :param action_id:
         :return: authz_buffer = {
-            'subject_uuid': xxx,
-            'object_uuid': yyy,
-            'action_uuid': zzz,
+            'subject_id': xxx,
+            'object_id': yyy,
+            'action_id': zzz,
             'subject_assignments': {
                 'subject_category1': [],
                 'subject_category2': [],
                 ...
-                'subject_categoryn': []
             },
             'object_assignments': {},
             'action_assignments': {},
@@ -496,14 +517,7 @@ class IntraExtensionManager(manager.Manager):
         :param object_id: object UUID of the request
         :param action_id: action UUID of the request
         :return: True or False or raise an exception
-        :raises: (in that order)
-            IntraExtensionNotFound
-            SubjectUnknown
-            ObjectUnknown
-            ActionUnknown
-            SubjectCategoryAssignmentUnknown
-            ObjectCategoryAssignmentUnknown
-            ActionCategoryAssignmentUnknown
+        :raises:
         """
         authz_buffer = self.__get_authz_buffer(intra_extension_id, subject_id, object_id, action_id)
         decision_buffer = dict()
@@ -523,11 +537,11 @@ class IntraExtensionManager(manager.Manager):
                     meta_rule_dict[sub_meta_rule_id],
                     self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values())
 
-        aggregation = self.driver.get_aggregation_algorithm_dict(intra_extension_id)
+        aggregation_algorithm_dict = self.driver.get_aggregation_algorithm_dict(intra_extension_id)
         # We suppose here that we have only one aggregation algorithm for one intra_extension
-        # TODO: need more work on this part of the model
-        aggregation_id = aggregation.keys()[0]
-        if aggregation[aggregation_id]['name'] == 'all_true':
+        # TODO: need more work on this part of the model HR: what to do?
+        aggregation_algorithm_id = aggregation_algorithm_dict.keys()[0]
+        if aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
             decision = all_true(decision_buffer)
         if not decision:
             raise AuthzException("{} {}-{}-{}".format(intra_extension_id, subject_id, action_id, object_id))
@@ -541,6 +555,7 @@ class IntraExtensionManager(manager.Manager):
             intra_extension_id1: {
                 name: xxx,
                 model: yyy,
+                genre, authz,
                 description: zzz}
             },
             intra_extension_id2: {...},
@@ -808,25 +823,32 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["description"] = filter_input(intra_extension_dict["description"])
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
         self.moonlog_api.debug("Creation of IE: {}".format(ref))
-        # read the profile given by "policymodel" and populate default variables
-        policy_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
-        self.__load_metadata_file(ie_dict, policy_dir)
-        self.__load_perimeter_file(ie_dict, policy_dir)
-        self.__load_scope_file(ie_dict, policy_dir)
-        self.__load_assignment_file(ie_dict, policy_dir)
-        self.__load_metarule_file(ie_dict, policy_dir)
-        self.__load_rule_file(ie_dict, policy_dir)
+        # read the template given by "model" and populate default variables
+        template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
+        self.__load_metadata_file(ie_dict, template_dir)
+        self.__load_perimeter_file(ie_dict, template_dir)
+        self.__load_scope_file(ie_dict, template_dir)
+        self.__load_assignment_file(ie_dict, template_dir)
+        self.__load_metarule_file(ie_dict, template_dir)
+        self.__load_rule_file(ie_dict, template_dir)
         return ref
 
     @enforce("read", "intra_extensions")
     def get_intra_extension_dict(self, user_id, intra_extension_id):
         """
         :param user_id:
-        :return: {intra_extension_id: intra_extension_name, ...}
+        :return: {
+            intra_extension_id: {
+                name: xxx,
+                model: yyy,
+                genre: authz,
+                description: xxx}
+            }
         """
-        if intra_extension_id not in self.driver.get_intra_extensions_dict():
+        intra_extensions_dict = self.driver.get_intra_extensions_dict()
+        if intra_extension_id not in intra_extensions_dict:
             raise IntraExtensionUnknown()
-        return self.driver.get_intra_extensions_dict()[intra_extension_id]
+        return intra_extensions_dict[intra_extension_id]
 
     @enforce(("read", "write"), "intra_extensions")
     def del_intra_extension(self, user_id, intra_extension_id):
@@ -1518,10 +1540,7 @@ class IntraExtensionManager(manager.Manager):
         :param user_id:
         :param intra_extension_id:
         :return: {
-            aggregation_algorithm_id: {
-                 name: xxx,
-                 description: yyy
-                 }
+            aggregation_algorithm_id: {name: xxx, description: yyy}
             }
         """
         aggregation_algorithm_dict = self.driver.get_aggregation_algorithm_dict(intra_extension_id)
@@ -1667,31 +1686,32 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         """Check authorization for a particular action.
         :return: True or False or raise an exception
         """
-        print("AUTHZ", tenant_name, subject_name, object_name, action_name, genre)
         if genre == "authz":
             genre = "intra_authz_extension_id"
         elif genre == "admin":
             genre = "intra_admin_extension_id"
+
         tenants_dict = self.tenant_api.get_tenants_dict(ADMIN_ID)
         tenant_id = None
         for _tenant_id in tenants_dict:
-            if tenants_dict[_tenant_id]["name"] == tenant_name:
+            if tenants_dict[_tenant_id]["name"] is tenant_name:
                 tenant_id = _tenant_id
                 break
-
-        intra_extension_id = self.tenant_api.get_tenant_dict(ADMIN_ID, tenant_id)[genre]
+        if not tenant_id:
+            raise TenantUnknown
+        intra_extension_id = tenants_dict[tenant_id][genre]
         if not intra_extension_id:
             raise TenantNoIntraExtension()
 
         subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
         subject_id = None
         for _subject_id in subjects_dict:
-            if subjects_dict[_subject_id]['keystone_name'] == subject_name:
+            if subjects_dict[_subject_id]['keystone_name'] is subject_name:
                 subject_id = subjects_dict[_subject_id]['keystone_id']
-                # subject_id = _subject_id
                 break
         if not subject_id:
             raise SubjectUnknown()
+
         objects_dict = self.driver.get_objects_dict(intra_extension_id)
         object_id = None
         for _object_id in objects_dict:
@@ -1700,6 +1720,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
                 break
         if not object_id:
             raise ObjectUnknown()
+
         actions_dict = self.driver.get_actions_dict(intra_extension_id)
         action_id = None
         for _action_id in actions_dict:

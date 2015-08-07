@@ -80,11 +80,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         subjects = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(subjects, dict)
         for key, value in subjects.iteritems():
@@ -123,11 +123,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         objects = self.manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
         objects_id_list = []
         self.assertIsInstance(objects, dict)
@@ -143,11 +143,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         actions = self.manager.get_actions_dict(admin_subject_id, authz_ie_dict["id"])
         actions_id_list = []
         self.assertIsInstance(actions, dict)
@@ -163,11 +163,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         subject_categories = self.manager.get_subject_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(subject_categories, dict)
         for key, value in subject_categories.iteritems():
@@ -203,11 +203,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(object_categories, dict)
         for key, value in object_categories.iteritems():
@@ -244,11 +244,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(action_categories, dict)
         for key, value in action_categories.iteritems():
@@ -285,11 +285,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         subject_categories = self.admin_manager.add_subject_category(
             admin_subject_id,
@@ -348,11 +348,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         object_categories = self.admin_manager.add_object_category(
             admin_subject_id,
@@ -411,11 +411,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         action_categories = self.admin_manager.add_action_category(
             admin_subject_id,
@@ -474,15 +474,15 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         admin_authz_subject_id, admin_authz_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         demo_authz_subject_id, demo_authz_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
 
         subjects_dict = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -597,11 +597,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         objects_dict = self.manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -726,11 +726,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         actions_dict = self.manager.get_actions_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -855,11 +855,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.admin_manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                                 {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         aggregation_algorithms = self.admin_manager.get_aggregation_algorithm_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in aggregation_algorithms.iteritems():
@@ -897,11 +897,11 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.admin_manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         sub_meta_rules = self.admin_manager.get_sub_meta_rules_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(sub_meta_rules, dict)
@@ -1067,7 +1067,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         # Test when subject is unknown
         self.assertRaises(
             SubjectUnknown,
@@ -1079,7 +1079,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
 
         # self.manager.add_subject_dict(
         #     admin_subject_id,
@@ -1298,11 +1298,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         subjects = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(subjects, dict)
         for key, value in subjects.iteritems():
@@ -1350,11 +1350,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         objects = self.manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
         objects_id_list = []
         self.assertIsInstance(objects, dict)
@@ -1404,11 +1404,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         actions = self.manager.get_actions_dict(admin_subject_id, authz_ie_dict["id"])
         actions_id_list = []
         self.assertIsInstance(actions, dict)
@@ -1458,11 +1458,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         subject_categories = self.manager.get_subject_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(subject_categories, dict)
         for key, value in subject_categories.iteritems():
@@ -1507,11 +1507,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(object_categories, dict)
         for key, value in object_categories.iteritems():
@@ -1556,11 +1556,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(action_categories, dict)
         for key, value in action_categories.iteritems():
@@ -1605,11 +1605,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         subject_categories = self.admin_manager.add_subject_category(
             admin_subject_id,
@@ -1677,11 +1677,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         object_categories = self.admin_manager.add_object_category(
             admin_subject_id,
@@ -1749,11 +1749,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         action_categories = self.admin_manager.add_action_category(
             admin_subject_id,
@@ -1821,15 +1821,15 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         admin_authz_subject_id, admin_authz_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
         demo_authz_subject_id, demo_authz_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], authz_ie_dict['id'], 'demo').iteritems().next()
 
         subjects_dict = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -1973,11 +1973,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         objects_dict = self.manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -2131,11 +2131,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         actions_dict = self.manager.get_actions_dict(admin_subject_id, authz_ie_dict["id"])
 
@@ -2289,11 +2289,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.admin_manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                                 {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         aggregation_algorithms = self.admin_manager.get_aggregation_algorithm_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in aggregation_algorithms.iteritems():
@@ -2331,11 +2331,11 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'admin').iteritems().next()
         demo_subject_dict = self.admin_manager.add_subject_dict(admin_subject_id, admin_ie_dict["id"],
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
-            self.tenant_api.get_subject_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
+            self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         sub_meta_rules = self.admin_manager.get_sub_meta_rules_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(sub_meta_rules, dict)
