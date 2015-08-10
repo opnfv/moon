@@ -877,6 +877,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for sub_meta_rule
 
+    def get_aggregation_algorithm_dict(self, intra_extension_id):
+        with sql.transaction() as session:
+            query = session.query(AggregationAlgorithm)
+            query = query.filter_by(intra_extension_id=intra_extension_id)
+            ref = query.first()
+            return {ref.id: ref.aggregation_algorithm}
+
     def set_aggregation_algorithm_dict(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
         with sql.transaction() as session:
             query = session.query(AggregationAlgorithm)
@@ -898,19 +905,12 @@ class IntraExtensionConnector(IntraExtensionDriver):
             session.flush()
             return self.get_aggregation_algorithm_dict(intra_extension_id)
 
-    def get_aggregation_algorithm_dict(self, intra_extension_id):
-        with sql.transaction() as session:
-            query = session.query(AggregationAlgorithm)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            return {ref.id: ref.aggregation_algorithm}
-
-    def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
-        with sql.transaction() as session:
-            query = session.query(AggregationAlgorithm)
-            query = query.filter_by(intra_extension_id=intra_extension_id, id=aggregation_algorithm_id)
-            ref = query.first()
-            session.delete(ref)
+    # def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
+    #     with sql.transaction() as session:
+    #         query = session.query(AggregationAlgorithm)
+    #         query = query.filter_by(intra_extension_id=intra_extension_id, id=aggregation_algorithm_id)
+    #         ref = query.first()
+    #         session.delete(ref)
 
     # Getter and Setter for sub_meta_rule
 

@@ -179,7 +179,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         new_subject_category = {"name": "subject_category_test", "description": "subject_category_test"}
 
-        subject_categories = self.admin_manager.add_subject_category(admin_subject_id, authz_ie_dict["id"], new_subject_category)
+        subject_categories = self.admin_manager.add_subject_category_dict(admin_subject_id, authz_ie_dict["id"], new_subject_category)
         _subject_categories = dict(subject_categories)
         self.assertEqual(len(_subject_categories.keys()), 1)
         new_subject_category["id"] = _subject_categories.keys()[0]
@@ -210,7 +210,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
-        object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
+        object_categories = self.manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(object_categories, dict)
         for key, value in object_categories.iteritems():
             self.assertIsInstance(value, dict)
@@ -219,7 +219,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         new_object_category = {"name": "object_category_test", "description": "object_category_test"}
 
-        object_categories = self.admin_manager.add_object_category(admin_subject_id, authz_ie_dict["id"], new_object_category)
+        object_categories = self.admin_manager.add_object_category_dict(admin_subject_id, authz_ie_dict["id"], new_object_category)
         _object_categories = dict(object_categories)
         self.assertEqual(len(_object_categories.keys()), 1)
         new_object_category["id"] = _object_categories.keys()[0]
@@ -233,7 +233,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         # Delete the new object_category
 
         self.admin_manager.del_object_category(admin_subject_id, authz_ie_dict["id"], new_object_category["id"])
-        object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
+        object_categories = self.manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in object_categories.iteritems():
             self.assertIsInstance(value, dict)
             self.assertIn("name", value)
@@ -251,7 +251,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
-        action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+        action_categories = self.manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(action_categories, dict)
         for key, value in action_categories.iteritems():
             self.assertIsInstance(value, dict)
@@ -260,7 +260,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         new_action_category = {"name": "action_category_test", "description": "action_category_test"}
 
-        action_categories = self.admin_manager.add_action_category(admin_subject_id, authz_ie_dict["id"], new_action_category)
+        action_categories = self.admin_manager.add_action_category_dict(admin_subject_id, authz_ie_dict["id"], new_action_category)
         _action_categories = dict(action_categories)
         self.assertEqual(len(_action_categories.keys()), 1)
         new_action_category["id"] = _action_categories.keys()[0]
@@ -274,7 +274,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         # Delete the new action_category
 
         self.admin_manager.del_action_category(admin_subject_id, authz_ie_dict["id"], new_action_category["id"])
-        action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+        action_categories = self.manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in action_categories.iteritems():
             self.assertIsInstance(value, dict)
             self.assertIn("name", value)
@@ -293,7 +293,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        subject_categories = self.admin_manager.add_subject_category(
+        subject_categories = self.admin_manager.add_subject_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -356,7 +356,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        object_categories = self.admin_manager.add_object_category(
+        object_categories = self.admin_manager.add_object_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -419,7 +419,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        action_categories = self.admin_manager.add_action_category(
+        action_categories = self.admin_manager.add_action_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -488,7 +488,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         subjects_dict = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        subject_categories = self.admin_manager.add_subject_category(
+        subject_categories = self.admin_manager.add_subject_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -617,7 +617,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 
-        object_categories = self.admin_manager.add_object_category(
+        object_categories = self.admin_manager.add_object_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -746,7 +746,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         if not action_upload_id or not action_list_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in actions)")
 
-        action_categories = self.admin_manager.add_action_category(
+        action_categories = self.admin_manager.add_action_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -875,8 +875,8 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.assertIsInstance(sub_meta_rules, dict)
         categories = {
             "subject_categories": self.admin_manager.get_subject_categories_dict(admin_subject_id, authz_ie_dict["id"]),
-            "object_categories": self.admin_manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"]),
-            "action_categories": self.admin_manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+            "object_categories": self.admin_manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"]),
+            "action_categories": self.admin_manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         }
         for key, value in sub_meta_rules.iteritems():
             self.assertIsInstance(value, dict)
@@ -1192,10 +1192,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_subject_category = {"name": "subject_category_test", "description": "subject_category_test"}
         self.assertRaises(
             AuthzException,
-            self.manager.add_subject_category,
+            self.manager.add_subject_category_dict,
             demo_subject_id, admin_ie_dict["id"], new_subject_category)
 
-        subject_categories = self.admin_manager.add_subject_category(admin_subject_id, authz_ie_dict["id"], new_subject_category)
+        subject_categories = self.admin_manager.add_subject_category_dict(admin_subject_id, authz_ie_dict["id"], new_subject_category)
         _subject_categories = dict(subject_categories)
         self.assertEqual(len(_subject_categories.keys()), 1)
         new_subject_category["id"] = _subject_categories.keys()[0]
@@ -1231,7 +1231,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
-        object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
+        object_categories = self.manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(object_categories, dict)
         for key, value in object_categories.iteritems():
             self.assertIsInstance(value, dict)
@@ -1241,10 +1241,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_object_category = {"name": "object_category_test", "description": "object_category_test"}
         self.assertRaises(
             AuthzException,
-            self.manager.add_object_category,
+            self.manager.add_object_category_dict,
             demo_subject_id, admin_ie_dict["id"], new_object_category)
 
-        object_categories = self.admin_manager.add_object_category(admin_subject_id, authz_ie_dict["id"], new_object_category)
+        object_categories = self.admin_manager.add_object_category_dict(admin_subject_id, authz_ie_dict["id"], new_object_category)
         _object_categories = dict(object_categories)
         self.assertEqual(len(_object_categories.keys()), 1)
         new_object_category["id"] = _object_categories.keys()[0]
@@ -1262,7 +1262,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             demo_subject_id, authz_ie_dict["id"], new_object_category["id"])
 
         self.admin_manager.del_object_category(admin_subject_id, authz_ie_dict["id"], new_object_category["id"])
-        object_categories = self.manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"])
+        object_categories = self.manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in object_categories.iteritems():
             self.assertIsInstance(value, dict)
             self.assertIn("name", value)
@@ -1280,7 +1280,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
                                                           {"name": "demo", "description": "demo"})
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
-        action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+        action_categories = self.manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         self.assertIsInstance(action_categories, dict)
         for key, value in action_categories.iteritems():
             self.assertIsInstance(value, dict)
@@ -1290,10 +1290,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         new_action_category = {"name": "action_category_test", "description": "action_category_test"}
         self.assertRaises(
             AuthzException,
-            self.manager.add_action_category,
+            self.manager.add_action_category_dict,
             demo_subject_id, admin_ie_dict["id"], new_action_category)
 
-        action_categories = self.admin_manager.add_action_category(admin_subject_id, authz_ie_dict["id"], new_action_category)
+        action_categories = self.admin_manager.add_action_category_dict(admin_subject_id, authz_ie_dict["id"], new_action_category)
         _action_categories = dict(action_categories)
         self.assertEqual(len(_action_categories.keys()), 1)
         new_action_category["id"] = _action_categories.keys()[0]
@@ -1311,7 +1311,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             demo_subject_id, authz_ie_dict["id"], new_action_category["id"])
 
         self.admin_manager.del_action_category(admin_subject_id, authz_ie_dict["id"], new_action_category["id"])
-        action_categories = self.manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+        action_categories = self.manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         for key, value in action_categories.iteritems():
             self.assertIsInstance(value, dict)
             self.assertIn("name", value)
@@ -1330,7 +1330,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        subject_categories = self.admin_manager.add_subject_category(
+        subject_categories = self.admin_manager.add_subject_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -1402,7 +1402,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        object_categories = self.admin_manager.add_object_category(
+        object_categories = self.admin_manager.add_object_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -1474,7 +1474,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.tenant_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        action_categories = self.admin_manager.add_action_category(
+        action_categories = self.admin_manager.add_action_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -1552,7 +1552,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         subjects_dict = self.manager.get_subjects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        subject_categories = self.admin_manager.add_subject_category(
+        subject_categories = self.admin_manager.add_subject_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -1710,7 +1710,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 
-        object_categories = self.admin_manager.add_object_category(
+        object_categories = self.admin_manager.add_object_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -1868,7 +1868,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         if not action_upload_id or not action_list_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in actions)")
 
-        action_categories = self.admin_manager.add_action_category(
+        action_categories = self.admin_manager.add_action_category_dict(
             admin_subject_id,
             authz_ie_dict["id"],
             {
@@ -2026,8 +2026,8 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.assertIsInstance(sub_meta_rules, dict)
         categories = {
             "subject_categories": self.admin_manager.get_subject_categories_dict(admin_subject_id, authz_ie_dict["id"]),
-            "object_categories": self.admin_manager.get_object_category_dict(admin_subject_id, authz_ie_dict["id"]),
-            "action_categories": self.admin_manager.get_action_category_dict(admin_subject_id, authz_ie_dict["id"])
+            "object_categories": self.admin_manager.get_object_categories_dict(admin_subject_id, authz_ie_dict["id"]),
+            "action_categories": self.admin_manager.get_action_categories_dict(admin_subject_id, authz_ie_dict["id"])
         }
         for key, value in sub_meta_rules.iteritems():
             self.assertIsInstance(value, dict)

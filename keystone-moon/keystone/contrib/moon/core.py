@@ -908,7 +908,7 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce(("read", "write"), "subject_categories")
-    def add_subject_category(self, user_id, intra_extension_id, subject_category_dict):
+    def add_subject_category_dict(self, user_id, intra_extension_id, subject_category_dict):
         subject_categories_dict = self.driver.get_subject_categories_dict(intra_extension_id)
         for subject_category_id in subject_categories_dict:
             if subject_categories_dict[subject_category_id]['name'] == subject_category_dict['name']:
@@ -917,11 +917,11 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce("read", "subject_categories")
-    def get_subject_category(self, user_id, intra_extension_id, subject_category_id):
-        subject_category_dict = self.driver.get_subject_categories_dict(intra_extension_id)
-        if subject_category_id not in subject_category_dict:
+    def get_subject_category_dict(self, user_id, intra_extension_id, subject_category_id):
+        subject_categories_dict = self.driver.get_subject_categories_dict(intra_extension_id)
+        if subject_category_id not in subject_categories_dict:
             raise SubjectCategoryUnknown()
-        return subject_category_dict[subject_category_id]
+        return subject_categories_dict[subject_category_id]
 
     @filter_input
     @enforce(("read", "write"), "subject_categories")
@@ -941,25 +941,20 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce(("read", "write"), "subject_categories")
-    def set_subject_category(self, user_id, intra_extension_id, subject_category_id, subject_category_dict):
+    def set_subject_category_dict(self, user_id, intra_extension_id, subject_category_id, subject_category_dict):
         if subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
             raise SubjectCategoryUnknown()
         return self.driver.set_subject_category_dict(intra_extension_id, subject_category_id, subject_category_dict)
 
     @filter_input
     @enforce("read", "object_categories")
-    def get_object_category_dict(self, user_id, intra_extension_id):
-        """
-        :param user_id:
-        :param intra_extension_id:
-        :return:
-        """
+    def get_object_categories_dict(self, user_id, intra_extension_id):
         return self.driver.get_object_categories_dict(intra_extension_id)
 
     @filter_input
     @enforce(("read", "write"), "object_categories")
     @enforce(("read", "write"), "object_scopes")
-    def add_object_category(self, user_id, intra_extension_id, object_category_dict):
+    def add_object_category_dict(self, user_id, intra_extension_id, object_category_dict):
         object_categories_dict = self.driver.get_object_categories_dict(intra_extension_id)
         for object_category_id in object_categories_dict:
             if object_categories_dict[object_category_id]["name"] == object_category_dict['name']:
@@ -968,11 +963,11 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce("read", "object_categories")
-    def get_object_category(self, user_id, intra_extension_id, object_category_id):
-        object_category_dict = self.driver.get_object_categories_dict(intra_extension_id)
-        if object_category_id not in object_category_dict:
+    def get_object_category_dict(self, user_id, intra_extension_id, object_category_id):
+        object_categories_dict = self.driver.get_object_categories_dict(intra_extension_id)
+        if object_category_id not in object_categories_dict:
             raise ObjectCategoryUnknown()
-        return object_category_dict[object_category_id]
+        return object_categories_dict[object_category_id]
 
     @filter_input
     @enforce(("read", "write"), "object_categories")
@@ -991,19 +986,21 @@ class IntraExtensionManager(manager.Manager):
         self.driver.del_object_category(intra_extension_id, object_category_id)
 
     @filter_input
+    @enforce(("read", "write"), "object_categories")
+    def set_object_category_dict(self, user_id, intra_extension_id, object_category_id, object_category_dict):
+        if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
+            raise ObjectCategoryUnknown()
+        return self.driver.set_object_category_dict(intra_extension_id, object_category_id, object_category_dict)
+
+    @filter_input
     @enforce("read", "action_categories")
-    def get_action_category_dict(self, user_id, intra_extension_id):
-        """
-        :param user_id:
-        :param intra_extension_id:
-        :return:
-        """
+    def get_action_categories_dict(self, user_id, intra_extension_id):
         return self.driver.get_action_categories_dict(intra_extension_id)
 
     @filter_input
     @enforce(("read", "write"), "action_categories")
     @enforce(("read", "write"), "action_scopes")
-    def add_action_category(self, user_id, intra_extension_id, action_category_dict):
+    def add_action_category_dict(self, user_id, intra_extension_id, action_category_dict):
         action_categories_dict = self.driver.get_action_categories_dict(intra_extension_id)
         for action_category_id in action_categories_dict:
             if action_categories_dict[action_category_id]['name'] == action_category_dict['name']:
@@ -1012,11 +1009,11 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce("read", "action_categories")
-    def get_action_category(self, user_id, intra_extension_id, action_category_id):
-        action_category_dict = self.driver.get_action_categories_dict(intra_extension_id)
-        if action_category_id not in action_category_dict:
+    def get_action_category_dict(self, user_id, intra_extension_id, action_category_id):
+        action_categories_dict = self.driver.get_action_categories_dict(intra_extension_id)
+        if action_category_id not in action_categories_dict:
             raise ActionCategoryUnknown()
-        return self.driver.get_action_categories_dict(intra_extension_id)[action_category_id]
+        return action_categories_dict[action_category_id]
 
     @filter_input
     @enforce(("read", "write"), "action_categories")
@@ -1032,6 +1029,13 @@ class IntraExtensionManager(manager.Manager):
             for assignment_id in self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id):
                 self.driver.del_action_assignment(intra_extension_id, action_id, action_category_id, assignment_id)
         self.driver.del_action_category(intra_extension_id, action_category_id)
+
+    @filter_input
+    @enforce(("read", "write"), "action_categories")
+    def set_action_category_dict(self, user_id, intra_extension_id, action_category_id, action_category_dict):
+        if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
+            raise ActionCategoryUnknown()
+        return self.driver.set_action_category_dict(intra_extension_id, action_category_id, action_category_dict)
 
     # Perimeter functions
 
@@ -1056,10 +1060,10 @@ class IntraExtensionManager(manager.Manager):
     @filter_input
     @enforce("read", "subjects")
     def get_subject_dict(self, user_id, intra_extension_id, subject_id):
-        subject_dict = self.driver.get_subjects_dict(intra_extension_id)
-        if subject_id in subject_dict:
+        subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
+        if subject_id not in subjects_dict:
             raise SubjectUnknown()
-        return subject_dict[subject_id]
+        return subjects_dict[subject_id]
 
     @filter_input
     @enforce(("read", "write"), "subjects")
@@ -1093,12 +1097,32 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce(("read", "write"), "objects")
-    def add_object_dict(self, user_id, intra_extension_id, object_name):
-        object_dict = self.driver.get_objects_dict(intra_extension_id)
-        for object_id in object_dict:
-            if object_dict[object_id]["name"] == object_name:
+    def add_object_dict(self, user_id, intra_extension_id, object_dict):
+        objects_dict = self.driver.get_objects_dict(intra_extension_id)
+        for object_id in objects_dict:
+            if objects_dict[object_id]["name"] == object_dict['name']:
                 raise ObjectNameExisting()
-        return self.driver.set_object_dict(intra_extension_id, uuid4().hex, object_name)
+        return self.driver.set_object_dict(intra_extension_id, uuid4().hex, object_dict)
+
+    @filter_input
+    @enforce("read", "objects")
+    def get_object_dict(self, user_id, intra_extension_id, object_id):
+        objects_dict = self.driver.get_objects_dict(intra_extension_id)
+        if object_id not in objects_dict:
+            raise ObjectUnknown()
+        return objects_dict[object_id]
+
+    @filter_input
+    @enforce(("read", "write"), "objects")
+    def del_object(self, user_id, intra_extension_id, object_id):
+        if object_id not in self.driver.get_objects_dict(intra_extension_id):
+            raise ObjectUnknown()
+        # Destroy assignments related to this category
+        for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
+            for _object_id in self.driver.get_objects_dict(intra_extension_id):
+                for assignment_id in self.driver.get_object_assignment_list(intra_extension_id, _object_id, object_category_id):
+                    self.driver.del_object_assignment(intra_extension_id, _object_id, object_category_id, assignment_id)
+        self.driver.del_object(intra_extension_id, object_id)
 
     @filter_input
     @enforce(("read", "write"), "objects")
@@ -1110,38 +1134,38 @@ class IntraExtensionManager(manager.Manager):
         return self.driver.set_object_dict(intra_extension_id, object_id, object_dict)
 
     @filter_input
-    @enforce("read", "objects")
-    def get_object_dict(self, user_id, intra_extension_id, object_id):
-        object_dict = self.driver.get_objects_dict(intra_extension_id)
-        if object_id in object_dict:
-            raise ObjectUnknown()
-        return object_dict[object_id]
-
-    @filter_input
-    @enforce(("read", "write"), "objects")
-    def del_object(self, user_id, intra_extension_id, object_id):
-        if object_id in self.driver.get_objects_dict(intra_extension_id):
-            raise ObjectUnknown()
-        # Destroy assignments related to this category
-        for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
-            for _object_id in self.driver.get_objects_dict(intra_extension_id):
-                for assignment_id in self.driver.get_object_assignment_list(intra_extension_id, _object_id, object_category_id):
-                    self.driver.del_object_assignment(intra_extension_id, _object_id, object_category_id, assignment_id)
-        self.driver.del_object(intra_extension_id, object_id)
-
-    @filter_input
     @enforce("read", "actions")
     def get_actions_dict(self, user_id, intra_extension_id):
         return self.driver.get_actions_dict(intra_extension_id)
 
     @filter_input
     @enforce(("read", "write"), "actions")
-    def add_action_dict(self, user_id, intra_extension_id, action_name):
-        action_dict = self.driver.get_actions_dict(intra_extension_id)
-        for action_id in action_dict:
-            if action_dict[action_id]["name"] == action_name:
+    def add_action_dict(self, user_id, intra_extension_id, action_dict):
+        actions_dict = self.driver.get_actions_dict(intra_extension_id)
+        for action_id in actions_dict:
+            if actions_dict[action_id]["name"] == action_dict['name']:
                 raise ActionNameExisting()
-        return self.driver.set_action_dict(intra_extension_id, uuid4().hex, action_name)
+        return self.driver.set_action_dict(intra_extension_id, uuid4().hex, action_dict)
+
+    @filter_input
+    @enforce("read", "actions")
+    def get_action_dict(self, user_id, intra_extension_id, action_id):
+        actions_dict = self.driver.get_actions_dict(intra_extension_id)
+        if action_id not in actions_dict:
+            raise ActionUnknown()
+        return actions_dict[action_id]
+
+    @filter_input
+    @enforce(("read", "write"), "actions")
+    def del_action(self, user_id, intra_extension_id, action_id):
+        if action_id not in self.driver.get_actions_dict(intra_extension_id):
+            raise ActionUnknown()
+        # Destroy assignments related to this category
+        for action_category_id in self.driver.get_action_categories_dict(intra_extension_id):
+            for _action_id in self.driver.get_actions_dict(intra_extension_id):
+                for assignment_id in self.driver.get_action_assignment_list(intra_extension_id, _action_id, action_category_id):
+                    self.driver.del_action_assignment(intra_extension_id, _action_id, action_category_id, assignment_id)
+        return self.driver.del_action(intra_extension_id, action_id)
 
     @filter_input
     @enforce(("read", "write"), "actions")
@@ -1151,26 +1175,6 @@ class IntraExtensionManager(manager.Manager):
             if actions_dict[action_id]["name"] == action_dict['name']:
                 raise ActionNameExisting()
         return self.driver.set_action_dict(intra_extension_id, action_id, action_dict)
-
-    @filter_input
-    @enforce("read", "actions")
-    def get_action_dict(self, user_id, intra_extension_id, action_id):
-        action_dict = self.driver.get_actions_dict(intra_extension_id)
-        if action_id in action_dict:
-            raise ActionUnknown()
-        return action_dict[action_id]
-
-    @filter_input
-    @enforce(("read", "write"), "actions")
-    def del_action(self, user_id, intra_extension_id, action_id):
-        if action_id in self.driver.get_actions_dict(intra_extension_id):
-            raise ActionUnknown()
-        # Destroy assignments related to this category
-        for action_category_id in self.driver.get_action_categories_dict(intra_extension_id):
-            for _action_id in self.driver.get_actions_dict(intra_extension_id):
-                for assignment_id in self.driver.get_action_assignment_list(intra_extension_id, _action_id, action_category_id):
-                    self.driver.del_action_assignment(intra_extension_id, _action_id, action_category_id, assignment_id)
-        return self.driver.del_action(intra_extension_id, action_id)
 
     # Scope functions
 
@@ -1205,8 +1209,7 @@ class IntraExtensionManager(manager.Manager):
         for _subject_scope_id in subject_scopes_dict:
             if subject_scope_dict['name'] == subject_scopes_dict[_subject_scope_id]['name']:
                 raise SubjectScopeNameExisting()
-        subject_scope_id = uuid4().hex
-        return self.driver.set_subject_scope_dict(intra_extension_id, subject_category_id, subject_scope_id, subject_scope_dict)
+        return self.driver.set_subject_scope_dict(intra_extension_id, subject_category_id, uuid4().hex, subject_scope_dict)
 
     @filter_input
     @enforce("read", "subject_scopes")
@@ -1237,17 +1240,17 @@ class IntraExtensionManager(manager.Manager):
             for rule_id in rules_dict:
                 if subject_scope_id in rules_dict[rule_id]:
                     self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
-        return self.driver.del_subject_scope(intra_extension_id, subject_category_id, subject_scope_id)
+        self.driver.del_subject_scope(intra_extension_id, subject_category_id, subject_scope_id)
 
     @filter_input
     @enforce(("read", "write"), "subject_scopes")
     @enforce("read", "subject_categories")
-    def set_subject_scope_dict(self, user_id, intra_extension_id, subject_category_id, subject_scope_id, subject_scope_name):
+    def set_subject_scope_dict(self, user_id, intra_extension_id, subject_category_id, subject_scope_id, subject_scope_dict):
         if subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
             raise SubjectCategoryUnknown()
-        subject_scope_dict = self.driver.get_subject_scopes_dict(intra_extension_id, subject_category_id)
-        for _subject_scope_id in subject_scope_dict:
-            if subject_scope_name == subject_scope_dict[_subject_scope_id]['name']:
+        subject_scopes_dict = self.driver.get_subject_scopes_dict(intra_extension_id, subject_category_id)
+        for _subject_scope_id in subject_scopes_dict:
+            if subject_scopes_dict[_subject_scope_id]['name'] == subject_scope_dict['name']:
                 raise SubjectScopeNameExisting()
         return self.driver.set_subject_scope_dict(intra_extension_id, subject_category_id, subject_scope_id, subject_scope_dict)
 
@@ -1262,19 +1265,14 @@ class IntraExtensionManager(manager.Manager):
     @filter_input
     @enforce(("read", "write"), "object_scopes")
     @enforce("read", "object_categories")
-    def add_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_name):
+    def add_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_dict):
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
-        object_scope_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
-        for _object_scope_id in object_scope_dict:
-            if object_scope_name == object_scope_dict[_object_scope_id]['name']:
+        object_scopes_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
+        for _object_scope_id in object_scopes_dict:
+            if object_scopes_dict[_object_scope_id]['name'] == object_scope_dict['name']:
                 raise ObjectScopeNameExisting()
-        object_scope_id = uuid4().hex
-        return self.driver.set_object_scope_dict(
-            intra_extension_id,
-            object_category_id,
-            object_scope_id,
-            object_scope_name)
+        return self.driver.set_object_scope_dict(intra_extension_id, object_category_id, uuid4().hex, object_scope_dict)
 
     @filter_input
     @enforce("read", "object_scopes")
@@ -1282,10 +1280,10 @@ class IntraExtensionManager(manager.Manager):
     def get_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_id):
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
-        object_scopte_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
-        if object_scope_id not in object_scopte_dict:
+        object_scopes_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
+        if object_scope_id not in object_scopes_dict:
             raise ObjectScopeUnknown()
-        return object_scopte_dict[object_scope_id]
+        return object_scopes_dict[object_scope_id]
 
     @filter_input
     @enforce(("read", "write"), "object_scopes")
@@ -1305,17 +1303,17 @@ class IntraExtensionManager(manager.Manager):
             for rule_id in rules_dict:
                 if object_scope_id in rules_dict[rule_id]:
                     self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
-        return self.driver.del_object_scope(intra_extension_id, object_category_id, object_scope_id)
+        self.driver.del_object_scope(intra_extension_id, object_category_id, object_scope_id)
 
     @filter_input
     @enforce(("read", "write"), "object_scopes")
     @enforce("read", "object_categories")
-    def set_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_id, object_scope_name):
+    def set_object_scope_dict(self, user_id, intra_extension_id, object_category_id, object_scope_id, object_scope_dict):
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
-        object_scope_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
-        for _object_scope_id in object_scope_dict:
-            if object_scope_name == object_scope_dict[_object_scope_id]['name']:
+        object_scopes_dict = self.driver.get_object_scopes_dict(intra_extension_id, object_category_id)
+        for _object_scope_id in object_scopes_dict:
+            if object_scopes_dict[_object_scope_id]['name'] == object_scope_dict['name']:
                 raise ObjectScopeNameExisting()
         return self.driver.set_object_scope_dict(intra_extension_id, object_category_id, object_scope_id, object_scope_dict)
 
@@ -1330,19 +1328,14 @@ class IntraExtensionManager(manager.Manager):
     @filter_input
     @enforce(("read", "write"), "action_scopes")
     @enforce("read", "action_categories")
-    def add_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_name):
+    def add_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_dict):
         if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
-        action_scope_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
-        for _action_scope_id in action_scope_dict:
-            if action_scope_name == action_scope_dict[_action_scope_id]['name']:
+        action_scopes_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
+        for _action_scope_id in action_scopes_dict:
+            if action_scopes_dict[_action_scope_id]['name'] == action_scope_dict['name']:
                 raise ActionScopeNameExisting()
-        action_scope_id = uuid4().hex
-        return self.driver.set_action_scope_dict(
-            intra_extension_id,
-            action_category_id,
-            action_scope_id,
-            action_scope_name)
+        return self.driver.set_action_scope_dict(intra_extension_id, action_category_id, uuid4().hex, action_scope_dict)
 
     @filter_input
     @enforce("read", "action_scopes")
@@ -1350,10 +1343,10 @@ class IntraExtensionManager(manager.Manager):
     def get_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_id):
         if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
-        action_scopte_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
-        if action_scope_id not in action_scopte_dict:
+        action_scopes_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
+        if action_scope_id not in action_scopes_dict:
             raise ActionScopeUnknown()
-        return action_scopte_dict[action_scope_id]
+        return action_scopes_dict[action_scope_id]
 
     @filter_input
     @enforce(("read", "write"), "action_scopes")
@@ -1373,23 +1366,19 @@ class IntraExtensionManager(manager.Manager):
             for rule_id in rules_dict:
                 if action_scope_id in rules_dict[rule_id]:
                     self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
-        return self.driver.del_action_scope(intra_extension_id, action_category_id, action_scope_id)
+        self.driver.del_action_scope(intra_extension_id, action_category_id, action_scope_id)
 
     @filter_input
     @enforce(("read", "write"), "action_scopes")
     @enforce("read", "action_categories")
-    def set_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_id, action_scope_name):
+    def set_action_scope_dict(self, user_id, intra_extension_id, action_category_id, action_scope_id, action_scope_dict):
         if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
-        action_scope_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
-        for _action_scope_id in action_scope_dict:
-            if action_scope_name == action_scope_dict[_action_scope_id]['name']:
+        action_scopes_dict = self.driver.get_action_scopes_dict(intra_extension_id, action_category_id)
+        for _action_scope_id in action_scopes_dict:
+            if action_scopes_dict[_action_scope_id]['name'] == action_scope_dict['name']:
                 raise ActionScopeNameExisting()
-        return self.driver.set_action_scope_dict(
-            intra_extension_id,
-            action_category_id,
-            action_scope_id,
-            action_scope_name)
+        return self.driver.set_action_scope_dict(intra_extension_id, action_category_id, action_scope_id, action_scope_dict)
 
     # Assignment functions
 
@@ -1398,9 +1387,18 @@ class IntraExtensionManager(manager.Manager):
     @enforce("read", "subjects")
     @enforce("read", "subject_categories")
     def get_subject_assignment_list(self, user_id, intra_extension_id, subject_id, subject_category_id):
+        """
+        :param user_id:
+        :param intra_extension_id:
+        :param subject_id:
+        :param subject_category_id:
+        :return: [
+            subject_scope_id1, ..., subject_scope_idn
+        ]
+        """
         if subject_id not in self.driver.get_subjects_dict(intra_extension_id):
             raise SubjectUnknown()
-        elif subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
+        if subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
             raise SubjectCategoryUnknown()
         return self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id)
 
@@ -1410,14 +1408,13 @@ class IntraExtensionManager(manager.Manager):
     @enforce("read", "subject_categories")
     @enforce("read", "subject_scopes")
     def add_subject_assignment_list(self, user_id, intra_extension_id, subject_id, subject_category_id, subject_scope_id):
-        print(subject_id, self.driver.get_subjects_dict(intra_extension_id))
         if subject_id not in self.driver.get_subjects_dict(intra_extension_id):
             raise SubjectUnknown()
         if subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
             raise SubjectCategoryUnknown()
         if subject_scope_id not in self.driver.get_subject_scopes_dict(intra_extension_id, subject_category_id):
             raise SubjectScopeUnknown()
-        if subject_scope_id in self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id):
+        elif subject_scope_id in self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id):
             raise SubjectAssignmentExisting()
         return self.driver.add_subject_assignment_list(intra_extension_id, subject_id, subject_category_id, subject_scope_id)
 
@@ -1429,9 +1426,9 @@ class IntraExtensionManager(manager.Manager):
     def del_subject_assignment(self, user_id, intra_extension_id, subject_id, subject_category_id, subject_scope_id):
         if subject_id not in self.driver.get_subjects_dict(intra_extension_id):
             raise SubjectUnknown()
-        elif subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
+        if subject_category_id not in self.driver.get_subject_categories_dict(intra_extension_id):
             raise SubjectCategoryUnknown()
-        elif subject_scope_id not in self.driver.get_subject_scopes_dict(intra_extension_id, subject_category_id):
+        if subject_scope_id not in self.driver.get_subject_scopes_dict(intra_extension_id, subject_category_id):
             raise SubjectScopeUnknown()
         elif subject_scope_id not in self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id):
             raise SubjectAssignmentUnknown()
@@ -1444,7 +1441,7 @@ class IntraExtensionManager(manager.Manager):
     def get_object_assignment_list(self, user_id, intra_extension_id, object_id, object_category_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
             raise ObjectUnknown()
-        elif object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
+        if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
         return self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id)
 
@@ -1455,9 +1452,9 @@ class IntraExtensionManager(manager.Manager):
     def add_object_assignment_list(self, user_id, intra_extension_id, object_id, object_category_id, object_scope_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
             raise ObjectUnknown()
-        elif object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
+        if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
-        elif object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
+        if object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
             raise ObjectScopeUnknown()
         elif object_scope_id in self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id):
             raise ObjectAssignmentExisting()
@@ -1471,9 +1468,9 @@ class IntraExtensionManager(manager.Manager):
     def del_object_assignment(self, user_id, intra_extension_id, object_id, object_category_id, object_scope_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
             raise ObjectUnknown()
-        elif object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
+        if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
-        elif object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
+        if object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
             raise ObjectScopeUnknown()
         elif object_scope_id not in self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id):
             raise ObjectAssignmentUnknown()
@@ -1486,7 +1483,7 @@ class IntraExtensionManager(manager.Manager):
     def get_action_assignment_list(self, user_id, intra_extension_id, action_id, action_category_id):
         if action_id not in self.driver.get_actions_dict(intra_extension_id):
             raise ActionUnknown()
-        elif action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
+        if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
         return self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id)
 
@@ -1497,9 +1494,9 @@ class IntraExtensionManager(manager.Manager):
     def add_action_assignment_list(self, user_id, intra_extension_id, action_id, action_category_id, action_scope_id):
         if action_id not in self.driver.get_actions_dict(intra_extension_id):
             raise ActionUnknown()
-        elif action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
+        if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
-        elif action_scope_id not in self.driver.get_action_scopes_dict(intra_extension_id, action_category_id):
+        if action_scope_id not in self.driver.get_action_scopes_dict(intra_extension_id, action_category_id):
             raise ActionScopeUnknown()
         elif action_scope_id in self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id):
             raise ObjectAssignmentExisting()
@@ -1513,25 +1510,15 @@ class IntraExtensionManager(manager.Manager):
     def del_action_assignment(self, user_id, intra_extension_id, action_id, action_category_id, action_scope_id):
         if action_id not in self.driver.get_actions_dict(intra_extension_id):
             raise ActionUnknown()
-        elif action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
+        if action_category_id not in self.driver.get_action_categories_dict(intra_extension_id):
             raise ActionCategoryUnknown()
-        elif action_scope_id not in self.driver.get_action_scopes_dict(intra_extension_id, action_category_id):
+        if action_scope_id not in self.driver.get_action_scopes_dict(intra_extension_id, action_category_id):
             raise ActionScopeUnknown()
         elif action_scope_id not in self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id):
             raise ActionAssignmentUnknown()
-        return self.driver.del_action_assignment(intra_extension_id, action_id, action_category_id, action_scope_id)
+        self.driver.del_action_assignment(intra_extension_id, action_id, action_category_id, action_scope_id)
 
     # Metarule functions
-
-    @filter_input
-    @enforce(("read", "write"), "aggregation_algorithm")
-    def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
-        if aggregation_algorithm_id:
-            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms_dict(ADMIN_ID):
-                raise AggregationAlgorithmUnknown()
-        else:
-            aggregation_algorithm_id = uuid4().hex
-        return self.driver.set_aggregation_algorithm_dict(intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict)
 
     @filter_input
     @enforce("read", "aggregation_algorithm")
@@ -1547,6 +1534,16 @@ class IntraExtensionManager(manager.Manager):
         if not aggregation_algorithm_dict:
             raise AggregationAlgorithmNotExisting()
         return aggregation_algorithm_dict
+
+    @filter_input
+    @enforce(("read", "write"), "aggregation_algorithm")
+    def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+        if aggregation_algorithm_id:
+            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms_dict(ADMIN_ID):
+                raise AggregationAlgorithmUnknown()
+        else:
+            aggregation_algorithm_id = uuid4().hex
+        return self.driver.set_aggregation_algorithm_dict(intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict)
 
     @filter_input
     @enforce("read", "sub_meta_rules")
@@ -1575,16 +1572,15 @@ class IntraExtensionManager(manager.Manager):
         for _sub_meta_rule_id in sub_meta_rules_dict:
             if sub_meta_rule_dict['name'] == sub_meta_rules_dict[_sub_meta_rule_id]["name"]:
                 raise SubMetaRuleNameExisting()
-            elif sub_meta_rule_dict['subject_categories'] == sub_meta_rules_dict[_sub_meta_rule_id]["subject_categories"] and \
+            if sub_meta_rule_dict['subject_categories'] == sub_meta_rules_dict[_sub_meta_rule_id]["subject_categories"] and \
                 sub_meta_rule_dict['object_categories'] == sub_meta_rules_dict[_sub_meta_rule_id]["object_categories"] and \
                 sub_meta_rule_dict['action_categories'] == sub_meta_rules_dict[_sub_meta_rule_id]["action_categories"] and \
                 sub_meta_rule_dict['algorithm'] == sub_meta_rules_dict[_sub_meta_rule_id]["algorithm"]:
                 raise SubMetaRuleExisting()
-        algorithms = self.configuration_api.get_sub_meta_rule_algorithms_dict(user_id)
-        if sub_meta_rule_dict['algorithm'] not in algorithms.keys():
+        if sub_meta_rule_dict['algorithm'] not in self.configuration_api.get_sub_meta_rule_algorithms_dict(user_id):
             raise SubMetaRuleAlgorithmNotExisting()
         sub_meta_rule_id = uuid4().hex
-        # TODO (dthom): add new sub-meta-rule to rule
+        # TODO (dthom): add new sub-meta-rule to rule dict
         # self.driver.add_rule(intra_extension_id, sub_meta_rule_id, [])
         return self.driver.set_sub_meta_rule_dict(intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict)
 
@@ -1612,8 +1608,6 @@ class IntraExtensionManager(manager.Manager):
     def set_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict):
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
-        # TODO (dthom): add new sub-meta-rule to rule
-        # self.driver.add_rule(intra_extension_id, sub_meta_rule_id, [])
         return self.driver.set_sub_meta_rule_dict(intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict)
 
     # Rule functions
@@ -1639,8 +1633,7 @@ class IntraExtensionManager(manager.Manager):
             raise SubMetaRuleUnknown()
         if rule_list in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values():
             raise RuleExisting()
-        rule_id = uuid4().hex
-        return self.driver.set_rule_dict(intra_extension_id, sub_meta_rule_id, rule_id, rule_list)
+        return self.driver.set_rule_dict(intra_extension_id, sub_meta_rule_id, uuid4().hex, rule_list)
 
     @filter_input
     @enforce("read", "sub_meta_rules")
@@ -1659,8 +1652,7 @@ class IntraExtensionManager(manager.Manager):
     def del_rule(self, user_id, intra_extension_id, sub_meta_rule_id, rule_id):
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
-        rules_dict = self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id)
-        if rule_id not in rules_dict:
+        if rule_id not in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id):
             raise RuleUnknown()
         self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
 
@@ -1670,8 +1662,7 @@ class IntraExtensionManager(manager.Manager):
     def set_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id, rule_id, rule_list):
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
-        rules_dict = self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id)
-        if rule_id not in rules_dict:
+        if rule_id not in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id):
             raise RuleUnknown()
         return self.driver.set_rule_dict(intra_extension_id, sub_meta_rule_id, rule_id, rule_list)
 
