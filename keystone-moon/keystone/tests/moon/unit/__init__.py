@@ -3,7 +3,6 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 import uuid
-from keystone.contrib.moon.core import ADMIN_ID
 
 USER = {
     'name': 'admin',
@@ -25,10 +24,8 @@ def create_intra_extension(self, policy_model="policy_authz"):
     if "authz" in policy_model:
         genre = "authz"
     IE["genre"] = genre
-    # force re-initialization of the ADMIN_ID variable
-    from keystone.contrib.moon.core import ADMIN_ID
-    self.ADMIN_ID = ADMIN_ID
-    ref = self.admin_api.load_intra_extension_dict(self.ADMIN_ID, intra_extension_dict=IE)
+    ref = self.admin_api.load_intra_extension_dict(self.root_api.get_root_admin_id(),
+                                                   intra_extension_dict=IE)
     self.assertIsInstance(ref, dict)
     return ref
 
@@ -62,7 +59,6 @@ def create_user(self, username="TestAdminIntraExtensionManagerUser"):
 
 def create_mapping(self, tenant_name=None, authz_id=None, admin_id=None):
 
-    from keystone.contrib.moon.core import ADMIN_ID
     if not tenant_name:
         tenant_name = uuid.uuid4().hex
 
@@ -76,7 +72,7 @@ def create_mapping(self, tenant_name=None, authz_id=None, admin_id=None):
         "domain_id": "default"
     }
     keystone_tenant = self.resource_api.create_project(tenant["id"], tenant)
-    mapping = self.tenant_api.add_tenant_dict(ADMIN_ID, tenant)
+    mapping = self.tenant_api.add_tenant_dict(self.root_api.get_root_admin_id(), tenant)
     self.assertIsInstance(mapping, dict)
     self.assertIn("intra_authz_extension_id", mapping[tenant["id"]])
     self.assertIn("intra_admin_extension_id", mapping[tenant["id"]])

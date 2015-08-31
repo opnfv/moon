@@ -1700,9 +1700,6 @@
 # Moon Log driver. (string value)
 #log_driver = keystone.contrib.moon.backends.flat.LogConnector
 
-# SuperExtension backend driver. (string value)
-#superextension_driver = keystone.contrib.moon.backends.flat.SuperExtensionConnector
-
 # IntraExtension backend driver. (string value)
 #intraextension_driver = keystone.contrib.moon.backends.sql.IntraExtensionConnector
 
@@ -1713,4 +1710,4 @@
 #policy_directory = /etc/keystone/policies
 
 # Local directory where SuperExtension configuration is stored. (string value)
-#super_extension_directory = /etc/keystone/super_extension
+#root_policy_directory = /etc/keystone/policies/policy_root

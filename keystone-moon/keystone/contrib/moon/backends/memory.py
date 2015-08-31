@@ -6,6 +6,7 @@
 from uuid import uuid4
 from glob import glob
 import os
+import json
 from keystone import config
 from keystone.contrib.moon.core import ConfigurationDriver
 
@@ -19,12 +20,12 @@ class ConfigurationConnector(ConfigurationDriver):
         super(ConfigurationConnector, self).__init__()
         self.aggregation_algorithms_dict = dict()
         self.aggregation_algorithms_dict[uuid4().hex] = {'name': 'all_true', 'description': 'all_true'}
+        self.aggregation_algorithms_dict[uuid4().hex] = {'name': 'one_true', 'description': 'one_true'}
         self.sub_meta_rule_algorithms_dict = dict()
         self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'inclusion', 'description': 'inclusion'}
         self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'comparison', 'description': 'comparison'}
 
     def get_policy_templates_dict(self):
-        # TODO (dthom): this function should return a dictionary of all policy templates as:
         """
         :return: {
             template_id1: {name: template_name, description: template_description},
@@ -33,11 +34,15 @@ class ConfigurationConnector(ConfigurationDriver):
             }
         """
         nodes = glob(os.path.join(CONF.moon.policy_directory, "*"))
-        return {
-            "authz_templates": [os.path.basename(n) for n in nodes if os.path.isdir(n)]
-        }
+        templates = dict()
+        for node in nodes:
+            templates[os.path.basename(node)] = dict()
+            metadata = json.load(open(os.path.join(node, "metadata.json")))
+            templates[os.path.basename(node)]["name"] = metadata["name"]
+            templates[os.path.basename(node)]["description"] = metadata["description"]
+        return templates
 
-    def get_aggregation_algorithm_dict(self):
+    def get_aggregation_algorithms_dict(self):
         return self.aggregation_algorithms_dict
 
     def get_sub_meta_rule_algorithms_dict(self):

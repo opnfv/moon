@@ -21,11 +21,11 @@ def upgrade(migrate_engine):
         mysql_charset='utf8')
     intra_extension_table.create(migrate_engine, checkfirst=True)
 
-    intra_extension_table.insert().values(id=uuid4().hex, intra_extension={
-        'name': "Root Extension",
-        'description': "The root intra extension",
-        'model': 'admin'
-    })
+    # intra_extension_table.insert().values(id=uuid4().hex, intra_extension={
+    #     'name': "Root Extension",
+    #     'description': "The root intra extension",
+    #     'model': 'admin'
+    # })
 
     tenant_table = sql.Table(
         'tenants',
@@ -194,8 +194,6 @@ def upgrade(migrate_engine):
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     rules_table.create(migrate_engine, checkfirst=True)
-
-    # TODO: load root_extension
 
 
 def downgrade(migrate_engine):

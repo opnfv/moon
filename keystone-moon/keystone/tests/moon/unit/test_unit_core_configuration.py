@@ -12,7 +12,6 @@ from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
-from keystone.contrib.moon.core import ADMIN_ID
 from keystone.contrib.moon.core import LogManager
 from keystone.contrib.moon.core import IntraExtensionAdminManager
 from keystone.tests.moon.unit import *
@@ -26,15 +25,18 @@ class TestConfigurationManager(tests.TestCase):
     def setUp(self):
         self.useFixture(database.Database())
         super(TestConfigurationManager, self).setUp()
-        self.load_backends()
         self.load_fixtures(default_fixtures)
+        self.load_backends()
+        domain = {'id': "default", 'name': "default"}
+        self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
-        self.root_intra_extension = create_intra_extension(self, policy_model="policy_root")
-        # force re-initialization of the ADMIN_ID variable
-        from keystone.contrib.moon.core import ADMIN_ID
-        self.ADMIN_ID = ADMIN_ID
-        self.manager = self.configuration_api
+        self.root_intra_extension = self.root_api.get_root_extension_dict()
+        self.root_intra_extension_id = self.root_intra_extension.keys()[0]
+        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.authz_manager = self.authz_api
+        self.admin_manager = self.admin_api
+        self.configuration_manager = self.configuration_api
 
     def load_extra_backends(self):
         return {
@@ -60,10 +62,9 @@ class TestConfigurationManager(tests.TestCase):
             policy_directory=self.policy_directory)
 
     def test_get_policy_template_dict(self):
-        data = self.manager.get_policy_templates_dict(self.ADMIN_ID)
+        data = self.configuration_manager.get_policy_templates_dict(self.ADMIN_ID)
         self.assertIsInstance(data, dict)
-        self.assertIn("authz_templates", data)
-        self.assertIn("policy_root", data["authz_templates"])
+        self.assertIn("policy_root", data)
 
     # def test_get_aggregation_algorithm_dict(self):
     #     admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")

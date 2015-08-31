@@ -17,7 +17,7 @@ from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
-from keystone.contrib.moon.core import ADMIN_ID
+from keystone.tests.moon.unit import *
 
 CONF = cfg.CONF
 
@@ -41,15 +41,18 @@ class TestIntraExtensionAdminManager(tests.TestCase):
     def setUp(self):
         self.useFixture(database.Database())
         super(TestIntraExtensionAdminManager, self).setUp()
-        self.load_backends()
         self.load_fixtures(default_fixtures)
-        self.admin = self.create_user(username="admin")
-        self.demo = self.create_user(username="demo")
-        self.root_intra_extension = self.create_intra_extension(policy_model="policy_root")
-        # force re-initialization of the ADMIN_ID variable
-        from keystone.contrib.moon.core import ADMIN_ID
-        self.ADMIN_ID = ADMIN_ID
-        self.manager = IntraExtensionAdminManager()
+        self.load_backends()
+        domain = {'id': "default", 'name': "default"}
+        self.resource_api.create_domain(domain['id'], domain)
+        self.admin = create_user(self, username="admin")
+        self.demo = create_user(self, username="demo")
+        self.root_intra_extension = self.root_api.get_root_extension_dict()
+        self.root_intra_extension_id = self.root_intra_extension.keys()[0]
+        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.authz_manager = self.authz_api
+        self.admin_manager = self.admin_api
+        self.tenant_manager = self.tenant_api
 
     def __get_key_from_value(self, value, values_dict):
         return filter(lambda v: v[1] == value, values_dict.iteritems())[0][0]
@@ -70,43 +73,6 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         self.config_fixture.config(
             group='moon',
             policy_directory=self.policy_directory)
-
-    def create_intra_extension(self, policy_model="policy_rbac_admin"):
-        # Create the admin user because IntraExtension needs it
-        self.admin = self.identity_api.create_user(USER_ADMIN)
-        IE["policymodel"] = policy_model
-        self.ref = self.manager.load_intra_extension_dict(ADMIN_ID, intra_extension_dict=IE)
-        self.assertIsInstance(self.ref, dict)
-        self.create_tenant(self.ref["id"])
-
-    def create_tenant(self, authz_uuid):
-        tenant = {
-            "id": uuid.uuid4().hex,
-            "name": "TestAuthzIntraExtensionManager",
-            "enabled": True,
-            "description": "",
-            "domain_id": "default"
-        }
-        project = self.resource_api.create_project(tenant["id"], tenant)
-        mapping = self.tenant_api.set_tenant_dict(project["id"], project["name"], authz_uuid, None)
-        self.assertIsInstance(mapping, dict)
-        self.assertIn("authz", mapping)
-        self.assertEqual(mapping["authz"], authz_uuid)
-        return mapping
-
-    def create_user(self, username="TestAdminIntraExtensionManagerUser"):
-        user = {
-            "id": uuid.uuid4().hex,
-            "name": username,
-            "enabled": True,
-            "description": "",
-            "domain_id": "default"
-        }
-        _user = self.identity_api.create_user(user)
-        return _user
-
-    def delete_admin_intra_extension(self):
-        self.manager.del_intra_extension(self.ref["id"])
 
     def send_logs(self):
         log_authz = "Test for authz " + uuid.uuid4().hex

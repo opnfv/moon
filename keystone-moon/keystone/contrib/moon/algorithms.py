@@ -22,17 +22,18 @@ sub_meta_rule_dict = {
 }
 
 rule_dict = [
-    ["high", "vm_admin", "medium"],
-    ["high", "vm_admin", "low"],
-    ["medium", "vm_admin", "low"],
-    ["high", "vm_access", "high"],
-    ["high", "vm_access", "medium"],
-    ["high", "vm_access", "low"],
-    ["medium", "vm_access", "medium"],
-    ["medium", "vm_access", "low"],
-    ["low", "vm_access", "low"]
+    ["high", "vm_admin", "medium", True],
+    ["high", "vm_admin", "low", True],
+    ["medium", "vm_admin", "low", True],
+    ["high", "vm_access", "high", True],
+    ["high", "vm_access", "medium", True],
+    ["high", "vm_access", "low", True],
+    ["medium", "vm_access", "medium", True],
+    ["medium", "vm_access", "low", True],
+    ["low", "vm_access", "low", True]
 ]
 """
+
 
 def inclusion(authz_buffer, sub_meta_rule_dict, rule_list):
     _cat = []
@@ -46,14 +47,10 @@ def inclusion(authz_buffer, sub_meta_rule_dict, rule_list):
         if object_cat in authz_buffer['object_assignments']:
             _cat.append(authz_buffer['object_assignments'][object_cat])
 
-    print("authz_buffer", authz_buffer)
-    print("rule_list", rule_list)
-    print("_cat", _cat)
     for _element in itertools.product(*_cat):
         # Add the boolean at the end
         _element = list(_element)
         _element.append(True)
-        print("_element", _element)
         if _element in rule_list:
             return True
 
@@ -66,6 +63,13 @@ def comparison(authz_buffer, sub_meta_rule_dict, rule_list):
 
 def all_true(decision_buffer):
     for _rule in decision_buffer:
-        if decision_buffer[_rule] is False:
+        if decision_buffer[_rule] == False:
             return False
     return True
+
+
+def one_true(decision_buffer):
+    for _rule in decision_buffer:
+        if decision_buffer[_rule] == True:
+            return True
+    return False
