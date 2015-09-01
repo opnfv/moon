@@ -87,7 +87,7 @@ def _internal_attr(attr_name, value_or_values):
     return [attr_fn(value_or_values)]
 
 
-def _match_query(query, attrs):
+def _match_query(query, attrs, attrs_checked):
     """Match an ldap query to an attribute dictionary.
 
     The characters &, |, and ! are supported in the query. No syntax checking
@@ -102,12 +102,14 @@ def _match_query(query, attrs):
             matchfn = any
         # cut off the & or |
         groups = _paren_groups(inner[1:])
-        return matchfn(_match_query(group, attrs) for group in groups)
+        return matchfn(_match_query(group, attrs, attrs_checked)
+                       for group in groups)
     if inner.startswith('!'):
         # cut off the ! and the nested parentheses
-        return not _match_query(query[2:-1], attrs)
+        return not _match_query(query[2:-1], attrs, attrs_checked)
 
     (k, _sep, v) = inner.partition('=')
+    attrs_checked.add(k.lower())
     return _match(k, v, attrs)
 
 
@@ -210,7 +212,7 @@ FakeShelves = {}
 
 
 class FakeLdap(core.LDAPHandler):
-    '''Emulate the python-ldap API.
+    """Emulate the python-ldap API.
 
     The python-ldap API requires all strings to be UTF-8 encoded. This
     is assured by the caller of this interface
@@ -223,7 +225,8 @@ class FakeLdap(core.LDAPHandler):
     strings, decodes them to unicode for operations internal to this
     emulation, and encodes them back to UTF-8 when returning values
     from the emulation.
-    '''
+
+    """
 
     __prefix = 'ldap:'
 
@@ -254,7 +257,7 @@ class FakeLdap(core.LDAPHandler):
                 ldap.set_option(ldap.OPT_X_TLS_CACERTFILE, tls_cacertfile)
             elif tls_cacertdir:
                 ldap.set_option(ldap.OPT_X_TLS_CACERTDIR, tls_cacertdir)
-            if tls_req_cert in core.LDAP_TLS_CERTS.values():
+            if tls_req_cert in list(core.LDAP_TLS_CERTS.values()):
                 ldap.set_option(ldap.OPT_X_TLS_REQUIRE_CERT, tls_req_cert)
             else:
                 raise ValueError("invalid TLS_REQUIRE_CERT tls_req_cert=%s",
@@ -356,7 +359,7 @@ class FakeLdap(core.LDAPHandler):
         return self.delete_ext_s(dn, serverctrls=[])
 
     def _getChildren(self, dn):
-        return [k for k, v in six.iteritems(self.db)
+        return [k for k, v in self.db.items()
                 if re.match('%s.*,%s' % (
                             re.escape(self.__prefix),
                             re.escape(self.dn(dn))), k)]
@@ -451,6 +454,10 @@ class FakeLdap(core.LDAPHandler):
         if server_fail:
             raise ldap.SERVER_DOWN
 
+        if (not filterstr) and (scope != ldap.SCOPE_BASE):
+            raise AssertionError('Search without filter on onelevel or '
+                                 'subtree scope')
+
         if scope == ldap.SCOPE_BASE:
             try:
                 item_dict = self.db[self.key(base)]
@@ -473,7 +480,7 @@ class FakeLdap(core.LDAPHandler):
                 raise ldap.NO_SUCH_OBJECT
             results = [(base, item_dict)]
             extraresults = [(k[len(self.__prefix):], v)
-                            for k, v in six.iteritems(self.db)
+                            for k, v in self.db.items()
                             if re.match('%s.*,%s' %
                                         (re.escape(self.__prefix),
                                          re.escape(self.dn(base))), k)]
@@ -484,7 +491,7 @@ class FakeLdap(core.LDAPHandler):
                 base_dn = ldap.dn.str2dn(core.utf8_encode(base))
                 base_len = len(base_dn)
 
-                for k, v in six.iteritems(self.db):
+                for k, v in self.db.items():
                     if not k.startswith(self.__prefix):
                         continue
                     k_dn_str = k[len(self.__prefix):]
@@ -509,9 +516,15 @@ class FakeLdap(core.LDAPHandler):
             id_val = core.utf8_decode(id_val)
             match_attrs = attrs.copy()
             match_attrs[id_attr] = [id_val]
-            if not filterstr or _match_query(filterstr, match_attrs):
+            attrs_checked = set()
+            if not filterstr or _match_query(filterstr, match_attrs,
+                                             attrs_checked):
+                if (filterstr and
+                        (scope != ldap.SCOPE_BASE) and
+                        ('objectclass' not in attrs_checked)):
+                    raise AssertionError('No objectClass in search filter')
                 # filter the attributes by attrlist
-                attrs = {k: v for k, v in six.iteritems(attrs)
+                attrs = {k: v for k, v in attrs.items()
                          if not attrlist or k in attrlist}
                 objects.append((dn, attrs))
 
@@ -536,11 +549,11 @@ class FakeLdap(core.LDAPHandler):
 
 
 class FakeLdapPool(FakeLdap):
-    '''Emulate the python-ldap API with pooled connections using existing
-    FakeLdap logic.
+    """Emulate the python-ldap API with pooled connections.
 
     This class is used as connector class in PooledLDAPHandler.
-    '''
+
+    """
 
     def __init__(self, uri, retry_max=None, retry_delay=None, conn=None):
         super(FakeLdapPool, self).__init__(conn=conn)
@@ -571,7 +584,7 @@ class FakeLdapPool(FakeLdap):
                                                 clientctrls=clientctrls)
 
     def unbind_ext_s(self):
-        '''Added to extend FakeLdap as connector class.'''
+        """Added to extend FakeLdap as connector class."""
         pass
 
 

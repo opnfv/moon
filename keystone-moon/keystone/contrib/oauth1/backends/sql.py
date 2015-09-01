@@ -18,9 +18,9 @@ import uuid
 
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
-import six
 
 from keystone.common import sql
+from keystone.common import utils
 from keystone.contrib.oauth1 import core
 from keystone import exception
 from keystone.i18n import _
@@ -58,7 +58,7 @@ class RequestToken(sql.ModelBase, sql.DictBase):
         return cls(**user_dict)
 
     def to_dict(self):
-        return dict(six.iteritems(self))
+        return dict(self.items())
 
 
 class AccessToken(sql.ModelBase, sql.DictBase):
@@ -81,7 +81,7 @@ class AccessToken(sql.ModelBase, sql.DictBase):
         return cls(**user_dict)
 
     def to_dict(self):
-        return dict(six.iteritems(self))
+        return dict(self.items())
 
 
 class OAuth1(object):
@@ -163,7 +163,7 @@ class OAuth1(object):
         if token_duration:
             now = timeutils.utcnow()
             future = now + datetime.timedelta(seconds=token_duration)
-            expiry_date = timeutils.isotime(future, subsecond=True)
+            expiry_date = utils.isotime(future, subsecond=True)
 
         ref = {}
         ref['id'] = request_token_id
@@ -225,7 +225,7 @@ class OAuth1(object):
             if token_duration:
                 now = timeutils.utcnow()
                 future = now + datetime.timedelta(seconds=token_duration)
-                expiry_date = timeutils.isotime(future, subsecond=True)
+                expiry_date = utils.isotime(future, subsecond=True)
 
             # add Access Token
             ref = {}

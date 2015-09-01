@@ -14,16 +14,16 @@
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 from oslo_middleware import sizelimit
 from oslo_serialization import jsonutils
-import six
 
 from keystone.common import authorization
 from keystone.common import wsgi
 from keystone import exception
 from keystone.i18n import _LW
 from keystone.models import token_model
-from keystone.openstack.common import versionutils
+
 
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
@@ -51,8 +51,7 @@ class TokenAuthMiddleware(wsgi.Middleware):
         context = request.environ.get(CONTEXT_ENV, {})
         context['token_id'] = token
         if SUBJECT_TOKEN_HEADER in request.headers:
-            context['subject_token_id'] = (
-                request.headers.get(SUBJECT_TOKEN_HEADER))
+            context['subject_token_id'] = request.headers[SUBJECT_TOKEN_HEADER]
         request.environ[CONTEXT_ENV] = context
 
 
@@ -82,7 +81,7 @@ class PostParamsMiddleware(wsgi.Middleware):
     def process_request(self, request):
         params_parsed = request.params
         params = {}
-        for k, v in six.iteritems(params_parsed):
+        for k, v in params_parsed.items():
             if k in ('self', 'context'):
                 continue
             if k.startswith('_'):
@@ -132,7 +131,7 @@ class JsonBodyMiddleware(wsgi.Middleware):
             return wsgi.render_exception(e, request=request)
 
         params = {}
-        for k, v in six.iteritems(params_parsed):
+        for k, v in params_parsed.items():
             if k in ('self', 'context'):
                 continue
             if k.startswith('_'):
@@ -140,35 +139,6 @@ class JsonBodyMiddleware(wsgi.Middleware):
             params[k] = v
 
         request.environ[PARAMS_ENV] = params
-
-
-class XmlBodyMiddleware(wsgi.Middleware):
-    """De/serialize XML to/from JSON."""
-
-    def print_warning(self):
-        LOG.warning(_LW('XML support has been removed as of the Kilo release '
-                        'and should not be referenced or used in deployment. '
-                        'Please remove references to XmlBodyMiddleware from '
-                        'your configuration. This compatibility stub will be '
-                        'removed in the L release'))
-
-    def __init__(self, *args, **kwargs):
-        super(XmlBodyMiddleware, self).__init__(*args, **kwargs)
-        self.print_warning()
-
-
-class XmlBodyMiddlewareV2(XmlBodyMiddleware):
-    """De/serialize XML to/from JSON for v2.0 API."""
-
-    def __init__(self, *args, **kwargs):
-        pass
-
-
-class XmlBodyMiddlewareV3(XmlBodyMiddleware):
-    """De/serialize XML to/from JSON for v3 API."""
-
-    def __init__(self, *args, **kwargs):
-        pass
 
 
 class NormalizingFilter(wsgi.Middleware):

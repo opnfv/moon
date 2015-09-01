@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Main entry point into the Token persistence service."""
+"""Main entry point into the Token Persistence service."""
 
 import abc
 import copy
@@ -27,6 +27,7 @@ from keystone.common import dependency
 from keystone.common import manager
 from keystone import exception
 from keystone.i18n import _LW
+from keystone.token import utils
 
 
 CONF = cfg.CONF
@@ -39,12 +40,14 @@ REVOCATION_MEMOIZE = cache.get_memoization_decorator(
 @dependency.requires('assignment_api', 'identity_api', 'resource_api',
                      'token_provider_api', 'trust_api')
 class PersistenceManager(manager.Manager):
-    """Default pivot point for the Token backend.
+    """Default pivot point for the Token Persistence backend.
 
     See :mod:`keystone.common.manager.Manager` for more details on how this
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.token.persistence'
 
     def __init__(self):
         super(PersistenceManager, self).__init__(CONF.token.driver)
@@ -62,7 +65,7 @@ class PersistenceManager(manager.Manager):
             # context['token_id'] will in-fact be None. This also saves
             # a round-trip to the backend if we don't have a token_id.
             raise exception.TokenNotFound(token_id='')
-        unique_id = self.token_provider_api.unique_id(token_id)
+        unique_id = utils.generate_unique_id(token_id)
         token_ref = self._get_token(unique_id)
         # NOTE(morganfainberg): Lift expired checking to the manager, there is
         # no reason to make the drivers implement this check. With caching,
@@ -77,7 +80,7 @@ class PersistenceManager(manager.Manager):
         return self.driver.get_token(token_id)
 
     def create_token(self, token_id, data):
-        unique_id = self.token_provider_api.unique_id(token_id)
+        unique_id = utils.generate_unique_id(token_id)
         data_copy = copy.deepcopy(data)
         data_copy['id'] = unique_id
         ret = self.driver.create_token(unique_id, data_copy)
@@ -91,7 +94,7 @@ class PersistenceManager(manager.Manager):
     def delete_token(self, token_id):
         if not CONF.token.revoke_by_id:
             return
-        unique_id = self.token_provider_api.unique_id(token_id)
+        unique_id = utils.generate_unique_id(token_id)
         self.driver.delete_token(unique_id)
         self._invalidate_individual_token_cache(unique_id)
         self.invalidate_revocation_list()
@@ -100,11 +103,10 @@ class PersistenceManager(manager.Manager):
                       consumer_id=None):
         if not CONF.token.revoke_by_id:
             return
-        token_list = self.driver._list_tokens(user_id, tenant_id, trust_id,
-                                              consumer_id)
-        self.driver.delete_tokens(user_id, tenant_id, trust_id, consumer_id)
+        token_list = self.driver.delete_tokens(user_id, tenant_id, trust_id,
+                                               consumer_id)
         for token_id in token_list:
-            unique_id = self.token_provider_api.unique_id(token_id)
+            unique_id = utils.generate_unique_id(token_id)
             self._invalidate_individual_token_cache(unique_id)
         self.invalidate_revocation_list()
 
@@ -196,11 +198,6 @@ class PersistenceManager(manager.Manager):
         self.token_provider_api.invalidate_individual_token_cache(token_id)
 
 
-# NOTE(morganfainberg): @dependency.optional() is required here to ensure the
-# class-level optional dependency control attribute is populated as empty
-# this is because of the override of .__getattr__ and ensures that if the
-# optional dependency injector changes attributes, this class doesn't break.
-@dependency.optional()
 @dependency.requires('token_provider_api')
 @dependency.provider('token_api')
 class Manager(object):
@@ -306,7 +303,7 @@ class Driver(object):
         :type trust_id: string
         :param consumer_id: identity of the consumer
         :type consumer_id: string
-        :returns: None.
+        :returns: The tokens that have been deleted.
         :raises: keystone.exception.TokenNotFound
 
         """
@@ -322,6 +319,7 @@ class Driver(object):
                 self.delete_token(token)
             except exception.NotFound:
                 pass
+        return token_list
 
     @abc.abstractmethod
     def _list_tokens(self, user_id, tenant_id=None, trust_id=None,

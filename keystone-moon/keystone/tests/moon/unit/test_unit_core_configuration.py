@@ -14,12 +14,13 @@ from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager
 from keystone.contrib.moon.core import IntraExtensionAdminManager
+from keystone.contrib.moon.core import IntraExtensionRootManager
 from keystone.tests.moon.unit import *
 
 CONF = cfg.CONF
 
 
-@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
+# @dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
 class TestConfigurationManager(tests.TestCase):
 
     def setUp(self):
@@ -41,7 +42,8 @@ class TestConfigurationManager(tests.TestCase):
     def load_extra_backends(self):
         return {
             "moonlog_api": LogManager(),
-            "admin_api": IntraExtensionAdminManager()
+            "admin_api": IntraExtensionAdminManager(),
+            "root_api": IntraExtensionRootManager()
         }
 
     def config_overrides(self):

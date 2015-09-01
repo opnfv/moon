@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Main entry point into the Credentials service."""
+"""Main entry point into the Credential service."""
 
 import abc
 
@@ -39,6 +39,8 @@ class Manager(manager.Manager):
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.credential'
 
     def __init__(self):
         super(Manager, self).__init__(CONF.credential.driver)

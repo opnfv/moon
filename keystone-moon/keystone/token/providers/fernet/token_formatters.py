@@ -21,11 +21,12 @@ from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import timeutils
 import six
-from six.moves import urllib
+from six.moves import map, urllib
 
 from keystone.auth import plugins as auth_plugins
+from keystone.common import utils as ks_utils
 from keystone import exception
-from keystone.i18n import _
+from keystone.i18n import _, _LI
 from keystone.token import provider
 from keystone.token.providers.fernet import utils
 
@@ -60,7 +61,7 @@ class TokenFormatter(object):
         if not keys:
             raise exception.KeysNotFound()
 
-        fernet_instances = [fernet.Fernet(key) for key in utils.load_keys()]
+        fernet_instances = [fernet.Fernet(key) for key in keys]
         return fernet.MultiFernet(fernet_instances)
 
     def pack(self, payload):
@@ -74,8 +75,9 @@ class TokenFormatter(object):
 
         try:
             return self.crypto.decrypt(token)
-        except fernet.InvalidToken as e:
-            raise exception.Unauthorized(six.text_type(e))
+        except fernet.InvalidToken:
+            raise exception.ValidationError(
+                _('This is not a recognized Fernet token'))
 
     @classmethod
     def creation_time(cls, fernet_token):
@@ -115,9 +117,27 @@ class TokenFormatter(object):
                 expires_at,
                 audit_ids,
                 trust_id)
+        elif project_id and federated_info:
+            version = FederatedProjectScopedPayload.version
+            payload = FederatedProjectScopedPayload.assemble(
+                user_id,
+                methods,
+                project_id,
+                expires_at,
+                audit_ids,
+                federated_info)
+        elif domain_id and federated_info:
+            version = FederatedDomainScopedPayload.version
+            payload = FederatedDomainScopedPayload.assemble(
+                user_id,
+                methods,
+                domain_id,
+                expires_at,
+                audit_ids,
+                federated_info)
         elif federated_info:
-            version = FederatedPayload.version
-            payload = FederatedPayload.assemble(
+            version = FederatedUnscopedPayload.version
+            payload = FederatedUnscopedPayload.assemble(
                 user_id,
                 methods,
                 expires_at,
@@ -151,6 +171,17 @@ class TokenFormatter(object):
         serialized_payload = msgpack.packb(versioned_payload)
         token = self.pack(serialized_payload)
 
+        # NOTE(lbragstad): We should warn against Fernet tokens that are over
+        # 255 characters in length. This is mostly due to persisting the tokens
+        # in a backend store of some kind that might have a limit of 255
+        # characters. Even though Keystone isn't storing a Fernet token
+        # anywhere, we can't say it isn't being stored somewhere else with
+        # those kind of backend constraints.
+        if len(token) > 255:
+            LOG.info(_LI('Fernet token created with length of %d '
+                         'characters, which exceeds 255 characters'),
+                     len(token))
+
         return token
 
     def validate_token(self, token):
@@ -181,21 +212,29 @@ class TokenFormatter(object):
         elif version == TrustScopedPayload.version:
             (user_id, methods, project_id, expires_at, audit_ids, trust_id) = (
                 TrustScopedPayload.disassemble(payload))
-        elif version == FederatedPayload.version:
+        elif version == FederatedUnscopedPayload.version:
             (user_id, methods, expires_at, audit_ids, federated_info) = (
-                FederatedPayload.disassemble(payload))
+                FederatedUnscopedPayload.disassemble(payload))
+        elif version == FederatedProjectScopedPayload.version:
+            (user_id, methods, project_id, expires_at, audit_ids,
+             federated_info) = FederatedProjectScopedPayload.disassemble(
+                payload)
+        elif version == FederatedDomainScopedPayload.version:
+            (user_id, methods, domain_id, expires_at, audit_ids,
+             federated_info) = FederatedDomainScopedPayload.disassemble(
+                payload)
         else:
-            # If the token_format is not recognized, raise Unauthorized.
-            raise exception.Unauthorized(_(
+            # If the token_format is not recognized, raise ValidationError.
+            raise exception.ValidationError(_(
                 'This is not a recognized Fernet payload version: %s') %
                 version)
 
         # rather than appearing in the payload, the creation time is encoded
         # into the token format itself
         created_at = TokenFormatter.creation_time(token)
-        created_at = timeutils.isotime(at=created_at, subsecond=True)
+        created_at = ks_utils.isotime(at=created_at, subsecond=True)
         expires_at = timeutils.parse_isotime(expires_at)
-        expires_at = timeutils.isotime(at=expires_at, subsecond=True)
+        expires_at = ks_utils.isotime(at=expires_at, subsecond=True)
 
         return (user_id, methods, audit_ids, domain_id, project_id, trust_id,
                 federated_info, created_at, expires_at)
@@ -273,8 +312,8 @@ class BasePayload(object):
         :returns: a time formatted strings
 
         """
-        time_object = datetime.datetime.utcfromtimestamp(int(time_int))
-        return timeutils.isotime(time_object)
+        time_object = datetime.datetime.utcfromtimestamp(time_int)
+        return ks_utils.isotime(time_object, subsecond=True)
 
     @classmethod
     def attempt_convert_uuid_hex_to_bytes(cls, value):
@@ -319,7 +358,7 @@ class UnscopedPayload(BasePayload):
         :returns: the payload of an unscoped token
 
         """
-        b_user_id = cls.convert_uuid_hex_to_bytes(user_id)
+        b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
         methods = auth_plugins.convert_method_list_to_integer(methods)
         expires_at_int = cls._convert_time_string_to_int(expires_at)
         b_audit_ids = list(map(provider.random_urlsafe_str_to_bytes,
@@ -335,7 +374,7 @@ class UnscopedPayload(BasePayload):
                  audit_ids
 
         """
-        user_id = cls.convert_uuid_bytes_to_hex(payload[0])
+        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
         expires_at_str = cls._convert_int_to_time_string(payload[2])
         audit_ids = list(map(provider.base64_encode, payload[3]))
@@ -357,7 +396,7 @@ class DomainScopedPayload(BasePayload):
         :returns: the payload of a domain-scoped token
 
         """
-        b_user_id = cls.convert_uuid_hex_to_bytes(user_id)
+        b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
         methods = auth_plugins.convert_method_list_to_integer(methods)
         try:
             b_domain_id = cls.convert_uuid_hex_to_bytes(domain_id)
@@ -381,7 +420,7 @@ class DomainScopedPayload(BasePayload):
                  expires_at_str, and audit_ids
 
         """
-        user_id = cls.convert_uuid_bytes_to_hex(payload[0])
+        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
         try:
             domain_id = cls.convert_uuid_bytes_to_hex(payload[2])
@@ -412,9 +451,9 @@ class ProjectScopedPayload(BasePayload):
         :returns: the payload of a project-scoped token
 
         """
-        b_user_id = cls.convert_uuid_hex_to_bytes(user_id)
+        b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
         methods = auth_plugins.convert_method_list_to_integer(methods)
-        b_project_id = cls.convert_uuid_hex_to_bytes(project_id)
+        b_project_id = cls.attempt_convert_uuid_hex_to_bytes(project_id)
         expires_at_int = cls._convert_time_string_to_int(expires_at)
         b_audit_ids = list(map(provider.random_urlsafe_str_to_bytes,
                            audit_ids))
@@ -429,9 +468,9 @@ class ProjectScopedPayload(BasePayload):
                  expires_at_str, and audit_ids
 
         """
-        user_id = cls.convert_uuid_bytes_to_hex(payload[0])
+        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        project_id = cls.convert_uuid_bytes_to_hex(payload[2])
+        project_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
         expires_at_str = cls._convert_int_to_time_string(payload[3])
         audit_ids = list(map(provider.base64_encode, payload[4]))
 
@@ -455,9 +494,9 @@ class TrustScopedPayload(BasePayload):
         :returns: the payload of a trust-scoped token
 
         """
-        b_user_id = cls.convert_uuid_hex_to_bytes(user_id)
+        b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
         methods = auth_plugins.convert_method_list_to_integer(methods)
-        b_project_id = cls.convert_uuid_hex_to_bytes(project_id)
+        b_project_id = cls.attempt_convert_uuid_hex_to_bytes(project_id)
         b_trust_id = cls.convert_uuid_hex_to_bytes(trust_id)
         expires_at_int = cls._convert_time_string_to_int(expires_at)
         b_audit_ids = list(map(provider.random_urlsafe_str_to_bytes,
@@ -475,9 +514,9 @@ class TrustScopedPayload(BasePayload):
                   expires_at_str, audit_ids, and trust_id
 
         """
-        user_id = cls.convert_uuid_bytes_to_hex(payload[0])
+        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        project_id = cls.convert_uuid_bytes_to_hex(payload[2])
+        project_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
         expires_at_str = cls._convert_int_to_time_string(payload[3])
         audit_ids = list(map(provider.base64_encode, payload[4]))
         trust_id = cls.convert_uuid_bytes_to_hex(payload[5])
@@ -486,8 +525,17 @@ class TrustScopedPayload(BasePayload):
                 trust_id)
 
 
-class FederatedPayload(BasePayload):
+class FederatedUnscopedPayload(BasePayload):
     version = 4
+
+    @classmethod
+    def pack_group_id(cls, group_dict):
+        return cls.attempt_convert_uuid_hex_to_bytes(group_dict['id'])
+
+    @classmethod
+    def unpack_group_id(cls, group_id_in_bytes):
+        group_id = cls.attempt_convert_uuid_bytes_to_hex(group_id_in_bytes)
+        return {'id': group_id}
 
     @classmethod
     def assemble(cls, user_id, methods, expires_at, audit_ids, federated_info):
@@ -503,24 +551,24 @@ class FederatedPayload(BasePayload):
         :returns: the payload of a federated token
 
         """
-        def pack_group_ids(group_dict):
-            return cls.convert_uuid_hex_to_bytes(group_dict['id'])
 
         b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
         methods = auth_plugins.convert_method_list_to_integer(methods)
-        b_group_ids = map(pack_group_ids, federated_info['group_ids'])
+        b_group_ids = list(map(cls.pack_group_id,
+                               federated_info['group_ids']))
         b_idp_id = cls.attempt_convert_uuid_hex_to_bytes(
             federated_info['idp_id'])
         protocol_id = federated_info['protocol_id']
         expires_at_int = cls._convert_time_string_to_int(expires_at)
-        b_audit_ids = map(provider.random_urlsafe_str_to_bytes, audit_ids)
+        b_audit_ids = list(map(provider.random_urlsafe_str_to_bytes,
+                               audit_ids))
 
         return (b_user_id, methods, b_group_ids, b_idp_id, protocol_id,
                 expires_at_int, b_audit_ids)
 
     @classmethod
     def disassemble(cls, payload):
-        """Validate a federated paylod.
+        """Validate a federated payload.
 
         :param token_string: a string representing the token
         :return: a tuple containing the user_id, auth methods, audit_ids, and
@@ -529,17 +577,81 @@ class FederatedPayload(BasePayload):
                  federated domain ID
 
         """
-        def unpack_group_ids(group_id_in_bytes):
-            group_id = cls.convert_uuid_bytes_to_hex(group_id_in_bytes)
-            return {'id': group_id}
 
         user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        group_ids = map(unpack_group_ids, payload[2])
+        group_ids = list(map(cls.unpack_group_id, payload[2]))
         idp_id = cls.attempt_convert_uuid_bytes_to_hex(payload[3])
         protocol_id = payload[4]
         expires_at_str = cls._convert_int_to_time_string(payload[5])
-        audit_ids = map(provider.base64_encode, payload[6])
+        audit_ids = list(map(provider.base64_encode, payload[6]))
         federated_info = dict(group_ids=group_ids, idp_id=idp_id,
                               protocol_id=protocol_id)
         return (user_id, methods, expires_at_str, audit_ids, federated_info)
+
+
+class FederatedScopedPayload(FederatedUnscopedPayload):
+    version = None
+
+    @classmethod
+    def assemble(cls, user_id, methods, scope_id, expires_at, audit_ids,
+                 federated_info):
+        """Assemble the project-scoped payload of a federated token.
+
+        :param user_id: ID of the user in the token request
+        :param methods: list of authentication methods used
+        :param scope_id: ID of the project or domain ID to scope to
+        :param expires_at: datetime of the token's expiration
+        :param audit_ids: list of the token's audit IDs
+        :param federated_info: dictionary containing the identity provider ID,
+                               protocol ID, federated domain ID and group IDs
+        :returns: the payload of a federated token
+
+        """
+        b_user_id = cls.attempt_convert_uuid_hex_to_bytes(user_id)
+        methods = auth_plugins.convert_method_list_to_integer(methods)
+        b_scope_id = cls.attempt_convert_uuid_hex_to_bytes(scope_id)
+        b_group_ids = list(map(cls.pack_group_id,
+                               federated_info['group_ids']))
+        b_idp_id = cls.attempt_convert_uuid_hex_to_bytes(
+            federated_info['idp_id'])
+        protocol_id = federated_info['protocol_id']
+        expires_at_int = cls._convert_time_string_to_int(expires_at)
+        b_audit_ids = list(map(provider.random_urlsafe_str_to_bytes,
+                               audit_ids))
+
+        return (b_user_id, methods, b_scope_id, b_group_ids, b_idp_id,
+                protocol_id, expires_at_int, b_audit_ids)
+
+    @classmethod
+    def disassemble(cls, payload):
+        """Validate a project-scoped federated payload.
+
+        :param token_string: a string representing the token
+        :returns: a tuple containing the user_id, auth methods, scope_id,
+                  expiration time (as str), audit_ids, and a dictionary
+                  containing federated information such as the the identity
+                  provider ID, the protocol ID, the federated domain ID and
+                  group IDs
+
+        """
+        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        methods = auth_plugins.convert_integer_to_method_list(payload[1])
+        scope_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
+        group_ids = list(map(cls.unpack_group_id, payload[3]))
+        idp_id = cls.attempt_convert_uuid_bytes_to_hex(payload[4])
+        protocol_id = payload[5]
+        expires_at_str = cls._convert_int_to_time_string(payload[6])
+        audit_ids = list(map(provider.base64_encode, payload[7]))
+        federated_info = dict(idp_id=idp_id, protocol_id=protocol_id,
+                              group_ids=group_ids)
+        return (user_id, methods, scope_id, expires_at_str, audit_ids,
+                federated_info)
+
+
+class FederatedProjectScopedPayload(FederatedScopedPayload):
+    version = 5
+
+
+class FederatedDomainScopedPayload(FederatedScopedPayload):
+    version = 6

@@ -12,8 +12,10 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import logging
 import uuid
 
+import fixtures
 from oslo_config import cfg
 from testtools import matchers
 
@@ -434,6 +436,38 @@ class IdentityTestCase(test_v3.RestfulTestCase):
         self.delete('/groups/%(group_id)s' % {
             'group_id': self.group_id})
 
+    def test_create_user_password_not_logged(self):
+        # When a user is created, the password isn't logged at any level.
+
+        log_fix = self.useFixture(fixtures.FakeLogger(level=logging.DEBUG))
+
+        ref = self.new_user_ref(domain_id=self.domain_id)
+        self.post(
+            '/users',
+            body={'user': ref})
+
+        self.assertNotIn(ref['password'], log_fix.output)
+
+    def test_update_password_not_logged(self):
+        # When admin modifies user password, the password isn't logged at any
+        # level.
+
+        log_fix = self.useFixture(fixtures.FakeLogger(level=logging.DEBUG))
+
+        # bootstrap a user as admin
+        user_ref = self.new_user_ref(domain_id=self.domain['id'])
+        password = user_ref['password']
+        user_ref = self.identity_api.create_user(user_ref)
+
+        # administrative password reset
+        new_password = uuid.uuid4().hex
+        self.patch('/users/%s' % user_ref['id'],
+                   body={'user': {'password': new_password}},
+                   expected_status=200)
+
+        self.assertNotIn(password, log_fix.output)
+        self.assertNotIn(new_password, log_fix.output)
+
 
 class IdentityV3toV2MethodsTestCase(tests.TestCase):
     """Test users V3 to V2 conversion methods."""
@@ -444,27 +478,26 @@ class IdentityV3toV2MethodsTestCase(tests.TestCase):
         self.user_id = uuid.uuid4().hex
         self.default_project_id = uuid.uuid4().hex
         self.tenant_id = uuid.uuid4().hex
-        self.domain_id = uuid.uuid4().hex
         # User with only default_project_id in ref
         self.user1 = {'id': self.user_id,
                       'name': self.user_id,
                       'default_project_id': self.default_project_id,
-                      'domain_id': self.domain_id}
+                      'domain_id': CONF.identity.default_domain_id}
         # User without default_project_id or tenantId in ref
         self.user2 = {'id': self.user_id,
                       'name': self.user_id,
-                      'domain_id': self.domain_id}
+                      'domain_id': CONF.identity.default_domain_id}
         # User with both tenantId and default_project_id in ref
         self.user3 = {'id': self.user_id,
                       'name': self.user_id,
                       'default_project_id': self.default_project_id,
                       'tenantId': self.tenant_id,
-                      'domain_id': self.domain_id}
+                      'domain_id': CONF.identity.default_domain_id}
         # User with only tenantId in ref
         self.user4 = {'id': self.user_id,
                       'name': self.user_id,
                       'tenantId': self.tenant_id,
-                      'domain_id': self.domain_id}
+                      'domain_id': CONF.identity.default_domain_id}
 
         # Expected result if the user is meant to have a tenantId element
         self.expected_user = {'id': self.user_id,
@@ -582,3 +615,18 @@ class UserSelfServiceChangingPasswordsTestCase(test_v3.RestfulTestCase):
         self.change_password(password=uuid.uuid4().hex,
                              original_password=self.user_ref['password'],
                              expected_status=401)
+
+    def test_changing_password_not_logged(self):
+        # When a user changes their password, the password isn't logged at any
+        # level.
+
+        log_fix = self.useFixture(fixtures.FakeLogger(level=logging.DEBUG))
+
+        # change password
+        new_password = uuid.uuid4().hex
+        self.change_password(password=new_password,
+                             original_password=self.user_ref['password'],
+                             expected_status=204)
+
+        self.assertNotIn(self.user_ref['password'], log_fix.output)
+        self.assertNotIn(new_password, log_fix.output)

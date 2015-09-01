@@ -360,8 +360,12 @@ class MongoApi(object):
 
             self._assign_data_mainpulator()
             if self.read_preference:
-                self.read_preference = pymongo.read_preferences.mongos_enum(
-                    self.read_preference)
+                # pymongo 3.0 renamed mongos_enum to read_pref_mode_from_name
+                f = getattr(pymongo.read_preferences,
+                            'read_pref_mode_from_name', None)
+                if not f:
+                    f = pymongo.read_preferences.mongos_enum
+                self.read_preference = f(self.read_preference)
                 coll.read_preference = self.read_preference
             if self.w > -1:
                 coll.write_concern['w'] = self.w
@@ -395,7 +399,7 @@ class MongoApi(object):
         Refer to MongoDB documentation around TTL index for further details.
         """
         indexes = collection.index_information()
-        for indx_name, index_data in six.iteritems(indexes):
+        for indx_name, index_data in indexes.items():
             if all(k in index_data for k in ('key', 'expireAfterSeconds')):
                 existing_value = index_data['expireAfterSeconds']
                 fld_present = 'doc_date' in index_data['key'][0]
@@ -447,7 +451,7 @@ class MongoApi(object):
         doc_date = self._get_doc_date()
         insert_refs = []
         update_refs = []
-        existing_docs = self._get_results_as_dict(mapping.keys())
+        existing_docs = self._get_results_as_dict(list(mapping.keys()))
         for key, value in mapping.items():
             ref = self._get_cache_entry(key, value.payload, value.metadata,
                                         doc_date)
@@ -532,7 +536,7 @@ class BaseTransform(AbstractManipulator):
 
     def transform_incoming(self, son, collection):
         """Used while saving data to MongoDB."""
-        for (key, value) in son.items():
+        for (key, value) in list(son.items()):
             if isinstance(value, api.CachedValue):
                 son[key] = value.payload  # key is 'value' field here
                 son['meta'] = value.metadata
@@ -549,7 +553,7 @@ class BaseTransform(AbstractManipulator):
                                          ('_id', 'value', 'meta', 'doc_date')):
             payload = son.pop('value', None)
             metadata = son.pop('meta', None)
-        for (key, value) in son.items():
+        for (key, value) in list(son.items()):
             if isinstance(value, dict):
                 son[key] = self.transform_outgoing(value, collection)
         if metadata is not None:

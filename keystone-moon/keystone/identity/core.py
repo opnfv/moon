@@ -21,11 +21,10 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log
-from oslo_utils import importutils
 import six
 
-from keystone import clean
 from keystone.common import cache
+from keystone.common import clean
 from keystone.common import dependency
 from keystone.common import driver_hints
 from keystone.common import manager
@@ -90,8 +89,9 @@ class DomainConfigs(dict):
     _any_sql = False
 
     def _load_driver(self, domain_config):
-        return importutils.import_object(
-            domain_config['cfg'].identity.driver, domain_config['cfg'])
+        return manager.load_driver(Manager.driver_namespace,
+                                   domain_config['cfg'].identity.driver,
+                                   domain_config['cfg'])
 
     def _assert_no_more_than_one_sql_driver(self, domain_id, new_config,
                                             config_file=None):
@@ -111,7 +111,7 @@ class DomainConfigs(dict):
             if not config_file:
                 config_file = _('Database at /domains/%s/config') % domain_id
             raise exception.MultipleSQLDriversInConfig(source=config_file)
-        self._any_sql = new_config['driver'].is_sql
+        self._any_sql = self._any_sql or new_config['driver'].is_sql
 
     def _load_config_from_file(self, resource_api, file_list, domain_name):
 
@@ -176,6 +176,21 @@ class DomainConfigs(dict):
                                   fname)
 
     def _load_config_from_database(self, domain_id, specific_config):
+
+        def _assert_not_sql_driver(domain_id, new_config):
+            """Ensure this is not an sql driver.
+
+            Due to multi-threading safety concerns, we do not currently support
+            the setting of a specific identity driver to sql via the Identity
+            API.
+
+            """
+            if new_config['driver'].is_sql:
+                reason = _('Domain specific sql drivers are not supported via '
+                           'the Identity API. One is specified in '
+                           '/domains/%s/config') % domain_id
+                raise exception.InvalidDomainConfig(reason=reason)
+
         domain_config = {}
         domain_config['cfg'] = cfg.ConfigOpts()
         config.configure(conf=domain_config['cfg'])
@@ -186,10 +201,12 @@ class DomainConfigs(dict):
         for group in specific_config:
             for option in specific_config[group]:
                 domain_config['cfg'].set_override(
-                    option, specific_config[group][option], group)
+                    option, specific_config[group][option],
+                    group, enforce_type=True)
 
+        domain_config['cfg_overrides'] = specific_config
         domain_config['driver'] = self._load_driver(domain_config)
-        self._assert_no_more_than_one_sql_driver(domain_id, domain_config)
+        _assert_not_sql_driver(domain_id, domain_config)
         self[domain_id] = domain_config
 
     def _setup_domain_drivers_from_database(self, standard_driver,
@@ -226,10 +243,12 @@ class DomainConfigs(dict):
                                                   resource_api)
 
     def get_domain_driver(self, domain_id):
+        self.check_config_and_reload_domain_driver_if_required(domain_id)
         if domain_id in self:
             return self[domain_id]['driver']
 
     def get_domain_conf(self, domain_id):
+        self.check_config_and_reload_domain_driver_if_required(domain_id)
         if domain_id in self:
             return self[domain_id]['cfg']
         else:
@@ -248,6 +267,61 @@ class DomainConfigs(dict):
             else:
                 # The standard driver
                 self.driver = self.driver()
+
+    def check_config_and_reload_domain_driver_if_required(self, domain_id):
+        """Check for, and load, any new domain specific config for this domain.
+
+        This is only supported for the database-stored domain specific
+        configuration.
+
+        When the domain specific drivers were set up, we stored away the
+        specific config for this domain that was available at that time. So we
+        now read the current version and compare. While this might seem
+        somewhat inefficient, the sensitive config call is cached, so should be
+        light weight. More importantly, when the cache timeout is reached, we
+        will get any config that has been updated from any other keystone
+        process.
+
+        This cache-timeout approach works for both multi-process and
+        multi-threaded keystone configurations. In multi-threaded
+        configurations, even though we might remove a driver object (that
+        could be in use by another thread), this won't actually be thrown away
+        until all references to it have been broken. When that other
+        thread is released back and is restarted with another command to
+        process, next time it accesses the driver it will pickup the new one.
+
+        """
+        if (not CONF.identity.domain_specific_drivers_enabled or
+                not CONF.identity.domain_configurations_from_database):
+            # If specific drivers are not enabled, then there is nothing to do.
+            # If we are not storing the configurations in the database, then
+            # we'll only re-read the domain specific config files on startup
+            # of keystone.
+            return
+
+        latest_domain_config = (
+            self.domain_config_api.
+            get_config_with_sensitive_info(domain_id))
+        domain_config_in_use = domain_id in self
+
+        if latest_domain_config:
+            if (not domain_config_in_use or
+                    latest_domain_config != self[domain_id]['cfg_overrides']):
+                self._load_config_from_database(domain_id,
+                                                latest_domain_config)
+        elif domain_config_in_use:
+            # The domain specific config has been deleted, so should remove the
+            # specific driver for this domain.
+            try:
+                del self[domain_id]
+            except KeyError:
+                # Allow this error in case we are unlucky and in a
+                # multi-threaded situation, two threads happen to be running
+                # in lock step.
+                pass
+        # If we fall into the else condition, this means there is no domain
+        # config set, and there is none in use either, so we have nothing
+        # to do.
 
 
 def domains_configured(f):
@@ -291,6 +365,7 @@ def exception_translated(exception_type):
     return _exception_translated
 
 
+@notifications.listener
 @dependency.provider('identity_api')
 @dependency.requires('assignment_api', 'credential_api', 'id_mapping_api',
                      'resource_api', 'revoke_api')
@@ -332,6 +407,9 @@ class Manager(manager.Manager):
     mapping by default is a more prudent way to introduce this functionality.
 
     """
+
+    driver_namespace = 'keystone.identity'
+
     _USER = 'user'
     _GROUP = 'group'
 
@@ -521,10 +599,10 @@ class Manager(manager.Manager):
         if (not driver.is_domain_aware() and driver == self.driver and
             domain_id != CONF.identity.default_domain_id and
                 domain_id is not None):
-                    LOG.warning('Found multiple domains being mapped to a '
-                                'driver that does not support that (e.g. '
-                                'LDAP) - Domain ID: %(domain)s, '
-                                'Default Driver: %(driver)s',
+                    LOG.warning(_LW('Found multiple domains being mapped to a '
+                                    'driver that does not support that (e.g. '
+                                    'LDAP) - Domain ID: %(domain)s, '
+                                    'Default Driver: %(driver)s'),
                                 {'domain': domain_id,
                                  'driver': (driver == self.driver)})
                     raise exception.DomainNotFound(domain_id=domain_id)
@@ -765,7 +843,7 @@ class Manager(manager.Manager):
         # Get user details to invalidate the cache.
         user_old = self.get_user(user_id)
         driver.delete_user(entity_id)
-        self.assignment_api.delete_user(user_id)
+        self.assignment_api.delete_user_assignments(user_id)
         self.get_user.invalidate(self, user_id)
         self.get_user_by_name.invalidate(self, user_old['name'],
                                          user_old['domain_id'])
@@ -837,7 +915,7 @@ class Manager(manager.Manager):
         driver.delete_group(entity_id)
         self.get_group.invalidate(self, group_id)
         self.id_mapping_api.delete_id_mapping(group_id)
-        self.assignment_api.delete_group(group_id)
+        self.assignment_api.delete_group_assignments(group_id)
 
         notifications.Audit.deleted(self._GROUP, group_id, initiator)
 
@@ -892,6 +970,19 @@ class Manager(manager.Manager):
 
         :param user_id: user identifier
         :type user_id: string
+        """
+        pass
+
+    @notifications.internal(
+        notifications.INVALIDATE_USER_PROJECT_TOKEN_PERSISTENCE)
+    def emit_invalidate_grant_token_persistence(self, user_project):
+        """Emit a notification to the callback system to revoke grant tokens.
+
+        This method and associated callback listener removes the need for
+        making a direct call to another manager to delete and revoke tokens.
+
+        :param user_project: {'user_id': user_id, 'project_id': project_id}
+        :type user_project: dict
         """
         pass
 
@@ -1192,6 +1283,8 @@ class Driver(object):
 @dependency.provider('id_mapping_api')
 class MappingManager(manager.Manager):
     """Default pivot point for the ID Mapping backend."""
+
+    driver_namespace = 'keystone.identity.id_mapping'
 
     def __init__(self):
         super(MappingManager, self).__init__(CONF.identity_mapping.driver)

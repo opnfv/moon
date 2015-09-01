@@ -12,13 +12,14 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Main entry point into the Identity service."""
+"""Main entry point into the Trust service."""
 
 import abc
 
 from oslo_config import cfg
 from oslo_log import log
 import six
+from six.moves import zip
 
 from keystone.common import dependency
 from keystone.common import manager
@@ -41,6 +42,9 @@ class Manager(manager.Manager):
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.trust'
+
     _TRUST = "OS-TRUST:trust"
 
     def __init__(self):
@@ -55,9 +59,9 @@ class Manager(manager.Manager):
         if not (0 < redelegation_depth <= max_redelegation_count):
             raise exception.Forbidden(
                 _('Remaining redelegation depth of %(redelegation_depth)d'
-                  ' out of allowed range of [0..%(max_count)d]'),
-                redelegation_depth=redelegation_depth,
-                max_count=max_redelegation_count)
+                  ' out of allowed range of [0..%(max_count)d]') %
+                {'redelegation_depth': redelegation_depth,
+                 'max_count': max_redelegation_count})
 
         # remaining_uses is None
         remaining_uses = trust.get('remaining_uses')
@@ -139,13 +143,14 @@ class Manager(manager.Manager):
             if requested_count and requested_count > max_redelegation_count:
                 raise exception.Forbidden(
                     _('Requested redelegation depth of %(requested_count)d '
-                      'is greater than allowed %(max_count)d'),
-                    requested_count=requested_count,
-                    max_count=max_redelegation_count)
+                      'is greater than allowed %(max_count)d') %
+                    {'requested_count': requested_count,
+                     'max_count': max_redelegation_count})
             # Decline remaining_uses
-            if 'remaining_uses' in trust:
-                exception.ValidationError(_('remaining_uses must not be set '
-                                            'if redelegation is allowed'))
+            if trust.get('remaining_uses') is not None:
+                raise exception.ValidationError(
+                    _('remaining_uses must not be set if redelegation is '
+                      'allowed'))
 
         if redelegated_trust:
             trust['redelegated_trust_id'] = redelegated_trust['id']
@@ -179,9 +184,6 @@ class Manager(manager.Manager):
         Recursively remove given and redelegated trusts
         """
         trust = self.driver.get_trust(trust_id)
-        if not trust:
-            raise exception.TrustNotFound(trust_id)
-
         trusts = self.driver.list_trusts_for_trustor(
             trust['trustor_user_id'])
 

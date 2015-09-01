@@ -25,6 +25,7 @@ from testtools import matchers as tt_matchers
 from keystone.common import json_home
 from keystone import controllers
 from keystone.tests import unit as tests
+from keystone.tests.unit import utils
 
 
 CONF = cfg.CONF
@@ -71,9 +72,9 @@ v3_MEDIA_TYPES = [
 ]
 
 v3_EXPECTED_RESPONSE = {
-    "id": "v3.0",
+    "id": "v3.4",
     "status": "stable",
-    "updated": "2013-03-06T00:00:00Z",
+    "updated": "2015-03-30T00:00:00Z",
     "links": [
         {
             "rel": "self",
@@ -161,7 +162,8 @@ ENDPOINT_GROUP_ID_PARAMETER_RELATION = (
 
 BASE_IDP_PROTOCOL = '/OS-FEDERATION/identity_providers/{idp_id}/protocols'
 BASE_EP_POLICY = '/policies/{policy_id}/OS-ENDPOINT-POLICY'
-BASE_EP_FILTER = '/OS-EP-FILTER/endpoint_groups/{endpoint_group_id}'
+BASE_EP_FILTER_PREFIX = '/OS-EP-FILTER'
+BASE_EP_FILTER = BASE_EP_FILTER_PREFIX + '/endpoint_groups/{endpoint_group_id}'
 BASE_ACCESS_TOKEN = (
     '/users/{user_id}/OS-OAUTH1/access_tokens/{access_token_id}')
 
@@ -352,6 +354,8 @@ V3_JSON_HOME_RESOURCES_INHERIT_DISABLED = {
         'href': '/OS-FEDERATION/projects'},
     _build_federation_rel(resource_name='saml2'): {
         'href': '/auth/OS-FEDERATION/saml2'},
+    _build_federation_rel(resource_name='ecp'): {
+        'href': '/auth/OS-FEDERATION/saml2/ecp'},
     _build_federation_rel(resource_name='metadata'): {
         'href': '/OS-FEDERATION/saml2/metadata'},
     _build_federation_rel(resource_name='identity_providers'): {
@@ -474,6 +478,12 @@ V3_JSON_HOME_RESOURCES_INHERIT_DISABLED = {
         'href-template': BASE_EP_FILTER + '/endpoints',
         'href-vars': {'endpoint_group_id':
                       ENDPOINT_GROUP_ID_PARAMETER_RELATION, }},
+    _build_ep_filter_rel(resource_name='project_endpoint_groups'):
+    {
+        'href-template': (BASE_EP_FILTER_PREFIX + '/projects/{project_id}' +
+                          '/endpoint_groups'),
+        'href-vars': {'project_id':
+                      json_home.Parameters.PROJECT_ID, }},
     _build_ep_filter_rel(resource_name='project_endpoint'):
     {
         'href-template': ('/OS-EP-FILTER/projects/{project_id}'
@@ -635,9 +645,11 @@ class VersionTestCase(tests.TestCase):
 
     def config_overrides(self):
         super(VersionTestCase, self).config_overrides()
-        port = random.randint(10000, 30000)
-        self.config_fixture.config(group='eventlet_server', public_port=port,
-                                   admin_port=port)
+        admin_port = random.randint(10000, 30000)
+        public_port = random.randint(40000, 60000)
+        self.config_fixture.config(group='eventlet_server',
+                                   public_port=public_port,
+                                   admin_port=admin_port)
 
     def _paste_in_port(self, response, port):
         for link in response['links']:
@@ -651,7 +663,7 @@ class VersionTestCase(tests.TestCase):
         data = jsonutils.loads(resp.body)
         expected = VERSIONS_RESPONSE
         for version in expected['versions']['values']:
-            if version['id'] == 'v3.0':
+            if version['id'].startswith('v3'):
                 self._paste_in_port(
                     version, 'http://localhost:%s/v3/' %
                     CONF.eventlet_server.public_port)
@@ -668,7 +680,7 @@ class VersionTestCase(tests.TestCase):
         data = jsonutils.loads(resp.body)
         expected = VERSIONS_RESPONSE
         for version in expected['versions']['values']:
-            if version['id'] == 'v3.0':
+            if version['id'].startswith('v3'):
                 self._paste_in_port(
                     version, 'http://localhost:%s/v3/' %
                     CONF.eventlet_server.admin_port)
@@ -689,7 +701,7 @@ class VersionTestCase(tests.TestCase):
             expected = VERSIONS_RESPONSE
             for version in expected['versions']['values']:
                 # localhost happens to be the site url for tests
-                if version['id'] == 'v3.0':
+                if version['id'].startswith('v3'):
                     self._paste_in_port(
                         version, 'http://localhost/v3/')
                 elif version['id'] == 'v2.0':
@@ -741,8 +753,9 @@ class VersionTestCase(tests.TestCase):
                             CONF.eventlet_server.public_port)
         self.assertEqual(expected, data)
 
+    @utils.wip('waiting on bug #1381961')
     def test_admin_version_v3(self):
-        client = tests.TestClient(self.public_app)
+        client = tests.TestClient(self.admin_app)
         resp = client.get('/v3/')
         self.assertEqual(200, resp.status_int)
         data = jsonutils.loads(resp.body)
@@ -931,9 +944,11 @@ class VersionSingleAppTestCase(tests.TestCase):
 
     def config_overrides(self):
         super(VersionSingleAppTestCase, self).config_overrides()
-        port = random.randint(10000, 30000)
-        self.config_fixture.config(group='eventlet_server', public_port=port,
-                                   admin_port=port)
+        admin_port = random.randint(10000, 30000)
+        public_port = random.randint(40000, 60000)
+        self.config_fixture.config(group='eventlet_server',
+                                   public_port=public_port,
+                                   admin_port=admin_port)
 
     def _paste_in_port(self, response, port):
         for link in response['links']:
@@ -941,6 +956,11 @@ class VersionSingleAppTestCase(tests.TestCase):
                 link['href'] = port
 
     def _test_version(self, app_name):
+        def app_port():
+            if app_name == 'admin':
+                return CONF.eventlet_server.admin_port
+            else:
+                return CONF.eventlet_server.public_port
         app = self.loadapp('keystone', app_name)
         client = tests.TestClient(app)
         resp = client.get('/')
@@ -948,14 +968,12 @@ class VersionSingleAppTestCase(tests.TestCase):
         data = jsonutils.loads(resp.body)
         expected = VERSIONS_RESPONSE
         for version in expected['versions']['values']:
-            if version['id'] == 'v3.0':
+            if version['id'].startswith('v3'):
                 self._paste_in_port(
-                    version, 'http://localhost:%s/v3/' %
-                    CONF.eventlet_server.public_port)
+                    version, 'http://localhost:%s/v3/' % app_port())
             elif version['id'] == 'v2.0':
                 self._paste_in_port(
-                    version, 'http://localhost:%s/v2.0/' %
-                    CONF.eventlet_server.public_port)
+                    version, 'http://localhost:%s/v2.0/' % app_port())
         self.assertThat(data, _VersionsEqual(expected))
 
     def test_public(self):
@@ -978,9 +996,11 @@ class VersionInheritEnabledTestCase(tests.TestCase):
 
     def config_overrides(self):
         super(VersionInheritEnabledTestCase, self).config_overrides()
-        port = random.randint(10000, 30000)
-        self.config_fixture.config(group='eventlet_server', public_port=port,
-                                   admin_port=port)
+        admin_port = random.randint(10000, 30000)
+        public_port = random.randint(40000, 60000)
+        self.config_fixture.config(group='eventlet_server',
+                                   public_port=public_port,
+                                   admin_port=admin_port)
 
         self.config_fixture.config(group='os_inherit', enabled=True)
 
@@ -1021,7 +1041,7 @@ class VersionBehindSslTestCase(tests.TestCase):
     def _get_expected(self, host):
         expected = VERSIONS_RESPONSE
         for version in expected['versions']['values']:
-            if version['id'] == 'v3.0':
+            if version['id'].startswith('v3'):
                 self._paste_in_port(version, host + 'v3/')
             elif version['id'] == 'v2.0':
                 self._paste_in_port(version, host + 'v2.0/')

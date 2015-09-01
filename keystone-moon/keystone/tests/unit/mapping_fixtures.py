@@ -12,6 +12,9 @@
 
 """Fixtures for Federation Mapping."""
 
+from six.moves import range, zip
+
+
 EMPLOYEE_GROUP_ID = "0cd5e9"
 CONTRACTOR_GROUP_ID = "85a868"
 TESTER_GROUP_ID = "123"
@@ -786,6 +789,7 @@ MAPPING_USER_IDS = {
                 {
                     "user": {
                         "name": "{0}",
+                        "id": "abc123@example.com",
                         "domain": {
                             "id": "federated"
                         }
@@ -828,7 +832,7 @@ MAPPING_USER_IDS = {
             "local": [
                 {
                     "user": {
-                        "id": "abc123",
+                        "id": "abc123@example.com",
                         "name": "{0}",
                         "domain": {
                             "id": "federated"
@@ -963,6 +967,7 @@ TESTER_ASSERTION = {
 }
 
 ANOTHER_TESTER_ASSERTION = {
+    'Email': 'testacct@example.com',
     'UserName': 'IamTester'
 }
 
@@ -989,8 +994,8 @@ MALFORMED_TESTER_ASSERTION = {
     'LastName': 'Account',
     'orgPersonType': 'Tester',
     'object': object(),
-    'dictionary': dict(zip('teststring', xrange(10))),
-    'tuple': tuple(xrange(5))
+    'dictionary': dict(zip('teststring', range(10))),
+    'tuple': tuple(range(5))
 }
 
 DEVELOPER_ASSERTION = {

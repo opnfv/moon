@@ -22,7 +22,11 @@ def upgrade(migrate_engine):
     services = list(service_table.select().execute())
 
     for service in services:
-        extra_dict = jsonutils.loads(service.extra)
+        if service.extra is not None:
+            extra_dict = jsonutils.loads(service.extra)
+        else:
+            extra_dict = {}
+
         # Skip records where service is not null
         if extra_dict.get('name') is not None:
             continue
@@ -34,10 +38,3 @@ def upgrade(migrate_engine):
         f = service_table.c.id == service.id
         update = service_table.update().where(f).values(new_values)
         migrate_engine.execute(update)
-
-
-def downgrade(migration_engine):
-    # The upgrade fixes the data inconsistency for the service name,
-    # it defaults the value to empty string. There is no necessity
-    # to revert it.
-    pass

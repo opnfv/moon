@@ -36,28 +36,32 @@ class EndpointFilterExtension(wsgi.V3ExtensionRouter):
 
     The API looks like::
 
-        PUT /OS-EP-FILTER/projects/$project_id/endpoints/$endpoint_id
-        GET /OS-EP-FILTER/projects/$project_id/endpoints/$endpoint_id
-        HEAD /OS-EP-FILTER/projects/$project_id/endpoints/$endpoint_id
-        DELETE /OS-EP-FILTER/projects/$project_id/endpoints/$endpoint_id
-        GET /OS-EP-FILTER/endpoints/$endpoint_id/projects
-        GET /OS-EP-FILTER/projects/$project_id/endpoints
+        PUT /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
+        GET /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
+        HEAD /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
+        DELETE /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
+        GET /OS-EP-FILTER/endpoints/{endpoint_id}/projects
+        GET /OS-EP-FILTER/projects/{project_id}/endpoints
+        GET /OS-EP-FILTER/projects/{project_id}/endpoint_groups
 
         GET /OS-EP-FILTER/endpoint_groups
         POST /OS-EP-FILTER/endpoint_groups
-        GET /OS-EP-FILTER/endpoint_groups/$endpoint_group_id
-        HEAD /OS-EP-FILTER/endpoint_groups/$endpoint_group_id
-        PATCH /OS-EP-FILTER/endpoint_groups/$endpoint_group_id
-        DELETE /OS-EP-FILTER/endpoint_groups/$endpoint_group_id
+        GET /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}
+        HEAD /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}
+        PATCH /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}
+        DELETE /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}
 
-        GET /OS-EP-FILTER/endpoint_groups/$endpoint_group_id/projects
-        GET /OS-EP-FILTER/endpoint_groups/$endpoint_group_id/endpoints
+        GET /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/projects
+        GET /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}/endpoints
 
-        PUT /OS-EP-FILTER/endpoint_groups/$endpoint_group/projects/$project_id
-        GET /OS-EP-FILTER/endpoint_groups/$endpoint_group/projects/$project_id
-        HEAD /OS-EP-FILTER/endpoint_groups/$endpoint_group/projects/$project_id
-        DELETE /OS-EP-FILTER/endpoint_groups/$endpoint_group/projects/
-            $project_id
+        PUT /OS-EP-FILTER/endpoint_groups/{endpoint_group}/projects/
+            {project_id}
+        GET /OS-EP-FILTER/endpoint_groups/{endpoint_group}/projects/
+            {project_id}
+        HEAD /OS-EP-FILTER/endpoint_groups/{endpoint_group}/projects/
+            {project_id}
+        DELETE /OS-EP-FILTER/endpoint_groups/{endpoint_group}/projects/
+            {project_id}
 
     """
     PATH_PREFIX = '/OS-EP-FILTER'
@@ -96,6 +100,15 @@ class EndpointFilterExtension(wsgi.V3ExtensionRouter):
             path=self.PATH_PREFIX + '/projects/{project_id}/endpoints',
             get_action='list_endpoints_for_project',
             rel=build_resource_relation(resource_name='project_endpoints'),
+            path_vars={
+                'project_id': json_home.Parameters.PROJECT_ID,
+            })
+        self._add_resource(
+            mapper, endpoint_group_controller,
+            path=self.PATH_PREFIX + '/projects/{project_id}/endpoint_groups',
+            get_action='list_endpoint_groups_for_project',
+            rel=build_resource_relation(
+                resource_name='project_endpoint_groups'),
             path_vars={
                 'project_id': json_home.Parameters.PROJECT_ID,
             })

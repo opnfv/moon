@@ -14,13 +14,12 @@
 from __future__ import absolute_import
 import uuid
 
-import ldap
 import ldap.filter
 from oslo_config import cfg
 from oslo_log import log
 import six
 
-from keystone import clean
+from keystone.common import clean
 from keystone.common import driver_hints
 from keystone.common import ldap as common_ldap
 from keystone.common import models
@@ -42,7 +41,7 @@ class Identity(identity.Driver):
         self.group = GroupApi(conf)
 
     def default_assignment_driver(self):
-        return "keystone.assignment.backends.ldap.Assignment"
+        return 'ldap'
 
     def is_domain_aware(self):
         return False
@@ -352,20 +351,18 @@ class GroupApi(common_ldap.BaseLdap):
         """Return a list of groups for which the user is a member."""
 
         user_dn_esc = ldap.filter.escape_filter_chars(user_dn)
-        query = '(&(objectClass=%s)(%s=%s)%s)' % (self.object_class,
-                                                  self.member_attribute,
-                                                  user_dn_esc,
-                                                  self.ldap_filter or '')
+        query = '(%s=%s)%s' % (self.member_attribute,
+                               user_dn_esc,
+                               self.ldap_filter or '')
         return self.get_all(query)
 
     def list_user_groups_filtered(self, user_dn, hints):
         """Return a filtered list of groups for which the user is a member."""
 
         user_dn_esc = ldap.filter.escape_filter_chars(user_dn)
-        query = '(&(objectClass=%s)(%s=%s)%s)' % (self.object_class,
-                                                  self.member_attribute,
-                                                  user_dn_esc,
-                                                  self.ldap_filter or '')
+        query = '(%s=%s)%s' % (self.member_attribute,
+                               user_dn_esc,
+                               self.ldap_filter or '')
         return self.get_all_filtered(hints, query)
 
     def list_group_users(self, group_id):

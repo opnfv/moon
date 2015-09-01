@@ -14,17 +14,17 @@
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 from oslo_serialization import jsonutils
-from oslo_utils import timeutils
 import six
 from six.moves.urllib import parse
 
 from keystone.common import controller as common_controller
 from keystone.common import dependency
-from keystone.contrib import federation
+from keystone.common import utils
+from keystone.contrib.federation import constants as federation_constants
 from keystone import exception
 from keystone.i18n import _, _LE
-from keystone.openstack.common import versionutils
 from keystone import token
 from keystone.token import provider
 
@@ -37,18 +37,33 @@ CONF = cfg.CONF
 class V2TokenDataHelper(object):
     """Creates V2 token data."""
 
-    def v3_to_v2_token(self, token_id, v3_token_data):
+    def v3_to_v2_token(self, v3_token_data):
         token_data = {}
         # Build v2 token
         v3_token = v3_token_data['token']
 
         token = {}
-        token['id'] = token_id
         token['expires'] = v3_token.get('expires_at')
         token['issued_at'] = v3_token.get('issued_at')
         token['audit_ids'] = v3_token.get('audit_ids')
 
+        # Bail immediately if this is a domain-scoped token, which is not
+        # supported by the v2 API at all.
+        if 'domain' in v3_token:
+            raise exception.Unauthorized(_(
+                'Domains are not supported by the v2 API. Please use the v3 '
+                'API instead.'))
+
+        # Bail if this is a project-scoped token outside the default domain,
+        # which may result in a namespace collision with a project inside the
+        # default domain.
         if 'project' in v3_token:
+            if (v3_token['project']['domain']['id'] !=
+                    CONF.identity.default_domain_id):
+                raise exception.Unauthorized(_(
+                    'Project not found in the default domain (please use the '
+                    'v3 API instead): %s') % v3_token['project']['id'])
+
             # v3 token_data does not contain all tenant attributes
             tenant = self.resource_api.get_project(
                 v3_token['project']['id'])
@@ -58,14 +73,32 @@ class V2TokenDataHelper(object):
 
         # Build v2 user
         v3_user = v3_token['user']
+
+        # Bail if this is a token outside the default domain,
+        # which may result in a namespace collision with a project inside the
+        # default domain.
+        if ('domain' in v3_user and v3_user['domain']['id'] !=
+                CONF.identity.default_domain_id):
+            raise exception.Unauthorized(_(
+                'User not found in the default domain (please use the v3 API '
+                'instead): %s') % v3_user['id'])
+
         user = common_controller.V2Controller.v3_to_v2_user(v3_user)
+
+        # Maintain Trust Data
+        if 'OS-TRUST:trust' in v3_token:
+            v3_trust_data = v3_token['OS-TRUST:trust']
+            token_data['trust'] = {
+                'trustee_user_id': v3_trust_data['trustee_user']['id'],
+                'id': v3_trust_data['id'],
+                'trustor_user_id': v3_trust_data['trustor_user']['id'],
+                'impersonation': v3_trust_data['impersonation']
+            }
 
         # Set user roles
         user['roles'] = []
         role_ids = []
         for role in v3_token.get('roles', []):
-            # Filter role id since it's not included in v2 token response
-            role_ids.append(role.pop('id'))
             user['roles'].append(role)
         user['roles_links'] = []
 
@@ -99,7 +132,7 @@ class V2TokenDataHelper(object):
         expires = token_ref.get('expires', provider.default_expire_time())
         if expires is not None:
             if not isinstance(expires, six.text_type):
-                expires = timeutils.isotime(expires)
+                expires = utils.isotime(expires)
 
         token_data = token_ref.get('token_data')
         if token_data:
@@ -112,7 +145,7 @@ class V2TokenDataHelper(object):
 
         o = {'access': {'token': {'id': token_ref['id'],
                                   'expires': expires,
-                                  'issued_at': timeutils.strtime(),
+                                  'issued_at': utils.strtime(),
                                   'audit_ids': audit_info
                                   },
                         'user': {'id': user_ref['id'],
@@ -181,8 +214,8 @@ class V2TokenDataHelper(object):
             return []
 
         services = {}
-        for region, region_ref in six.iteritems(catalog_ref):
-            for service, service_ref in six.iteritems(region_ref):
+        for region, region_ref in catalog_ref.items():
+            for service, service_ref in region_ref.items():
                 new_service_ref = services.get(service, {})
                 new_service_ref['name'] = service_ref.pop('name')
                 new_service_ref['type'] = service
@@ -195,7 +228,7 @@ class V2TokenDataHelper(object):
                 new_service_ref['endpoints'] = endpoints_ref
                 services[service] = new_service_ref
 
-        return services.values()
+        return list(services.values())
 
 
 @dependency.requires('assignment_api', 'catalog_api', 'federation_api',
@@ -239,10 +272,26 @@ class V3TokenDataHelper(object):
                 user_id, project_id)
         return [self.role_api.get_role(role_id) for role_id in roles]
 
-    def _populate_roles_for_groups(self, group_ids,
-                                   project_id=None, domain_id=None,
-                                   user_id=None):
-        def _check_roles(roles, user_id, project_id, domain_id):
+    def populate_roles_for_groups(self, token_data, group_ids,
+                                  project_id=None, domain_id=None,
+                                  user_id=None):
+        """Populate roles basing on provided groups and project/domain
+
+        Used for ephemeral users with dynamically assigned groups.
+        This method does not return anything, yet it modifies token_data in
+        place.
+
+        :param token_data: a dictionary used for building token response
+        :group_ids: list of group IDs a user is a member of
+        :project_id: project ID to scope to
+        :domain_id: domain ID to scope to
+        :user_id: user ID
+
+        :raises: exception.Unauthorized - when no roles were found for a
+            (group_ids, project_id) or (group_ids, domain_id) pairs.
+
+        """
+        def check_roles(roles, user_id, project_id, domain_id):
             # User was granted roles so simply exit this function.
             if roles:
                 return
@@ -264,8 +313,8 @@ class V3TokenDataHelper(object):
         roles = self.assignment_api.get_roles_for_groups(group_ids,
                                                          project_id,
                                                          domain_id)
-        _check_roles(roles, user_id, project_id, domain_id)
-        return roles
+        check_roles(roles, user_id, project_id, domain_id)
+        token_data['roles'] = roles
 
     def _populate_user(self, token_data, user_id, trust):
         if 'user' in token_data:
@@ -393,10 +442,10 @@ class V3TokenDataHelper(object):
         if not expires:
             expires = provider.default_expire_time()
         if not isinstance(expires, six.string_types):
-            expires = timeutils.isotime(expires, subsecond=True)
+            expires = utils.isotime(expires, subsecond=True)
         token_data['expires_at'] = expires
         token_data['issued_at'] = (issued_at or
-                                   timeutils.isotime(subsecond=True))
+                                   utils.isotime(subsecond=True))
 
     def _populate_audit_info(self, token_data, audit_info=None):
         if audit_info is None or isinstance(audit_info, six.string_types):
@@ -420,7 +469,7 @@ class V3TokenDataHelper(object):
             versionutils.deprecated(
                 what='passing token data with "extras"',
                 as_of=versionutils.deprecated.KILO,
-                in_favor_of='well-defined APIs')
+                in_favor_of='well-defined APIs')(lambda: None)()
         token_data = {'methods': method_names,
                       'extras': extras}
 
@@ -490,13 +539,21 @@ class BaseProvider(provider.Provider):
         return token_id, token_data
 
     def _is_mapped_token(self, auth_context):
-        return (federation.IDENTITY_PROVIDER in auth_context and
-                federation.PROTOCOL in auth_context)
+        return (federation_constants.IDENTITY_PROVIDER in auth_context and
+                federation_constants.PROTOCOL in auth_context)
 
     def issue_v3_token(self, user_id, method_names, expires_at=None,
                        project_id=None, domain_id=None, auth_context=None,
                        trust=None, metadata_ref=None, include_catalog=True,
                        parent_audit_id=None):
+        if auth_context and auth_context.get('bind'):
+            # NOTE(lbragstad): Check if the token provider being used actually
+            # supports bind authentication methods before proceeding.
+            if not self._supports_bind_authentication:
+                raise exception.NotImplemented(_(
+                    'The configured token provider does not support bind '
+                    'authentication.'))
+
         # for V2, trust is stashed in metadata_ref
         if (CONF.trust.enabled and not trust and metadata_ref and
                 'trust_id' in metadata_ref):
@@ -530,38 +587,30 @@ class BaseProvider(provider.Provider):
         return token_id, token_data
 
     def _handle_mapped_tokens(self, auth_context, project_id, domain_id):
-        def get_federated_domain():
-            return (CONF.federation.federated_domain_name or
-                    federation.FEDERATED_DOMAIN_KEYWORD)
-
-        federated_domain = get_federated_domain()
         user_id = auth_context['user_id']
         group_ids = auth_context['group_ids']
-        idp = auth_context[federation.IDENTITY_PROVIDER]
-        protocol = auth_context[federation.PROTOCOL]
+        idp = auth_context[federation_constants.IDENTITY_PROVIDER]
+        protocol = auth_context[federation_constants.PROTOCOL]
         token_data = {
             'user': {
                 'id': user_id,
                 'name': parse.unquote(user_id),
-                federation.FEDERATION: {
+                federation_constants.FEDERATION: {
+                    'groups': [{'id': x} for x in group_ids],
                     'identity_provider': {'id': idp},
                     'protocol': {'id': protocol}
                 },
                 'domain': {
-                    'id': federated_domain,
-                    'name': federated_domain
+                    'id': CONF.federation.federated_domain_name,
+                    'name': CONF.federation.federated_domain_name
                 }
             }
         }
 
         if project_id or domain_id:
-            roles = self.v3_token_data_helper._populate_roles_for_groups(
-                group_ids, project_id, domain_id, user_id)
-            token_data.update({'roles': roles})
-        else:
-            token_data['user'][federation.FEDERATION].update({
-                'groups': [{'id': x} for x in group_ids]
-            })
+            self.v3_token_data_helper.populate_roles_for_groups(
+                token_data, group_ids, project_id, domain_id, user_id)
+
         return token_data
 
     def _verify_token_ref(self, token_ref):
@@ -637,30 +686,10 @@ class BaseProvider(provider.Provider):
             # management layer is now pluggable, one can always provide
             # their own implementation to suit their needs.
             token_data = token_ref.get('token_data')
-            if (not token_data or
-                    self.get_token_version(token_data) !=
-                    token.provider.V2):
-                # token is created by old v2 logic
-                metadata_ref = token_ref['metadata']
-                roles_ref = []
-                for role_id in metadata_ref.get('roles', []):
-                    roles_ref.append(self.role_api.get_role(role_id))
-
-                # Get a service catalog if possible
-                # This is needed for on-behalf-of requests
-                catalog_ref = None
-                if token_ref.get('tenant'):
-                    catalog_ref = self.catalog_api.get_catalog(
-                        token_ref['user']['id'],
-                        token_ref['tenant']['id'])
-
-                trust_ref = None
-                if CONF.trust.enabled and 'trust_id' in metadata_ref:
-                    trust_ref = self.trust_api.get_trust(
-                        metadata_ref['trust_id'])
-
-                token_data = self.v2_token_data_helper.format_token(
-                    token_ref, roles_ref, catalog_ref, trust_ref)
+            if (self.get_token_version(token_data) != token.provider.V2):
+                # Validate the V3 token as V2
+                token_data = self.v2_token_data_helper.v3_to_v2_token(
+                    token_data)
 
             trust_id = token_data['access'].get('trust', {}).get('id')
             if trust_id:

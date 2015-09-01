@@ -13,6 +13,7 @@
 
 import uuid
 
+import six
 import testtools
 
 from keystone.assignment import schema as assignment_schema
@@ -24,8 +25,10 @@ from keystone.contrib.endpoint_filter import schema as endpoint_filter_schema
 from keystone.contrib.federation import schema as federation_schema
 from keystone.credential import schema as credential_schema
 from keystone import exception
+from keystone.identity import schema as identity_schema
 from keystone.policy import schema as policy_schema
 from keystone.resource import schema as resource_schema
+from keystone.tests import unit
 from keystone.trust import schema as trust_schema
 
 """Example model to validate create requests against. Assume that this is
@@ -96,7 +99,84 @@ _VALID_FILTERS = [{'interface': 'admin'},
 _INVALID_FILTERS = ['some string', 1, 0, True, False]
 
 
-class EntityValidationTestCase(testtools.TestCase):
+class ValidatedDecoratorTests(unit.BaseTestCase):
+
+    entity_schema = {
+        'type': 'object',
+        'properties': {
+            'name': parameter_types.name,
+        },
+        'required': ['name'],
+    }
+
+    valid_entity = {
+        'name': uuid.uuid4().hex,
+    }
+
+    invalid_entity = {}
+
+    @validation.validated(entity_schema, 'entity')
+    def do_something(self, entity):
+        pass
+
+    @validation.validated(entity_create, 'entity')
+    def create_entity(self, entity):
+        pass
+
+    @validation.validated(entity_update, 'entity')
+    def update_entity(self, entity_id, entity):
+        pass
+
+    def _assert_call_entity_method_fails(self, method, *args, **kwargs):
+        e = self.assertRaises(exception.ValidationError, method,
+                              *args, **kwargs)
+
+        self.assertIn('Expecting to find entity in request body',
+                      six.text_type(e))
+
+    def test_calling_with_valid_entity_kwarg_succeeds(self):
+        self.do_something(entity=self.valid_entity)
+
+    def test_calling_with_invalid_entity_kwarg_fails(self):
+        self.assertRaises(exception.ValidationError,
+                          self.do_something,
+                          entity=self.invalid_entity)
+
+    def test_calling_with_valid_entity_arg_succeeds(self):
+        self.do_something(self.valid_entity)
+
+    def test_calling_with_invalid_entity_arg_fails(self):
+        self.assertRaises(exception.ValidationError,
+                          self.do_something,
+                          self.invalid_entity)
+
+    def test_using_the_wrong_name_with_the_decorator_fails(self):
+        with testtools.ExpectedException(TypeError):
+            @validation.validated(self.entity_schema, 'entity_')
+            def function(entity):
+                pass
+
+    def test_create_entity_no_request_body_with_decorator(self):
+        """Test the case when request body is not provided."""
+        self._assert_call_entity_method_fails(self.create_entity)
+
+    def test_create_entity_empty_request_body_with_decorator(self):
+        """Test the case when client passing in an empty entity reference."""
+        self._assert_call_entity_method_fails(self.create_entity, entity={})
+
+    def test_update_entity_no_request_body_with_decorator(self):
+        """Test the case when request body is not provided."""
+        self._assert_call_entity_method_fails(self.update_entity,
+                                              uuid.uuid4().hex)
+
+    def test_update_entity_empty_request_body_with_decorator(self):
+        """Test the case when client passing in an empty entity reference."""
+        self._assert_call_entity_method_fails(self.update_entity,
+                                              uuid.uuid4().hex,
+                                              entity={})
+
+
+class EntityValidationTestCase(unit.BaseTestCase):
 
     def setUp(self):
         super(EntityValidationTestCase, self).setUp()
@@ -226,7 +306,7 @@ class EntityValidationTestCase(testtools.TestCase):
     def test_create_entity_with_invalid_id_strings(self):
         """Exception raised when using invalid id strings."""
         long_string = 'A' * 65
-        invalid_id_strings = ['', long_string, 'this,should,fail']
+        invalid_id_strings = ['', long_string]
         for invalid_id in invalid_id_strings:
             request_to_validate = {'name': self.resource_name,
                                    'id_string': invalid_id}
@@ -299,7 +379,7 @@ class EntityValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class ProjectValidationTestCase(testtools.TestCase):
+class ProjectValidationTestCase(unit.BaseTestCase):
     """Test for V3 Project API validation."""
 
     def setUp(self):
@@ -426,7 +506,7 @@ class ProjectValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class DomainValidationTestCase(testtools.TestCase):
+class DomainValidationTestCase(unit.BaseTestCase):
     """Test for V3 Domain API validation."""
 
     def setUp(self):
@@ -524,7 +604,7 @@ class DomainValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class RoleValidationTestCase(testtools.TestCase):
+class RoleValidationTestCase(unit.BaseTestCase):
     """Test for V3 Role API validation."""
 
     def setUp(self):
@@ -578,7 +658,7 @@ class RoleValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class PolicyValidationTestCase(testtools.TestCase):
+class PolicyValidationTestCase(unit.BaseTestCase):
     """Test for V3 Policy API validation."""
 
     def setUp(self):
@@ -653,7 +733,7 @@ class PolicyValidationTestCase(testtools.TestCase):
                               request_to_validate)
 
 
-class CredentialValidationTestCase(testtools.TestCase):
+class CredentialValidationTestCase(unit.BaseTestCase):
     """Test for V3 Credential API validation."""
 
     def setUp(self):
@@ -770,7 +850,7 @@ class CredentialValidationTestCase(testtools.TestCase):
         self.update_credential_validator.validate(request_to_validate)
 
 
-class RegionValidationTestCase(testtools.TestCase):
+class RegionValidationTestCase(unit.BaseTestCase):
     """Test for V3 Region API validation."""
 
     def setUp(self):
@@ -804,6 +884,14 @@ class RegionValidationTestCase(testtools.TestCase):
                                'parent_region_id': uuid.uuid4().hex}
         self.create_region_validator.validate(request_to_validate)
 
+    def test_validate_region_create_fails_with_invalid_region_id(self):
+        """Exception raised when passing invalid `id` in request."""
+        request_to_validate = {'id': 1234,
+                               'description': 'US East Region'}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_region_validator.validate,
+                          request_to_validate)
+
     def test_validate_region_create_succeeds_with_extra_parameters(self):
         """Validate create region request with extra values."""
         request_to_validate = {'other_attr': uuid.uuid4().hex}
@@ -830,7 +918,7 @@ class RegionValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class ServiceValidationTestCase(testtools.TestCase):
+class ServiceValidationTestCase(unit.BaseTestCase):
     """Test for V3 Service API validation."""
 
     def setUp(self):
@@ -985,7 +1073,7 @@ class ServiceValidationTestCase(testtools.TestCase):
                           request_to_validate)
 
 
-class EndpointValidationTestCase(testtools.TestCase):
+class EndpointValidationTestCase(unit.BaseTestCase):
     """Test for V3 Endpoint API validation."""
 
     def setUp(self):
@@ -1096,6 +1184,26 @@ class EndpointValidationTestCase(testtools.TestCase):
                           self.create_endpoint_validator.validate,
                           request_to_validate)
 
+    def test_validate_endpoint_create_fails_with_invalid_region_id(self):
+        """Exception raised when passing invalid `region(_id)` in request."""
+        request_to_validate = {'interface': 'admin',
+                               'region_id': 1234,
+                               'service_id': uuid.uuid4().hex,
+                               'url': 'https://service.example.com:5000/'}
+
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_endpoint_validator.validate,
+                          request_to_validate)
+
+        request_to_validate = {'interface': 'admin',
+                               'region': 1234,
+                               'service_id': uuid.uuid4().hex,
+                               'url': 'https://service.example.com:5000/'}
+
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_endpoint_validator.validate,
+                          request_to_validate)
+
     def test_validate_endpoint_update_fails_with_invalid_enabled(self):
         """Exception raised when `enabled` is boolean-like value."""
         for invalid_enabled in _INVALID_ENABLED_FORMATS:
@@ -1163,8 +1271,28 @@ class EndpointValidationTestCase(testtools.TestCase):
                               self.update_endpoint_validator.validate,
                               request_to_validate)
 
+    def test_validate_endpoint_update_fails_with_invalid_region_id(self):
+        """Exception raised when passing invalid `region(_id)` in request."""
+        request_to_validate = {'interface': 'admin',
+                               'region_id': 1234,
+                               'service_id': uuid.uuid4().hex,
+                               'url': 'https://service.example.com:5000/'}
 
-class EndpointGroupValidationTestCase(testtools.TestCase):
+        self.assertRaises(exception.SchemaValidationError,
+                          self.update_endpoint_validator.validate,
+                          request_to_validate)
+
+        request_to_validate = {'interface': 'admin',
+                               'region': 1234,
+                               'service_id': uuid.uuid4().hex,
+                               'url': 'https://service.example.com:5000/'}
+
+        self.assertRaises(exception.SchemaValidationError,
+                          self.update_endpoint_validator.validate,
+                          request_to_validate)
+
+
+class EndpointGroupValidationTestCase(unit.BaseTestCase):
     """Test for V3 Endpoint Group API validation."""
 
     def setUp(self):
@@ -1269,7 +1397,7 @@ class EndpointGroupValidationTestCase(testtools.TestCase):
                               request_to_validate)
 
 
-class TrustValidationTestCase(testtools.TestCase):
+class TrustValidationTestCase(unit.BaseTestCase):
     """Test for V3 Trust API validation."""
 
     _valid_roles = ['member', uuid.uuid4().hex, str(uuid.uuid4())]
@@ -1360,6 +1488,13 @@ class TrustValidationTestCase(testtools.TestCase):
                                'remaining_uses': 2}
         self.create_trust_validator.validate(request_to_validate)
 
+    def test_validate_trust_with_period_in_user_id_string(self):
+        """Validate trust request with a period in the user id string."""
+        request_to_validate = {'trustor_user_id': 'john.smith',
+                               'trustee_user_id': 'joe.developer',
+                               'impersonation': False}
+        self.create_trust_validator.validate(request_to_validate)
+
     def test_validate_trust_with_invalid_expires_at_fails(self):
         """Validate trust request with invalid `expires_at` fails."""
         request_to_validate = {'trustor_user_id': uuid.uuid4().hex,
@@ -1399,7 +1534,7 @@ class TrustValidationTestCase(testtools.TestCase):
         self.create_trust_validator.validate(request_to_validate)
 
 
-class ServiceProviderValidationTestCase(testtools.TestCase):
+class ServiceProviderValidationTestCase(unit.BaseTestCase):
     """Test for V3 Service Provider API validation."""
 
     def setUp(self):
@@ -1561,3 +1696,182 @@ class ServiceProviderValidationTestCase(testtools.TestCase):
         self.assertRaises(exception.SchemaValidationError,
                           self.update_sp_validator.validate,
                           request_to_validate)
+
+
+class UserValidationTestCase(unit.BaseTestCase):
+    """Test for V3 User API validation."""
+
+    def setUp(self):
+        super(UserValidationTestCase, self).setUp()
+
+        self.user_name = uuid.uuid4().hex
+
+        create = identity_schema.user_create
+        update = identity_schema.user_update
+        self.create_user_validator = validators.SchemaValidator(create)
+        self.update_user_validator = validators.SchemaValidator(update)
+
+    def test_validate_user_create_request_succeeds(self):
+        """Test that validating a user create request succeeds."""
+        request_to_validate = {'name': self.user_name}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_with_all_valid_parameters_succeeds(self):
+        """Test that validating a user create request succeeds."""
+        request_to_validate = {'name': self.user_name,
+                               'default_project_id': uuid.uuid4().hex,
+                               'domain_id': uuid.uuid4().hex,
+                               'description': uuid.uuid4().hex,
+                               'enabled': True,
+                               'email': uuid.uuid4().hex,
+                               'password': uuid.uuid4().hex}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_fails_without_name(self):
+        """Exception raised when validating a user without name."""
+        request_to_validate = {'email': uuid.uuid4().hex}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_user_validator.validate,
+                          request_to_validate)
+
+    def test_validate_user_create_fails_with_name_of_zero_length(self):
+        """Exception raised when validating a username with length of zero."""
+        request_to_validate = {'name': ''}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_user_validator.validate,
+                          request_to_validate)
+
+    def test_validate_user_create_fails_with_name_of_wrong_type(self):
+        """Exception raised when validating a username of wrong type."""
+        request_to_validate = {'name': True}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_user_validator.validate,
+                          request_to_validate)
+
+    def test_validate_user_create_succeeds_with_valid_enabled_formats(self):
+        """Validate acceptable enabled formats in create user requests."""
+        for enabled in _VALID_ENABLED_FORMATS:
+            request_to_validate = {'name': self.user_name,
+                                   'enabled': enabled}
+            self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_fails_with_invalid_enabled_formats(self):
+        """Exception raised when enabled is not an acceptable format."""
+        for invalid_enabled in _INVALID_ENABLED_FORMATS:
+            request_to_validate = {'name': self.user_name,
+                                   'enabled': invalid_enabled}
+            self.assertRaises(exception.SchemaValidationError,
+                              self.create_user_validator.validate,
+                              request_to_validate)
+
+    def test_validate_user_create_succeeds_with_extra_attributes(self):
+        """Validate extra parameters on user create requests."""
+        request_to_validate = {'name': self.user_name,
+                               'other_attr': uuid.uuid4().hex}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_succeeds_with_password_of_zero_length(self):
+        """Validate empty password on user create requests."""
+        request_to_validate = {'name': self.user_name,
+                               'password': ''}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_succeeds_with_null_password(self):
+        """Validate that password is nullable on create user."""
+        request_to_validate = {'name': self.user_name,
+                               'password': None}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_create_fails_with_invalid_password_type(self):
+        """Exception raised when user password is of the wrong type."""
+        request_to_validate = {'name': self.user_name,
+                               'password': True}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_user_validator.validate,
+                          request_to_validate)
+
+    def test_validate_user_create_succeeds_with_null_description(self):
+        """Validate that description can be nullable on create user."""
+        request_to_validate = {'name': self.user_name,
+                               'description': None}
+        self.create_user_validator.validate(request_to_validate)
+
+    def test_validate_user_update_succeeds(self):
+        """Validate an update user request."""
+        request_to_validate = {'email': uuid.uuid4().hex}
+        self.update_user_validator.validate(request_to_validate)
+
+    def test_validate_user_update_fails_with_no_parameters(self):
+        """Exception raised when updating nothing."""
+        request_to_validate = {}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.update_user_validator.validate,
+                          request_to_validate)
+
+    def test_validate_user_update_succeeds_with_extra_parameters(self):
+        """Validate user update requests with extra parameters."""
+        request_to_validate = {'other_attr': uuid.uuid4().hex}
+        self.update_user_validator.validate(request_to_validate)
+
+
+class GroupValidationTestCase(unit.BaseTestCase):
+    """Test for V3 Group API validation."""
+
+    def setUp(self):
+        super(GroupValidationTestCase, self).setUp()
+
+        self.group_name = uuid.uuid4().hex
+
+        create = identity_schema.group_create
+        update = identity_schema.group_update
+        self.create_group_validator = validators.SchemaValidator(create)
+        self.update_group_validator = validators.SchemaValidator(update)
+
+    def test_validate_group_create_succeeds(self):
+        """Validate create group requests."""
+        request_to_validate = {'name': self.group_name}
+        self.create_group_validator.validate(request_to_validate)
+
+    def test_validate_group_create_succeeds_with_all_parameters(self):
+        """Validate create group requests with all parameters."""
+        request_to_validate = {'name': self.group_name,
+                               'description': uuid.uuid4().hex,
+                               'domain_id': uuid.uuid4().hex}
+        self.create_group_validator.validate(request_to_validate)
+
+    def test_validate_group_create_fails_without_group_name(self):
+        """Exception raised when group name is not provided in request."""
+        request_to_validate = {'description': uuid.uuid4().hex}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_group_validator.validate,
+                          request_to_validate)
+
+    def test_validate_group_create_fails_when_group_name_is_too_short(self):
+        """Exception raised when group name is equal to zero."""
+        request_to_validate = {'name': ''}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.create_group_validator.validate,
+                          request_to_validate)
+
+    def test_validate_group_create_succeeds_with_extra_parameters(self):
+        """Validate extra attributes on group create requests."""
+        request_to_validate = {'name': self.group_name,
+                               'other_attr': uuid.uuid4().hex}
+        self.create_group_validator.validate(request_to_validate)
+
+    def test_validate_group_update_succeeds(self):
+        """Validate group update requests."""
+        request_to_validate = {'description': uuid.uuid4().hex}
+        self.update_group_validator.validate(request_to_validate)
+
+    def test_validate_group_update_fails_with_no_parameters(self):
+        """Exception raised when no parameters passed in on update."""
+        request_to_validate = {}
+        self.assertRaises(exception.SchemaValidationError,
+                          self.update_group_validator.validate,
+                          request_to_validate)
+
+    def test_validate_group_update_succeeds_with_extra_parameters(self):
+        """Validate group update requests with extra parameters."""
+        request_to_validate = {'other_attr': uuid.uuid4().hex}
+        self.update_group_validator.validate(request_to_validate)

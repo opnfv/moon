@@ -56,6 +56,8 @@ class CoreApiTests(object):
     def assertValidTenant(self, tenant):
         self.assertIsNotNone(tenant.get('id'))
         self.assertIsNotNone(tenant.get('name'))
+        self.assertNotIn('domain_id', tenant)
+        self.assertNotIn('parent_id', tenant)
 
     def assertValidUser(self, user):
         self.assertIsNotNone(user.get('id'))
@@ -1373,12 +1375,10 @@ class V2TestCase(RestfulTestCase, CoreApiTests, LegacyV2UsernameTests):
 class RevokeApiTestCase(V2TestCase):
     def config_overrides(self):
         super(RevokeApiTestCase, self).config_overrides()
-        self.config_fixture.config(
-            group='revoke',
-            driver='keystone.contrib.revoke.backends.kvs.Revoke')
+        self.config_fixture.config(group='revoke', driver='kvs')
         self.config_fixture.config(
             group='token',
-            provider='keystone.token.providers.pki.Provider',
+            provider='pki',
             revoke_by_id=False)
 
     def test_fetch_revocation_list_admin_200(self):
@@ -1410,9 +1410,7 @@ class TestFernetTokenProviderV2(RestfulTestCase):
 
     def config_overrides(self):
         super(TestFernetTokenProviderV2, self).config_overrides()
-        self.config_fixture.config(
-            group='token',
-            provider='keystone.token.providers.fernet.Provider')
+        self.config_fixture.config(group='token', provider='fernet')
 
     def test_authenticate_unscoped_token(self):
         unscoped_token = self.get_unscoped_token()
@@ -1498,3 +1496,44 @@ class TestFernetTokenProviderV2(RestfulTestCase):
             path=path,
             token=CONF.admin_token,
             expected_status=200)
+
+    def test_rescoped_tokens_maintain_original_expiration(self):
+        project_ref = self.new_project_ref()
+        self.resource_api.create_project(project_ref['id'], project_ref)
+        self.assignment_api.add_role_to_user_and_project(self.user_foo['id'],
+                                                         project_ref['id'],
+                                                         self.role_admin['id'])
+        resp = self.public_request(
+            method='POST',
+            path='/v2.0/tokens',
+            body={
+                'auth': {
+                    'tenantName': project_ref['name'],
+                    'passwordCredentials': {
+                        'username': self.user_foo['name'],
+                        'password': self.user_foo['password']
+                    }
+                }
+            },
+            # NOTE(lbragstad): This test may need to be refactored if Keystone
+            # decides to disallow rescoping using a scoped token.
+            expected_status=200)
+        original_token = resp.result['access']['token']['id']
+        original_expiration = resp.result['access']['token']['expires']
+
+        resp = self.public_request(
+            method='POST',
+            path='/v2.0/tokens',
+            body={
+                'auth': {
+                    'tenantName': project_ref['name'],
+                    'token': {
+                        'id': original_token,
+                    }
+                }
+            },
+            expected_status=200)
+        rescoped_token = resp.result['access']['token']['id']
+        rescoped_expiration = resp.result['access']['token']['expires']
+        self.assertNotEqual(original_token, rescoped_token)
+        self.assertEqual(original_expiration, rescoped_expiration)

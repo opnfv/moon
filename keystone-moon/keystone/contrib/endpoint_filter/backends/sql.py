@@ -13,6 +13,7 @@
 # under the License.
 
 from keystone.common import sql
+from keystone.contrib import endpoint_filter
 from keystone import exception
 from keystone.i18n import _
 
@@ -52,7 +53,7 @@ class ProjectEndpointGroupMembership(sql.ModelBase, sql.ModelDictMixin):
                                                'project_id'), {})
 
 
-class EndpointFilter(object):
+class EndpointFilter(endpoint_filter.Driver):
 
     @sql.handle_conflicts(conflict_type='project_endpoint')
     def add_endpoint_to_project(self, endpoint_id, project_id):
@@ -150,9 +151,9 @@ class EndpointFilter(object):
         endpoint_group_ref = self._get_endpoint_group(session,
                                                       endpoint_group_id)
         with session.begin():
-            session.delete(endpoint_group_ref)
             self._delete_endpoint_group_association_by_endpoint_group(
                 session, endpoint_group_id)
+            session.delete(endpoint_group_ref)
 
     def get_endpoint_group_in_project(self, endpoint_group_id, project_id):
         session = sql.get_session()

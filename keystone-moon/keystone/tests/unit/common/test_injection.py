@@ -21,6 +21,7 @@ from keystone.tests import unit as tests
 class TestDependencyInjection(tests.BaseTestCase):
     def setUp(self):
         super(TestDependencyInjection, self).setUp()
+        dependency.reset()
         self.addCleanup(dependency.reset)
 
     def test_dependency_injection(self):
@@ -209,62 +210,6 @@ class TestDependencyInjection(tests.BaseTestCase):
         dependency.reset()
 
         self.assertFalse(dependency._REGISTRY)
-
-    def test_optional_dependency_not_provided(self):
-        requirement_name = uuid.uuid4().hex
-
-        @dependency.optional(requirement_name)
-        class C1(object):
-            pass
-
-        c1_inst = C1()
-
-        dependency.resolve_future_dependencies()
-
-        self.assertIsNone(getattr(c1_inst, requirement_name))
-
-    def test_optional_dependency_provided(self):
-        requirement_name = uuid.uuid4().hex
-
-        @dependency.optional(requirement_name)
-        class C1(object):
-            pass
-
-        @dependency.provider(requirement_name)
-        class P1(object):
-            pass
-
-        c1_inst = C1()
-        p1_inst = P1()
-
-        dependency.resolve_future_dependencies()
-
-        self.assertIs(getattr(c1_inst, requirement_name), p1_inst)
-
-    def test_optional_and_required(self):
-        p1_name = uuid.uuid4().hex
-        p2_name = uuid.uuid4().hex
-        optional_name = uuid.uuid4().hex
-
-        @dependency.provider(p1_name)
-        @dependency.requires(p2_name)
-        @dependency.optional(optional_name)
-        class P1(object):
-            pass
-
-        @dependency.provider(p2_name)
-        @dependency.requires(p1_name)
-        class P2(object):
-            pass
-
-        p1 = P1()
-        p2 = P2()
-
-        dependency.resolve_future_dependencies()
-
-        self.assertIs(getattr(p1, p2_name), p2)
-        self.assertIs(getattr(p2, p1_name), p1)
-        self.assertIsNone(getattr(p1, optional_name))
 
     def test_get_provider(self):
         # Can get the instance of a provider using get_provider

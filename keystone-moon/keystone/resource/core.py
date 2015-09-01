@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Main entry point into the resource service."""
+"""Main entry point into the Resource service."""
 
 import abc
 
@@ -18,12 +18,11 @@ from oslo_config import cfg
 from oslo_log import log
 import six
 
-from keystone import clean
 from keystone.common import cache
+from keystone.common import clean
 from keystone.common import dependency
 from keystone.common import driver_hints
 from keystone.common import manager
-from keystone.contrib import federation
 from keystone import exception
 from keystone.i18n import _, _LE, _LW
 from keystone import notifications
@@ -47,12 +46,15 @@ def calc_default_domain():
 @dependency.requires('assignment_api', 'credential_api', 'domain_config_api',
                      'identity_api', 'revoke_api')
 class Manager(manager.Manager):
-    """Default pivot point for the resource backend.
+    """Default pivot point for the Resource backend.
 
     See :mod:`keystone.common.manager.Manager` for more details on how this
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.resource'
+
     _DOMAIN = 'domain'
     _PROJECT = 'project'
 
@@ -62,9 +64,8 @@ class Manager(manager.Manager):
         resource_driver = CONF.resource.driver
 
         if resource_driver is None:
-            assignment_driver = (
-                dependency.get_provider('assignment_api').driver)
-            resource_driver = assignment_driver.default_resource_driver()
+            assignment_manager = dependency.get_provider('assignment_api')
+            resource_driver = assignment_manager.default_resource_driver()
 
         super(Manager, self).__init__(resource_driver)
 
@@ -86,21 +87,23 @@ class Manager(manager.Manager):
         tenant['enabled'] = clean.project_enabled(tenant['enabled'])
         tenant.setdefault('description', '')
         tenant.setdefault('parent_id', None)
+        tenant.setdefault('is_domain', False)
 
+        self.get_domain(tenant.get('domain_id'))
         if tenant.get('parent_id') is not None:
             parent_ref = self.get_project(tenant.get('parent_id'))
             parents_list = self.list_project_parents(parent_ref['id'])
             parents_list.append(parent_ref)
             for ref in parents_list:
                 if ref.get('domain_id') != tenant.get('domain_id'):
-                    raise exception.ForbiddenAction(
-                        action=_('cannot create a project within a different '
-                                 'domain than its parents.'))
+                    raise exception.ValidationError(
+                        message=_('cannot create a project within a different '
+                                  'domain than its parents.'))
                 if not ref.get('enabled', True):
-                    raise exception.ForbiddenAction(
-                        action=_('cannot create a project in a '
-                                 'branch containing a disabled '
-                                 'project: %s') % ref['id'])
+                    raise exception.ValidationError(
+                        message=_('cannot create a project in a '
+                                  'branch containing a disabled '
+                                  'project: %s') % ref['id'])
             self._assert_max_hierarchy_depth(tenant.get('parent_id'),
                                              parents_list)
 
@@ -135,14 +138,13 @@ class Manager(manager.Manager):
         """
         # NOTE(marek-denis): We cannot create this attribute in the __init__ as
         # config values are always initialized to default value.
-        federated_domain = (CONF.federation.federated_domain_name or
-                            federation.FEDERATED_DOMAIN_KEYWORD).lower()
+        federated_domain = CONF.federation.federated_domain_name.lower()
         if (domain.get('name') and domain['name'].lower() == federated_domain):
             raise AssertionError(_('Domain cannot be named %s')
-                                 % federated_domain)
+                                 % domain['name'])
         if (domain_id.lower() == federated_domain):
             raise AssertionError(_('Domain cannot have ID %s')
-                                 % federated_domain)
+                                 % domain_id)
 
     def assert_project_enabled(self, project_id, project=None):
         """Assert the project is enabled and its associated domain is enabled.
@@ -177,7 +179,7 @@ class Manager(manager.Manager):
                              'disabled parents') % project_id)
 
     def _assert_whole_subtree_is_disabled(self, project_id):
-        subtree_list = self.driver.list_projects_in_subtree(project_id)
+        subtree_list = self.list_projects_in_subtree(project_id)
         for ref in subtree_list:
             if ref.get('enabled', True):
                 raise exception.ForbiddenAction(
@@ -193,6 +195,11 @@ class Manager(manager.Manager):
         if 'parent_id' in tenant and tenant.get('parent_id') != parent_id:
             raise exception.ForbiddenAction(
                 action=_('Update of `parent_id` is not allowed.'))
+
+        if ('is_domain' in tenant and
+                tenant['is_domain'] != original_tenant['is_domain']):
+            raise exception.ValidationError(
+                message=_('Update of `is_domain` is not allowed.'))
 
         if 'enabled' in tenant:
             tenant['enabled'] = clean.project_enabled(tenant['enabled'])
@@ -241,15 +248,23 @@ class Manager(manager.Manager):
         user_projects = self.assignment_api.list_projects_for_user(user_id)
         user_projects_ids = set([proj['id'] for proj in user_projects])
         # Keep only the projects present in user_projects
-        projects_list = [proj for proj in projects_list
-                         if proj['id'] in user_projects_ids]
+        return [proj for proj in projects_list
+                if proj['id'] in user_projects_ids]
+
+    def _assert_valid_project_id(self, project_id):
+        if project_id is None:
+            msg = _('Project field is required and cannot be empty.')
+            raise exception.ValidationError(message=msg)
+        # Check if project_id exists
+        self.get_project(project_id)
 
     def list_project_parents(self, project_id, user_id=None):
+        self._assert_valid_project_id(project_id)
         parents = self.driver.list_project_parents(project_id)
         # If a user_id was provided, the returned list should be filtered
         # against the projects this user has access to.
         if user_id:
-            self._filter_projects_list(parents, user_id)
+            parents = self._filter_projects_list(parents, user_id)
         return parents
 
     def _build_parents_as_ids_dict(self, project, parents_by_id):
@@ -296,11 +311,12 @@ class Manager(manager.Manager):
         return parents_as_ids
 
     def list_projects_in_subtree(self, project_id, user_id=None):
+        self._assert_valid_project_id(project_id)
         subtree = self.driver.list_projects_in_subtree(project_id)
         # If a user_id was provided, the returned list should be filtered
         # against the projects this user has access to.
         if user_id:
-            self._filter_projects_list(subtree, user_id)
+            subtree = self._filter_projects_list(subtree, user_id)
         return subtree
 
     def _build_subtree_as_ids_dict(self, project_id, subtree_by_parent):
@@ -780,6 +796,9 @@ class Driver(object):
             raise exception.DomainNotFound(domain_id=domain_id)
 
 
+MEMOIZE_CONFIG = cache.get_memoization_decorator(section='domain_config')
+
+
 @dependency.provider('domain_config_api')
 class DomainConfigManager(manager.Manager):
     """Default pivot point for the Domain Config backend."""
@@ -792,6 +811,8 @@ class DomainConfigManager(manager.Manager):
     #
     # Only those options that affect the domain-specific driver support in
     # the identity manager are supported.
+
+    driver_namespace = 'keystone.resource.domain_config'
 
     whitelisted_options = {
         'identity': ['driver'],
@@ -975,6 +996,10 @@ class DomainConfigManager(manager.Manager):
             self.create_config_option(
                 domain_id, option['group'], option['option'], option['value'],
                 sensitive=True)
+        # Since we are caching on the full substituted config, we just
+        # invalidate here, rather than try and create the right result to
+        # cache.
+        self.get_config_with_sensitive_info.invalidate(self, domain_id)
         return self._list_to_config(whitelisted)
 
     def get_config(self, domain_id, group=None, option=None):
@@ -999,7 +1024,7 @@ class DomainConfigManager(manager.Manager):
                     'url': 'myurl'
                     'user_tree_dn': 'OU=myou'},
                 'identity': {
-                    'driver': 'keystone.identity.backends.ldap.Identity'}
+                    'driver': 'ldap'}
 
             }
 
@@ -1077,22 +1102,22 @@ class DomainConfigManager(manager.Manager):
                             'provided contains group %(group_other)s '
                             'instead') % {
                                 'group': group,
-                                'group_other': config.keys()[0]}
+                                'group_other': list(config.keys())[0]}
                     raise exception.InvalidDomainConfig(reason=msg)
                 if option and option not in config[group]:
                     msg = _('Trying to update option %(option)s in group '
                             '%(group)s, but config provided contains option '
                             '%(option_other)s instead') % {
                                 'group': group, 'option': option,
-                                'option_other': config[group].keys()[0]}
+                                'option_other': list(config[group].keys())[0]}
                     raise exception.InvalidDomainConfig(reason=msg)
 
                 # Finally, we need to check if the group/option specified
                 # already exists in the original config - since if not, to keep
                 # with the semantics of an update, we need to fail with
                 # a DomainConfigNotFound
-                if not self.get_config_with_sensitive_info(domain_id,
-                                                           group, option):
+                if not self._get_config_with_sensitive_info(domain_id,
+                                                            group, option):
                     if option:
                         msg = _('option %(option)s in group %(group)s') % {
                             'group': group, 'option': option}
@@ -1131,6 +1156,7 @@ class DomainConfigManager(manager.Manager):
         for new_option in sensitive:
             _update_or_create(domain_id, new_option, sensitive=True)
 
+        self.get_config_with_sensitive_info.invalidate(self, domain_id)
         return self.get_config(domain_id)
 
     def delete_config(self, domain_id, group=None, option=None):
@@ -1154,7 +1180,7 @@ class DomainConfigManager(manager.Manager):
         if group:
             # As this is a partial delete, then make sure the items requested
             # are valid and exist in the current config
-            current_config = self.get_config_with_sensitive_info(domain_id)
+            current_config = self._get_config_with_sensitive_info(domain_id)
             # Raise an exception if the group/options specified don't exist in
             # the current config so that the delete method provides the
             # correct error semantics.
@@ -1171,14 +1197,14 @@ class DomainConfigManager(manager.Manager):
 
         self.delete_config_options(domain_id, group, option)
         self.delete_config_options(domain_id, group, option, sensitive=True)
+        self.get_config_with_sensitive_info.invalidate(self, domain_id)
 
-    def get_config_with_sensitive_info(self, domain_id, group=None,
-                                       option=None):
-        """Get config for a domain with sensitive info included.
+    def _get_config_with_sensitive_info(self, domain_id, group=None,
+                                        option=None):
+        """Get config for a domain/group/option with sensitive info included.
 
-        This method is not exposed via the public API, but is used by the
-        identity manager to initialize a domain with the fully formed config
-        options.
+        This is only used by the methods within this class, which may need to
+        check individual groups or options.
 
         """
         whitelisted = self.list_config_options(domain_id, group, option)
@@ -1232,6 +1258,17 @@ class DomainConfigManager(manager.Manager):
                     'value': original_value})
 
         return self._list_to_config(whitelisted, sensitive)
+
+    @MEMOIZE_CONFIG
+    def get_config_with_sensitive_info(self, domain_id):
+        """Get config for a domain with sensitive info included.
+
+        This method is not exposed via the public API, but is used by the
+        identity manager to initialize a domain with the fully formed config
+        options.
+
+        """
+        return self._get_config_with_sensitive_info(domain_id)
 
 
 @six.add_metaclass(abc.ABCMeta)

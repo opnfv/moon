@@ -156,10 +156,6 @@ configuration file.
 Domain-specific Drivers
 -----------------------
 
-.. NOTE::
-
-    This functionality is new in Juno.
-
 Keystone supports the option (disabled by default) to specify identity driver
 configurations on a domain by domain basis, allowing, for example, a specific
 domain to have its own LDAP or SQL server. This is configured by specifying the
@@ -182,12 +178,74 @@ the primary configuration file for the specified domain only. Domains without a
 specific configuration file will continue to use the options from the primary
 configuration file.
 
+Keystone also supports the ability to store the domain-specific configuration
+options in the keystone SQL database, managed via the Identity API, as opposed
+to using domain-specific configuration files.
+
 .. NOTE::
 
-    It is important to notice that by enabling this configuration, the
-    operations of listing all users and listing all groups are not supported,
-    those calls will need that either a domain filter is specified or the usage
-    of a domain scoped token.
+    The ability to store and manage configuration options via the Identity API
+    is new and experimental in Kilo.
+
+This capability (which is disabled by default) is enabled by specifying the
+following options in the main keystone configuration file:
+
+.. code-block:: ini
+
+ [identity]
+ domain_specific_drivers_enabled = true
+ domain_configurations_from_database = true
+
+Once enabled, any existing domain-specific configuration files in the
+configuration directory will be ignored and only those domain-specific
+configuration options specified via the Identity API will be used.
+
+Unlike the file-based method of specifying domain-specific configurations,
+options specified via the Identity API will become active without needing to
+restart the keystone server. For performance reasons, the current state of
+configuration options for a domain are cached in the keystone server, and in
+multi-process and multi-threaded keystone configurations, the new
+configuration options may not become active until the cache has timed out. The
+cache settings for domain config options can be adjusted in the general
+keystone configuration file (option ``cache_time`` in the ``domain_config``
+group).
+
+.. NOTE::
+
+    It is important to notice that when using either of these methods of
+    specifying domain-specific configuration options, the main keystone
+    configuration file is still maintained. Only those options that relate
+    to the Identity driver for users and groups (i.e. specifying whether the
+    driver for this domain is SQL or LDAP, and, if LDAP, the options that
+    define that connection) are supported in a domain-specific manner. Further,
+    when using the configuration options via the Identity API, the driver
+    option must be set to an LDAP driver (attempting to set it to an SQL driver
+    will generate an error when it is subsequently used).
+
+For existing installations that already use file-based domain-specific
+configurations who wish to migrate to the SQL-based approach, the
+``keystone-manage`` command can be used to upload all configuration files to
+the SQL database:
+
+.. code-block:: bash
+
+    $ keystone-manage domain_config_upload --all
+
+Once uploaded, these domain-configuration options will be visible via the
+Identity API as well as applied to the domain-specific drivers. It is also
+possible to upload individual domain-specific configuration files by
+specifying the domain name:
+
+.. code-block:: bash
+
+    $ keystone-manage domain_config_upload --domain-name DOMAINA
+
+.. NOTE::
+
+    It is important to notice that by enabling either of the domain-specific
+    configuration methods, the operations of listing all users and listing all
+    groups are not supported, those calls will need either a domain filter to
+    be specified or usage of a domain scoped token.
 
 .. NOTE::
 
@@ -197,17 +255,21 @@ configuration file.
 
 .. NOTE::
 
-    To delete a domain that uses a domain specific backend, it's necessary to
-    first disable it, remove its specific configuration file (i.e. its
-    corresponding keystone.<domain_name>.conf) and then restart the Identity
-    server.
+    When using the file-based domain-specific configuration method, to delete a
+    domain that uses a domain specific backend, it's necessary to first disable
+    it, remove its specific configuration file (i.e. its corresponding
+    keystone.<domain_name>.conf) and then restart the Identity server. When
+    managing configuration options via the Identity API, the domain can simply
+    be disabled and deleted via the Identity API; since any domain-specific
+    configuration options will automatically be removed.
 
 .. NOTE::
 
-    Although Keystone supports multiple LDAP backends via domain specific
-    configuration files, it currently only supports one SQL backend. This could
-    be either the default driver or a single domain-specific backend, perhaps
-    for storing service users in a predominantly LDAP installation.
+    Although Keystone supports multiple LDAP backends via the above
+    domain-specific configuration methods, it currently only supports one SQL
+    backend. This could be either the default driver or a single
+    domain-specific backend, perhaps for storing service users in a
+    predominantly LDAP installation.
 
 Due to the need for user and group IDs to be unique across an OpenStack
 installation and for Keystone to be able to deduce which domain and backend to
@@ -274,8 +336,8 @@ wish to make use of other generator algorithms that have a different trade-off
 of attributes. A different generator can be installed by configuring the
 following property:
 
-* ``generator`` - identity mapping generator. Defaults to
-  ``keystone.identity.generators.sha256.Generator``
+* ``generator`` - identity mapping generator. Defaults to ``sha256``
+  (implemented by :class:`keystone.identity.id_generators.sha256.Generator`)
 
 .. WARNING::
 
@@ -309,7 +371,7 @@ How to Implement an Authentication Plugin
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 All authentication plugins must extend the
-``keystone.auth.core.AuthMethodHandler`` class and implement the
+:class:`keystone.auth.core.AuthMethodHandler` class and implement the
 ``authenticate()`` method. The ``authenticate()`` method expects the following
 parameters.
 
@@ -332,7 +394,7 @@ return the payload in the form of a dictionary for the next authentication
 step.
 
 If authentication is unsuccessful, the ``authenticate()`` method must raise a
-``keystone.exception.Unauthorized`` exception.
+:class:`keystone.exception.Unauthorized` exception.
 
 Simply add the new plugin name to the ``methods`` list along with your plugin
 class configuration in the ``[auth]`` sections of the configuration file to
@@ -365,30 +427,28 @@ provides three non-test persistence backends. These can be set with the
 
 The drivers Keystone provides are:
 
-* ``keystone.token.persistence.backends.memcache_pool.Token`` - The pooled
-  memcached token persistence engine. This backend supports the concept of
-  pooled memcache client object (allowing for the re-use of the client
-  objects). This backend has a number of extra tunable options in the
-  ``[memcache]`` section of the config.
+* ``memcache_pool`` - The pooled memcached token persistence engine. This
+  backend supports the concept of pooled memcache client object (allowing for
+  the re-use of the client objects). This backend has a number of extra tunable
+  options in the ``[memcache]`` section of the config. Implemented by
+  :class:`keystone.token.persistence.backends.memcache_pool.Token`
 
-* ``keystone.token.persistence.backends.sql.Token`` - The SQL-based (default)
-  token persistence engine.
+* ``sql`` - The SQL-based (default) token persistence engine. Implemented by
+  :class:`keystone.token.persistence.backends.sql.Token`
 
-* ``keystone.token.persistence.backends.memcache.Token`` - The memcached based
-  token persistence backend. This backend relies on ``dogpile.cache`` and
-  stores the token data in a set of memcached servers. The servers URLs are
-  specified in the ``[memcache]\servers`` configuration option in the Keystone
-  config.
+* ``memcache`` - The memcached based token persistence backend. This backend
+  relies on ``dogpile.cache`` and stores the token data in a set of memcached
+  servers. The servers URLs are specified in the ``[memcache]\servers``
+  configuration option in the Keystone config. Implemented by
+  :class:`keystone.token.persistence.backends.memcache.Token`
 
 
 .. WARNING::
-    It is recommended you use the
-    ``keystone.token.persistence.backends.memcache_pool.Token`` backend instead
-    of ``keystone.token.persistence.backends.memcache.Token`` as the token
-    persistence driver if you are deploying Keystone under eventlet instead of
-    Apache + mod_wsgi. This recommendation is due to known issues with the use
-    of ``thread.local`` under eventlet that can allow the leaking of memcache
-    client objects and consumption of extra sockets.
+    It is recommended you use the ``memcache_pool`` backend instead of
+    ``memcache`` as the token persistence driver if you are deploying Keystone
+    under eventlet instead of Apache + mod_wsgi. This recommendation is due to
+    known issues with the use of ``thread.local`` under eventlet that can allow
+    the leaking of memcache client objects and consumption of extra sockets.
 
 
 Token Provider
@@ -399,8 +459,8 @@ Keystone supports customizable token provider and it is specified in the
 PKI token providers. However, users may register their own token provider by
 configuring the following property.
 
-* ``provider`` - token provider driver. Defaults to
-  ``keystone.token.providers.uuid.Provider``
+* ``provider`` - token provider driver. Defaults to ``uuid``. Implemented by
+  :class:`keystone.token.providers.uuid.Provider`
 
 
 UUID, PKI, PKIZ, or Fernet?
@@ -749,7 +809,7 @@ following states:
   deployment at all times). In a multi-node Keystone deployment this would
   allow for the *staged* key to be replicated to all Keystone nodes before
   being promoted to *primary* on a single node. This prevents the case where a
-  *primary* key is created on one Keystone node and tokens encryted/signed with
+  *primary* key is created on one Keystone node and tokens encrypted/signed with
   that new *primary* are rejected on another Keystone node because the new
   *primary* doesn't exist there yet.
 
@@ -790,7 +850,7 @@ A dynamic database-backed driver fully supporting persistent configuration.
 .. code-block:: ini
 
     [catalog]
-    driver = keystone.catalog.backends.sql.Catalog
+    driver = sql
 
 .. NOTE::
 
@@ -805,7 +865,7 @@ To build your service catalog using this driver, see the built-in help:
     $ openstack help endpoint create
 
 You can also refer to `an example in Keystone (tools/sample_data.sh)
-<https://github.com/openstack/keystone/blob/master/tools/sample_data.sh>`_.
+<https://git.openstack.org/cgit/openstack/keystone/tree/tools/sample_data.sh>`_.
 
 File-based Service Catalog (``templated.Catalog``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -826,7 +886,7 @@ catalog will not change very much over time.
 .. code-block:: ini
 
     [catalog]
-    driver = keystone.catalog.backends.templated.Catalog
+    driver = templated
     template_file = /opt/stack/keystone/etc/default_catalog.templates
 
 The value of ``template_file`` is expected to be an absolute path to your
@@ -835,7 +895,7 @@ Keystone, however you should create your own to reflect your deployment.
 
 Another such example is `available in devstack
 (files/default_catalog.templates)
-<https://github.com/openstack-dev/devstack/blob/master/files/default_catalog.templates>`_.
+<https://git.openstack.org/cgit/openstack-dev/devstack/tree/files/default_catalog.templates>`_.
 
 Logging
 -------
@@ -1121,10 +1181,10 @@ The following attributes are available
   would ensure that the user object that is being deleted is in the same
   domain as the token provided.
 
-Every target object has an `id` and a `name` available as `target.<object>.id`
-and `target.<object>.name`. Other attributes are retrieved from the database
-and vary between object types. Moreover, some database fields are filtered out
-(e.g. user passwords).
+Every target object (except token) has an `id` and a `name` available as
+`target.<object>.id` and `target.<object>.name`. Other attributes are retrieved
+from the database and vary between object types. Moreover, some database fields
+are filtered out (e.g. user passwords).
 
 List of object attributes:
 
@@ -1158,6 +1218,10 @@ List of object attributes:
     * target.project.id
     * target.project.name
 
+* token
+    * target.token.user_id
+    * target.token.user.domain.id
+
 The default policy.json file supplied provides a somewhat basic example of API
 protection, and does not assume any particular use of domains. For multi-domain
 configuration installations where, for example, a cloud provider wishes to
@@ -1186,7 +1250,7 @@ Ensure that your ``keystone.conf`` is configured to use a SQL driver:
 .. code-block:: ini
 
     [identity]
-    driver = keystone.identity.backends.sql.Identity
+    driver = sql
 
 You may also want to configure your ``[database]`` settings to better reflect
 your environment:
@@ -1234,6 +1298,10 @@ through the normal REST API. At the moment, the following calls are supported:
 
 * ``db_sync``: Sync the database.
 * ``db_version``: Print the current migration version of the database.
+* ``domain_config_upload``: Upload domain configuration file.
+* ``fernet_rotate``: Rotate keys in the Fernet key repository.
+* ``fernet_setup``: Setup a Fernet key repository.
+* ``mapping_engine``: Test your federation mapping rules.
 * ``mapping_purge``: Purge the identity mapping table.
 * ``pki_setup``: Initialize the certificates used to sign tokens.
 * ``saml_idp_metadata``: Generate identity provider metadata.
@@ -1629,23 +1697,23 @@ enable this option, you must have the following ``keystone.conf`` options set:
 .. code-block:: ini
 
   [identity]
-  driver = keystone.identity.backends.ldap.Identity
+  driver = ldap
 
   [resource]
-  driver = keystone.resource.backends.sql.Resource
+  driver = sql
 
   [assignment]
-  driver = keystone.assignment.backends.sql.Assignment
+  driver = sql
 
   [role]
-  driver = keystone.assignment.role_backends.sql.Role
+  driver = sql
 
 With the above configuration, Keystone will only lookup identity related
 information such users, groups, and group membership from the directory, while
 resources, roles and assignment related information will be provided by the SQL
 backend. Also note that if there is an LDAP Identity, and no resource,
 assignment or role backend is specified, they will default to LDAP. Although
-this may seem counterintuitive, it is provided for backwards compatibility.
+this may seem counter intuitive, it is provided for backwards compatibility.
 Nonetheless, the explicit option will always override the implicit option, so
 specifying the options as shown above will always be correct.  Finally, it is
 also worth noting that whether or not the LDAP accessible directory is to be
@@ -1662,7 +1730,7 @@ section:
 
 .. NOTE::
 
-    While having identity related infomration backed by LDAP while other
+    While having identity related information backed by LDAP while other
     information is backed by SQL is a supported configuration, as shown above;
     the opposite is not true. If either resource or assignment drivers are
     configured for LDAP, then Identity must also be configured for LDAP.
@@ -1671,32 +1739,31 @@ Connection Pooling
 ------------------
 
 Various LDAP backends in Keystone use a common LDAP module to interact with
-LDAP data. By default, a new connection is established for LDAP operations.
-This can become highly expensive when TLS support is enabled which is a likely
-configuraton in enterprise setup. Re-using of connectors from a connection pool
-drastically reduces overhead of initiating a new connection for every LDAP
+LDAP data. By default, a new connection is established for each LDAP operation.
+This can become highly expensive when TLS support is enabled, which is a likely
+configuration in an enterprise setup. Reuse of connectors from a connection
+pool drastically reduces overhead of initiating a new connection for every LDAP
 operation.
 
-Keystone now provides connection pool support via configuration. This change
-will keep LDAP connectors alive and re-use for subsequent LDAP operations. A
-connection lifespan is going to be configurable with other pooling specific
-attributes. The change is made in LDAP handler layer logic which is primarily
-responsible for LDAP connection and shared common operations.
+Keystone provides connection pool support via configuration. This will keep
+LDAP connectors alive and reused for subsequent LDAP operations. The connection
+lifespan is configurable as other pooling specific attributes.
 
-In LDAP identity driver, Keystone authenticates end user by LDAP bind with user
-DN and provided password. These kind of auth binds can fill up the pool pretty
-quickly so a separate pool is provided for those end user auth bind calls. If a
-deployment does not want to use pool for those binds, then it can disable
-pooling selectively by ``use_auth_pool`` as false. If a deployment wants to use
-pool for those auth binds, then ``use_auth_pool`` needs to be true. For auth
-pool, a different pool size (``auth_pool_size``) and connection lifetime
-(``auth_pool_connection_lifetime``) can be specified. With enabled auth pool,
-its connection lifetime should be kept short so that pool frequently re-binds
-the connection with provided creds and works reliably in end user password
-change case. When ``use_pool`` is false (disabled), then auth pool
-configuration is also not used.
+In the LDAP identity driver, Keystone authenticates end users via an LDAP bind
+with the user's DN and provided password. This kind of authentication bind
+can fill up the pool pretty quickly, so a separate pool is provided for end
+user authentication bind calls. If a deployment does not want to use a pool for
+those binds, then it can disable pooling selectively by setting
+``use_auth_pool`` to false. If a deployment wants to use a pool for those 
+authentication binds, then ``use_auth_pool`` needs to be set to true. For the
+authentication pool, a different pool size (``auth_pool_size``) and connection
+lifetime (``auth_pool_connection_lifetime``) can be specified. With an enabled
+authentication pool, its connection lifetime should be kept short so that the
+pool frequently re-binds the connection with the provided credentials and works
+reliably in the end user password change case. When ``use_pool`` is false
+(disabled), then the authentication pool configuration is also not used.
 
-Connection pool configuration is added in ``[ldap]`` configuration section:
+Connection pool configuration is part of the ``[ldap]`` configuration section:
 
 .. code-block:: ini
 

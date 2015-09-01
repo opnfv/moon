@@ -12,6 +12,7 @@
 
 import sqlalchemy as sql
 
+
 _REGION_TABLE_NAME = 'region'
 
 
@@ -21,12 +22,3 @@ def upgrade(migrate_engine):
 
     region_table = sql.Table(_REGION_TABLE_NAME, meta, autoload=True)
     region_table.drop_column('url')
-
-
-def downgrade(migrate_engine):
-    meta = sql.MetaData()
-    meta.bind = migrate_engine
-
-    region_table = sql.Table(_REGION_TABLE_NAME, meta, autoload=True)
-    url_column = sql.Column('url', sql.String(255), nullable=True)
-    region_table.create_column(url_column)

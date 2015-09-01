@@ -10,7 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Extensions supporting Federation."""
+"""Workflow logic for the Federation service."""
 
 import string
 
@@ -55,9 +55,9 @@ class IdentityProvider(_ControllerBase):
     collection_name = 'identity_providers'
     member_name = 'identity_provider'
 
-    _mutable_parameters = frozenset(['description', 'enabled', 'remote_id'])
+    _mutable_parameters = frozenset(['description', 'enabled', 'remote_ids'])
     _public_parameters = frozenset(['id', 'enabled', 'description',
-                                    'remote_id', 'links'
+                                    'remote_ids', 'links'
                                     ])
 
     @classmethod
@@ -247,6 +247,36 @@ class MappingController(_ControllerBase):
 @dependency.requires('federation_api')
 class Auth(auth_controllers.Auth):
 
+    def _get_sso_origin_host(self, context):
+        """Validate and return originating dashboard URL.
+
+        Make sure the parameter is specified in the request's URL as well its
+        value belongs to a list of trusted dashboards.
+
+        :param context: request's context
+        :raises: exception.ValidationError: ``origin`` query parameter was not
+            specified. The URL is deemed invalid.
+        :raises: exception.Unauthorized: URL specified in origin query
+            parameter does not exist in list of websso trusted dashboards.
+        :returns: URL with the originating dashboard
+
+        """
+        if 'origin' in context['query_string']:
+            origin = context['query_string'].get('origin')
+            host = urllib.parse.unquote_plus(origin)
+        else:
+            msg = _('Request must have an origin query parameter')
+            LOG.error(msg)
+            raise exception.ValidationError(msg)
+
+        if host not in CONF.federation.trusted_dashboard:
+            msg = _('%(host)s is not a trusted dashboard host')
+            msg = msg % {'host': host}
+            LOG.error(msg)
+            raise exception.Unauthorized(msg)
+
+        return host
+
     def federated_authentication(self, context, identity_provider, protocol):
         """Authenticate from dedicated url endpoint.
 
@@ -268,33 +298,23 @@ class Auth(auth_controllers.Auth):
 
     def federated_sso_auth(self, context, protocol_id):
         try:
-            remote_id_name = CONF.federation.remote_id_attribute
+            remote_id_name = utils.get_remote_id_parameter(protocol_id)
             remote_id = context['environment'][remote_id_name]
         except KeyError:
             msg = _('Missing entity ID from environment')
             LOG.error(msg)
             raise exception.Unauthorized(msg)
 
-        if 'origin' in context['query_string']:
-            origin = context['query_string'].get('origin')
-            host = urllib.parse.unquote_plus(origin)
-        else:
-            msg = _('Request must have an origin query parameter')
-            LOG.error(msg)
-            raise exception.ValidationError(msg)
+        host = self._get_sso_origin_host(context)
 
-        if host in CONF.federation.trusted_dashboard:
-            ref = self.federation_api.get_idp_from_remote_id(remote_id)
-            identity_provider = ref['id']
-            res = self.federated_authentication(context, identity_provider,
-                                                protocol_id)
-            token_id = res.headers['X-Subject-Token']
-            return self.render_html_response(host, token_id)
-        else:
-            msg = _('%(host)s is not a trusted dashboard host')
-            msg = msg % {'host': host}
-            LOG.error(msg)
-            raise exception.Unauthorized(msg)
+        ref = self.federation_api.get_idp_from_remote_id(remote_id)
+        # NOTE(stevemar): the returned object is a simple dict that
+        # contains the idp_id and remote_id.
+        identity_provider = ref['idp_id']
+        res = self.federated_authentication(context, identity_provider,
+                                            protocol_id)
+        token_id = res.headers['X-Subject-Token']
+        return self.render_html_response(host, token_id)
 
     def render_html_response(self, host, token_id):
         """Forms an HTML Form from a template with autosubmit."""
@@ -309,45 +329,77 @@ class Auth(auth_controllers.Auth):
         return webob.Response(body=body, status='200',
                               headerlist=headers)
 
-    @validation.validated(schema.saml_create, 'auth')
-    def create_saml_assertion(self, context, auth):
-        """Exchange a scoped token for a SAML assertion.
-
-        :param auth: Dictionary that contains a token and service provider id
-        :returns: SAML Assertion based on properties from the token
-        """
-
+    def _create_base_saml_assertion(self, context, auth):
         issuer = CONF.saml.idp_entity_id
         sp_id = auth['scope']['service_provider']['id']
         service_provider = self.federation_api.get_sp(sp_id)
         utils.assert_enabled_service_provider_object(service_provider)
-
         sp_url = service_provider.get('sp_url')
-        auth_url = service_provider.get('auth_url')
 
         token_id = auth['identity']['token']['id']
         token_data = self.token_provider_api.validate_token(token_id)
         token_ref = token_model.KeystoneToken(token_id, token_data)
-        subject = token_ref.user_name
-        roles = token_ref.role_names
 
         if not token_ref.project_scoped:
             action = _('Use a project scoped token when attempting to create '
                        'a SAML assertion')
             raise exception.ForbiddenAction(action=action)
 
+        subject = token_ref.user_name
+        roles = token_ref.role_names
         project = token_ref.project_name
-        generator = keystone_idp.SAMLGenerator()
-        response = generator.samlize_token(issuer, sp_url, subject, roles,
-                                           project)
+        # NOTE(rodrigods): the domain name is necessary in order to distinguish
+        # between projects and users with the same name in different domains.
+        project_domain_name = token_ref.project_domain_name
+        subject_domain_name = token_ref.user_domain_name
 
+        generator = keystone_idp.SAMLGenerator()
+        response = generator.samlize_token(
+            issuer, sp_url, subject, subject_domain_name,
+            roles, project, project_domain_name)
+        return (response, service_provider)
+
+    def _build_response_headers(self, service_provider):
+        return [('Content-Type', 'text/xml'),
+                ('X-sp-url', six.binary_type(service_provider['sp_url'])),
+                ('X-auth-url', six.binary_type(service_provider['auth_url']))]
+
+    @validation.validated(schema.saml_create, 'auth')
+    def create_saml_assertion(self, context, auth):
+        """Exchange a scoped token for a SAML assertion.
+
+        :param auth: Dictionary that contains a token and service provider ID
+        :returns: SAML Assertion based on properties from the token
+        """
+
+        t = self._create_base_saml_assertion(context, auth)
+        (response, service_provider) = t
+
+        headers = self._build_response_headers(service_provider)
         return wsgi.render_response(body=response.to_string(),
                                     status=('200', 'OK'),
-                                    headers=[('Content-Type', 'text/xml'),
-                                             ('X-sp-url',
-                                              six.binary_type(sp_url)),
-                                             ('X-auth-url',
-                                              six.binary_type(auth_url))])
+                                    headers=headers)
+
+    @validation.validated(schema.saml_create, 'auth')
+    def create_ecp_assertion(self, context, auth):
+        """Exchange a scoped token for an ECP assertion.
+
+        :param auth: Dictionary that contains a token and service provider ID
+        :returns: ECP Assertion based on properties from the token
+        """
+
+        t = self._create_base_saml_assertion(context, auth)
+        (saml_assertion, service_provider) = t
+        relay_state_prefix = service_provider.get('relay_state_prefix')
+
+        generator = keystone_idp.ECPGenerator()
+        ecp_assertion = generator.generate_ecp(saml_assertion,
+                                               relay_state_prefix)
+
+        headers = self._build_response_headers(service_provider)
+        return wsgi.render_response(body=ecp_assertion.to_string(),
+                                    status=('200', 'OK'),
+                                    headers=headers)
 
 
 @dependency.requires('assignment_api', 'resource_api')
@@ -404,15 +456,17 @@ class ServiceProvider(_ControllerBase):
     member_name = 'service_provider'
 
     _mutable_parameters = frozenset(['auth_url', 'description', 'enabled',
-                                     'sp_url'])
+                                     'relay_state_prefix', 'sp_url'])
     _public_parameters = frozenset(['auth_url', 'id', 'enabled', 'description',
-                                    'links', 'sp_url'])
+                                    'links', 'relay_state_prefix', 'sp_url'])
 
     @controller.protected()
     @validation.validated(schema.service_provider_create, 'service_provider')
     def create_service_provider(self, context, sp_id, service_provider):
         service_provider = self._normalize_dict(service_provider)
         service_provider.setdefault('enabled', False)
+        service_provider.setdefault('relay_state_prefix',
+                                    CONF.saml.relay_state_prefix)
         ServiceProvider.check_immutable_params(service_provider)
         sp_ref = self.federation_api.create_sp(sp_id, service_provider)
         response = ServiceProvider.wrap_member(context, sp_ref)

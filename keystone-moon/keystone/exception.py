@@ -15,7 +15,6 @@
 from oslo_config import cfg
 from oslo_log import log
 from oslo_utils import encodeutils
-import six
 
 from keystone.i18n import _, _LW
 
@@ -63,7 +62,7 @@ class Error(Exception):
             except UnicodeDecodeError:
                 try:
                     kwargs = {k: encodeutils.safe_decode(v)
-                              for k, v in six.iteritems(kwargs)}
+                              for k, v in kwargs.items()}
                 except UnicodeDecodeError:
                     # NOTE(jamielennox): This is the complete failure case
                     # at least by showing the template we have some idea
@@ -84,6 +83,11 @@ class ValidationError(Error):
     title = 'Bad Request'
 
 
+class URLValidationError(ValidationError):
+    message_format = _("Cannot create an endpoint with an invalid URL:"
+                       " %(url)s")
+
+
 class SchemaValidationError(ValidationError):
     # NOTE(lbragstad): For whole OpenStack message consistency, this error
     # message has been written in a format consistent with WSME.
@@ -92,6 +96,15 @@ class SchemaValidationError(ValidationError):
 
 class ValidationTimeStampError(Error):
     message_format = _("Timestamp not in expected format."
+                       " The server could not comply with the request"
+                       " since it is either malformed or otherwise"
+                       " incorrect. The client is assumed to be in error.")
+    code = 400
+    title = 'Bad Request'
+
+
+class ValidationExpirationError(Error):
+    message_format = _("The 'expires_at' must not be before now."
                        " The server could not comply with the request"
                        " since it is either malformed or otherwise"
                        " incorrect. The client is assumed to be in error.")
@@ -448,9 +461,9 @@ class MigrationNotProvided(Exception):
         ) % {'mod_name': mod_name, 'path': path})
 
 
-class UnsupportedTokenVersionException(Exception):
-    """Token version is unrecognizable or unsupported."""
-    pass
+class UnsupportedTokenVersionException(UnexpectedError):
+    message_format = _('Token version is unrecognizable or '
+                       'unsupported.')
 
 
 class SAMLSigningError(UnexpectedError):

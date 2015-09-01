@@ -63,7 +63,7 @@ class Extensions(wsgi.Application):
         return None
 
     def get_extensions_info(self, context):
-        return {'extensions': {'values': self.extensions.values()}}
+        return {'extensions': {'values': list(self.extensions.values())}}
 
     def get_extension_info(self, context, extension_alias):
         try:
@@ -146,9 +146,9 @@ class Version(wsgi.Application):
 
         if 'v3' in _VERSIONS:
             versions['v3'] = {
-                'id': 'v3.0',
+                'id': 'v3.4',
                 'status': 'stable',
-                'updated': '2013-03-06T00:00:00Z',
+                'updated': '2015-03-30T00:00:00Z',
                 'links': [
                     {
                         'rel': 'self',
@@ -177,7 +177,7 @@ class Version(wsgi.Application):
         versions = self._get_versions_list(context)
         return wsgi.render_response(status=(300, 'Multiple Choices'), body={
             'versions': {
-                'values': versions.values()
+                'values': list(versions.values())
             }
         })
 

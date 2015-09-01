@@ -13,7 +13,7 @@
 from oslo_config import cfg
 from oslo_log import log
 
-from keystone import clean
+from keystone.common import clean
 from keystone.common import sql
 from keystone import exception
 from keystone.i18n import _LE
@@ -27,7 +27,7 @@ LOG = log.getLogger(__name__)
 class Resource(keystone_resource.Driver):
 
     def default_assignment_driver(self):
-        return 'keystone.assignment.backends.sql.Assignment'
+        return 'sql'
 
     def _get_project(self, session, project_id):
         project_ref = session.query(Project).get(project_id)
@@ -91,10 +91,9 @@ class Resource(keystone_resource.Driver):
 
     def list_projects_in_subtree(self, project_id):
         with sql.transaction() as session:
-            project = self._get_project(session, project_id).to_dict()
-            children = self._get_children(session, [project['id']])
+            children = self._get_children(session, [project_id])
             subtree = []
-            examined = set(project['id'])
+            examined = set([project_id])
             while children:
                 children_ids = set()
                 for ref in children:
@@ -106,7 +105,7 @@ class Resource(keystone_resource.Driver):
                         return
                     children_ids.add(ref['id'])
 
-                examined.union(children_ids)
+                examined.update(children_ids)
                 subtree += children
                 children = self._get_children(session, children_ids)
             return subtree
@@ -246,7 +245,7 @@ class Domain(sql.ModelBase, sql.DictBase):
 class Project(sql.ModelBase, sql.DictBase):
     __tablename__ = 'project'
     attributes = ['id', 'name', 'domain_id', 'description', 'enabled',
-                  'parent_id']
+                  'parent_id', 'is_domain']
     id = sql.Column(sql.String(64), primary_key=True)
     name = sql.Column(sql.String(64), nullable=False)
     domain_id = sql.Column(sql.String(64), sql.ForeignKey('domain.id'),
@@ -255,6 +254,7 @@ class Project(sql.ModelBase, sql.DictBase):
     enabled = sql.Column(sql.Boolean)
     extra = sql.Column(sql.JsonBlob())
     parent_id = sql.Column(sql.String(64), sql.ForeignKey('project.id'))
+    is_domain = sql.Column(sql.Boolean, default=False, nullable=False)
     # Unique constraint across two columns to create the separation
     # rather than just only 'name' being unique
     __table_args__ = (sql.UniqueConstraint('domain_id', 'name'), {})

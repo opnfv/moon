@@ -21,6 +21,7 @@ import six
 from keystone.common import dependency
 from keystone import exception
 
+
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
@@ -51,7 +52,7 @@ def convert_method_list_to_integer(methods):
 
     method_ints = []
     for method in methods:
-        for k, v in six.iteritems(method_map):
+        for k, v in method_map.items():
             if v == method:
                 method_ints.append(k)
     return sum(method_ints)
@@ -71,7 +72,7 @@ def convert_integer_to_method_list(method_int):
 
     method_map = construct_method_map_from_config()
     method_ints = []
-    for k, v in six.iteritems(method_map):
+    for k, v in method_map.items():
         method_ints.append(k)
     method_ints.sort(reverse=True)
 

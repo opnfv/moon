@@ -13,7 +13,6 @@
 # under the License.
 
 from oslo_serialization import jsonutils
-import six
 import webtest
 
 from keystone.auth import controllers as auth_controllers
@@ -61,7 +60,7 @@ class RestfulTestCase(tests.TestCase):
         # Will need to reset the plug-ins
         self.addCleanup(setattr, auth_controllers, 'AUTH_METHODS', {})
 
-        self.useFixture(database.Database(extensions=self.get_extensions()))
+        self.useFixture(database.Database())
         self.load_backends()
         self.load_fixtures(default_fixtures)
 
@@ -75,7 +74,7 @@ class RestfulTestCase(tests.TestCase):
     def request(self, app, path, body=None, headers=None, token=None,
                 expected_status=None, **kwargs):
         if headers:
-            headers = {str(k): str(v) for k, v in six.iteritems(headers)}
+            headers = {str(k): str(v) for k, v in headers.items()}
         else:
             headers = {}
 
@@ -119,7 +118,7 @@ class RestfulTestCase(tests.TestCase):
         self.assertEqual(
             response.status_code,
             expected_status,
-            'Status code %s is not %s, as expected)\n\n%s' %
+            'Status code %s is not %s, as expected\n\n%s' %
             (response.status_code, expected_status, response.body))
 
     def assertValidResponseHeaders(self, response):

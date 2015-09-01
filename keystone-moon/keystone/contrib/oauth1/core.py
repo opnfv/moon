@@ -12,7 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-"""Extensions supporting OAuth1."""
+"""Main entry point into the OAuth1 service."""
 
 from __future__ import absolute_import
 
@@ -151,6 +151,9 @@ class Manager(manager.Manager):
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.oauth1'
+
     _ACCESS_TOKEN = "OS-OAUTH1:access_token"
     _REQUEST_TOKEN = "OS-OAUTH1:request_token"
     _CONSUMER = "OS-OAUTH1:consumer"

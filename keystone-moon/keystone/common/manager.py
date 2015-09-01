@@ -14,7 +14,13 @@
 
 import functools
 
+from oslo_log import log
+from oslo_log import versionutils
 from oslo_utils import importutils
+import stevedore
+
+
+LOG = log.getLogger(__name__)
 
 
 def response_truncated(f):
@@ -53,6 +59,28 @@ def response_truncated(f):
     return wrapper
 
 
+def load_driver(namespace, driver_name, *args):
+    try:
+        driver_manager = stevedore.DriverManager(namespace,
+                                                 driver_name,
+                                                 invoke_on_load=True,
+                                                 invoke_args=args)
+        return driver_manager.driver
+    except RuntimeError as e:
+        LOG.debug('Failed to load %r using stevedore: %s', driver_name, e)
+        # Ignore failure and continue on.
+
+    @versionutils.deprecated(as_of=versionutils.deprecated.LIBERTY,
+                             in_favor_of='entrypoints',
+                             what='direct import of driver')
+    def _load_using_import(driver_name, *args):
+        return importutils.import_object(driver_name, *args)
+
+    # For backwards-compatibility, an unregistered class reference can
+    # still be used.
+    return _load_using_import(driver_name, *args)
+
+
 class Manager(object):
     """Base class for intermediary request layer.
 
@@ -66,8 +94,10 @@ class Manager(object):
 
     """
 
+    driver_namespace = None
+
     def __init__(self, driver_name):
-        self.driver = importutils.import_object(driver_name)
+        self.driver = load_driver(self.driver_namespace, driver_name)
 
     def __getattr__(self, name):
         """Forward calls to the underlying driver."""

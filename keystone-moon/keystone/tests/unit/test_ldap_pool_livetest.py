@@ -30,10 +30,10 @@ CONF = cfg.CONF
 
 class LiveLDAPPoolIdentity(test_backend_ldap_pool.LdapPoolCommonTestMixin,
                            test_ldap_livetest.LiveLDAPIdentity):
-    """Executes existing LDAP live test with pooled LDAP handler to make
-    sure it works without any error.
+    """Executes existing LDAP live test with pooled LDAP handler.
 
     Also executes common pool specific tests via Mixin class.
+
     """
 
     def setUp(self):
@@ -47,12 +47,6 @@ class LiveLDAPPoolIdentity(test_backend_ldap_pool.LdapPoolCommonTestMixin,
         config_files.append(tests.dirs.
                             tests_conf('backend_pool_liveldap.conf'))
         return config_files
-
-    def config_overrides(self):
-        super(LiveLDAPPoolIdentity, self).config_overrides()
-        self.config_fixture.config(
-            group='identity',
-            driver='keystone.identity.backends.ldap.Identity')
 
     def test_assert_connector_used_not_fake_ldap_pool(self):
         handler = ldap_core._get_connection(CONF.ldap.url, use_pool=True)

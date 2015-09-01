@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""Main entry point into this Example service."""
+
 from oslo_log import log
 
 from keystone.common import dependency
@@ -24,14 +26,17 @@ from keystone import notifications
 LOG = log.getLogger(__name__)
 
 
+@notifications.listener  # NOTE(dstanek): only needed if using event_callbacks
 @dependency.provider('example_api')
 class ExampleManager(manager.Manager):
-    """Example Manager.
+    """Default pivot point for this Example backend.
 
     See :mod:`keystone.common.manager.Manager` for more details on
     how this dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.example'
 
     def __init__(self):
         # The following is an example of event callbacks. In this setup,
@@ -45,8 +50,8 @@ class ExampleManager(manager.Manager):
         # project_created_callback will be invoked whenever a new project is
         # created.
 
-        # This information is used when the @dependency.provider decorator acts
-        # on the class.
+        # This information is used when the @notifications.listener decorator
+        # acts on the class.
         self.event_callbacks = {
             notifications.ACTIONS.deleted: {
                 'project': [self.project_deleted_callback],

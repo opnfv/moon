@@ -9,7 +9,7 @@ from keystone.contrib.moon import controllers
 from keystone.common import wsgi
 
 
-class Routers(wsgi.RoutersBase):
+class Routers(wsgi.V3ExtensionRouter):
     """API Endpoints for the Moon extension.
     """
 

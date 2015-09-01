@@ -33,7 +33,7 @@ class RevocationEvent(sql.ModelBase, sql.ModelDictMixin):
     access_token_id = sql.Column(sql.String(64))
     issued_before = sql.Column(sql.DateTime(), nullable=False)
     expires_at = sql.Column(sql.DateTime())
-    revoked_at = sql.Column(sql.DateTime(), nullable=False)
+    revoked_at = sql.Column(sql.DateTime(), nullable=False, index=True)
     audit_id = sql.Column(sql.String(32))
     audit_chain_id = sql.Column(sql.String(32))
 
@@ -81,7 +81,6 @@ class Revoke(revoke.Driver):
         session.flush()
 
     def list_events(self, last_fetch=None):
-        self._prune_expired_events()
         session = sql.get_session()
         query = session.query(RevocationEvent).order_by(
             RevocationEvent.revoked_at)
@@ -102,3 +101,4 @@ class Revoke(revoke.Driver):
         session = sql.get_session()
         with session.begin():
             session.add(record)
+        self._prune_expired_events()

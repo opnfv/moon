@@ -59,8 +59,8 @@ def _convert_to_integers(id_value):
     try:
         id_int = int(id_value)
     except ValueError as e:
-        msg = ('Unable to convert Keystone user or group ID. Error: %s', e)
-        LOG.error(msg)
+        msg = _LE('Unable to convert Keystone user or group ID. Error: %s')
+        LOG.error(msg, e)
         raise
 
     return id_int
@@ -174,11 +174,16 @@ def rotate_keys(keystone_user_id=None, keystone_group_id=None):
     for filename in os.listdir(CONF.fernet_tokens.key_repository):
         path = os.path.join(CONF.fernet_tokens.key_repository, str(filename))
         if os.path.isfile(path):
-            key_files[int(filename)] = path
+            try:
+                key_id = int(filename)
+            except ValueError:
+                pass
+            else:
+                key_files[key_id] = path
 
     LOG.info(_LI('Starting key rotation with %(count)s key files: %(list)s'), {
         'count': len(key_files),
-        'list': key_files.values()})
+        'list': list(key_files.values())})
 
     # determine the number of the new primary key
     current_primary_key = max(key_files.keys())
@@ -199,20 +204,24 @@ def rotate_keys(keystone_user_id=None, keystone_group_id=None):
     # add a new key to the rotation, which will be the *next* primary
     _create_new_key(keystone_user_id, keystone_group_id)
 
+    max_active_keys = CONF.fernet_tokens.max_active_keys
     # check for bad configuration
-    if CONF.fernet_tokens.max_active_keys < 1:
+    if max_active_keys < 1:
         LOG.warning(_LW(
             '[fernet_tokens] max_active_keys must be at least 1 to maintain a '
             'primary key.'))
-        CONF.fernet_tokens.max_active_keys = 1
+        max_active_keys = 1
 
     # purge excess keys
-    keys = sorted(key_files.keys())
-    excess_keys = (
-        keys[:len(key_files) - CONF.fernet_tokens.max_active_keys + 1])
-    LOG.info(_LI('Excess keys to purge: %s'), excess_keys)
-    for i in excess_keys:
-        os.remove(key_files[i])
+
+    # Note that key_files doesn't contain the new active key that was created,
+    # only the old active keys.
+    keys = sorted(key_files.keys(), reverse=True)
+    while len(keys) > (max_active_keys - 1):
+        index_to_purge = keys.pop()
+        key_to_purge = key_files[index_to_purge]
+        LOG.info(_LI('Excess key to purge: %s'), key_to_purge)
+        os.remove(key_to_purge)
 
 
 def load_keys():
@@ -232,12 +241,25 @@ def load_keys():
         path = os.path.join(CONF.fernet_tokens.key_repository, str(filename))
         if os.path.isfile(path):
             with open(path, 'r') as key_file:
-                keys[int(filename)] = key_file.read()
+                try:
+                    key_id = int(filename)
+                except ValueError:
+                    pass
+                else:
+                    keys[key_id] = key_file.read()
 
-    LOG.info(_LI(
-        'Loaded %(count)s encryption keys from: %(dir)s'), {
-            'count': len(keys),
-            'dir': CONF.fernet_tokens.key_repository})
+    if len(keys) != CONF.fernet_tokens.max_active_keys:
+        # If there haven't been enough key rotations to reach max_active_keys,
+        # or if the configured value of max_active_keys has changed since the
+        # last rotation, then reporting the discrepancy might be useful. Once
+        # the number of keys matches max_active_keys, this log entry is too
+        # repetitive to be useful.
+        LOG.info(_LI(
+            'Loaded %(count)d encryption keys (max_active_keys=%(max)d) from: '
+            '%(dir)s'), {
+                'count': len(keys),
+                'max': CONF.fernet_tokens.max_active_keys,
+                'dir': CONF.fernet_tokens.key_repository})
 
     # return the encryption_keys, sorted by key number, descending
     return [keys[x] for x in sorted(keys.keys(), reverse=True)]

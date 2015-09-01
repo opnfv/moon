@@ -15,6 +15,8 @@
 import copy
 import uuid
 
+from testtools import matchers
+
 from keystone import catalog
 from keystone.tests import unit as tests
 from keystone.tests.unit.ksfixtures import database
@@ -154,7 +156,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref2 = self.new_region_ref()
 
         del ref1['description']
-        del ref2['description']
+        ref2['description'] = None
 
         resp1 = self.post(
             '/regions',
@@ -222,6 +224,39 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         r = self.patch('/regions/%(region_id)s' % {
             'region_id': self.region_id},
             body={'region': region})
+        self.assertValidRegionResponse(r, region)
+
+    def test_update_region_without_description_keeps_original(self):
+        """Call ``PATCH /regions/{region_id}``."""
+        region_ref = self.new_region_ref()
+
+        resp = self.post('/regions', body={'region': region_ref},
+                         expected_status=201)
+
+        region_updates = {
+            # update with something that's not the description
+            'parent_region_id': self.region_id,
+        }
+        resp = self.patch('/regions/%s' % region_ref['id'],
+                          body={'region': region_updates},
+                          expected_status=200)
+
+        # NOTE(dstanek): Keystone should keep the original description.
+        self.assertEqual(region_ref['description'],
+                         resp.result['region']['description'])
+
+    def test_update_region_with_null_description(self):
+        """Call ``PATCH /regions/{region_id}``."""
+        region = self.new_region_ref()
+        del region['id']
+        region['description'] = None
+        r = self.patch('/regions/%(region_id)s' % {
+            'region_id': self.region_id},
+            body={'region': region})
+
+        # NOTE(dstanek): Keystone should turn the provided None value into
+        # an empty string before storing in the backend.
+        region['description'] = ''
         self.assertValidRegionResponse(r, region)
 
     def test_delete_region(self):
@@ -378,6 +413,133 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """Call ``GET /endpoints``."""
         r = self.get('/endpoints')
         self.assertValidEndpointListResponse(r, ref=self.endpoint)
+
+    def _create_random_endpoint(self, interface='public',
+                                parent_region_id=None):
+        region = self._create_region_with_parent_id(
+            parent_id=parent_region_id)
+        service = self._create_random_service()
+        ref = self.new_endpoint_ref(
+            service_id=service['id'],
+            interface=interface,
+            region_id=region.result['region']['id'])
+
+        response = self.post(
+            '/endpoints',
+            body={'endpoint': ref})
+        return response.json['endpoint']
+
+    def test_list_endpoints_filtered_by_interface(self):
+        """Call ``GET /endpoints?interface={interface}``."""
+        ref = self._create_random_endpoint(interface='internal')
+
+        response = self.get('/endpoints?interface=%s' % ref['interface'])
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['interface'], endpoint['interface'])
+
+    def test_list_endpoints_filtered_by_service_id(self):
+        """Call ``GET /endpoints?service_id={service_id}``."""
+        ref = self._create_random_endpoint()
+
+        response = self.get('/endpoints?service_id=%s' % ref['service_id'])
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['service_id'], endpoint['service_id'])
+
+    def test_list_endpoints_filtered_by_region_id(self):
+        """Call ``GET /endpoints?region_id={region_id}``."""
+        ref = self._create_random_endpoint()
+
+        response = self.get('/endpoints?region_id=%s' % ref['region_id'])
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['region_id'], endpoint['region_id'])
+
+    def test_list_endpoints_filtered_by_parent_region_id(self):
+        """Call ``GET /endpoints?region_id={region_id}``.
+
+        Ensure passing the parent_region_id as filter returns an
+        empty list.
+
+        """
+        parent_region = self._create_region_with_parent_id()
+        parent_region_id = parent_region.result['region']['id']
+        self._create_random_endpoint(parent_region_id=parent_region_id)
+
+        response = self.get('/endpoints?region_id=%s' % parent_region_id)
+        self.assertEqual(0, len(response.json['endpoints']))
+
+    def test_list_endpoints_with_multiple_filters(self):
+        """Call ``GET /endpoints?interface={interface}...``.
+
+        Ensure passing different combinations of interface, region_id and
+        service_id as filters will return the correct result.
+
+        """
+        # interface and region_id specified
+        ref = self._create_random_endpoint(interface='internal')
+        response = self.get('/endpoints?interface=%s&region_id=%s' %
+                            (ref['interface'], ref['region_id']))
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['interface'], endpoint['interface'])
+            self.assertEqual(ref['region_id'], endpoint['region_id'])
+
+        # interface and service_id specified
+        ref = self._create_random_endpoint(interface='internal')
+        response = self.get('/endpoints?interface=%s&service_id=%s' %
+                            (ref['interface'], ref['service_id']))
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['interface'], endpoint['interface'])
+            self.assertEqual(ref['service_id'], endpoint['service_id'])
+
+        # region_id and service_id specified
+        ref = self._create_random_endpoint(interface='internal')
+        response = self.get('/endpoints?region_id=%s&service_id=%s' %
+                            (ref['region_id'], ref['service_id']))
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['region_id'], endpoint['region_id'])
+            self.assertEqual(ref['service_id'], endpoint['service_id'])
+
+        # interface, region_id and service_id specified
+        ref = self._create_random_endpoint(interface='internal')
+        response = self.get(('/endpoints?interface=%s&region_id=%s'
+                             '&service_id=%s') %
+                            (ref['interface'], ref['region_id'],
+                             ref['service_id']))
+        self.assertValidEndpointListResponse(response, ref=ref)
+
+        for endpoint in response.json['endpoints']:
+            self.assertEqual(ref['interface'], endpoint['interface'])
+            self.assertEqual(ref['region_id'], endpoint['region_id'])
+            self.assertEqual(ref['service_id'], endpoint['service_id'])
+
+    def test_list_endpoints_with_random_filter_values(self):
+        """Call ``GET /endpoints?interface={interface}...``.
+
+        Ensure passing random values for: interface, region_id and
+        service_id will return an empty list.
+
+        """
+        self._create_random_endpoint(interface='internal')
+
+        response = self.get('/endpoints?interface=%s' % uuid.uuid4().hex)
+        self.assertEqual(0, len(response.json['endpoints']))
+
+        response = self.get('/endpoints?region_id=%s' % uuid.uuid4().hex)
+        self.assertEqual(0, len(response.json['endpoints']))
+
+        response = self.get('/endpoints?service_id=%s' % uuid.uuid4().hex)
+        self.assertEqual(0, len(response.json['endpoints']))
 
     def test_create_endpoint_no_enabled(self):
         """Call ``POST /endpoints``."""
@@ -582,6 +744,62 @@ class CatalogTestCase(test_v3.RestfulTestCase):
 
         self.assertEqual(endpoint_v2['region'], endpoint_v3['region_id'])
 
+    def test_deleting_endpoint_with_space_in_url(self):
+        # create a v3 endpoint ref
+        ref = self.new_endpoint_ref(service_id=self.service['id'])
+
+        # add a space to all urls (intentional "i d" to test bug)
+        url_with_space = "http://127.0.0.1:8774 /v1.1/\$(tenant_i d)s"
+        ref['publicurl'] = url_with_space
+        ref['internalurl'] = url_with_space
+        ref['adminurl'] = url_with_space
+        ref['url'] = url_with_space
+
+        # add the endpoint to the database
+        self.catalog_api.create_endpoint(ref['id'], ref)
+
+        # delete the endpoint
+        self.delete('/endpoints/%s' % ref['id'])
+
+        # make sure it's deleted (GET should return 404)
+        self.get('/endpoints/%s' % ref['id'], expected_status=404)
+
+    def test_endpoint_create_with_valid_url(self):
+        """Create endpoint with valid url should be tested,too."""
+        # list one valid url is enough, no need to list too much
+        valid_url = 'http://127.0.0.1:8774/v1.1/$(tenant_id)s'
+
+        ref = self.new_endpoint_ref(self.service_id)
+        ref['url'] = valid_url
+        self.post('/endpoints',
+                  body={'endpoint': ref},
+                  expected_status=201)
+
+    def test_endpoint_create_with_invalid_url(self):
+        """Test the invalid cases: substitutions is not exactly right.
+        """
+        invalid_urls = [
+            # using a substitution that is not whitelisted - KeyError
+            'http://127.0.0.1:8774/v1.1/$(nonexistent)s',
+
+            # invalid formatting - ValueError
+            'http://127.0.0.1:8774/v1.1/$(tenant_id)',
+            'http://127.0.0.1:8774/v1.1/$(tenant_id)t',
+            'http://127.0.0.1:8774/v1.1/$(tenant_id',
+
+            # invalid type specifier - TypeError
+            # admin_url is a string not an int
+            'http://127.0.0.1:8774/v1.1/$(admin_url)d',
+        ]
+
+        ref = self.new_endpoint_ref(self.service_id)
+
+        for invalid_url in invalid_urls:
+            ref['url'] = invalid_url
+            self.post('/endpoints',
+                      body={'endpoint': ref},
+                      expected_status=400)
+
 
 class TestCatalogAPISQL(tests.TestCase):
     """Tests for the catalog Manager against the SQL backend.
@@ -602,9 +820,7 @@ class TestCatalogAPISQL(tests.TestCase):
 
     def config_overrides(self):
         super(TestCatalogAPISQL, self).config_overrides()
-        self.config_fixture.config(
-            group='catalog',
-            driver='keystone.catalog.backends.sql.Catalog')
+        self.config_fixture.config(group='catalog', driver='sql')
 
     def new_endpoint_ref(self, service_id):
         return {
@@ -642,6 +858,20 @@ class TestCatalogAPISQL(tests.TestCase):
         self.assertEqual(1, len(catalog[0]['endpoints']))
         # all three appear in the backend
         self.assertEqual(3, len(self.catalog_api.list_endpoints()))
+
+        # create another valid endpoint - tenant_id will be replaced
+        ref = self.new_endpoint_ref(self.service_id)
+        ref['url'] = 'http://keystone/%(tenant_id)s'
+        self.catalog_api.create_endpoint(ref['id'], ref)
+
+        # there are two valid endpoints, positive check
+        catalog = self.catalog_api.get_v3_catalog(user_id, tenant_id)
+        self.assertThat(catalog[0]['endpoints'], matchers.HasLength(2))
+
+        # If the URL has no 'tenant_id' to substitute, we will skip the
+        # endpoint which contains this kind of URL, negative check.
+        catalog = self.catalog_api.get_v3_catalog(user_id, tenant_id=None)
+        self.assertThat(catalog[0]['endpoints'], matchers.HasLength(1))
 
     def test_get_catalog_always_returns_service_name(self):
         user_id = uuid.uuid4().hex
@@ -691,9 +921,7 @@ class TestCatalogAPISQLRegions(tests.TestCase):
 
     def config_overrides(self):
         super(TestCatalogAPISQLRegions, self).config_overrides()
-        self.config_fixture.config(
-            group='catalog',
-            driver='keystone.catalog.backends.sql.Catalog')
+        self.config_fixture.config(group='catalog', driver='sql')
 
     def new_endpoint_ref(self, service_id):
         return {

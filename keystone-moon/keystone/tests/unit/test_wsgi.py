@@ -1,3 +1,5 @@
+# encoding: utf-8
+#
 # Copyright 2012 OpenStack Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,6 +18,7 @@ import gettext
 import socket
 import uuid
 
+import eventlet
 import mock
 import oslo_i18n
 from oslo_serialization import jsonutils
@@ -47,6 +50,22 @@ class FakeAttributeCheckerApp(wsgi.Application):
         """Asserts that the given request has a certain set attributes."""
         ref = jsonutils.loads(body)
         self._require_attributes(ref, attr)
+
+
+class RouterTest(tests.TestCase):
+    def setUp(self):
+        self.router = wsgi.RoutersBase()
+        super(RouterTest, self).setUp()
+
+    def test_invalid_status(self):
+        fake_mapper = uuid.uuid4().hex
+        fake_controller = uuid.uuid4().hex
+        fake_path = uuid.uuid4().hex
+        fake_rel = uuid.uuid4().hex
+        self.assertRaises(exception.Error,
+                          self.router._add_resource,
+                          fake_mapper, fake_controller, fake_path, fake_rel,
+                          status=uuid.uuid4().hex)
 
 
 class BaseWSGITest(tests.TestCase):
@@ -184,6 +203,26 @@ class ApplicationTest(BaseWSGITest):
         resp = wsgi.render_exception(e, context=context)
 
         self.assertEqual(401, resp.status_int)
+
+    def test_improperly_encoded_params(self):
+        class FakeApp(wsgi.Application):
+            def index(self, context):
+                return context['query_string']
+        # this is high bit set ASCII, copy & pasted from Windows.
+        # aka code page 1252. It is not valid UTF8.
+        req = self._make_request(url='/?name=nonexit%E8nt')
+        self.assertRaises(exception.ValidationError, req.get_response,
+                          FakeApp())
+
+    def test_properly_encoded_params(self):
+        class FakeApp(wsgi.Application):
+            def index(self, context):
+                return context['query_string']
+        # nonexitènt encoded as UTF-8
+        req = self._make_request(url='/?name=nonexit%C3%A8nt')
+        resp = req.get_response(FakeApp())
+        self.assertEqual({'name': u'nonexit\xe8nt'},
+                         jsonutils.loads(resp.body))
 
 
 class ExtensionRouterTest(BaseWSGITest):
@@ -425,3 +464,43 @@ class ServerTest(tests.TestCase):
                                                     1)
 
         self.assertTrue(mock_listen.called)
+
+    def test_client_socket_timeout(self):
+        # mocking server method of eventlet.wsgi to check it is called with
+        # configured 'client_socket_timeout' value.
+        for socket_timeout in range(1, 10):
+            self.config_fixture.config(group='eventlet_server',
+                                       client_socket_timeout=socket_timeout)
+            server = environment.Server(mock.MagicMock(), host=self.host,
+                                        port=self.port)
+            with mock.patch.object(eventlet.wsgi, 'server') as mock_server:
+                fake_application = uuid.uuid4().hex
+                fake_socket = uuid.uuid4().hex
+                server._run(fake_application, fake_socket)
+                mock_server.assert_called_once_with(
+                    fake_socket,
+                    fake_application,
+                    debug=mock.ANY,
+                    socket_timeout=socket_timeout,
+                    log=mock.ANY,
+                    keepalive=mock.ANY)
+
+    def test_wsgi_keep_alive(self):
+        # mocking server method of eventlet.wsgi to check it is called with
+        # configured 'wsgi_keep_alive' value.
+        wsgi_keepalive = False
+        self.config_fixture.config(group='eventlet_server',
+                                   wsgi_keep_alive=wsgi_keepalive)
+
+        server = environment.Server(mock.MagicMock(), host=self.host,
+                                    port=self.port)
+        with mock.patch.object(eventlet.wsgi, 'server') as mock_server:
+            fake_application = uuid.uuid4().hex
+            fake_socket = uuid.uuid4().hex
+            server._run(fake_application, fake_socket)
+            mock_server.assert_called_once_with(fake_socket,
+                                                fake_application,
+                                                debug=mock.ANY,
+                                                socket_timeout=mock.ANY,
+                                                log=mock.ANY,
+                                                keepalive=wsgi_keepalive)

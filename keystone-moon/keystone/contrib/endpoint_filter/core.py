@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+"""Main entry point into the Endpoint Filter service."""
+
 import abc
 
 from oslo_config import cfg
@@ -55,6 +57,8 @@ class Manager(manager.Manager):
     dynamically calls the backend.
 
     """
+
+    driver_namespace = 'keystone.endpoint_filter'
 
     def __init__(self):
         super(Manager, self).__init__(CONF.endpoint_filter.driver)

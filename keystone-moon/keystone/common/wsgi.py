@@ -20,7 +20,7 @@
 
 import copy
 import itertools
-import urllib
+import wsgiref.util
 
 from oslo_config import cfg
 import oslo_i18n
@@ -49,9 +49,11 @@ LOG = log.getLogger(__name__)
 # Environment variable used to pass the request context
 CONTEXT_ENV = 'openstack.context'
 
-
 # Environment variable used to pass the request params
 PARAMS_ENV = 'openstack.params'
+
+JSON_ENCODE_CONTENT_TYPES = set(['application/json',
+                                 'application/json-home'])
 
 
 def validate_token_bind(context, token_ref):
@@ -84,7 +86,7 @@ def validate_token_bind(context, token_ref):
         LOG.info(_LI("Named bind mode %s not in bind information"), name)
         raise exception.Unauthorized()
 
-    for bind_type, identifier in six.iteritems(bind):
+    for bind_type, identifier in bind.items():
         if bind_type == 'kerberos':
             if not (context['environment'].get('AUTH_TYPE', '').lower()
                     == 'negotiate'):
@@ -195,8 +197,16 @@ class Application(BaseApplication):
 
         # allow middleware up the stack to provide context, params and headers.
         context = req.environ.get(CONTEXT_ENV, {})
-        context['query_string'] = dict(six.iteritems(req.params))
-        context['headers'] = dict(six.iteritems(req.headers))
+
+        try:
+            context['query_string'] = dict(req.params.items())
+        except UnicodeDecodeError as e:
+            # The webob package throws UnicodeError when a request cannot be
+            # decoded. Raise ValidationError instead to avoid an UnknownError.
+            msg = _('Query string is not UTF-8 encoded')
+            raise exception.ValidationError(msg)
+
+        context['headers'] = dict(req.headers.items())
         context['path'] = req.environ['PATH_INFO']
         scheme = (None if not CONF.secure_proxy_ssl_header
                   else req.environ.get(CONF.secure_proxy_ssl_header))
@@ -211,8 +221,8 @@ class Application(BaseApplication):
         context['host_url'] = req.host_url
         params = req.environ.get(PARAMS_ENV, {})
         # authentication and authorization attributes are set as environment
-        # values by the container and processed by the pipeline.  the complete
-        # set is not yet know.
+        # values by the container and processed by the pipeline. The complete
+        # set is not yet known.
         context['environment'] = req.environ
         context['accept_header'] = req.accept
         req.environ = None
@@ -227,11 +237,10 @@ class Application(BaseApplication):
         # NOTE(morganfainberg): use the request method to normalize the
         # response code between GET and HEAD requests. The HTTP status should
         # be the same.
-        req_method = req.environ['REQUEST_METHOD'].upper()
-        LOG.info('%(req_method)s %(path)s?%(params)s', {
-            'req_method': req_method,
-            'path': context['path'],
-            'params': urllib.urlencode(req.params)})
+        LOG.info('%(req_method)s %(uri)s', {
+            'req_method': req.environ['REQUEST_METHOD'].upper(),
+            'uri': wsgiref.util.request_uri(req.environ),
+        })
 
         params = self._normalize_dict(params)
 
@@ -270,7 +279,7 @@ class Application(BaseApplication):
 
         response_code = self._get_response_code(req)
         return render_response(body=result, status=response_code,
-                               method=req_method)
+                               method=req.environ['REQUEST_METHOD'])
 
     def _get_response_code(self, req):
         req_method = req.environ['REQUEST_METHOD']
@@ -284,17 +293,21 @@ class Application(BaseApplication):
         return arg.replace(':', '_').replace('-', '_')
 
     def _normalize_dict(self, d):
-        return {self._normalize_arg(k): v for (k, v) in six.iteritems(d)}
+        return {self._normalize_arg(k): v for (k, v) in d.items()}
 
     def assert_admin(self, context):
+        """Ensure the user is an admin.
+
+        :raises keystone.exception.Unauthorized: if a token could not be
+            found/authorized, a user is invalid, or a tenant is
+            invalid/not scoped.
+        :raises keystone.exception.Forbidden: if the user is not an admin and
+            does not have the admin role
+
+        """
+
         if not context['is_admin']:
-            try:
-                user_token_ref = token_model.KeystoneToken(
-                    token_id=context['token_id'],
-                    token_data=self.token_provider_api.validate_token(
-                        context['token_id']))
-            except exception.TokenNotFound as e:
-                raise exception.Unauthorized(e)
+            user_token_ref = utils.get_token_ref(context)
 
             validate_token_bind(context, user_token_ref)
             creds = copy.deepcopy(user_token_ref.metadata)
@@ -353,16 +366,7 @@ class Application(BaseApplication):
             LOG.debug(('will not lookup trust as the request auth token is '
                        'either absent or it is the system admin token'))
             return None
-
-        try:
-            token_data = self.token_provider_api.validate_token(
-                context['token_id'])
-        except exception.TokenNotFound:
-            LOG.warning(_LW('Invalid token in _get_trust_id_for_request'))
-            raise exception.Unauthorized()
-
-        token_ref = token_model.KeystoneToken(token_id=context['token_id'],
-                                              token_data=token_data)
+        token_ref = utils.get_token_ref(context)
         return token_ref.trust_id
 
     @classmethod
@@ -371,8 +375,7 @@ class Application(BaseApplication):
 
         if url:
             substitutions = dict(
-                itertools.chain(six.iteritems(CONF),
-                                six.iteritems(CONF.eventlet_server)))
+                itertools.chain(CONF.items(), CONF.eventlet_server.items()))
 
             url = url % substitutions
         else:
@@ -491,7 +494,7 @@ class Debug(Middleware):
         resp = req.get_response(self.application)
         if not hasattr(LOG, 'isEnabledFor') or LOG.isEnabledFor(LOG.debug):
             LOG.debug('%s %s %s', ('*' * 20), 'RESPONSE HEADERS', ('*' * 20))
-            for (key, value) in six.iteritems(resp.headers):
+            for (key, value) in resp.headers.items():
                 LOG.debug('%s = %s', key, value)
             LOG.debug('')
 
@@ -603,7 +606,7 @@ class ExtensionRouter(Router):
             mapper = routes.Mapper()
         self.application = application
         self.add_routes(mapper)
-        mapper.connect('{path_info:.*}', controller=self.application)
+        mapper.connect('/{path_info:.*}', controller=self.application)
         super(ExtensionRouter, self).__init__(mapper)
 
     def add_routes(self, mapper):
@@ -657,7 +660,7 @@ class RoutersBase(object):
                       get_action=None, head_action=None, get_head_action=None,
                       put_action=None, post_action=None, patch_action=None,
                       delete_action=None, get_post_action=None,
-                      path_vars=None, status=None):
+                      path_vars=None, status=json_home.Status.STABLE):
         if get_head_action:
             getattr(controller, get_head_action)  # ensure the attribute exists
             mapper.connect(path, controller=controller, action=get_head_action,
@@ -699,13 +702,7 @@ class RoutersBase(object):
         else:
             resource_data['href'] = path
 
-        if status:
-            if not json_home.Status.is_supported(status):
-                raise exception.Error(message=_(
-                    'Unexpected status requested for JSON Home response, %s') %
-                    status)
-            resource_data.setdefault('hints', {})
-            resource_data['hints']['status'] = status
+        json_home.Status.update_resource_data(resource_data, status)
 
         self.v3_resources.append((rel, resource_data))
 
@@ -762,8 +759,6 @@ def render_response(body=None, status=None, headers=None, method=None):
         else:
             content_type = None
 
-        JSON_ENCODE_CONTENT_TYPES = ('application/json',
-                                     'application/json-home',)
         if content_type is None or content_type in JSON_ENCODE_CONTENT_TYPES:
             body = jsonutils.dumps(body, cls=utils.SmarterEncoder)
             if content_type is None:
@@ -774,7 +769,7 @@ def render_response(body=None, status=None, headers=None, method=None):
                           status='%s %s' % status,
                           headerlist=headers)
 
-    if method == 'HEAD':
+    if method and method.upper() == 'HEAD':
         # NOTE(morganfainberg): HEAD requests should return the same status
         # as a GET request and same headers (including content-type and
         # content-length). The webob.Response object automatically changes
@@ -785,7 +780,7 @@ def render_response(body=None, status=None, headers=None, method=None):
         # both py2x and py3x.
         stored_headers = resp.headers.copy()
         resp.body = b''
-        for header, value in six.iteritems(stored_headers):
+        for header, value in stored_headers.items():
             resp.headers[header] = value
 
     return resp
@@ -820,8 +815,7 @@ def render_exception(error, context=None, request=None, user_locale=None):
                 url = 'http://localhost:%d' % CONF.eventlet_server.public_port
         else:
             substitutions = dict(
-                itertools.chain(six.iteritems(CONF),
-                                six.iteritems(CONF.eventlet_server)))
+                itertools.chain(CONF.items(), CONF.eventlet_server.items()))
             url = url % substitutions
 
         headers.append(('WWW-Authenticate', 'Keystone uri="%s"' % url))

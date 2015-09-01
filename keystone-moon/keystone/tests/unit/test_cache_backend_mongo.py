@@ -20,6 +20,7 @@ import uuid
 from dogpile.cache import api
 from dogpile.cache import region as dp_region
 import six
+from six.moves import range
 
 from keystone.common.cache.backends import mongo
 from keystone import exception
@@ -139,13 +140,13 @@ class MockCollection(object):
                 if self._apply_filter(document, spec))
 
     def _apply_filter(self, document, query):
-        for key, search in six.iteritems(query):
+        for key, search in query.items():
             doc_val = document.get(key)
             if isinstance(search, dict):
                 op_dict = {'$in': lambda dv, sv: dv in sv}
                 is_match = all(
                     op_str in op_dict and op_dict[op_str](doc_val, search_val)
-                    for op_str, search_val in six.iteritems(search)
+                    for op_str, search_val in search.items()
                 )
             else:
                 is_match = doc_val == search
@@ -160,7 +161,7 @@ class MockCollection(object):
             return new
         if isinstance(obj, dict):
             new = container()
-            for key, value in obj.items():
+            for key, value in list(obj.items()):
                 new[key] = self._copy_doc(value, container)
             return new
         else:
@@ -198,7 +199,7 @@ class MockCollection(object):
             existing_doc = self._documents[self._insert(document)]
 
     def _internalize_dict(self, d):
-        return {k: copy.deepcopy(v) for k, v in six.iteritems(d)}
+        return {k: copy.deepcopy(v) for k, v in d.items()}
 
     def remove(self, spec_or_id=None, search_filter=None):
         """Remove objects matching spec_or_id from the collection."""

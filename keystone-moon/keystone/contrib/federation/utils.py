@@ -21,7 +21,6 @@ from oslo_log import log
 from oslo_utils import timeutils
 import six
 
-from keystone.contrib import federation
 from keystone import exception
 from keystone.i18n import _, _LW
 
@@ -191,14 +190,37 @@ def validate_groups_cardinality(group_ids, mapping_id):
         raise exception.MissingGroups(mapping_id=mapping_id)
 
 
-def validate_idp(idp, assertion):
-    """Check if the IdP providing the assertion is the one registered for
-       the mapping
+def get_remote_id_parameter(protocol):
+    # NOTE(marco-fargetta): Since we support any protocol ID, we attempt to
+    # retrieve the remote_id_attribute of the protocol ID. If it's not
+    # registered in the config, then register the option and try again.
+    # This allows the user to register protocols other than oidc and saml2.
+    remote_id_parameter = None
+    try:
+        remote_id_parameter = CONF[protocol]['remote_id_attribute']
+    except AttributeError:
+        CONF.register_opt(cfg.StrOpt('remote_id_attribute'),
+                          group=protocol)
+        try:
+            remote_id_parameter = CONF[protocol]['remote_id_attribute']
+        except AttributeError:
+            pass
+    if not remote_id_parameter:
+        LOG.debug('Cannot find "remote_id_attribute" in configuration '
+                  'group %s. Trying default location in '
+                  'group federation.', protocol)
+        remote_id_parameter = CONF.federation.remote_id_attribute
+
+    return remote_id_parameter
+
+
+def validate_idp(idp, protocol, assertion):
+    """Validate the IdP providing the assertion is registered for the mapping.
     """
-    remote_id_parameter = CONF.federation.remote_id_attribute
-    if not remote_id_parameter or not idp['remote_id']:
-        LOG.warning(_LW('Impossible to identify the IdP %s '),
-                    idp['id'])
+
+    remote_id_parameter = get_remote_id_parameter(protocol)
+    if not remote_id_parameter or not idp['remote_ids']:
+        LOG.debug('Impossible to identify the IdP %s ', idp['id'])
         # If nothing is defined, the administrator may want to
         # allow the mapping of every IdP
         return
@@ -206,10 +228,9 @@ def validate_idp(idp, assertion):
         idp_remote_identifier = assertion[remote_id_parameter]
     except KeyError:
         msg = _('Could not find Identity Provider identifier in '
-                'environment, check [federation] remote_id_attribute '
-                'for details.')
+                'environment')
         raise exception.ValidationError(msg)
-    if idp_remote_identifier != idp['remote_id']:
+    if idp_remote_identifier not in idp['remote_ids']:
         msg = _('Incoming identity provider identifier not included '
                 'among the accepted identifiers.')
         raise exception.Forbidden(msg)
@@ -265,7 +286,7 @@ def validate_groups(group_ids, mapping_id, identity_api):
 # TODO(marek-denis): Optimize this function, so the number of calls to the
 # backend are minimized.
 def transform_to_group_ids(group_names, mapping_id,
-                           identity_api, assignment_api):
+                           identity_api, resource_api):
     """Transform groups identitified by name/domain to their ids
 
     Function accepts list of groups identified by a name and domain giving
@@ -296,7 +317,7 @@ def transform_to_group_ids(group_names, mapping_id,
     :type mapping_id: str
 
     :param identity_api: identity_api object
-    :param assignment_api: assignment_api object
+    :param resource_api: resource manager object
 
     :returns: generator object with group ids
 
@@ -317,7 +338,7 @@ def transform_to_group_ids(group_names, mapping_id,
 
         """
         domain_id = (domain.get('id') or
-                     assignment_api.get_domain_by_name(
+                     resource_api.get_domain_by_name(
                      domain.get('name')).get('id'))
         return domain_id
 
@@ -334,7 +355,7 @@ def transform_to_group_ids(group_names, mapping_id,
 def get_assertion_params_from_env(context):
     LOG.debug('Environment variables: %s', context['environment'])
     prefix = CONF.federation.assertion_prefix
-    for k, v in context['environment'].items():
+    for k, v in list(context['environment'].items()):
         if k.startswith(prefix):
             yield (k, v)
 
@@ -487,8 +508,8 @@ class RuleProcessor(object):
         """
 
         def extract_groups(groups_by_domain):
-            for groups in groups_by_domain.values():
-                for group in {g['name']: g for g in groups}.values():
+            for groups in list(groups_by_domain.values()):
+                for group in list({g['name']: g for g in groups}.values()):
                     yield group
 
         def normalize_user(user):
@@ -506,8 +527,7 @@ class RuleProcessor(object):
 
             if user_type == UserType.EPHEMERAL:
                 user['domain'] = {
-                    'id': (CONF.federation.federated_domain_name or
-                           federation.FEDERATED_DOMAIN_KEYWORD)
+                    'id': CONF.federation.federated_domain_name
                 }
 
         # initialize the group_ids as a set to eliminate duplicates
@@ -586,7 +606,7 @@ class RuleProcessor(object):
         LOG.debug('direct_maps: %s', direct_maps)
         LOG.debug('local: %s', local)
         new = {}
-        for k, v in six.iteritems(local):
+        for k, v in local.items():
             if isinstance(v, dict):
                 new_value = self._update_local_mapping(v, direct_maps)
             else:
@@ -644,7 +664,7 @@ class RuleProcessor(object):
             }
 
         :returns: identity values used to update local
-        :rtype: keystone.contrib.federation.utils.DirectMaps
+        :rtype: keystone.contrib.federation.utils.DirectMaps or None
 
         """
 
@@ -686,10 +706,10 @@ class RuleProcessor(object):
 
                 # If a blacklist or whitelist is used, we want to map to the
                 # whole list instead of just its values separately.
-                if blacklisted_values:
+                if blacklisted_values is not None:
                     direct_map_values = [v for v in direct_map_values
                                          if v not in blacklisted_values]
-                elif whitelisted_values:
+                elif whitelisted_values is not None:
                     direct_map_values = [v for v in direct_map_values
                                          if v in whitelisted_values]
 

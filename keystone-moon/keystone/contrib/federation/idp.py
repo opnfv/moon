@@ -17,17 +17,24 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_utils import fileutils
+from oslo_utils import importutils
 from oslo_utils import timeutils
 import saml2
+from saml2 import client_base
 from saml2 import md
+from saml2.profile import ecp
 from saml2 import saml
 from saml2 import samlp
+from saml2.schema import soapenv
 from saml2 import sigver
-import xmldsig
+xmldsig = importutils.try_import("saml2.xmldsig")
+if not xmldsig:
+    xmldsig = importutils.try_import("xmldsig")
 
+from keystone.common import utils
 from keystone import exception
 from keystone.i18n import _, _LE
-from keystone.openstack.common import fileutils
 
 
 LOG = log.getLogger(__name__)
@@ -40,8 +47,8 @@ class SAMLGenerator(object):
     def __init__(self):
         self.assertion_id = uuid.uuid4().hex
 
-    def samlize_token(self, issuer, recipient, user, roles, project,
-                      expires_in=None):
+    def samlize_token(self, issuer, recipient, user, user_domain_name, roles,
+                      project, project_domain_name, expires_in=None):
         """Convert Keystone attributes to a SAML assertion.
 
         :param issuer: URL of the issuing party
@@ -50,10 +57,14 @@ class SAMLGenerator(object):
         :type recipient: string
         :param user: User name
         :type user: string
+        :param user_domain_name: User Domain name
+        :type user_domain_name: string
         :param roles: List of role names
         :type roles: list
         :param project: Project name
         :type project: string
+        :param project_domain_name: Project Domain name
+        :type project_domain_name: string
         :param expires_in: Sets how long the assertion is valid for, in seconds
         :type expires_in: int
 
@@ -64,8 +75,8 @@ class SAMLGenerator(object):
         status = self._create_status()
         saml_issuer = self._create_issuer(issuer)
         subject = self._create_subject(user, expiration_time, recipient)
-        attribute_statement = self._create_attribute_statement(user, roles,
-                                                               project)
+        attribute_statement = self._create_attribute_statement(
+            user, user_domain_name, roles, project, project_domain_name)
         authn_statement = self._create_authn_statement(issuer, expiration_time)
         signature = self._create_signature()
 
@@ -84,7 +95,7 @@ class SAMLGenerator(object):
             expires_in = CONF.saml.assertion_expiration_time
         now = timeutils.utcnow()
         future = now + datetime.timedelta(seconds=expires_in)
-        return timeutils.isotime(future, subsecond=True)
+        return utils.isotime(future, subsecond=True)
 
     def _create_status(self):
         """Create an object that represents a SAML Status.
@@ -150,15 +161,18 @@ class SAMLGenerator(object):
         subject.name_id = name_id
         return subject
 
-    def _create_attribute_statement(self, user, roles, project):
+    def _create_attribute_statement(self, user, user_domain_name, roles,
+                                    project, project_domain_name):
         """Create an object that represents a SAML AttributeStatement.
 
-        <ns0:AttributeStatement
-          xmlns:ns0="urn:oasis:names:tc:SAML:2.0:assertion"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+        <ns0:AttributeStatement>
             <ns0:Attribute Name="openstack_user">
                 <ns0:AttributeValue
                   xsi:type="xs:string">test_user</ns0:AttributeValue>
+            </ns0:Attribute>
+            <ns0:Attribute Name="openstack_user_domain">
+                <ns0:AttributeValue
+                  xsi:type="xs:string">Default</ns0:AttributeValue>
             </ns0:Attribute>
             <ns0:Attribute Name="openstack_roles">
                 <ns0:AttributeValue
@@ -166,42 +180,45 @@ class SAMLGenerator(object):
                 <ns0:AttributeValue
                   xsi:type="xs:string">member</ns0:AttributeValue>
             </ns0:Attribute>
-            <ns0:Attribute Name="openstack_projects">
+            <ns0:Attribute Name="openstack_project">
                 <ns0:AttributeValue
                   xsi:type="xs:string">development</ns0:AttributeValue>
+            </ns0:Attribute>
+            <ns0:Attribute Name="openstack_project_domain">
+                <ns0:AttributeValue
+                  xsi:type="xs:string">Default</ns0:AttributeValue>
             </ns0:Attribute>
         </ns0:AttributeStatement>
 
         :return: XML <AttributeStatement> object
 
         """
-        openstack_user = 'openstack_user'
-        user_attribute = saml.Attribute()
-        user_attribute.name = openstack_user
-        user_value = saml.AttributeValue()
-        user_value.set_text(user)
-        user_attribute.attribute_value = user_value
 
-        openstack_roles = 'openstack_roles'
-        roles_attribute = saml.Attribute()
-        roles_attribute.name = openstack_roles
+        def _build_attribute(attribute_name, attribute_values):
+            attribute = saml.Attribute()
+            attribute.name = attribute_name
 
-        for role in roles:
-            role_value = saml.AttributeValue()
-            role_value.set_text(role)
-            roles_attribute.attribute_value.append(role_value)
+            for value in attribute_values:
+                attribute_value = saml.AttributeValue()
+                attribute_value.set_text(value)
+                attribute.attribute_value.append(attribute_value)
 
-        openstack_project = 'openstack_project'
-        project_attribute = saml.Attribute()
-        project_attribute.name = openstack_project
-        project_value = saml.AttributeValue()
-        project_value.set_text(project)
-        project_attribute.attribute_value = project_value
+            return attribute
+
+        user_attribute = _build_attribute('openstack_user', [user])
+        roles_attribute = _build_attribute('openstack_roles', roles)
+        project_attribute = _build_attribute('openstack_project', [project])
+        project_domain_attribute = _build_attribute(
+            'openstack_project_domain', [project_domain_name])
+        user_domain_attribute = _build_attribute(
+            'openstack_user_domain', [user_domain_name])
 
         attribute_statement = saml.AttributeStatement()
         attribute_statement.attribute.append(user_attribute)
         attribute_statement.attribute.append(roles_attribute)
         attribute_statement.attribute.append(project_attribute)
+        attribute_statement.attribute.append(project_domain_attribute)
+        attribute_statement.attribute.append(user_domain_attribute)
         return attribute_statement
 
     def _create_authn_statement(self, issuer, expiration_time):
@@ -224,7 +241,7 @@ class SAMLGenerator(object):
 
         """
         authn_statement = saml.AuthnStatement()
-        authn_statement.authn_instant = timeutils.isotime()
+        authn_statement.authn_instant = utils.isotime()
         authn_statement.session_index = uuid.uuid4().hex
         authn_statement.session_not_on_or_after = expiration_time
 
@@ -261,7 +278,7 @@ class SAMLGenerator(object):
         """
         assertion = saml.Assertion()
         assertion.id = self.assertion_id
-        assertion.issue_instant = timeutils.isotime()
+        assertion.issue_instant = utils.isotime()
         assertion.version = '2.0'
         assertion.issuer = issuer
         assertion.signature = signature
@@ -289,7 +306,7 @@ class SAMLGenerator(object):
         response = samlp.Response()
         response.id = uuid.uuid4().hex
         response.destination = recipient
-        response.issue_instant = timeutils.isotime()
+        response.issue_instant = utils.isotime()
         response.version = '2.0'
         response.issuer = issuer
         response.status = status
@@ -397,6 +414,7 @@ def _sign_assertion(assertion):
     command_list = [xmlsec_binary, '--sign', '--privkey-pem', certificates,
                     '--id-attr:ID', 'Assertion']
 
+    file_path = None
     try:
         # NOTE(gyee): need to make the namespace prefixes explicit so
         # they won't get reassigned when we wrap the assertion into
@@ -405,15 +423,19 @@ def _sign_assertion(assertion):
             nspair={'saml': saml2.NAMESPACE,
                     'xmldsig': xmldsig.NAMESPACE}))
         command_list.append(file_path)
-        stdout = subprocess.check_output(command_list)
+        stdout = subprocess.check_output(command_list,
+                                         stderr=subprocess.STDOUT)
     except Exception as e:
         msg = _LE('Error when signing assertion, reason: %(reason)s')
         msg = msg % {'reason': e}
+        if hasattr(e, 'output'):
+            msg += ' output: %(output)s' % {'output': e.output}
         LOG.error(msg)
         raise exception.SAMLSigningError(reason=e)
     finally:
         try:
-            os.remove(file_path)
+            if file_path:
+                os.remove(file_path)
         except OSError:
             pass
 
@@ -556,3 +578,31 @@ class MetadataGenerator(object):
             if value is None:
                 return False
         return True
+
+
+class ECPGenerator(object):
+    """A class for generating an ECP assertion."""
+
+    @staticmethod
+    def generate_ecp(saml_assertion, relay_state_prefix):
+        ecp_generator = ECPGenerator()
+        header = ecp_generator._create_header(relay_state_prefix)
+        body = ecp_generator._create_body(saml_assertion)
+        envelope = soapenv.Envelope(header=header, body=body)
+        return envelope
+
+    def _create_header(self, relay_state_prefix):
+        relay_state_text = relay_state_prefix + uuid.uuid4().hex
+        relay_state = ecp.RelayState(actor=client_base.ACTOR,
+                                     must_understand='1',
+                                     text=relay_state_text)
+        header = soapenv.Header()
+        header.extension_elements = (
+            [saml2.element_to_extension_element(relay_state)])
+        return header
+
+    def _create_body(self, saml_assertion):
+        body = soapenv.Body()
+        body.extension_elements = (
+            [saml2.element_to_extension_element(saml_assertion)])
+        return body

@@ -42,7 +42,7 @@ Clone the Keystone repository:
 
 .. code-block:: bash
 
-    $ git clone http://github.com/openstack/keystone.git
+    $ git clone https://git.openstack.org/openstack/keystone.git
     $ cd keystone
 
 Install the Keystone web service:
@@ -82,12 +82,12 @@ An excellent reference implementation of setting up Keystone is DEVSTACK_,
 most commonly used for development and testing setup of not only Keystone,
 but all of the core OpenStack projects.
 
-.. _DEVSTACK: http://devstack.org/
+.. _DEVSTACK: http://docs.openstack.org/developer/devstack/
 
 The script with the latest examples of initializing data in Keystone is a
-bash script called keystone_data.sh_
+bash script called `lib/keystone`_
 
-.. _keystone_data.sh: https://github.com/openstack-dev/devstack/blob/master/files/keystone_data.sh
+.. _lib/keystone: https://git.openstack.org/cgit/openstack-dev/devstack/tree/lib/keystone
 
 Installing from packages: Ubuntu
 --------------------------------
@@ -111,15 +111,16 @@ find described in :doc:`configuringservices`.
 Installing from packages: Fedora
 --------------------------------
 
-Installing Keystone with Fedora 17 is documented at
-http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17.
+To install Keystone on Fedora refer to the steps found in the `OpenStack
+Install Guide`_.
 
 To install the packages:
 
 .. code-block:: bash
 
-    $ sudo yum install --enablerepo=updates-testing openstack-keystone
+    $ sudo yum install openstack-keystone
 
-Once installed, you can configure Keystone based on the instructions at:
+Once installed, you still need to initialize data in Keystone, which you can
+find described in :doc:`configuringservices`.
 
-http://fedoraproject.org/wiki/Getting_started_with_OpenStack_on_Fedora_17#Configuring_Keystone_for_authentication
+.. _`OpenStack Install Guide`: http://docs.openstack.org/juno/install-guide/install/yum/content/keystone-install.html

@@ -6,103 +6,91 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: keystone 2015.1.dev497\n"
+"Project-Id-Version: keystone 8.0.0.0b3.dev122\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/keystone\n"
-"POT-Creation-Date: 2015-03-19 06:04+0000\n"
+"POT-Creation-Date: 2015-08-16 06:06+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.0\n"
 
-#: keystone/cli.py:159
-msgid "keystone-manage pki_setup is not recommended for production use."
-msgstr ""
-
-#: keystone/cli.py:178
-msgid "keystone-manage ssl_setup is not recommended for production use."
-msgstr ""
-
-#: keystone/cli.py:493
-#, python-format
-msgid "Ignoring file (%s) while scanning domain config directory"
-msgstr ""
-
-#: keystone/exception.py:49
+#: keystone/exception.py:48
 msgid "missing exception kwargs (programmer error)"
 msgstr ""
 
-#: keystone/assignment/controllers.py:60
-#, python-format
-msgid "Authentication failed: %s"
-msgstr ""
-
-#: keystone/assignment/controllers.py:576
-#, python-format
-msgid ""
-"Group %(group)s not found for role-assignment - %(target)s with Role: "
-"%(role)s"
-msgstr ""
-
-#: keystone/auth/controllers.py:449
+#: keystone/auth/controllers.py:446
 #, python-format
 msgid ""
 "User %(user_id)s doesn't have access to default project %(project_id)s. "
 "The token will be unscoped rather than scoped to the project."
 msgstr ""
 
-#: keystone/auth/controllers.py:457
+#: keystone/auth/controllers.py:454
 #, python-format
 msgid ""
 "User %(user_id)s's default project %(project_id)s is disabled. The token "
 "will be unscoped rather than scoped to the project."
 msgstr ""
 
-#: keystone/auth/controllers.py:466
+#: keystone/auth/controllers.py:463
 #, python-format
 msgid ""
 "User %(user_id)s's default project %(project_id)s not found. The token "
 "will be unscoped rather than scoped to the project."
 msgstr ""
 
+#: keystone/cmd/cli.py:158
+msgid "keystone-manage pki_setup is not recommended for production use."
+msgstr ""
+
+#: keystone/cmd/cli.py:177
+msgid "keystone-manage ssl_setup is not recommended for production use."
+msgstr ""
+
+#: keystone/cmd/cli.py:483
+#, python-format
+msgid "Ignoring file (%s) while scanning domain config directory"
+msgstr ""
+
 #: keystone/common/authorization.py:55
 msgid "RBAC: Invalid user data in token"
 msgstr ""
 
-#: keystone/common/controller.py:79 keystone/middleware/core.py:224
+#: keystone/common/controller.py:83 keystone/middleware/core.py:194
 msgid "RBAC: Invalid token"
 msgstr ""
 
-#: keystone/common/controller.py:104 keystone/common/controller.py:201
-#: keystone/common/controller.py:740
+#: keystone/common/controller.py:108 keystone/common/controller.py:205
+#: keystone/common/controller.py:755
 msgid "RBAC: Bypassing authorization"
 msgstr ""
 
-#: keystone/common/controller.py:669 keystone/common/controller.py:704
-msgid "Invalid token found while getting domain ID for list request"
-msgstr ""
-
-#: keystone/common/controller.py:677
+#: keystone/common/controller.py:710
 msgid "No domain information specified as part of list request"
 msgstr ""
 
-#: keystone/common/utils.py:103
+#: keystone/common/openssl.py:73
+msgid "Failed to invoke ``openssl version``, assuming is v1.0 or newer"
+msgstr ""
+
+#: keystone/common/utils.py:105
 #, python-format
 msgid "Truncating user password to %d characters."
 msgstr ""
 
-#: keystone/common/wsgi.py:242
+#: keystone/common/utils.py:527
+msgid "Couldn't find the auth context."
+msgstr ""
+
+#: keystone/common/wsgi.py:243
 #, python-format
 msgid "Authorization failed. %(exception)s from %(remote_addr)s"
 msgstr ""
 
-#: keystone/common/wsgi.py:361
-msgid "Invalid token in _get_trust_id_for_request"
-msgstr ""
-
-#: keystone/common/cache/backends/mongo.py:403
+#: keystone/common/cache/backends/mongo.py:407
 #, python-format
 msgid ""
 "TTL index already exists on db collection <%(c_name)s>, remove index "
@@ -110,79 +98,74 @@ msgid ""
 "effective"
 msgstr ""
 
-#: keystone/common/kvs/core.py:134
+#: keystone/common/kvs/core.py:133
 #, python-format
 msgid "%s is not a dogpile.proxy.ProxyBackend"
 msgstr ""
 
-#: keystone/common/kvs/core.py:403
+#: keystone/common/kvs/core.py:402
 #, python-format
 msgid "KVS lock released (timeout reached) for: %s"
 msgstr ""
 
-#: keystone/common/ldap/core.py:1026
+#: keystone/common/ldap/core.py:1029
 msgid ""
 "LDAP Server does not support paging. Disable paging in keystone.conf to "
 "avoid this message."
 msgstr ""
 
-#: keystone/common/ldap/core.py:1225
+#: keystone/common/ldap/core.py:1224
 #, python-format
 msgid ""
 "Invalid additional attribute mapping: \"%s\". Format must be "
 "<ldap_attribute>:<keystone_attribute>"
 msgstr ""
 
-#: keystone/common/ldap/core.py:1336
+#: keystone/common/ldap/core.py:1335
 #, python-format
 msgid ""
 "ID attribute %(id_attr)s for LDAP object %(dn)s has multiple values and "
 "therefore cannot be used as an ID. Will get the ID from DN instead"
 msgstr ""
 
-#: keystone/common/ldap/core.py:1669
+#: keystone/common/ldap/core.py:1668
 #, python-format
 msgid ""
 "When deleting entries for %(search_base)s, could not delete nonexistent "
 "entries %(entries)s%(dots)s"
 msgstr ""
 
-#: keystone/contrib/endpoint_policy/core.py:91
+#: keystone/contrib/federation/utils.py:545
+msgid "Ignoring user name"
+msgstr ""
+
+#: keystone/endpoint_policy/core.py:94
 #, python-format
 msgid ""
 "Endpoint %(endpoint_id)s referenced in association for policy "
 "%(policy_id)s not found."
 msgstr ""
 
-#: keystone/contrib/endpoint_policy/core.py:179
+#: keystone/endpoint_policy/core.py:182
 #, python-format
 msgid ""
 "Unsupported policy association found - Policy %(policy_id)s, Endpoint "
 "%(endpoint_id)s, Service %(service_id)s, Region %(region_id)s, "
 msgstr ""
 
-#: keystone/contrib/endpoint_policy/core.py:195
+#: keystone/endpoint_policy/core.py:198
 #, python-format
 msgid ""
 "Policy %(policy_id)s referenced in association for endpoint "
 "%(endpoint_id)s not found."
 msgstr ""
 
-#: keystone/contrib/federation/utils.py:200
-#, python-format
-msgid "Impossible to identify the IdP %s "
-msgstr ""
-
-#: keystone/contrib/federation/utils.py:523
-msgid "Ignoring user name"
-msgstr ""
-
-#: keystone/identity/controllers.py:139
+#: keystone/identity/controllers.py:141
 #, python-format
 msgid "Unable to remove user %(user)s from %(tenant)s."
 msgstr ""
 
-#: keystone/identity/controllers.py:158
+#: keystone/identity/controllers.py:160
 #, python-format
 msgid "Unable to add user %(user)s to %(tenant)s."
 msgstr ""
@@ -197,29 +180,18 @@ msgstr ""
 msgid "Unable to locate domain config directory: %s"
 msgstr ""
 
-#: keystone/middleware/core.py:149
+#: keystone/identity/core.py:602
+#, python-format
 msgid ""
-"XML support has been removed as of the Kilo release and should not be "
-"referenced or used in deployment. Please remove references to "
-"XmlBodyMiddleware from your configuration. This compatibility stub will "
-"be removed in the L release"
+"Found multiple domains being mapped to a driver that does not support "
+"that (e.g. LDAP) - Domain ID: %(domain)s, Default Driver: %(driver)s"
 msgstr ""
 
-#: keystone/middleware/core.py:234
+#: keystone/middleware/core.py:204
 msgid "Auth context already exists in the request environment"
 msgstr ""
 
-#: keystone/openstack/common/loopingcall.py:87
-#, python-format
-msgid "task %(func_name)r run outlasted interval by %(delay).2f sec"
-msgstr ""
-
-#: keystone/openstack/common/service.py:351
-#, python-format
-msgid "pid %d not in child list"
-msgstr ""
-
-#: keystone/resource/core.py:1214
+#: keystone/resource/core.py:1237
 #, python-format
 msgid ""
 "Found what looks like an unmatched config option substitution reference -"
@@ -228,7 +200,7 @@ msgid ""
 "added?"
 msgstr ""
 
-#: keystone/resource/core.py:1221
+#: keystone/resource/core.py:1244
 #, python-format
 msgid ""
 "Found what looks like an incorrectly constructed config option "
@@ -236,27 +208,26 @@ msgid ""
 "%(option)s, value: %(value)s."
 msgstr ""
 
-#: keystone/token/persistence/core.py:228
+#: keystone/token/persistence/core.py:225
 #, python-format
 msgid ""
 "`token_api.%s` is deprecated as of Juno in favor of utilizing methods on "
 "`token_provider_api` and may be removed in Kilo."
 msgstr ""
 
-#: keystone/token/persistence/backends/kvs.py:57
+#: keystone/token/persistence/backends/kvs.py:58
 msgid ""
 "It is recommended to only use the base key-value-store implementation for"
-" the token driver for testing purposes. Please use "
-"keystone.token.persistence.backends.memcache.Token or "
-"keystone.token.persistence.backends.sql.Token instead."
+" the token driver for testing purposes. Please use 'memcache' or 'sql' "
+"instead."
 msgstr ""
 
-#: keystone/token/persistence/backends/kvs.py:206
+#: keystone/token/persistence/backends/kvs.py:205
 #, python-format
 msgid "Token `%s` is expired, not adding to the revocation list."
 msgstr ""
 
-#: keystone/token/persistence/backends/kvs.py:240
+#: keystone/token/persistence/backends/kvs.py:239
 #, python-format
 msgid ""
 "Removing `%s` from revocation list due to invalid expires data in "
@@ -282,7 +253,7 @@ msgid ""
 "and keystone group ID both being provided: %s"
 msgstr ""
 
-#: keystone/token/providers/fernet/utils.py:204
+#: keystone/token/providers/fernet/utils.py:210
 msgid ""
 "[fernet_tokens] max_active_keys must be at least 1 to maintain a primary "
 "key."

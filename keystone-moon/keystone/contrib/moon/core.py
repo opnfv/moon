@@ -258,6 +258,8 @@ def enforce(action_names, object_name, **extra):
 @dependency.requires('moonlog_api', 'admin_api', 'tenant_api', 'root_api')
 class ConfigurationManager(manager.Manager):
 
+    driver_namespace = 'keystone.moon.configuration'
+
     def __init__(self):
         super(ConfigurationManager, self).__init__(CONF.moon.configuration_driver)
 
@@ -325,6 +327,8 @@ class ConfigurationManager(manager.Manager):
 @dependency.provider('tenant_api')
 @dependency.requires('moonlog_api', 'admin_api', 'configuration_api', 'root_api', 'resource_api')
 class TenantManager(manager.Manager):
+
+    driver_namespace = 'keystone.moon.tenant'
 
     def __init__(self):
         super(TenantManager, self).__init__(CONF.moon.tenant_driver)
@@ -451,6 +455,8 @@ class TenantManager(manager.Manager):
 
 @dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'moonlog_api', 'root_api')
 class IntraExtensionManager(manager.Manager):
+
+    driver_namespace = 'keystone.moon.intraextension'
 
     def __init__(self):
         driver = CONF.moon.intraextension_driver
@@ -2064,6 +2070,8 @@ class IntraExtensionRootManager(IntraExtensionManager):
 # Next line is mandatory in order to force keystone to process dependencies.
 @dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'root_api')
 class LogManager(manager.Manager):
+
+    driver_namespace = 'keystone.moon.log'
 
     def __init__(self):
         driver = CONF.moon.log_driver

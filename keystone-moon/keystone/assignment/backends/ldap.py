@@ -13,10 +13,10 @@
 # under the License.
 from __future__ import absolute_import
 
-import ldap as ldap
 import ldap.filter
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 
 from keystone import assignment
 from keystone.assignment.role_backends import ldap as ldap_role
@@ -25,7 +25,6 @@ from keystone.common import models
 from keystone import exception
 from keystone.i18n import _
 from keystone.identity.backends import ldap as ldap_identity
-from keystone.openstack.common import versionutils
 
 
 CONF = cfg.CONF
@@ -36,7 +35,7 @@ class Assignment(assignment.Driver):
     @versionutils.deprecated(
         versionutils.deprecated.KILO,
         remove_in=+2,
-        what='keystone.assignment.backends.ldap.Assignment')
+        what='ldap')
     def __init__(self):
         super(Assignment, self).__init__()
         self.LDAP_URL = CONF.ldap.url
@@ -54,10 +53,10 @@ class Assignment(assignment.Driver):
         self.role = RoleApi(CONF, self.user)
 
     def default_role_driver(self):
-        return 'keystone.assignment.role_backends.ldap.Role'
+        return 'ldap'
 
     def default_resource_driver(self):
-        return 'keystone.resource.backends.ldap.Resource'
+        return 'ldap'
 
     def list_role_ids_for_groups_on_project(
             self, groups, project_id, project_domain_id, project_parents):
@@ -181,7 +180,7 @@ class Assignment(assignment.Driver):
                                      self.group._id_to_dn(group_id), role_id)
 
 # Bulk actions on User From identity
-    def delete_user(self, user_id):
+    def delete_user_assignments(self, user_id):
         user_dn = self.user._id_to_dn(user_id)
         for ref in self.role.list_global_roles_for_user(user_dn):
             self.role.delete_user(ref.role_dn, ref.user_dn,
@@ -191,7 +190,7 @@ class Assignment(assignment.Driver):
             self.role.delete_user(ref.role_dn, ref.user_dn,
                                   self.role._dn_to_id(ref.role_dn))
 
-    def delete_group(self, group_id):
+    def delete_group_assignments(self, group_id):
         """Called when the group was deleted.
 
         Any role assignments for the group should be cleaned up.
@@ -277,20 +276,39 @@ class Assignment(assignment.Driver):
         return self._roles_from_role_dicts(metadata_ref.get('roles', []),
                                            inherited_to_projects)
 
-    def list_role_assignments(self):
+    def list_role_assignments(self, role_id=None,
+                              user_id=None, group_ids=None,
+                              domain_id=None, project_ids=None,
+                              inherited_to_projects=None):
         role_assignments = []
-        for a in self.role.list_role_assignments(self.project.tree_dn):
-            if isinstance(a, UserRoleAssociation):
-                assignment = {
-                    'role_id': self.role._dn_to_id(a.role_dn),
-                    'user_id': self.user._dn_to_id(a.user_dn),
-                    'project_id': self.project._dn_to_id(a.project_dn)}
-            else:
-                assignment = {
-                    'role_id': self.role._dn_to_id(a.role_dn),
-                    'group_id': self.group._dn_to_id(a.group_dn),
-                    'project_id': self.project._dn_to_id(a.project_dn)}
-            role_assignments.append(assignment)
+
+        # Since the LDAP backend does not support assignments to domains, if
+        # the request is to filter by domain, then the answer is guaranteed
+        # to be an empty list.
+        if not domain_id:
+            for a in self.role.list_role_assignments(self.project.tree_dn):
+                if isinstance(a, UserRoleAssociation):
+                    assignment = {
+                        'role_id': self.role._dn_to_id(a.role_dn),
+                        'user_id': self.user._dn_to_id(a.user_dn),
+                        'project_id': self.project._dn_to_id(a.project_dn)}
+                else:
+                    assignment = {
+                        'role_id': self.role._dn_to_id(a.role_dn),
+                        'group_id': self.group._dn_to_id(a.group_dn),
+                        'project_id': self.project._dn_to_id(a.project_dn)}
+
+                if role_id and assignment['role_id'] != role_id:
+                    continue
+                if user_id and assignment.get('user_id') != user_id:
+                    continue
+                if group_ids and assignment.get('group_id') not in group_ids:
+                    continue
+                if project_ids and assignment['project_id'] not in project_ids:
+                    continue
+
+                role_assignments.append(assignment)
+
         return role_assignments
 
     def delete_project_assignments(self, project_id):
@@ -313,9 +331,7 @@ class ProjectApi(common_ldap.ProjectLdapStructureMixin,
                                  or self.DEFAULT_MEMBER_ATTRIBUTE)
 
     def get_user_projects(self, user_dn, associations):
-        """Returns list of tenants a user has access to
-        """
-
+        """Returns the list of tenants to which a user has access."""
         project_ids = set()
         for assoc in associations:
             project_ids.add(self._dn_to_id(assoc.project_dn))
@@ -497,9 +513,7 @@ class RoleApi(ldap_role.RoleLdapStructureMixin, common_ldap.BaseLdap):
             self.id_attr: role_id})
 
     def list_role_assignments(self, project_tree_dn):
-        """Returns a list of all the role assignments linked to project_tree_dn
-        attribute.
-        """
+        """List the role assignments linked to project_tree_dn attribute."""
         try:
             roles = self._ldap_get_list(project_tree_dn, ldap.SCOPE_SUBTREE,
                                         attrlist=[self.member_attribute])

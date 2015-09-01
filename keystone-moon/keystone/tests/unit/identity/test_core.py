@@ -12,11 +12,13 @@
 
 """Unit tests for core identity behavior."""
 
+import itertools
 import os
 import uuid
 
 import mock
 from oslo_config import cfg
+from oslo_config import fixture as config_fixture
 
 from keystone import exception
 from keystone import identity
@@ -34,7 +36,10 @@ class TestDomainConfigs(tests.BaseTestCase):
         self.addCleanup(CONF.reset)
 
         self.tmp_dir = tests.dirs.tmp()
-        CONF.set_override('domain_config_dir', self.tmp_dir, 'identity')
+
+        self.config_fixture = self.useFixture(config_fixture.Config(CONF))
+        self.config_fixture.config(domain_config_dir=self.tmp_dir,
+                                   group='identity')
 
     def test_config_for_nonexistent_domain(self):
         """Having a config for a non-existent domain will be ignored.
@@ -80,6 +85,45 @@ class TestDomainConfigs(tests.BaseTestCase):
                                                      [domain_config_filename],
                                                      'abc.def.com')
 
+    def test_config_for_multiple_sql_backend(self):
+        domains_config = identity.DomainConfigs()
+
+        # Create the right sequence of is_sql in the drivers being
+        # requested to expose the bug, which is that a False setting
+        # means it forgets previous True settings.
+        drivers = []
+        files = []
+        for idx, is_sql in enumerate((True, False, True)):
+            drv = mock.Mock(is_sql=is_sql)
+            drivers.append(drv)
+            name = 'dummy.{0}'.format(idx)
+            files.append(''.join((
+                identity.DOMAIN_CONF_FHEAD,
+                name,
+                identity.DOMAIN_CONF_FTAIL)))
+
+        walk_fake = lambda *a, **kwa: (
+            ('/fake/keystone/domains/config', [], files), )
+
+        generic_driver = mock.Mock(is_sql=False)
+
+        assignment_api = mock.Mock()
+        id_factory = itertools.count()
+        assignment_api.get_domain_by_name.side_effect = (
+            lambda name: {'id': next(id_factory), '_': 'fake_domain'})
+        load_driver_mock = mock.Mock(side_effect=drivers)
+
+        with mock.patch.object(os, 'walk', walk_fake):
+            with mock.patch.object(identity.cfg, 'ConfigOpts'):
+                with mock.patch.object(domains_config, '_load_driver',
+                                       load_driver_mock):
+                    self.assertRaises(
+                        exception.MultipleSQLDriversInConfig,
+                        domains_config.setup_domain_drivers,
+                        generic_driver, assignment_api)
+
+                    self.assertEqual(3, load_driver_mock.call_count)
+
 
 class TestDatabaseDomainConfigs(tests.TestCase):
 
@@ -92,15 +136,16 @@ class TestDatabaseDomainConfigs(tests.TestCase):
         self.assertFalse(CONF.identity.domain_configurations_from_database)
 
     def test_loading_config_from_database(self):
-        CONF.set_override('domain_configurations_from_database', True,
-                          'identity')
+        self.config_fixture.config(domain_configurations_from_database=True,
+                                   group='identity')
         domain = {'id': uuid.uuid4().hex, 'name': uuid.uuid4().hex}
         self.resource_api.create_domain(domain['id'], domain)
         # Override two config options for our domain
         conf = {'ldap': {'url': uuid.uuid4().hex,
-                         'suffix': uuid.uuid4().hex},
+                         'suffix': uuid.uuid4().hex,
+                         'use_tls': 'True'},
                 'identity': {
-                    'driver': 'keystone.identity.backends.ldap.Identity'}}
+                    'driver': 'ldap'}}
         self.domain_config_api.create_config(domain['id'], conf)
         fake_standard_driver = None
         domain_config = identity.DomainConfigs()
@@ -112,6 +157,11 @@ class TestDatabaseDomainConfigs(tests.TestCase):
         self.assertEqual(conf['ldap']['suffix'], res.ldap.suffix)
         self.assertEqual(CONF.ldap.query_scope, res.ldap.query_scope)
 
+        # Make sure the override is not changing the type of the config value
+        use_tls_type = type(CONF.ldap.use_tls)
+        self.assertEqual(use_tls_type(conf['ldap']['use_tls']),
+                         res.ldap.use_tls)
+
         # Now turn off using database domain configuration and check that the
         # default config file values are now seen instead of the overrides.
         CONF.set_override('domain_configurations_from_database', False,
@@ -122,4 +172,5 @@ class TestDatabaseDomainConfigs(tests.TestCase):
         res = domain_config.get_domain_conf(domain['id'])
         self.assertEqual(CONF.ldap.url, res.ldap.url)
         self.assertEqual(CONF.ldap.suffix, res.ldap.suffix)
+        self.assertEqual(CONF.ldap.use_tls, res.ldap.use_tls)
         self.assertEqual(CONF.ldap.query_scope, res.ldap.query_scope)

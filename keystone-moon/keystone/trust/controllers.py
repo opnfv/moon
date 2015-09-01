@@ -16,18 +16,18 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 from oslo_utils import timeutils
 import six
 
 from keystone import assignment
 from keystone.common import controller
 from keystone.common import dependency
+from keystone.common import utils
 from keystone.common import validation
 from keystone import exception
 from keystone.i18n import _
-from keystone.models import token_model
 from keystone import notifications
-from keystone.openstack.common import versionutils
 from keystone.trust import schema
 
 
@@ -63,19 +63,15 @@ class TrustV3(controller.V3Controller):
         return super(TrustV3, cls).base_url(context, path=path)
 
     def _get_user_id(self, context):
-        if 'token_id' in context:
-            token_id = context['token_id']
-            token_data = self.token_provider_api.validate_token(token_id)
-            token_ref = token_model.KeystoneToken(token_id=token_id,
-                                                  token_data=token_data)
-            return token_ref.user_id
-        return None
+        try:
+            token_ref = utils.get_token_ref(context)
+        except exception.Unauthorized:
+            return None
+        return token_ref.user_id
 
     def get_trust(self, context, trust_id):
         user_id = self._get_user_id(context)
         trust = self.trust_api.get_trust(trust_id)
-        if not trust:
-            raise exception.TrustNotFound(trust_id=trust_id)
         _trustor_trustee_only(trust, user_id)
         self._fill_in_roles(context, trust,
                             self.role_api.list_roles())
@@ -83,7 +79,7 @@ class TrustV3(controller.V3Controller):
 
     def _fill_in_roles(self, context, trust, all_roles):
         if trust.get('expires_at') is not None:
-            trust['expires_at'] = (timeutils.isotime
+            trust['expires_at'] = (utils.isotime
                                    (trust['expires_at'],
                                     subsecond=True))
 
@@ -126,15 +122,12 @@ class TrustV3(controller.V3Controller):
 
     @controller.protected()
     @validation.validated(schema.trust_create, 'trust')
-    def create_trust(self, context, trust=None):
+    def create_trust(self, context, trust):
         """Create a new trust.
 
         The user creating the trust must be the trustor.
 
         """
-        if not trust:
-            raise exception.ValidationError(attribute='trust',
-                                            target='request')
 
         auth_context = context.get('environment',
                                    {}).get('KEYSTONE_AUTH_CONTEXT', {})
@@ -206,15 +199,16 @@ class TrustV3(controller.V3Controller):
         if not expiration_date.endswith('Z'):
             expiration_date += 'Z'
         try:
-            return timeutils.parse_isotime(expiration_date)
+            expiration_time = timeutils.parse_isotime(expiration_date)
         except ValueError:
             raise exception.ValidationTimeStampError()
+        if timeutils.is_older_than(expiration_time, 0):
+            raise exception.ValidationExpirationError()
+        return expiration_time
 
     def _check_role_for_trust(self, context, trust_id, role_id):
         """Checks if a role has been assigned to a trust."""
         trust = self.trust_api.get_trust(trust_id)
-        if not trust:
-            raise exception.TrustNotFound(trust_id=trust_id)
         user_id = self._get_user_id(context)
         _trustor_trustee_only(trust, user_id)
         if not any(role['id'] == role_id for role in trust['roles']):
@@ -247,7 +241,7 @@ class TrustV3(controller.V3Controller):
             if 'roles' in trust:
                 del trust['roles']
             if trust.get('expires_at') is not None:
-                trust['expires_at'] = (timeutils.isotime
+                trust['expires_at'] = (utils.isotime
                                        (trust['expires_at'],
                                         subsecond=True))
         return TrustV3.wrap_collection(context, trusts)
@@ -255,9 +249,6 @@ class TrustV3(controller.V3Controller):
     @controller.protected()
     def delete_trust(self, context, trust_id):
         trust = self.trust_api.get_trust(trust_id)
-        if not trust:
-            raise exception.TrustNotFound(trust_id=trust_id)
-
         user_id = self._get_user_id(context)
         _admin_trustor_only(context, trust, user_id)
         initiator = notifications._get_request_audit_info(context)
@@ -266,8 +257,6 @@ class TrustV3(controller.V3Controller):
     @controller.protected()
     def list_roles_for_trust(self, context, trust_id):
         trust = self.get_trust(context, trust_id)['trust']
-        if not trust:
-            raise exception.TrustNotFound(trust_id=trust_id)
         user_id = self._get_user_id(context)
         _trustor_trustee_only(trust, user_id)
         return {'roles': trust['roles'],
