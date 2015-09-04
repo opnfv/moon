@@ -19,44 +19,56 @@ from keystone.common import dependency
 from keystone import exception
 from oslo_config import cfg
 from keystone.i18n import _
+from keystone.common import extension
 
 from keystone.contrib.moon.exception import *
 from keystone.contrib.moon.algorithms import *
 
-CONF = config.CONF
+CONF = cfg.CONF
 LOG = log.getLogger(__name__)
-# ADMIN_ID = None  # default user_id for internal invocation
-# ROOT_EXTENSION_ID = None
-# ROOT_EXTENSION_MODEL = "policy_root"
 
+EXTENSION_DATA = {
+    'name': 'OpenStack Moon APIs',
+    'namespace': 'http://docs.openstack.org/identity/api/ext/'
+                 'OS-MOON',
+    'alias': 'OS-MOON',
+    'updated': '2015-09-02T12:00:0-00:00',
+    'description': 'OpenStack Authorization Providers Mechanism.',
+    'links': [{
+        'rel': 'describedby',
+        'type': 'text/html',
+        'href': 'https://git.opnfv.org/moon.git'
+    }]}
+extension.register_admin_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
+extension.register_public_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
 
-_OPTS = [
-    cfg.StrOpt('configuration_driver',
-               default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
-               help='Configuration backend driver.'),
-    cfg.StrOpt('tenant_driver',
-               default='keystone.contrib.moon.backends.sql.TenantConnector',
-               help='Tenant backend driver.'),
-    cfg.StrOpt('authz_driver',
-               default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
-               help='Authorisation backend driver.'),
-    cfg.StrOpt('intraextension_driver',
-               default='keystone.contrib.moon.backends.sql.IntraExtensionConnector',
-               help='IntraExtension backend driver.'),
-    cfg.StrOpt('interextension_driver',
-               default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
-               help='InterExtension backend driver.'),
-    cfg.StrOpt('log_driver',
-               default='keystone.contrib.moon.backends.flat.LogConnector',
-               help='Logs backend driver.'),
-    cfg.StrOpt('policy_directory',
-               default='/etc/keystone/policies',
-               help='Local directory where all policies are stored.'),
-    cfg.StrOpt('root_policy_directory',
-               default='policy_root',
-               help='Local directory where Root IntraExtension configuration is stored.'),
-]
-CONF.register_opts(_OPTS, group='moon')
+# _OPTS = [
+#     cfg.StrOpt('configuration_driver',
+#                default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
+#                help='Configuration backend driver.'),
+#     cfg.StrOpt('tenant_driver',
+#                default='keystone.contrib.moon.backends.sql.TenantConnector',
+#                help='Tenant backend driver.'),
+#     cfg.StrOpt('authz_driver',
+#                default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
+#                help='Authorisation backend driver.'),
+#     cfg.StrOpt('intraextension_driver',
+#                default='keystone.contrib.moon.backends.sql.IntraExtensionConnector',
+#                help='IntraExtension backend driver.'),
+#     cfg.StrOpt('interextension_driver',
+#                default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
+#                help='InterExtension backend driver.'),
+#     cfg.StrOpt('log_driver',
+#                default='keystone.contrib.moon.backends.flat.LogConnector',
+#                help='Logs backend driver.'),
+#     cfg.StrOpt('policy_directory',
+#                default='/etc/keystone/policies',
+#                help='Local directory where all policies are stored.'),
+#     cfg.StrOpt('root_policy_directory',
+#                default='policy_root',
+#                help='Local directory where Root IntraExtension configuration is stored.'),
+# ]
+# CONF.register_opts(_OPTS, group='moon')
 
 
 def filter_input(func_or_str):
@@ -177,8 +189,20 @@ def enforce(action_names, object_name, **extra):
             else:
                 intra_extensions_dict = self.admin_api.driver.get_intra_extensions_dict()
                 if intra_extension_id not in intra_extensions_dict:
-                    raise IntraExtensionUnknown()
-                tenants_dict = self.tenant_api.driver.get_tenants_dict()
+                    # if id is not an intra_extension, maybe it is a tenant id
+                    try:
+                        tenants_dict = self.tenant_api.driver.get_tenants_dict()
+                    except AttributeError:
+                        tenants_dict = self.driver.get_tenants_dict()
+                    if intra_extension_id in tenants_dict:
+                        # id is in fact a tenant id so, we must check against the Root intra_extension
+                        intra_extension_id = intra_root_extension_id
+                    else:
+                        raise IntraExtensionUnknown()
+                try:
+                    tenants_dict = self.tenant_api.driver.get_tenants_dict()
+                except AttributeError:
+                    tenants_dict = self.driver.get_tenants_dict()
                 for _tenant_id in tenants_dict:
                     if tenants_dict[_tenant_id]['intra_authz_extension_id'] == intra_extension_id or \
                                     tenants_dict[_tenant_id]['intra_admin_extension_id'] == intra_extension_id:
@@ -374,7 +398,7 @@ class TenantManager(manager.Manager):
 
     @filter_input
     @enforce(("read", "write"), "tenants")
-    def add_tenant_dict(self, user_id, tenant_dict):
+    def add_tenant_dict(self, user_id, tenant_id, tenant_dict):
         tenants_dict = self.driver.get_tenants_dict()
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]['name'] == tenant_dict['name']:
@@ -459,8 +483,7 @@ class IntraExtensionManager(manager.Manager):
     driver_namespace = 'keystone.moon.intraextension'
 
     def __init__(self):
-        driver = CONF.moon.intraextension_driver
-        super(IntraExtensionManager, self).__init__(driver)
+        super(IntraExtensionManager, self).__init__(CONF.moon.intraextension_driver)
 
     def __get_authz_buffer(self, intra_extension_id, subject_id, object_id, action_id):
         """
@@ -857,7 +880,13 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
-        self.moonlog_api.debug("Creation of IE: {}".format(ref))
+        try:
+            self.moonlog_api.debug("Creation of IE: {}".format(ref))
+        except AttributeError:
+            pass
+            # Creation of the root intra extension raise an error here because
+            # self.moonlog_api doesn't exist.
+        # FIXME (asteroide): understand why moonlog_api raise an error here...
         # read the template given by "model" and populate default variables
         template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
         self.__load_metadata_file(ie_dict, template_dir)
@@ -2038,11 +2067,16 @@ class IntraExtensionRootManager(IntraExtensionManager):
     def __init__(self):
         super(IntraExtensionRootManager, self).__init__()
         extensions = self.admin_api.driver.get_intra_extensions_dict()
+        LOG.debug("extensions {}".format(extensions))
         for extension_id, extension_dict in extensions.iteritems():
-            if extension_dict["model"] == CONF.moon.root_policy_directory:
+            LOG.debug("{} / {}".format(extension_dict["name"], CONF.moon.root_policy_directory))
+            if extension_dict["name"] == CONF.moon.root_policy_directory:
                 self.root_extension_id = extension_id
+                break
         else:
             extension = self.admin_api.load_root_intra_extension_dict(CONF.moon.root_policy_directory)
+            if not extension:
+                raise IntraExtensionCreationError("The root extension is not created.")
             self.root_extension_id = extension['id']
         self.root_admin_id = self.__compute_admin_id_for_root_extension()
 
@@ -2054,7 +2088,9 @@ class IntraExtensionRootManager(IntraExtensionManager):
         return {self.root_extension_id: self.admin_api.driver.get_intra_extensions_dict()[self.root_extension_id]}
 
     def __compute_admin_id_for_root_extension(self):
+        LOG.debug(self.admin_api.driver.get_subjects_dict(self.root_extension_id))
         for subject_id, subject_dict in self.admin_api.driver.get_subjects_dict(self.root_extension_id).iteritems():
+            LOG.debug("subject_name = {}".format(subject_dict["name"]))
             if subject_dict["name"] == "admin":
                 return subject_id
         raise RootExtensionNotInitialized()

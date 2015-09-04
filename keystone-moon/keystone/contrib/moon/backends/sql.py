@@ -429,12 +429,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in SubjectCategory.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {subject_category_id: self.get_subject_categories_dict(intra_extension_id)[subject_category_id]}
+            return {subject_category_id: SubjectCategory.to_dict(ref)['subject_category']}
 
     def del_subject_category(self, intra_extension_id, subject_category_id):
         with sql.transaction() as session:
@@ -466,12 +467,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in ObjectCategory.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {object_category_id: self.get_object_categories_dict(intra_extension_id)[object_category_id]}
+            return {object_category_id: ObjectCategory.to_dict(ref)['object_category']}
 
     def del_object_category(self, intra_extension_id, object_category_id):
         with sql.transaction() as session:
@@ -503,12 +505,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in ActionCategory.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {action_category_id: self.get_action_categories_dict(intra_extension_id)[action_category_id]}
+            return {action_category_id: ActionCategory.to_dict(ref)['action_category']}
 
     def del_action_category(self, intra_extension_id, action_category_id):
         with sql.transaction() as session:
@@ -542,12 +545,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Subject.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {subject_id: self.get_subjects_dict(intra_extension_id)[subject_id]}
+            return {subject_id: Subject.to_dict(ref)['subject']}
 
     def del_subject(self, intra_extension_id, subject_id):
         with sql.transaction() as session:
@@ -577,12 +581,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Object.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {object_id: self.get_objects_dict(intra_extension_id)[object_id]}
+            return {object_id: Object.to_dict(ref)['object']}
 
     def del_object(self, intra_extension_id, object_id):
         with sql.transaction() as session:
@@ -612,12 +617,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Action.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {action_id: self.get_actions_dict(intra_extension_id)[action_id]}
+            return {action_id: Action.to_dict(ref)['action']}
 
     def del_action(self, intra_extension_id, action_id):
         with sql.transaction() as session:
@@ -650,12 +656,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Subject.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {subject_scope_id: self.get_subject_scopes_dict(intra_extension_id, subject_category_id)[subject_scope_id]}
+            return {subject_scope_id: SubjectScope.to_dict(ref)['subject_scope']}
 
     def del_subject_scope(self, intra_extension_id, subject_category_id, subject_scope_id):
         with sql.transaction() as session:
@@ -688,12 +695,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Object.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {object_scope_id: self.get_object_scopes_dict(intra_extension_id, object_category_id)[object_scope_id]}
+            return {object_scope_id: ObjectScope.to_dict(ref)['object_scope']}
 
     def del_object_scope(self, intra_extension_id, object_category_id, object_scope_id):
         with sql.transaction() as session:
@@ -726,12 +734,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Action.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {action_scope_id: self.get_action_scopes_dict(intra_extension_id, action_category_id)[action_scope_id]}
+            return {action_scope_id: ActionScope.to_dict(ref)['action_scope']}
 
     def del_action_scope(self, intra_extension_id, action_category_id, action_scope_id):
         with sql.transaction() as session:
@@ -767,6 +776,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in SubjectAssignment.attributes:
                     if attr != 'id':

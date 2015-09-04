@@ -3,7 +3,6 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from uuid import uuid4
 import sqlalchemy as sql
 from keystone.common import sql as k_sql
 
@@ -20,12 +19,6 @@ def upgrade(migrate_engine):
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     intra_extension_table.create(migrate_engine, checkfirst=True)
-
-    # intra_extension_table.insert().values(id=uuid4().hex, intra_extension={
-    #     'name': "Root Extension",
-    #     'description': "The root intra extension",
-    #     'model': 'admin'
-    # })
 
     tenant_table = sql.Table(
         'tenants',
@@ -119,7 +112,7 @@ def upgrade(migrate_engine):
     object_scopes_table.create(migrate_engine, checkfirst=True)
 
     action_scopes_table = sql.Table(
-        'action_category_scopes',
+        'action_scopes',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('action_scope', k_sql.JsonBlob(), nullable=True),
@@ -133,7 +126,7 @@ def upgrade(migrate_engine):
         'subject_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('subject_category_assignment', k_sql.JsonBlob(), nullable=True),
+        sql.Column('subject_assignment', k_sql.JsonBlob(), nullable=True),
         sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         sql.Column('subject_id', sql.ForeignKey("subjects.id"), nullable=False),
         sql.Column('subject_category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
@@ -203,12 +196,12 @@ def downgrade(migrate_engine):
     for _table in (
         'rules',
         'sub_meta_rules',
-        'action_category_assignments',
-        'object_category_assignments',
-        'subject_category_assignments',
-        'action_category_scopes',
-        'object_category_scopes',
-        'subject_category_scopes',
+        'action_assignments',
+        'object_assignments',
+        'subject_assignments',
+        'action_scopes',
+        'object_scopes',
+        'subject_scopes',
         'actions',
         'objects',
         'subjects',

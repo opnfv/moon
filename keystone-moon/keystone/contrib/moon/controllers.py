@@ -14,7 +14,7 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-@dependency.requires('configuration_api')
+@dependency.requires('configuration_api', 'root_api', 'moonlog_api')
 class Configuration(controller.V3Controller):
     collection_name = 'configurations'
     member_name = 'configuration'
@@ -63,14 +63,14 @@ class Tenants(controller.V3Controller):
     def add_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         # Next line will raise an error if tenant doesn't exist
-        k_tenant_dict = self.resource_api.get_project_by_name(kw.get('tenant_name', None))
+        k_tenant_dict = self.resource_api.get_project_by_name(kw.get('tenant_name'), "default")
         tenant_dict = dict()
         tenant_dict['id'] = k_tenant_dict['id']
         tenant_dict['name'] = kw.get('tenant_name', None)
         tenant_dict['description'] = kw.get('tenant_description', None)
         tenant_dict['intra_authz_extension_id'] = kw.get('tenant_intra_authz_extension_id', None)
         tenant_dict['intra_admin_extension_id'] = kw.get('tenant_intra_admin_extension_id', None)
-        return self.tenant_api.add_tenant_dict(user_id, tenant_dict)
+        return self.tenant_api.add_tenant_dict(user_id, tenant_dict['id'], tenant_dict)
 
     @controller.protected()
     def get_tenant(self, context, **kw):

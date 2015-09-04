@@ -9,9 +9,11 @@ import os
 import json
 from keystone import config
 from keystone.contrib.moon.core import ConfigurationDriver
+from oslo_log import log
 
 
 CONF = config.CONF
+LOG = log.getLogger(__name__)
 
 
 class ConfigurationConnector(ConfigurationDriver):
@@ -36,8 +38,12 @@ class ConfigurationConnector(ConfigurationDriver):
         nodes = glob(os.path.join(CONF.moon.policy_directory, "*"))
         templates = dict()
         for node in nodes:
+            try:
+                metadata = json.load(open(os.path.join(node, "metadata.json")))
+            except IOError:
+                # Note (asteroide): it's not a true policy directory, so we forgive it
+                continue
             templates[os.path.basename(node)] = dict()
-            metadata = json.load(open(os.path.join(node, "metadata.json")))
             templates[os.path.basename(node)]["name"] = metadata["name"]
             templates[os.path.basename(node)]["description"] = metadata["description"]
         return templates

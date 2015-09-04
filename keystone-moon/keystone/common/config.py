@@ -1138,6 +1138,32 @@ FILE_OPTIONS = {
                     deprecated_for_removal=True,
                     help='Require client certificate.'),
     ],
+    'moon': [
+        cfg.StrOpt('configuration_driver',
+                   default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
+                   help='Configuration backend driver.'),
+        cfg.StrOpt('tenant_driver',
+                   default='keystone.contrib.moon.backends.sql.TenantConnector',
+                   help='Tenant backend driver.'),
+        cfg.StrOpt('authz_driver',
+                   default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
+                   help='Authorisation backend driver.'),
+        cfg.StrOpt('intraextension_driver',
+                   default='keystone.contrib.moon.backends.sql.IntraExtensionConnector',
+                   help='IntraExtension backend driver.'),
+        cfg.StrOpt('interextension_driver',
+                   default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
+                   help='InterExtension backend driver.'),
+        cfg.StrOpt('log_driver',
+                   default='keystone.contrib.moon.backends.flat.LogConnector',
+                   help='Logs backend driver.'),
+        cfg.StrOpt('policy_directory',
+                   default='/etc/keystone/policies',
+                   help='Local directory where all policies are stored.'),
+        cfg.StrOpt('root_policy_directory',
+                   default='policy_root',
+                   help='Local directory where Root IntraExtension configuration is stored.'),
+    ]
 }
 
 
