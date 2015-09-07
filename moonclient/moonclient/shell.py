@@ -90,6 +90,9 @@ class MoonClient(App):
                     break
         return self._intraextension
 
+    def get_tenant_uuid(self, tenant_name):
+        return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True)["projects"][0]["id"]
+
     def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None):
         if post_data:
             method = "POST"
@@ -97,6 +100,7 @@ class MoonClient(App):
             method = "DELETE"
         self.log.debug("\033[32m{} {}\033[m".format(method, url))
         conn = httplib.HTTPConnection(self.host, self.port)
+        self.log.info("Host: {}:{}".format(self.host, self.port))
         headers = {
             "Content-type": "application/x-www-form-urlencoded",
             "Accept": "text/plain,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

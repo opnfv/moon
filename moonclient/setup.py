@@ -58,12 +58,22 @@ setup(
             'moon = moonclient.shell:main'
         ],
         'moon.client': [
-            'policy_list = moonclient.authz_policy:AuthzPolicies',
+            'templates_list = moonclient.configuration:TemplatesList',
+            'aggregation_algorithms_list = moonclient.configuration:AggregationAlgorithmsList',
+            'submetarule_algorithms_list = moonclient.configuration:SubMetaRuleAlgorithmsList',
+
+            'tenant_add = moonclient.tenants:TenantAdd',
+            'tenant_set = moonclient.tenants:TenantSet',
+            'tenant_list = moonclient.tenants:TenantList',
+            'tenant_show = moonclient.tenants:TenantShow',
+            'tenant_delete = moonclient.tenants:TenantDelete',
+
             'intraextension_tenant_set = moonclient.intraextension:TenantSet',
             'intraextension_create = moonclient.intraextension:IntraExtensionCreate',
             'intraextension_list = moonclient.intraextension:IntraExtensionList',
             'intraextension_delete = moonclient.intraextension:IntraExtensionDelete',
             'intraextension_show = moonclient.intraextension:IntraExtensionShow',
+
             'subject_list = moonclient.subjects:SubjectsList',
             'subject_add = moonclient.subjects:SubjectsAdd',
             'subject_delete = moonclient.subjects:SubjectsDelete',

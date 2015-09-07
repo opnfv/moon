@@ -1,0 +1,43 @@
+{
+  "command_prefix": "moon",
+  "tests_group": {
+    "group1": [
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "^$",
+        "description": "List all tenants (must be empty)"
+      },
+      {
+        "name": "add tenant demo",
+        "command": "tenant add demo",
+        "result": "Tenant created: (?P<uuid>\\w+)",
+        "description": "Add a new tenant"
+      },
+      {
+        "name": "create_intraextension_admin",
+        "command": "intraextension create --policy_model policy_admin func_test",
+        "result": "%uuid_admin%",
+        "description": "Create an admin intra extension"
+      },
+      {
+        "name": "list_intraextension_admin",
+        "command": "intraextension list",
+        "result": "$uuid_admin",
+        "description": "Check the existence of that admin intra extension"
+      },
+      {
+        "name": "set_tenant_authz",
+        "command": "intraextension tenant set authz $uuid_authz demo",
+        "result": "",
+        "description": "Connect the authz intra extension to the tenant demo"
+      },
+      {
+        "name": "set_tenant_admin",
+        "command": "intraextension tenant set authz $uuid_authz demo",
+        "result": "",
+        "description": "Connect the admin intra extension to the tenant demo"
+      }
+    ]
+  }
+}
