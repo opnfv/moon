@@ -72,7 +72,7 @@ def create_mapping(self, tenant_name=None, authz_id=None, admin_id=None):
         "domain_id": "default"
     }
     keystone_tenant = self.resource_api.create_project(tenant["id"], tenant)
-    mapping = self.tenant_api.add_tenant_dict(self.root_api.get_root_admin_id(), tenant)
+    mapping = self.tenant_api.add_tenant_dict(self.root_api.get_root_admin_id(), tenant["id"], tenant)
     self.assertIsInstance(mapping, dict)
     self.assertIn("intra_authz_extension_id", mapping[tenant["id"]])
     self.assertIn("intra_admin_extension_id", mapping[tenant["id"]])

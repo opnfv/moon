@@ -7,6 +7,9 @@
 
 from keystone.contrib.moon import controllers
 from keystone.common import wsgi
+from oslo_log import log
+
+LOG = log.getLogger(__name__)
 
 
 class Routers(wsgi.V3ExtensionRouter):
@@ -23,7 +26,7 @@ class Routers(wsgi.V3ExtensionRouter):
     def _get_path(component):
         return 'http://docs.openstack.org/api/openstack-authz/3/param/{}'.format(component)
 
-    def append_v3_routers(self, mapper, routers):
+    def add_routes(self, mapper):
         # Controllers creation
         authz_controller = controllers.Authz_v3()
         configuration_controller = controllers.Configuration()
@@ -31,12 +34,11 @@ class Routers(wsgi.V3ExtensionRouter):
         tenants_controller = controllers.Tenants()
         logs_controller = controllers.Logs()
         inter_ext_controller = controllers.InterExtensions()
-
         # Configuration route
         self._add_resource(
             mapper, configuration_controller,
             path=self.PATH_PREFIX+'/configuration/templates',
-            get_action='get_templates',
+            get_action='get_policy_templates',
             rel=self._get_rel('templates'),
             path_vars={})
         self._add_resource(
@@ -47,7 +49,7 @@ class Routers(wsgi.V3ExtensionRouter):
             path_vars={})
         self._add_resource(
             mapper, configuration_controller,
-            path=self.PATH_PREFIX+'/configuration/sub_meta_rule_relations',
+            path=self.PATH_PREFIX+'/configuration/sub_meta_rule_algorithms',
             get_action='get_sub_meta_rule_algorithms',
             rel=self._get_rel('sub_meta_rule_algorithms'),
             path_vars={})

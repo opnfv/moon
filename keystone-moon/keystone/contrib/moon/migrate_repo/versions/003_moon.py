@@ -11,22 +11,22 @@ def upgrade(migrate_engine):
     meta = sql.MetaData()
     meta.bind = migrate_engine
 
-    region_table = sql.Table(
-        'tenants',
-        meta,
-        sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('name', sql.String(128), nullable=True),
-        sql.Column('authz', sql.String(64), nullable=True),
-        sql.Column('admin', sql.String(64), nullable=True),
-
-        mysql_engine='InnoDB',
-        mysql_charset='utf8')
-    region_table.create(migrate_engine, checkfirst=True)
-
+#     region_table = sql.Table(
+#         'tenants',
+#         meta,
+#         sql.Column('id', sql.String(64), primary_key=True),
+#         sql.Column('name', sql.String(128), nullable=True),
+#         sql.Column('authz', sql.String(64), nullable=True),
+#         sql.Column('admin', sql.String(64), nullable=True),
+#
+#         mysql_engine='InnoDB',
+#         mysql_charset='utf8')
+#     region_table.create(migrate_engine, checkfirst=True)
+#
 
 def downgrade(migrate_engine):
     meta = sql.MetaData()
     meta.bind = migrate_engine
-
-    table = sql.Table('tenants', meta, autoload=True)
-    table.drop(migrate_engine, checkfirst=True)
+#
+#     table = sql.Table('tenants', meta, autoload=True)
+#     table.drop(migrate_engine, checkfirst=True)
