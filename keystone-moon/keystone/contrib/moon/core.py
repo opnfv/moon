@@ -198,7 +198,9 @@ def enforce(action_names, object_name, **extra):
                         # id is in fact a tenant id so, we must check against the Root intra_extension
                         intra_extension_id = intra_root_extension_id
                     else:
-                        raise IntraExtensionUnknown()
+                        # id is not a known tenant ID, so we must check against the Root intra_extension
+                        intra_extension_id = intra_root_extension_id
+                        LOG.warning("Cannot enforce because the intra-extension is unknown ({})".format(intra_extension_id))
                 try:
                     tenants_dict = self.tenant_api.driver.get_tenants_dict()
                 except AttributeError:
