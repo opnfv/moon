@@ -184,6 +184,7 @@ def upgrade(migrate_engine):
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('rule', k_sql.JsonBlob(), nullable=True),
         sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
+        sql.Column('sub_meta_rule_id', sql.ForeignKey("sub_meta_rules.id"), nullable=False),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     rules_table.create(migrate_engine, checkfirst=True)
