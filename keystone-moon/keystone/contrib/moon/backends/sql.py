@@ -892,7 +892,10 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(AggregationAlgorithm)
             query = query.filter_by(intra_extension_id=intra_extension_id)
             ref = query.first()
-            return {ref.id: ref.aggregation_algorithm}
+            try:
+                return {ref.id: ref.aggregation_algorithm}
+            except AttributeError:
+                return {}
 
     def set_aggregation_algorithm_dict(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
         with sql.transaction() as session:
