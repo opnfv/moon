@@ -850,6 +850,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce(("read", "write"), "intra_extensions")
     def load_intra_extension_dict(self, user_id, intra_extension_dict):
         ie_dict = dict()
+        LOG.debug("load_intra_extension_dict {}".format(intra_extension_dict))
         ie_dict['id'] = uuid4().hex
         ie_dict["name"] = filter_input(intra_extension_dict["name"])
         ie_dict["model"] = filter_input(intra_extension_dict["model"])
@@ -927,26 +928,26 @@ class IntraExtensionManager(manager.Manager):
         for aggregation_algorithm_id in self.driver.get_aggregation_algorithm_dict(intra_extension_id):
             self.driver.del_aggregation_algorithm(intra_extension_id, aggregation_algorithm_id)
         for subject_id in self.driver.get_subjects_dict(intra_extension_id):
+            for subject_category_id in self.driver.get_subject_categories_dict(intra_extension_id):
+                self.driver.del_subject_scope(intra_extension_id, None, None)
+                self.driver.del_subject_assignment(intra_extension_id, None, None, None)
+                self.driver.del_subject_category(intra_extension_id, subject_category_id)
+        for object_id in self.driver.get_objects_dict(intra_extension_id):
+            for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
+                self.driver.del_object_scope(intra_extension_id, None, None)
+                self.driver.del_object_assignment(intra_extension_id, None, None, None)
+                self.driver.del_object_category(intra_extension_id, object_category_id)
+        for action_id in self.driver.get_actions_dict(intra_extension_id):
+            for action_category_id in self.driver.get_action_categories_dict(intra_extension_id):
+                self.driver.del_action_scope(intra_extension_id, None, None)
+                self.driver.del_action_assignment(intra_extension_id, None, None, None)
+                self.driver.del_action_category(intra_extension_id, action_category_id)
+        for subject_id in self.driver.get_subjects_dict(intra_extension_id):
             self.driver.del_subject(intra_extension_id, subject_id)
         for object_id in self.driver.get_objects_dict(intra_extension_id):
             self.driver.del_object(intra_extension_id, object_id)
         for action_id in self.driver.get_actions_dict(intra_extension_id):
             self.driver.del_action(intra_extension_id, action_id)
-        for subject_category_id in self.driver.get_subject_categories_dict(intra_extension_id):
-            for subject_scope_id in self.driver.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id):
-                self.driver.del_subject_assignment(intra_extension_id, subject_id, subject_category_id, subject_scope_id)
-                self.driver.del_subject_scope(intra_extension_id, subject_category_id, subject_scope_id)
-            self.driver.del_subject_category(intra_extension_id, subject_category_id)
-        for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
-            for object_scope_id in self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id):
-                self.driver.del_object_assignment(intra_extension_id, object_id, object_category_id, object_scope_id)
-                self.driver.del_object_scope(intra_extension_id, object_category_id, object_scope_id)
-            self.driver.del_object_category(intra_extension_id, object_category_id)
-        for action_category_id in self.driver.get_action_categories_dict(intra_extension_id):
-            for action_scope_id in self.driver.get_action_assignment_list(intra_extension_id, action_id, action_category_id):
-                self.driver.del_action_assignment(intra_extension_id, action_id, action_category_id, action_scope_id)
-                self.driver.del_action_scope(intra_extension_id, action_category_id, action_scope_id)
-            self.driver.del_action_category(intra_extension_id, action_category_id)
         return self.driver.del_intra_extension(intra_extension_id)
 
     @enforce(("read", "write"), "intra_extensions")

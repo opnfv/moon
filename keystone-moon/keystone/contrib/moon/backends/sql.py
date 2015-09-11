@@ -667,9 +667,14 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def del_subject_scope(self, intra_extension_id, subject_category_id, subject_scope_id):
         with sql.transaction() as session:
             query = session.query(SubjectScope)
-            query = query.filter_by(intra_extension_id=intra_extension_id, subject_category_id=subject_category_id, id=subject_scope_id)
-            ref = query.first()
-            session.delete(ref)
+            if not subject_category_id or not subject_scope_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                for ref in query.all():
+                    session.delete(ref)
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, subject_category_id=subject_category_id, id=subject_scope_id)
+                ref = query.first()
+                session.delete(ref)
 
     # Getter and Setter for object_category_scope
 
@@ -706,9 +711,14 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def del_object_scope(self, intra_extension_id, object_category_id, object_scope_id):
         with sql.transaction() as session:
             query = session.query(ObjectScope)
-            query = query.filter_by(intra_extension_id=intra_extension_id, object_category_id=object_category_id, id=object_scope_id)
-            ref = query.first()
-            session.delete(ref)
+            if not object_category_id or not object_scope_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                for ref in query.all():
+                    session.delete(ref)
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, object_category_id=object_category_id, id=object_scope_id)
+                ref = query.first()
+                session.delete(ref)
 
     # Getter and Setter for action_scope
  
@@ -745,17 +755,27 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def del_action_scope(self, intra_extension_id, action_category_id, action_scope_id):
         with sql.transaction() as session:
             query = session.query(ActionScope)
-            query = query.filter_by(intra_extension_id=intra_extension_id, action_category_id=action_category_id, id=action_scope_id)
-            ref = query.first()
-            session.delete(ref)
+            if not action_category_id or not action_scope_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                for ref in query.all():
+                    session.delete(ref)
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, action_category_id=action_category_id, id=action_scope_id)
+                ref = query.first()
+                session.delete(ref)
 
     # Getter and Setter for subject_category_assignment
 
     def get_subject_assignment_list(self, intra_extension_id, subject_id, subject_category_id):
         with sql.transaction() as session:
             query = session.query(SubjectAssignment)
-            query = query.filter_by(intra_extension_id=intra_extension_id, subject_id=subject_id, subject_category_id=subject_category_id)
-            ref = query.first()
+            if not subject_id or not subject_category_id or not subject_category_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                ref = query.all()
+                return ref
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, subject_id=subject_id, subject_category_id=subject_category_id)
+                ref = query.first()
             if not ref:
                 return list()
             return list(ref.subject_assignment)
@@ -791,6 +811,11 @@ class IntraExtensionConnector(IntraExtensionDriver):
         return self.set_subject_assignment_list(intra_extension_id, subject_id, subject_category_id, new_subject_assignment_list)
 
     def del_subject_assignment(self, intra_extension_id, subject_id, subject_category_id, subject_scope_id):
+        if not subject_id or not subject_category_id or not subject_category_id:
+            with sql.transaction() as session:
+                for ref in self.get_subject_assignment_list(intra_extension_id, None, None):
+                    session.delete(ref)
+                return
         new_subject_assignment_list = self.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id)
         new_subject_assignment_list.remove(subject_scope_id)
         return self.set_subject_assignment_list(intra_extension_id, subject_id, subject_category_id, new_subject_assignment_list)
@@ -800,8 +825,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def get_object_assignment_list(self, intra_extension_id, object_id, object_category_id):
         with sql.transaction() as session:
             query = session.query(ObjectAssignment)
-            query = query.filter_by(intra_extension_id=intra_extension_id, object_id=object_id, object_category_id=object_category_id)
-            ref = query.first()
+            if not object_id or not object_category_id or not object_category_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                ref = query.all()
+                return ref
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, object_id=object_id, object_category_id=object_category_id)
+                ref = query.first()
             if not ref:
                 return list()
             return list(ref.object_assignment)
@@ -836,6 +866,11 @@ class IntraExtensionConnector(IntraExtensionDriver):
         return self.set_object_assignment_list(intra_extension_id, object_id, object_category_id, new_object_assignment_list)
 
     def del_object_assignment(self, intra_extension_id, object_id, object_category_id, object_scope_id):
+        if not object_id or not object_category_id or not object_category_id:
+            with sql.transaction() as session:
+                for ref in self.get_object_assignment_list(intra_extension_id, None, None):
+                    session.delete(ref)
+                return
         new_object_assignment_list = self.get_object_assignment_list(intra_extension_id, object_id, object_category_id)
         new_object_assignment_list.remove(object_scope_id)
         return self.set_object_assignment_list(intra_extension_id, object_id, object_category_id, new_object_assignment_list)
@@ -845,8 +880,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
     def get_action_assignment_list(self, intra_extension_id, action_id, action_category_id):
         with sql.transaction() as session:
             query = session.query(ActionAssignment)
-            query = query.filter_by(intra_extension_id=intra_extension_id, action_id=action_id, action_category_id=action_category_id)
-            ref = query.first()
+            if not action_id or not action_category_id or not action_category_id:
+                query = query.filter_by(intra_extension_id=intra_extension_id)
+                ref = query.all()
+                return ref
+            else:
+                query = query.filter_by(intra_extension_id=intra_extension_id, action_id=action_id, action_category_id=action_category_id)
+                ref = query.first()
             if not ref:
                 return list()
             return list(ref.action_assignment)
@@ -881,6 +921,11 @@ class IntraExtensionConnector(IntraExtensionDriver):
         return self.set_action_assignment_list(intra_extension_id, action_id, action_category_id, new_action_assignment_list)
 
     def del_action_assignment(self, intra_extension_id, action_id, action_category_id, action_scope_id):
+        if not action_id or not action_category_id or not action_category_id:
+            with sql.transaction() as session:
+                for ref in self.get_action_assignment_list(intra_extension_id, None, None):
+                    session.delete(ref)
+                return
         new_action_assignment_list = self.get_action_assignment_list(intra_extension_id, action_id, action_category_id)
         new_action_assignment_list.remove(action_scope_id)
         return self.set_action_assignment_list(intra_extension_id, action_id, action_category_id, new_action_assignment_list)
@@ -983,12 +1028,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
             )
             if not ref:
                 session.add(new_ref)
+                ref = new_ref
             else:
                 for attr in Rule.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return {rule_id: self.get_rules_dict(intra_extension_id, sub_meta_rule_id)[rule_id]}
+            return {rule_id: ref.rule}
 
     def del_rule(self, intra_extension_id, sub_meta_rule_id, rule_id):
         with sql.transaction() as session:
