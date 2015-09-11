@@ -323,7 +323,20 @@ __all_objects__ = (
     Rule,
 )
 
+
 class TenantConnector(TenantDriver):
+
+    @staticmethod
+    def __update_dict(base, update):
+        """Update a dict only if values are not None
+
+        :param base: dict to update
+        :param update: updates for the base dict
+        :return: None
+        """
+        for key in update:
+            if type(update[key]) is not None:
+                base[key] = update[key]
 
     def get_tenants_dict(self):
         with sql.transaction() as session:
@@ -354,13 +367,10 @@ class TenantConnector(TenantDriver):
             query = session.query(Tenant)
             query = query.filter_by(id=tenant_id)
             ref = query.first()
-            tenant_ref = ref.to_dict()
-            tenant_ref.update(tenant_dict)
-            new_tenant = Tenant(id=tenant_id, tenant=tenant_ref)
-            for attr in Tenant.attributes:
-                if attr != 'id':
-                    setattr(ref, attr, getattr(new_tenant, attr))
-            return {ref.id: ref.tenant}
+            tenant_dict_orig = dict(ref.tenant)
+            self.__update_dict(tenant_dict_orig, tenant_dict)
+            setattr(ref, "tenant", tenant_dict_orig)
+            return {ref.id: tenant_dict_orig}
 
 
 class IntraExtensionConnector(IntraExtensionDriver):

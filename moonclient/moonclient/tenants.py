@@ -71,7 +71,7 @@ class TenantAdd(Command):
         if parsed_args.admin:
             post_data["tenant_intra_admin_extension_id"] = parsed_args.admin
         if parsed_args.desc:
-            post_data["description"] = parsed_args.desc
+            post_data["tenant_description"] = parsed_args.desc
         tenants = self.app.get_url("/v3/OS-MOON/tenants",
                                 post_data=post_data,
                                 authtoken=True)
@@ -154,20 +154,20 @@ class TenantSet(Command):
 
     def take_action(self, parsed_args):
         post_data = dict()
-        post_data["id"] = parsed_args.tenant_id
+        post_data["tenant_id"] = parsed_args.tenant_id
         if parsed_args.name:
-            post_data["name"] = parsed_args.tenant_name
-        if parsed_args.authz:
-            post_data["intra_authz_extension_id"] = parsed_args.authz
-        if parsed_args.admin:
-            post_data["intra_admin_extension_id"] = parsed_args.admin
-        if parsed_args.desc:
-            post_data["description"] = parsed_args.desc
-        tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(post_data["id"]),
+            post_data["tenant_name"] = parsed_args.tenant_name
+        if parsed_args.authz is not None:
+            post_data["tenant_intra_authz_extension_id"] = parsed_args.authz
+        if parsed_args.admin is not None:
+            post_data["tenant_intra_admin_extension_id"] = parsed_args.admin
+        if parsed_args.desc is not None:
+            post_data["tenant_description"] = parsed_args.desc
+        tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(post_data["tenant_id"]),
                                 post_data=post_data,
                                 authtoken=True)
         return (
-            ("id", "name", "description", "intra_authz_extension_id", "intra_admin_extension_id"),
+            ("id", "name", "description", "authz", "admin"),
             ((
                 tenant_id,
                 tenants[tenant_id]["name"],

@@ -37,9 +37,9 @@ class IntraExtensionCreate(Command):
 
     def take_action(self, parsed_args):
         post_data = {
-            "name": parsed_args.name,
-            "policymodel": parsed_args.policy_model,
-            "description": parsed_args.description
+            "intra_extension_name": parsed_args.name,
+            "intra_extension_model": parsed_args.policy_model,
+            "intra_extension_description": parsed_args.description
         }
         ie = self.app.get_url("/v3/OS-MOON/intra_extensions", post_data=post_data, authtoken=True)
         if "id" not in ie:
@@ -59,11 +59,11 @@ class IntraExtensionList(Lister):
 
     def take_action(self, parsed_args):
         ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
-        if "intra_extensions" not in ie:
-            raise Exception("Error in command {}".format(ie))
+        # if "intra_extensions" not in ie:
+        #     raise Exception("Error in command {}".format(ie))
         return (
-            ("id",),
-            ((_id, ) for _id in ie["intra_extensions"])
+            ("id", "name", "model"),
+            ((_id, ie[_id]["name"], ie[_id]["model"]) for _id in ie.keys())
         )
 
 

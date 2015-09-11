@@ -412,31 +412,30 @@ class TenantManager(manager.Manager):
         keystone_tenant = self.__get_keystone_tenant_dict(tenant_dict['id'], tenant_dict['name'])
         tenant_dict.update(keystone_tenant)
         # Sync users between intra_authz_extension and intra_admin_extension
-        if tenant_dict['intra_admin_extension_id']:
-            if not tenant_dict['intra_authz_extension_id']:
-                raise TenantNoIntraAuthzExtension()
-            # authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
-            # admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
-            # for _subject_id in authz_subjects_dict:
-            #     if _subject_id not in admin_subjects_dict:
-            #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
-            # for _subject_id in admin_subjects_dict:
-            #     if _subject_id not in authz_subjects_dict:
-            #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+        if 'intra_admin_extension_id' in tenant_dict:
+            if 'intra_authz_extension_id' in tenant_dict:
+                # authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
+                # admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
+                # for _subject_id in authz_subjects_dict:
+                #     if _subject_id not in admin_subjects_dict:
+                #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+                # for _subject_id in admin_subjects_dict:
+                #     if _subject_id not in authz_subjects_dict:
+                #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
-            # TODO (ateroide): check whether we can replace the below code by the above one
-            # NOTE (ateroide): at a first glance: no, subject_id changes depending on which intra_extesion is used
-            # we must use name which is constant.
-            authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
-            authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
-            admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
-            admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
-            for _subject_id in authz_subjects_dict:
-                if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
-                    self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
-            for _subject_id in admin_subjects_dict:
-                if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
-                    self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+                # TODO (ateroide): check whether we can replace the below code by the above one
+                # NOTE (ateroide): at a first glance: no, subject_id changes depending on which intra_extesion is used
+                # we must use name which is constant.
+                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
+                authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
+                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
+                admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
+                for _subject_id in authz_subjects_dict:
+                    if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
+                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+                for _subject_id in admin_subjects_dict:
+                    if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
+                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.add_tenant_dict(tenant_dict['id'], tenant_dict)
 
@@ -463,19 +462,18 @@ class TenantManager(manager.Manager):
             raise TenantUnknown()
 
         # Sync users between intra_authz_extension and intra_admin_extension
-        if tenant_dict['intra_admin_extension_id']:
-            if not tenant_dict['intra_authz_extension_id']:
-                raise TenantNoIntraAuthzExtension
-            authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
-            authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
-            admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
-            admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
-            for _subject_id in authz_subjects_dict:
-                if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
-                    self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
-            for _subject_id in admin_subjects_dict:
-                if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
-                    self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+        if 'intra_admin_extension_id' in tenant_dict:
+            if 'intra_authz_extension_id' in tenant_dict:
+                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
+                authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
+                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
+                admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
+                for _subject_id in authz_subjects_dict:
+                    if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
+                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+                for _subject_id in admin_subjects_dict:
+                    if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
+                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 

@@ -100,7 +100,7 @@ class MoonClient(App):
             method = "DELETE"
         self.log.debug("\033[32m{} {}\033[m".format(method, url))
         conn = httplib.HTTPConnection(self.host, self.port)
-        self.log.info("Host: {}:{}".format(self.host, self.port))
+        self.log.debug("Host: {}:{}".format(self.host, self.port))
         headers = {
             "Content-type": "application/x-www-form-urlencoded",
             "Accept": "text/plain,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",

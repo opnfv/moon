@@ -92,9 +92,12 @@ class Tenants(controller.V3Controller):
         tenant_id = kw.get('tenant_id', None)
         tenant_dict = dict()
         tenant_dict['name'] = k_tenant_dict.get('name', None)
-        tenant_dict['description'] = kw.get('tenant_description', None)
-        tenant_dict['intra_authz_extension_id'] = kw.get('tenant_intra_authz_extension_id', None)
-        tenant_dict['intra_admin_extension_id'] = kw.get('tenant_intra_admin_extension_id', None)
+        if 'tenant_description' in kw:
+            tenant_dict['description'] = kw.get('tenant_description', None)
+        if 'tenant_intra_authz_extension_id' in kw:
+            tenant_dict['intra_authz_extension_id'] = kw.get('tenant_intra_authz_extension_id', None)
+        if 'tenant_intra_admin_extension_id' in kw:
+            tenant_dict['intra_admin_extension_id'] = kw.get('tenant_intra_admin_extension_id', None)
         self.tenant_api.set_tenant_dict(user_id, tenant_id, tenant_dict)
 
 
