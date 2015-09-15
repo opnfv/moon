@@ -35,6 +35,8 @@ class MoonClient(App):
     port = "35357"
     tenant = None
     _intraextension = None
+    _tenant_id = None
+    _tenant_name = None
     post = {
         "auth": {
             "identity": {
@@ -74,19 +76,32 @@ class MoonClient(App):
         self.post["auth"]["scope"]["project"]["name"] = creds["tenant_name"]
         self.host = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
         self.port = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[1]
-        self.tenant = creds["tenant_name"]
+        self._tenant_name = creds["tenant_name"]
+
+    @property
+    def tenant_id(self):
+        if not self._tenant_id:
+            self._tenant_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
+                                           authtoken=True)["projects"][0]["id"]
+        return self._tenant_id
+
+    @property
+    def tenant_name(self):
+        return self._tenant_name
 
     @property
     def intraextension(self):
         if not self._intraextension:
             self.log.debug("Setting intraextension")
-            project_id = self.get_url("/v3/projects?name={}".format(self.tenant), authtoken=True)["projects"][0]["id"]
+            project_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
+                                      authtoken=True)["projects"][0]["id"]
             self.log.debug("project_id={}".format(project_id))
             tenants = self.get_url("/v3/OS-MOON/tenants", authtoken=True)
             self.log.debug("tenants={}".format(tenants))
             if project_id not in tenants:
                 self.log.info("Tenant [{}] was not added in Moon".format(project_id))
                 return
+            self._tenant_id = project_id
             if tenants[project_id]['intra_authz_extension_id']:
                 self._intraextension = tenants[project_id]['intra_authz_extension_id']
             elif tenants[project_id]['intra_admin_extension_id']:
