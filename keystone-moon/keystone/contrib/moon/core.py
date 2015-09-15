@@ -853,6 +853,11 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["name"] = filter_input(intra_extension_dict["name"])
         ie_dict["model"] = filter_input(intra_extension_dict["model"])
         ie_dict["genre"] = filter_input(intra_extension_dict["genre"])
+        if not ie_dict["genre"]:
+            if "admin" in ie_dict["model"] or "root" in ie_dict["model"]:
+                ie_dict["genre"] = "admin"
+            else:
+                ie_dict["genre"] = "authz"
         ie_dict["description"] = filter_input(intra_extension_dict["description"])
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
         self.moonlog_api.debug("Creation of IE: {}".format(ref))
