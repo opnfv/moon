@@ -28,11 +28,9 @@ class SubjectsList(Lister):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
                                 authtoken=True)
-        if "subjects" not in data:
-            raise Exception("Error in command {}: {}".format("SubjectsList", data))
         return (
-            ("subjects",),
-            ((_uuid, ) for _uuid in data["subjects"])
+            ("id", "name", "Keystone ID"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["keystone_id"]) for _uuid in data)
         )
 
 
@@ -45,8 +43,8 @@ class SubjectsAdd(Command):
         parser = super(SubjectsAdd, self).get_parser(prog_name)
         parser.add_argument(
             'subject',
-            metavar='<subject-uuid>',
-            help='Subject UUID',
+            metavar='<subject-name>',
+            help='Subject name',
         )
         parser.add_argument(
             '--intraextension',
@@ -59,13 +57,11 @@ class SubjectsAdd(Command):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
-                                post_data={"subject_id": parsed_args.subject},
+                                post_data={"subject_name": parsed_args.subject},
                                 authtoken=True)
-        if "subjects" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("subjects",),
-            ((_uuid, ) for _uuid in data["subjects"])
+            ("id", "name", "Keystone ID"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["keystone_id"]) for _uuid in data)
         )
 
 
