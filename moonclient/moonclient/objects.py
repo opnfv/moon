@@ -28,11 +28,9 @@ class ObjectsList(Lister):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects".format(parsed_args.intraextension),
                                 authtoken=True)
-        if "objects" not in data:
-            raise Exception("Error in command {}: {}".format("ObjectsList", data))
         return (
-            ("objects",),
-            ((_uuid, ) for _uuid in data["objects"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["description"]) for _uuid in data)
         )
 
 
@@ -44,8 +42,8 @@ class ObjectsAdd(Command):
     def get_parser(self, prog_name):
         parser = super(ObjectsAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'object',
-            metavar='<object-uuid>',
+            'object_id',
+            metavar='<object-id>',
             help='Object UUID',
         )
         parser.add_argument(
@@ -53,19 +51,25 @@ class ObjectsAdd(Command):
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
         )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Object description',
+        )
         return parser
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects".format(parsed_args.intraextension),
-                                post_data={"object_id": parsed_args.object},
+                                post_data={
+                                    "object_name": parsed_args.object_id,
+                                    "object_description": parsed_args.description,
+                                },
                                 authtoken=True)
-        if "objects" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("objects",),
-            ((_uuid, ) for _uuid in data["objects"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["description"]) for _uuid in data)
         )
 
 
