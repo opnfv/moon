@@ -56,6 +56,7 @@ class TestsLaunch(Lister):
             global_command_options = tests_dict["command_options"]
         data = list()
         for group_name, tests_list in tests_dict["tests_group"].iteritems():
+            self.log.info("\n\033[1mgroup {}\033[0m".format(group_name))
             self.logfile.write("{}:\n\n".format(group_name))
             for test in tests_list:
                 data_tmp = list()
@@ -68,13 +69,14 @@ class TestsLaunch(Lister):
                     command = test["command"] + " " + global_command_options
                 command = self.__replace_var_in_str(command)
                 self.logfile.write("-----> {}\n".format(command))
-                self.log.info("executing {}".format(command))
+                self.log.info("    \\-executing {}".format(command))
                 self.app.stdout = tmp_filename_fd
                 result_id = self.app.run_subcommand(shlex.split(command))
                 tmp_filename_fd.close()
                 self.app.stdout = stdout_back
                 result_str = open(tmp_filename, "r").read()
                 self.logfile.write("{}".format(result_str))
+                data_tmp.append(group_name)
                 data_tmp.append(test["name"])
                 compare = self.__compare_results(self.__replace_var_in_str(test["result"]), result_str)
                 self.logfile.write("----->{} ({})\n\n".format(compare, self.__replace_var_in_str(test["result"])))
@@ -87,6 +89,6 @@ class TestsLaunch(Lister):
                 data.append(data_tmp)
 
         return (
-            ("test_name", "result", "description"),
+            ("group_name", "test_name", "result", "description"),
             data
         )
