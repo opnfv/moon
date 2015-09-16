@@ -1,7 +1,7 @@
 {
   "command_options": "-f value",
   "tests_group": {
-    "group1": [
+    "main": [
       {
         "name": "list tenant",
         "command": "tenant list",
@@ -49,17 +49,31 @@
       },
       {
         "name": "set_tenant_authz",
-        "command": "tenant set --authz $uuid_authz demo",
+        "command": "tenant set --authz $uuid_authz $uuid",
         "result": "",
-        "description": "Connect the authz intra extension to the tenant demo",
+        "description": "Connect the authz intra extension to the tenant alt_demo",
         "command_options": ""
       },
       {
+        "name": "check authz ie for tenant alt_demo",
+        "command": "tenant list",
+        "result": "alt_demo $uuid_authz",
+        "description": "Check that authz ie has been correctly added for tenant alt_demo ",
+        "command_options": "-c name -c intra_authz_extension_id -f value"
+      },
+      {
         "name": "set_tenant_admin",
-        "command": "tenant set --admin $uuid_admin demo",
+        "command": "tenant set --admin $uuid_admin $uuid",
         "result": "",
-        "description": "Connect the admin intra extension to the tenant demo",
+        "description": "Connect the admin intra extension to the tenant alt_demo",
         "command_options": ""
+      },
+      {
+        "name": "check admin ie for tenant alt_demo",
+        "command": "tenant list",
+        "result": "alt_demo $uuid_admin",
+        "description": "Check that admin ie has been correctly added for tenant alt_demo ",
+        "command_options": "-c name -c intra_admin_extension_id -f value"
       },
       {
         "name": "delete_admin_intra_extension",
