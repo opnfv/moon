@@ -28,11 +28,9 @@ class ActionsList(Lister):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/actions".format(parsed_args.intraextension),
                                 authtoken=True)
-        if "actions" not in data:
-            raise Exception("Error in command {}: {}".format("ActionsList", data))
         return (
-            ("actions",),
-            ((_uuid, ) for _uuid in data["actions"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]['name'], data[_uuid]['description']) for _uuid in data)
         )
 
 
@@ -44,14 +42,19 @@ class ActionsAdd(Command):
     def get_parser(self, prog_name):
         parser = super(ActionsAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'action',
-            metavar='<action-uuid>',
-            help='Action UUID',
+            'action_name',
+            metavar='<action-name>',
+            help='Action name',
         )
         parser.add_argument(
             '--intraextension',
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
+        )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Action description',
         )
         return parser
 
@@ -59,13 +62,14 @@ class ActionsAdd(Command):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/actions".format(parsed_args.intraextension),
-                                post_data={"action_id": parsed_args.action},
+                                post_data={
+                                    "action_name": parsed_args.action_name,
+                                    "action_description": parsed_args.description,
+                                },
                                 authtoken=True)
-        if "actions" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("actions",),
-            ((_uuid, ) for _uuid in data["actions"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]['name'], data[_uuid]['description']) for _uuid in data)
         )
 
 
