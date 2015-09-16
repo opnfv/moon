@@ -120,6 +120,8 @@ setup(
             'rule_add = moonclient.rules:RuleAdd',
             'rule_delete = moonclient.rules:RuleDelete',
             'log = moonclient.logs:LogsList',
+
+            'tests = moonclient.tests:TestsLaunch',
         ],
     },
 
