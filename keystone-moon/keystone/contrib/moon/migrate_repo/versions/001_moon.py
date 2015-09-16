@@ -138,7 +138,7 @@ def upgrade(migrate_engine):
         'object_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('object_assignments', k_sql.JsonBlob(), nullable=True),
+        sql.Column('object_assignment', k_sql.JsonBlob(), nullable=True),
         sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
         sql.Column('object_id', sql.ForeignKey("objects.id"), nullable=False),
         sql.Column('object_category_id', sql.ForeignKey("object_categories.id"), nullable=False),
