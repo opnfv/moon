@@ -29,9 +29,9 @@ class IntraExtensionSelect(Command):
         ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
         if parsed_args.id in ie.keys():
             self.app.intraextension = parsed_args.id
-            self.log.info("Select {} IntraExtension.".format(self.app.intraextension))
+            self.app.stdout.write("Select {} IntraExtension.\n".format(self.app.intraextension))
         else:
-            self.log.error("IntraExtension {} unknown.".format(parsed_args.id))
+            self.app.stdout.write("IntraExtension {} unknown.\n".format(parsed_args.id))
         return
 
 

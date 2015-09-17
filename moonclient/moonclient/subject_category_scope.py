@@ -17,6 +17,11 @@ class SubjectCategoryScopeList(Lister):
     def get_parser(self, prog_name):
         parser = super(SubjectCategoryScopeList, self).get_parser(prog_name)
         parser.add_argument(
+            'category',
+            metavar='<category-uuid>',
+            help='Category UUID',
+        )
+        parser.add_argument(
             '--intraextension',
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
@@ -26,13 +31,12 @@ class SubjectCategoryScopeList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_category_scope".format(parsed_args.intraextension),
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+            parsed_args.intraextension, parsed_args.category),
                                 authtoken=True)
-        if "subject_category_scope" not in data:
-            raise Exception("Error in command {}: {}".format("SubjectCategoryScopeList", data))
         return (
-            ("subject_category", "subject_category_scope",),
-            ((_val1, str(_val2)) for _val1, _val2 in data["subject_category_scope"].items())
+            ("id", "name", "description"),
+            ((_id, data[_id]["name"], data[_id]["description"]) for _id in data)
         )
 
 
@@ -44,14 +48,19 @@ class SubjectCategoryScopeAdd(Command):
     def get_parser(self, prog_name):
         parser = super(SubjectCategoryScopeAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'subject_category',
-            metavar='<subject_category-uuid>',
-            help='Subject UUID',
+            'category',
+            metavar='<category-uuid>',
+            help='Category UUID',
         )
         parser.add_argument(
-            'subject_category_scope',
-            metavar='<subject_category_scope-uuid>',
-            help='Subject UUID',
+            'scope_name',
+            metavar='<scope-str>',
+            help='Scope Name',
+        )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Description',
         )
         parser.add_argument(
             '--intraextension',
@@ -63,17 +72,16 @@ class SubjectCategoryScopeAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_category_scope".format(parsed_args.intraextension),
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+            parsed_args.intraextension, parsed_args.category),
                                 post_data={
-                                    "subject_category_id": parsed_args.subject_category,
-                                    "subject_category_scope_id": parsed_args.subject_category_scope,
+                                    "subject_scope_name": parsed_args.scope_name,
+                                    "subject_scope_description": parsed_args.description,
                                 },
                                 authtoken=True)
-        if "subject_category_scope" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("subject_category", "subject_category_scope",),
-            ((_val1, str(_val2)) for _val1, _val2 in data["subject_category_scope"].items())
+            ("id", "name", "description"),
+            ((_id, data[_id]["name"], data[_id]["description"]) for _id in data)
         )
 
 
@@ -85,14 +93,14 @@ class SubjectCategoryScopeDelete(Command):
     def get_parser(self, prog_name):
         parser = super(SubjectCategoryScopeDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'subject_category',
-            metavar='<subject_category-uuid>',
-            help='Subject UUID',
+            'category',
+            metavar='<category-uuid>',
+            help='Category  UUID',
         )
         parser.add_argument(
-            'subject_category_scope',
-            metavar='<subject_category_scope-uuid>',
-            help='Subject UUID',
+            'scope_id',
+            metavar='<scope-uuid>',
+            help='Scope UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -104,10 +112,10 @@ class SubjectCategoryScopeDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_category_scope/{}/{}".format(
+        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}/{}".format(
             parsed_args.intraextension,
-            parsed_args.subject_category,
-            parsed_args.subject_category_scope
+            parsed_args.category,
+            parsed_args.scope_id
         ),
             method="DELETE",
             authtoken=True)
