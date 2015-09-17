@@ -8,6 +8,31 @@ import logging
 from cliff.command import Command
 from cliff.lister import Lister
 from cliff.show import ShowOne
+import os
+
+
+class IntraExtensionSelect(Command):
+    """Select a Intra_Extension to work with."""
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(IntraExtensionSelect, self).get_parser(prog_name)
+        parser.add_argument(
+            'id',
+            metavar='<intraextension-id>',
+            help='IntraExtension UUID to select',
+        )
+        return parser
+
+    def take_action(self, parsed_args):
+        ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
+        if parsed_args.id in ie.keys():
+            self.app.intraextension = parsed_args.id
+            self.log.info("Select {} IntraExtension.".format(self.app.intraextension))
+        else:
+            self.log.error("IntraExtension {} unknown.".format(parsed_args.id))
+        return
 
 
 class IntraExtensionCreate(Command):
@@ -98,59 +123,36 @@ class IntraExtensionShow(ShowOne):
         parser.add_argument(
             'uuid',
             metavar='<intraextension-uuid>',
-            help='IntraExtension UUID',
+            help='IntraExtension UUID (put "selected" if you want to show the selected IntraExtension)',
+            default="selected"
         )
         return parser
 
     def take_action(self, parsed_args):
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(parsed_args.uuid), authtoken=True)
-        if "intra_extensions" not in ie:
-            raise Exception("Error in command {}".format(ie))
+        intra_extension_id = parsed_args.uuid
+        if parsed_args.uuid == "selected":
+            intra_extension_id = self.app.intraextension
+        self.log.debug("self.app.intraextension={}".format(intra_extension_id))
+        ie = self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(intra_extension_id), authtoken=True)
+        self.log.debug("ie={}".format(ie))
+        if "id" not in ie:
+            self.log.error("Unknown intraextension {}".format(intra_extension_id))
+            raise Exception()
         try:
             columns = (
                 "id",
                 "name",
                 "description",
-                "tenant",
-                "enabled",
                 "model",
                 "genre"
             )
             data = (
-                ie["intra_extensions"]["id"],
-                ie["intra_extensions"]["name"],
-                ie["intra_extensions"]["description"],
-                ie["intra_extensions"]["tenant"],
-                ie["intra_extensions"]["enabled"],
-                ie["intra_extensions"]["model"],
-                ie["intra_extensions"]["genre"]
+                ie["id"],
+                ie["name"],
+                ie["description"],
+                ie["model"],
+                ie["genre"]
             )
             return columns, data
         except Exception as e:
             self.app.stdout.write(str(e))
-
-
-class TenantSet(Command):
-    """Set the tenant for a intra_extension."""
-
-    log = logging.getLogger(__name__)
-
-    def get_parser(self, prog_name):
-        parser = super(TenantSet, self).get_parser(prog_name)
-        parser.add_argument(
-            'intraextension_uuid',
-            metavar='<intraextension-uuid>',
-            help='IntraExtension UUID',
-        )
-        parser.add_argument(
-            'tenant_name',
-            metavar='<tenant-name>',
-            help='Tenant Name',
-        )
-        return parser
-
-    def take_action(self, parsed_args):
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/tenant".format(parsed_args.intraextension_uuid),
-                         post_data={"tenant_id": parsed_args.tenant_name},
-                         authtoken=True)
-

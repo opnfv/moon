@@ -68,7 +68,7 @@ setup(
             'tenant_show = moonclient.tenants:TenantShow',
             'tenant_delete = moonclient.tenants:TenantDelete',
 
-            'intraextension_tenant_set = moonclient.intraextension:TenantSet',
+            'intraextension_select = moonclient.intraextension:IntraExtensionSelect',
             'intraextension_create = moonclient.intraextension:IntraExtensionCreate',
             'intraextension_list = moonclient.intraextension:IntraExtensionList',
             'intraextension_delete = moonclient.intraextension:IntraExtensionDelete',

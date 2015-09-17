@@ -37,6 +37,7 @@ class MoonClient(App):
     _intraextension = None
     _tenant_id = None
     _tenant_name = None
+    user_saving_file = ".moonclient"
     post = {
         "auth": {
             "identity": {
@@ -91,25 +92,12 @@ class MoonClient(App):
 
     @property
     def intraextension(self):
-        if not self._intraextension:
-            self.log.debug("Setting intraextension")
-            project_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
-                                      authtoken=True)["projects"][0]["id"]
-            self.log.debug("project_id={}".format(project_id))
-            tenants = self.get_url("/v3/OS-MOON/tenants", authtoken=True)
-            self.log.debug("tenants={}".format(tenants))
-            if project_id not in tenants:
-                self.log.info("Tenant [{}] was not added in Moon".format(project_id))
-                return
-            self._tenant_id = project_id
-            if tenants[project_id]['intra_authz_extension_id']:
-                self._intraextension = tenants[project_id]['intra_authz_extension_id']
-            elif tenants[project_id]['intra_admin_extension_id']:
-                self._intraextension = tenants[project_id]['intra_admin_extension_id']
-            else:
-                self._intraextension = None
-                self.log.info("No intra_extension found for tenant [{}].".format(project_id))
-        return self._intraextension
+        return open(os.path.join(os.getenv('HOME'), self.user_saving_file)).read().strip()
+
+    @intraextension.setter
+    def intraextension(self, value):
+        self._intraextension = value
+        open(os.path.join(os.getenv('HOME'), self.user_saving_file), "w").write(value)
 
     def get_tenant_uuid(self, tenant_name):
         return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True)["projects"][0]["id"]
