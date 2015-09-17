@@ -28,11 +28,9 @@ class SubjectCategoriesList(Lister):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(parsed_args.intraextension),
                                 authtoken=True)
-        if "subject_categories" not in data:
-            raise Exception("Error in command {}: {}".format("SubjectCategoriesList", data))
         return (
-            ("subject_categories",),
-            ((_uuid, ) for _uuid in data["subject_categories"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["description"]) for _uuid in data)
         )
 
 
@@ -53,19 +51,25 @@ class SubjectCategoriesAdd(Command):
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
         )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Category description',
+        )
         return parser
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(parsed_args.intraextension),
-                                post_data={"subject_category_id": parsed_args.subject_category},
+                                post_data={
+                                    "subject_category_name": parsed_args.subject_category,
+                                    "subject_category_description": parsed_args.description,
+                                },
                                 authtoken=True)
-        if "subject_categories" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("subject_categories",),
-            ((_uuid, ) for _uuid in data["subject_categories"])
+            ("id", "name", "description"),
+            ((_uuid, data[_uuid]["name"], data[_uuid]["description"]) for _uuid in data)
         )
 
 
