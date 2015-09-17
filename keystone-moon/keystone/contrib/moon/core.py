@@ -142,7 +142,6 @@ def enforce(action_names, object_name, **extra):
     def wrap(func):
 
         def wrapped(*args, **kwargs):
-            # global ADMIN_ID, ROOT_EXTENSION_ID
             returned_value_for_func = None
             self = args[0]
             try:
@@ -152,29 +151,7 @@ def enforce(action_names, object_name, **extra):
             intra_extension_id = None
             intra_admin_extension_id = None
 
-            # try:
             intra_root_extension_id = self.root_api.get_root_extension_id()
-            # except RootExtensionNotInitialized:
-            #     # Root extension is not initialized, the current requested function must be the creation
-            #     # of this root extension
-            #     returned_value_for_func = func(*args, **kwargs)
-            #     # after the creation, we must update ROOT_EXTENSION_ID and ADMIN_ID
-            #     intra_extensions_dict = self.admin_api.driver.get_intra_extensions_dict()
-            #     for ext in intra_extensions_dict:
-            #         if intra_extensions_dict[ext]["model"] == ROOT_EXTENSION_MODEL:
-            #             ROOT_EXTENSION_ID = ext
-            #             break
-            #     if not ROOT_EXTENSION_ID:
-            #         raise RootExtensionUnknown()
-            #     subjects_dict = self.admin_api.driver.get_subjects_dict(returned_value_for_func['id'])
-            #     for subject_id in subjects_dict:
-            #         if subjects_dict[subject_id]["name"] == "admin":
-            #             ADMIN_ID = subject_id
-            #             break
-            #     if not ADMIN_ID:
-            #         raise RootExtensionUnknown()
-            #     # if all is OK, return values from func (creation of the root extension)
-            #     return returned_value_for_func
             try:
                 intra_extension_id = args[2]
             except IndexError:
@@ -183,7 +160,7 @@ def enforce(action_names, object_name, **extra):
                 else:
                     intra_extension_id = intra_root_extension_id
 
-            if user_id == self.root_api.get_root_admin_id():
+            if self.root_api.is_admin_subject(user_id):
                 # TODO: check if there is no security hole here
                 returned_value_for_func = func(*args, **kwargs)
             else:
@@ -238,7 +215,14 @@ def enforce(action_names, object_name, **extra):
                         try:
                             subject_name = subjects_dict[user_id]["name"]
                         except KeyError:
-                            raise SubjectUnknown()
+                            subject_name = None
+                            # Try if user_id is a Keystone ID
+                            try:
+                                for _subject_id in subjects_dict:
+                                    if subjects_dict[_subject_id]["keystone_id"] == user_id:
+                                        subject_name = subjects_dict[_subject_id]["name"]
+                            except KeyError:
+                                raise SubjectUnknown()
                         intra_admin_extension_id = intra_root_extension_id
                         subjects_dict = self.admin_api.driver.get_subjects_dict(intra_admin_extension_id)
                         user_id = None
@@ -2073,9 +2057,7 @@ class IntraExtensionRootManager(IntraExtensionManager):
     def __init__(self):
         super(IntraExtensionRootManager, self).__init__()
         extensions = self.admin_api.driver.get_intra_extensions_dict()
-        LOG.debug("extensions {}".format(extensions))
         for extension_id, extension_dict in extensions.iteritems():
-            LOG.debug("{} / {}".format(extension_dict["name"], CONF.moon.root_policy_directory))
             if extension_dict["name"] == CONF.moon.root_policy_directory:
                 self.root_extension_id = extension_id
                 break
@@ -2094,9 +2076,7 @@ class IntraExtensionRootManager(IntraExtensionManager):
         return {self.root_extension_id: self.admin_api.driver.get_intra_extensions_dict()[self.root_extension_id]}
 
     def __compute_admin_id_for_root_extension(self):
-        LOG.debug(self.admin_api.driver.get_subjects_dict(self.root_extension_id))
         for subject_id, subject_dict in self.admin_api.driver.get_subjects_dict(self.root_extension_id).iteritems():
-            LOG.debug("subject_name = {}".format(subject_dict["name"]))
             if subject_dict["name"] == "admin":
                 return subject_id
         raise RootExtensionNotInitialized()
@@ -2107,6 +2087,14 @@ class IntraExtensionRootManager(IntraExtensionManager):
     def get_root_admin_id(self):
         return self.root_admin_id
 
+    def is_admin_subject(self, keystone_id):
+        for subject_id, subject_dict in self.admin_api.driver.get_subjects_dict(self.root_extension_id).iteritems():
+            if subject_id == keystone_id:
+                # subject_id may be a true id from an intra_extension
+                return True
+            if subject_dict["name"] == "admin" and subject_dict["keystone_id"] == keystone_id:
+                return True
+        return False
 
 @dependency.provider('moonlog_api')
 # Next line is mandatory in order to force keystone to process dependencies.
