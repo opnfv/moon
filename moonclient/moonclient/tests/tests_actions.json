@@ -36,36 +36,50 @@
       },
       {
         "name": "set_tenant_authz",
-        "command": "tenant set --authz $uuid_authz alt_demo",
+        "command": "tenant set --authz $uuid_authz $uuid",
         "result": "",
         "description": "Connect the authz intra extension to the tenant alt_demo",
         "command_options": ""
       },
       {
-        "name": "add_subject",
-        "command": "subject add alt_demo",
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "add_action",
+        "command": "action add new_action_1",
         "result": "",
-        "description": "Connect the authz intra extension to the tenant demo",
+        "description": "Add a new action.",
         "command_options": ""
       },
       {
-        "name": "list_subject",
-        "command": "subject list",
-        "result": "(?P<uuid_subject>\\w+)\\s+alt_demo",
-        "description": "Check that alt_demo subject was added."
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action>\\w+)\\s+new_action_1",
+        "description": "Check that new_action_1 action was added."
       },
       {
-        "name": "delete_subject",
-        "command": "subject delete $uuid_subject",
+        "name": "delete_action",
+        "command": "action delete $uuid_action",
         "result": "^$",
-        "description": "Delete alt_demo subject.",
+        "description": "Delete new_action_1 action.",
         "command_options": ""
       },
       {
-        "name": "list_subject",
-        "command": "subject list",
-        "result": "(?!$uuid_subject)",
-        "description": "Check that alt_demo subject was deleted."
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?!$uuid_action)",
+        "description": "Check that new_action_1 action was deleted."
       },
       {
         "name": "delete_authz_intra_extension",
@@ -157,30 +171,44 @@
         "command_options": "-c intra_admin_extension_id -f value"
       },
       {
-        "name": "add_subject",
-        "command": "subject add alt_demo",
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "add_action",
+        "command": "action add new_action_1",
         "result": "",
-        "description": "Connect the authz intra extension to the tenant alt_demo",
+        "description": "Add a new action.",
         "command_options": ""
       },
       {
-        "name": "list_subject",
-        "command": "subject list",
-        "result": "(?P<uuid_subject>\\w+)\\s+alt_demo",
-        "description": "Check that alt_demo subject was added."
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action>\\w+)\\s+new_action_1",
+        "description": "Check that new_action_1 action was added."
       },
       {
-        "name": "delete_subject",
-        "command": "subject delete $uuid_subject",
+        "name": "delete_action",
+        "command": "action delete $uuid_action",
         "result": "^$",
-        "description": "Delete alt_demo subject.",
+        "description": "Delete new_action_1 action.",
         "command_options": ""
       },
       {
-        "name": "list_subject",
-        "command": "subject list",
-        "result": "(?!$uuid_subject)",
-        "description": "Check that alt_demo subject was deleted."
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?!$uuid_action)",
+        "description": "Check that new_action_1 action was deleted."
       },
       {
         "name": "delete_admin_intra_extension",
