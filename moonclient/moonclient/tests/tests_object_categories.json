@@ -1,0 +1,236 @@
+{
+  "command_options": "-f value",
+  "tests_group": {
+    "authz": [
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "(?!alt_demo)",
+        "description": "Check if tenant alt_demo is used."
+      },
+      {
+        "name": "add tenant alt_demo",
+        "command": "tenant add alt_demo",
+        "result": "^$",
+        "description": "Add a new tenant",
+        "command_options": ""
+      },
+      {
+        "name": "check tenant alt_demo",
+        "command": "tenant list",
+        "result": "(?P<uuid>\\w+)\\s+alt_demo",
+        "description": "Check that tenant alt_demo has been correctly added"
+      },
+      {
+        "name": "create_intraextension_authz",
+        "command": "intraextension create --policy_model policy_authz authz_test",
+        "result": "IntraExtension created: (?P<uuid_authz>\\w+)",
+        "description": "Create an authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "list_intraextension_authz",
+        "command": "intraextension list",
+        "result": "$uuid_authz",
+        "description": "Check the existence of that authz intra extension"
+      },
+      {
+        "name": "set_tenant_authz",
+        "command": "tenant set --authz $uuid_authz $uuid",
+        "result": "",
+        "description": "Connect the authz intra extension to the tenant alt_demo",
+        "command_options": ""
+      },
+      {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "add_object_category",
+        "command": "object category add my_new_object_category",
+        "result": "",
+        "description": "Add the new object category my_new_object_category",
+        "command_options": ""
+      },
+      {
+        "name": "list_object_category",
+        "command": "object category list",
+        "result": "(?P<uuid_object_category>\\w+)\\s+my_new_object_category",
+        "description": "Check that my_new_object_category object_category was added."
+      },
+      {
+        "name": "delete_object_category",
+        "command": "object category delete $uuid_object_category",
+        "result": "^$",
+        "description": "Delete my_new_object_category object_category.",
+        "command_options": ""
+      },
+      {
+        "name": "list_object_category",
+        "command": "object category list",
+        "result": "(?!$uuid_object_category)",
+        "description": "Check that my_new_object_category object_category was deleted."
+      },
+      {
+        "name": "delete_authz_intra_extension",
+        "command": "intraextension delete $uuid_authz",
+        "result": "",
+        "description": "Delete the authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "delete_tenant",
+        "command": "tenant delete $uuid",
+        "result": "",
+        "description": "Delete the tenant alt_demo",
+        "command_options": ""
+      }
+    ],
+    "authz_and_admin": [
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "(?!alt_demo)",
+        "description": "Check if tenant alt_demo is used."
+      },
+      {
+        "name": "add tenant alt_demo",
+        "command": "tenant add alt_demo",
+        "result": "^$",
+        "description": "Add a new tenant",
+        "command_options": ""
+      },
+      {
+        "name": "check tenant alt_demo",
+        "command": "tenant list",
+        "result": "(?P<uuid>\\w+)\\s+alt_demo",
+        "description": "Check that tenant alt_demo has been correctly added"
+      },
+      {
+        "name": "create_intraextension_authz",
+        "command": "intraextension create --policy_model policy_authz authz_test",
+        "result": "IntraExtension created: (?P<uuid_authz>\\w+)",
+        "description": "Create an authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "list_intraextension_authz",
+        "command": "intraextension list",
+        "result": "$uuid_authz",
+        "description": "Check the existence of that authz intra extension"
+      },
+      {
+        "name": "create_intraextension_admin",
+        "command": "intraextension create --policy_model policy_admin admin_test",
+        "result": "IntraExtension created: (?P<uuid_admin>\\w+)",
+        "description": "Create an admin intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "list_intraextension_admin",
+        "command": "intraextension list",
+        "result": "$uuid_admin",
+        "description": "Check the existence of that admin intra extension"
+      },
+      {
+        "name": "set_tenant_authz",
+        "command": "tenant set --authz $uuid_authz $uuid",
+        "result": "",
+        "description": "Connect the authz intra extension to the tenant demo",
+        "command_options": ""
+      },
+      {
+        "name": "set_tenant_admin",
+        "command": "tenant set --admin $uuid_admin $uuid",
+        "result": "",
+        "description": "Connect the authz intra extension to the tenant alt_demo",
+        "command_options": ""
+      },
+      {
+        "name": "check tenant alt_demo and authz ie",
+        "command": "tenant list",
+        "result": "alt_demo $uuid_authz",
+        "description": "Check that authz intra extension has been correctly added to the tenant.",
+        "command_options": "-c name -c intra_authz_extension_id -f value"
+      },
+      {
+        "name": "check tenant alt_demo and admin ie",
+        "command": "tenant list",
+        "result": "$uuid_admin",
+        "description": "Check that admin intra extension has been correctly added to the tenant.",
+        "command_options": "-c intra_admin_extension_id -f value"
+      },
+      {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "add_object_category",
+        "command": "object category add my_new_object_category",
+        "result": "",
+        "description": "Add the new object category my_new_object_category",
+        "command_options": ""
+      },
+      {
+        "name": "list_object_category",
+        "command": "object category list",
+        "result": "(?P<uuid_object_category>\\w+)\\s+my_new_object_category",
+        "description": "Check that my_new_object_category object_category was added."
+      },
+      {
+        "name": "delete_object_category",
+        "command": "object category delete $uuid_object_category",
+        "result": "^$",
+        "description": "Delete my_new_object_category object_category.",
+        "command_options": ""
+      },
+      {
+        "name": "list_object_category",
+        "command": "object category list",
+        "result": "(?!$uuid_object_category)",
+        "description": "Check that my_new_object_category object_category was deleted."
+      },
+      {
+        "name": "delete_admin_intra_extension",
+        "command": "intraextension delete $uuid_admin",
+        "result": "",
+        "description": "Delete the admin intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "delete_authz_intra_extension",
+        "command": "intraextension delete $uuid_authz",
+        "result": "",
+        "description": "Delete the authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "delete_tenant",
+        "command": "tenant delete $uuid",
+        "result": "",
+        "description": "Delete the tenant alt_demo",
+        "command_options": ""
+      }
+    ]
+  }
+}
