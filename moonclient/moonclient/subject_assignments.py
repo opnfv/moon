@@ -17,22 +17,38 @@ class SubjectAssignmentsList(Lister):
     def get_parser(self, prog_name):
         parser = super(SubjectAssignmentsList, self).get_parser(prog_name)
         parser.add_argument(
+            'subject_id',
+            metavar='<subject-uuid>',
+            help='Subject UUID',
+        )
+        parser.add_argument(
+            'category_id',
+            metavar='<category-uuid>',
+            help='Category UUID',
+        )
+        parser.add_argument(
             '--intraextension',
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
         )
         return parser
 
+    def __get_scope_from_id(self, intraextension_id, category_id, scope_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+            intraextension_id, category_id),
+            authtoken=True)
+        if scope_id in data:
+            return data[scope_id]
+
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments".format(parsed_args.intraextension),
-                                authtoken=True)
-        if "subject_assignments" not in data:
-            raise Exception("Error in command {}: {}".format("SubjectAssignmentsList", data))
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments/{}/{}".format(
+            parsed_args.intraextension, parsed_args.subject_id, parsed_args.category_id),
+            authtoken=True)
         return (
-            ("category", "value"),
-            ((_cat, str(_val)) for _cat, _val in data["subject_assignments"].items())
+            ("id", "name"),
+            ((_id, self.__get_scope_from_id(parsed_args.intraextension, parsed_args.category_id, _id)['name']) for _id in data)
         )
 
 
@@ -50,12 +66,12 @@ class SubjectAssignmentsAdd(Command):
         )
         parser.add_argument(
             'subject_category',
-            metavar='<subject_category>',
+            metavar='<subject_category-uuid>',
             help='Subject Category',
         )
         parser.add_argument(
             'subject_category_scope',
-            metavar='<subject_category_scope>',
+            metavar='<subject_category_scope-uuid>',
             help='Subject Category Scope',
         )
         parser.add_argument(
@@ -65,21 +81,26 @@ class SubjectAssignmentsAdd(Command):
         )
         return parser
 
+    def __get_scope_from_id(self, intraextension_id, category_id, scope_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+            intraextension_id, category_id),
+            authtoken=True)
+        if scope_id in data:
+            return data[scope_id]
+
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments".format(parsed_args.intraextension),
                                 post_data={
                                     "subject_id": parsed_args.subject_id,
-                                    "subject_category": parsed_args.subject_category,
-                                    "subject_category_scope": parsed_args.subject_category_scope
+                                    "subject_category_id": parsed_args.subject_category,
+                                    "subject_scope_id": parsed_args.subject_category_scope
                                 },
                                 authtoken=True)
-        if "subject_assignments" not in data:
-            raise Exception("Error in command {}".format(data))
         return (
-            ("category", "value"),
-            ((_cat, str(_val)) for _cat, _val in data["subject_assignments"].items())
+            ("id", "name"),
+            ((_id, self.__get_scope_from_id(parsed_args.intraextension, parsed_args.category_id, _id)['name']) for _id in data)
         )
 
 
