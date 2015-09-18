@@ -42,6 +42,20 @@
         "command_options": ""
       },
       {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
         "name": "add_subject",
         "command": "subject add alt_demo",
         "result": "",
@@ -155,6 +169,20 @@
         "result": "$uuid_admin",
         "description": "Check that admin intra extension has been correctly added to the tenant.",
         "command_options": "-c intra_admin_extension_id -f value"
+      },
+      {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
       },
       {
         "name": "add_subject",
