@@ -33,7 +33,7 @@ class TestsLaunch(Lister):
     def __replace_var_in_str(self, data_str):
         for exp in re.findall("\$\w+", data_str):
             if exp.replace("$", "") in self.result_vars:
-                data_str = data_str.replace(exp, self.result_vars[exp.replace("$", "")])
+                data_str = re.sub(exp.replace("$", "\$") + "(?=$|\s)", self.result_vars[exp.replace("$", "")], data_str)
         return data_str
 
     def __compare_results(self, expected, observed):
