@@ -812,7 +812,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))
             session.flush()
-            return self.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id)
+            return subject_assignment_list
 
     def add_subject_assignment_list(self, intra_extension_id, subject_id, subject_category_id, subject_scope_id):
         new_subject_assignment_list = self.get_subject_assignment_list(intra_extension_id, subject_id, subject_category_id)
