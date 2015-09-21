@@ -438,7 +438,7 @@ Copyright (C) 2010 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/home/michel/Documents/Pro/POC/cpabe-0.11'
+ac_pwd='/home/wukong/workspace/opnfv-moon/moon-abe/cpabe-0.11'
 srcdir='.'
 test -n "$AWK" || AWK=awk
 # The default lists apply if the user does not specify any file.
@@ -600,8 +600,8 @@ S["GMP_CFLAGS"]=""
 S["GLIB_MKENUMS"]="glib-mkenums"
 S["GOBJECT_QUERY"]="gobject-query"
 S["GLIB_GENMARSHAL"]="glib-genmarshal"
-S["GLIB_LIBS"]="-L/usr/local/lib -lglib-2.0  "
-S["GLIB_CFLAGS"]="-I/usr/local/include/glib-2.0 -I/usr/local/lib/glib-2.0/include  "
+S["GLIB_LIBS"]="-lglib-2.0  "
+S["GLIB_CFLAGS"]="-I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include  "
 S["PKG_CONFIG"]="/usr/bin/pkg-config"
 S["LIBOBJS"]=""
 S["EGREP"]="/bin/grep -E"
