@@ -10,7 +10,7 @@ import json
 from keystone import config
 from keystone.contrib.moon.core import ConfigurationDriver
 from oslo_log import log
-
+import hashlib
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -21,8 +21,10 @@ class ConfigurationConnector(ConfigurationDriver):
     def __init__(self):
         super(ConfigurationConnector, self).__init__()
         self.aggregation_algorithms_dict = dict()
-        self.aggregation_algorithms_dict[uuid4().hex] = {'name': 'all_true', 'description': 'all_true'}
-        self.aggregation_algorithms_dict[uuid4().hex] = {'name': 'one_true', 'description': 'one_true'}
+        self.aggregation_algorithms_dict[hashlib.sha224("all_true").hexdigest()[:32]] = \
+            {'name': 'all_true', 'description': 'all rules must match'}
+        self.aggregation_algorithms_dict[hashlib.sha224("one_true").hexdigest()[:32]] = \
+            {'name': 'one_true', 'description': 'only one rule has to match'}
         self.sub_meta_rule_algorithms_dict = dict()
         self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'inclusion', 'description': 'inclusion'}
         self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'comparison', 'description': 'comparison'}

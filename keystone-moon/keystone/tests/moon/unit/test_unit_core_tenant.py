@@ -8,12 +8,13 @@
 import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
-from keystone.contrib.moon.core import TenantManager
+from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager
-from keystone.contrib.moon.core import ConfigurationManager
+from keystone.contrib.moon.core import IntraExtensionRootManager
+from keystone.contrib.moon.core import IntraExtensionAdminManager
 from keystone.common import dependency
 from keystone.tests.moon.unit import *
 
@@ -52,7 +53,10 @@ class TestTenantManager(tests.TestCase):
 
     def load_extra_backends(self):
         return {
-            "moonlog_api": LogManager()
+            "moonlog_api": LogManager(),
+            "admin_api": IntraExtensionAdminManager(),
+            "configuration_api": ConfigurationManager(),
+            "root_api": IntraExtensionRootManager(),
         }
 
     def config_overrides(self):

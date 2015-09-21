@@ -942,38 +942,30 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     # Getter and Setter for sub_meta_rule
 
-    def get_aggregation_algorithm_dict(self, intra_extension_id):
+    def get_aggregation_algorithm_id(self, intra_extension_id):
         with sql.transaction() as session:
-            query = session.query(AggregationAlgorithm)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
+            query = session.query(IntraExtension)
+            query = query.filter_by(id=intra_extension_id)
             ref = query.first()
             try:
-                return {ref.id: ref.aggregation_algorithm}
-            except AttributeError:
-                return {}
+                return ref.intra_extension["aggregation_algorithm"]
+            except KeyError:
+                return ""
 
-    def set_aggregation_algorithm_dict(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+    def set_aggregation_algorithm_id(self, intra_extension_id, aggregation_algorithm_id):
+        with sql.transaction() as session:
+            query = session.query(IntraExtension)
+            query = query.filter_by(id=intra_extension_id)
+            ref = query.first()
+            intra_extension_dict = dict(ref.intra_extension)
+            intra_extension_dict["aggregation_algorithm"] = aggregation_algorithm_id
+            setattr(ref, "intra_extension", intra_extension_dict)
+            return self.get_aggregation_algorithm_id(intra_extension_id)
+
+    def del_aggregation_algorithm(self, intra_extension_id):
         with sql.transaction() as session:
             query = session.query(AggregationAlgorithm)
             query = query.filter_by(intra_extension_id=intra_extension_id)
-            ref = query.first()
-            new_ref = AggregationAlgorithm.from_dict(
-                {
-                    "id": aggregation_algorithm_id,
-                    'aggregation_algorithm': aggregation_algorithm_dict,
-                    'intra_extension_id': intra_extension_id
-                }
-            )
-            if ref:
-                session.delete(ref)
-            session.add(new_ref)
-            session.flush()
-            return self.get_aggregation_algorithm_dict(intra_extension_id)
-
-    def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
-        with sql.transaction() as session:
-            query = session.query(AggregationAlgorithm)
-            query = query.filter_by(intra_extension_id=intra_extension_id, id=aggregation_algorithm_id)
             ref = query.first()
             session.delete(ref)
 

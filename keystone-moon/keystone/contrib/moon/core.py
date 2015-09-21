@@ -335,6 +335,7 @@ class ConfigurationManager(manager.Manager):
 
 
 @dependency.provider('tenant_api')
+@dependency.requires('admin_api', 'resource_api', 'root_api')
 @dependency.requires('moonlog_api', 'admin_api', 'configuration_api', 'root_api', 'resource_api')
 class TenantManager(manager.Manager):
 
@@ -461,6 +462,7 @@ class TenantManager(manager.Manager):
 
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 
+
 @dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'moonlog_api', 'root_api')
 class IntraExtensionManager(manager.Manager):
 
@@ -468,6 +470,15 @@ class IntraExtensionManager(manager.Manager):
 
     def __init__(self):
         super(IntraExtensionManager, self).__init__(CONF.moon.intraextension_driver)
+        self.__init_aggregation_algorithm()
+
+    def __init_aggregation_algorithm(self):
+        try:
+            self.root_extension_id = self.root_api.get_root_extension_id()
+            self.aggregation_algorithm_dict = self.configuration_api.get_aggregation_algorithms_dict(self.root_extension_id)
+        except AttributeError:
+            self.root_extension_id = None
+            self.aggregation_algorithm_dict = {}
 
     def __get_authz_buffer(self, intra_extension_id, subject_id, object_id, action_id):
         """
@@ -548,13 +559,12 @@ class IntraExtensionManager(manager.Manager):
                     meta_rule_dict[sub_meta_rule_id],
                     self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values())
 
-        aggregation_algorithm_dict = self.driver.get_aggregation_algorithm_dict(intra_extension_id)
-        # We suppose here that we have only one aggregation algorithm for one intra_extension
-        # TODO: need more work on this part of the model HR: what to do?
-        aggregation_algorithm_id = aggregation_algorithm_dict.keys()[0]
-        if aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
+        if not self.root_extension_id:
+            self.__init_aggregation_algorithm()
+        aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)
+        if self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
             decision = all_true(decision_buffer)
-        elif aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'one_true':
+        elif self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'one_true':
             decision = one_true(decision_buffer)
         if not decision:
             raise AuthzException("{} {}-{}-{}".format(intra_extension_id, subject_id, action_id, object_id))
@@ -773,11 +783,9 @@ class IntraExtensionManager(manager.Manager):
             "aggregation": json_metarule["aggregation"],
             "sub_meta_rules": metarule
         }
-        self.driver.set_aggregation_algorithm_dict(intra_extension_dict["id"], uuid4().hex,
-                                              {
-                                                  "name": json_metarule["aggregation"],
-                                                  "description": json_metarule["aggregation"],
-                                              })
+        for _id, _value in self.configuration_api.driver.get_aggregation_algorithms_dict().iteritems():
+            if _value["name"] == json_metarule["aggregation"]:
+                self.driver.set_aggregation_algorithm_id(intra_extension_dict["id"], _id)
 
     def __load_rule_file(self, intra_extension_dict, policy_dir):
 
@@ -912,8 +920,7 @@ class IntraExtensionManager(manager.Manager):
             for rule_id in self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id):
                 self.driver.del_rule(intra_extension_id, sub_meta_rule_id, rule_id)
             self.driver.del_sub_meta_rule(intra_extension_id, sub_meta_rule_id)
-        for aggregation_algorithm_id in self.driver.get_aggregation_algorithm_dict(intra_extension_id):
-            self.driver.del_aggregation_algorithm(intra_extension_id, aggregation_algorithm_id)
+        self.driver.del_aggregation_algorithm(intra_extension_id)
         for subject_id in self.driver.get_subjects_dict(intra_extension_id):
             for subject_category_id in self.driver.get_subject_categories_dict(intra_extension_id):
                 self.driver.del_subject_scope(intra_extension_id, None, None)
@@ -1608,7 +1615,7 @@ class IntraExtensionManager(manager.Manager):
 
     @filter_input
     @enforce("read", "aggregation_algorithm")
-    def get_aggregation_algorithm_dict(self, user_id, intra_extension_id):
+    def get_aggregation_algorithm_id(self, user_id, intra_extension_id):
         """
         :param user_id:
         :param intra_extension_id:
@@ -1616,20 +1623,19 @@ class IntraExtensionManager(manager.Manager):
             aggregation_algorithm_id: {name: xxx, description: yyy}
             }
         """
-        aggregation_algorithm_dict = self.driver.get_aggregation_algorithm_dict(intra_extension_id)
-        if not aggregation_algorithm_dict:
+        aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)
+        if not aggregation_algorithm_id:
             raise AggregationAlgorithmNotExisting()
-        return aggregation_algorithm_dict
+        return aggregation_algorithm_id
 
     @filter_input
     @enforce(("read", "write"), "aggregation_algorithm")
-    def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+    def set_aggregation_algorithm_id(self, user_id, intra_extension_id, aggregation_algorithm_id):
         if aggregation_algorithm_id:
-            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms_dict(self.root_api.get_root_admin_id()):
+            if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms_dict(
+                    self.root_api.get_root_admin_id()):
                 raise AggregationAlgorithmUnknown()
-        else:
-            aggregation_algorithm_id = uuid4().hex
-        return self.driver.set_aggregation_algorithm_dict(intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict)
+        return self.driver.set_aggregation_algorithm_id(intra_extension_id, aggregation_algorithm_id)
 
     @filter_input
     @enforce("read", "sub_meta_rules")
@@ -1756,6 +1762,7 @@ class IntraExtensionManager(manager.Manager):
 
 
 @dependency.provider('authz_api')
+#@dependency.requires('resource_api')
 class IntraExtensionAuthzManager(IntraExtensionManager):
 
     def __init__(self):
@@ -1940,10 +1947,10 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
     def del_action_assignment(self, user_id, intra_extension_id, action_id, action_category_id, action_scope_id):
         raise AuthzException()
 
-    def set_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+    def set_aggregation_algorithm_id(self, user_id, intra_extension_id, aggregation_algorithm_id):
         raise AuthzException()
 
-    def del_aggregation_algorithm_dict(self, user_id, intra_extension_id, aggregation_algorithm_id):
+    def del_aggregation_algorithm_(self, user_id, intra_extension_id):
         raise AuthzException()
 
     def add_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_dict):
@@ -1966,6 +1973,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
 
 
 @dependency.provider('admin_api')
+#@dependency.requires('resource_api')
 class IntraExtensionAdminManager(IntraExtensionManager):
 
     def __init__(self):
@@ -2051,7 +2059,7 @@ class IntraExtensionAdminManager(IntraExtensionManager):
 
 
 @dependency.provider('root_api')
-@dependency.requires('moonlog_api', 'admin_api', 'tenant_api')
+#@dependency.requires('admin_api')
 class IntraExtensionRootManager(IntraExtensionManager):
 
     def __init__(self):
@@ -2098,7 +2106,7 @@ class IntraExtensionRootManager(IntraExtensionManager):
 
 @dependency.provider('moonlog_api')
 # Next line is mandatory in order to force keystone to process dependencies.
-@dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'root_api')
+#@dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'root_api')
 class LogManager(manager.Manager):
 
     driver_namespace = 'keystone.moon.log'
@@ -2180,7 +2188,7 @@ class ConfigurationDriver(object):
     def get_policy_templates_dict(self):
         raise exception.NotImplemented()  # pragma: no cover
 
-    def get_aggregation_algorithm_dict(self):
+    def get_aggregation_algorithm_id(self):
         raise exception.NotImplemented()  # pragma: no cover
 
     def get_sub_meta_rule_algorithms_dict(self):
@@ -2464,13 +2472,13 @@ class IntraExtensionDriver(object):
 
     # Meta_rule functions
 
-    def set_aggregation_algorithm_dict(self, intra_extension_id, aggregation_algorithm_id, aggregation_algorithm_dict):
+    def set_aggregation_algorithm_id(self, intra_extension_id, aggregation_algorithm_id):
         raise exception.NotImplemented()  # pragma: no cover
 
-    def get_aggregation_algorithm_dict(self, intra_extension_id):
+    def get_aggregation_algorithm_id(self, intra_extension_id):
         raise exception.NotImplemented()  # pragma: no cover
 
-    def del_aggregation_algorithm(self, intra_extension_id, aggregation_algorithm_id):
+    def del_aggregation_algorithm(self, intra_extension_id):
         raise exception.NotImplemented()  # pragma: no cover
 
     def get_sub_meta_rules_dict(self, intra_extension_id):

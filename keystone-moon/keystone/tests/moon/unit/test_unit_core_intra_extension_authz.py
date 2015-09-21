@@ -11,6 +11,7 @@ import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
 from keystone.contrib.moon.core import IntraExtensionAdminManager, IntraExtensionAuthzManager, IntraExtensionRootManager
+from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
 from keystone import resource
 from keystone.contrib.moon.exception import *
@@ -32,7 +33,7 @@ IE = {
     "description": "a simple description."
 }
 
-@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
+#@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
 class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
 
     def setUp(self):
@@ -59,6 +60,7 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
             "tenant_api": TenantManager(),
             "admin_api": IntraExtensionAdminManager(),
             "authz_api": IntraExtensionAuthzManager(),
+            "configuration_api": ConfigurationManager(),
             # "resource_api": resource.Manager(),
         }
 
@@ -836,11 +838,8 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.admin_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        aggregation_algorithms = self.admin_manager.get_aggregation_algorithm_dict(admin_subject_id, authz_ie_dict["id"])
-        for key, value in aggregation_algorithms.iteritems():
-            self.assertIsInstance(value, dict)
-            self.assertIn("name", value)
-            self.assertIn("description", value)
+        aggregation_algorithm = self.admin_manager.get_aggregation_algorithm_id(admin_subject_id, authz_ie_dict["id"])
+        self.assertIsInstance(aggregation_algorithm, basestring)
 
         # TODO: need more tests on aggregation_algorithms (set and del)
 
@@ -942,7 +941,7 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         # TODO: add test for the delete function
 
 
-@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api', 'identity_api', 'root_api')
+#@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api', 'identity_api', 'root_api')
 class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
     def setUp(self):
@@ -971,6 +970,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         return {
             "moonlog_api": LogManager(),
             "tenant_api": TenantManager(),
+            "configuration_api": ConfigurationManager(),
             "admin_api": IntraExtensionAdminManager(),
             "authz_api": IntraExtensionAuthzManager(),
             "root_api": IntraExtensionRootManager(),
@@ -1231,9 +1231,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         aggregation_algorithms = self.configuration_api.get_aggregation_algorithms_dict(admin_subject_id)
         for _id in aggregation_algorithms:
             if aggregation_algorithms[_id]["name"] == "one_true":
-                agg = self.admin_manager.set_aggregation_algorithm_dict(admin_subject_id, authz_ie_dict["id"],
-                                                                        _id,
-                                                                        aggregation_algorithms[_id])
+                agg = self.admin_manager.set_aggregation_algorithm_id(admin_subject_id, authz_ie_dict["id"], _id)
 
         rule = self.admin_manager.add_rule_dict(
             admin_subject_id,
@@ -2228,11 +2226,8 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         demo_subject_id, demo_subject_dict = \
             self.admin_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
-        aggregation_algorithms = self.admin_manager.get_aggregation_algorithm_dict(admin_subject_id, authz_ie_dict["id"])
-        for key, value in aggregation_algorithms.iteritems():
-            self.assertIsInstance(value, dict)
-            self.assertIn("name", value)
-            self.assertIn("description", value)
+        aggregation_algorithm = self.admin_manager.get_aggregation_algorithm_id(admin_subject_id, authz_ie_dict["id"])
+        self.assertIsInstance(aggregation_algorithm, basestring)
 
         # TODO: need more tests on aggregation_algorithms (set and del)
 
@@ -2256,7 +2251,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
                 self.assertIn(object_category_id, categories["object_categories"])
             for subject_category_id in value["subject_categories"]:
                 self.assertIn(subject_category_id, categories["subject_categories"])
-        # TODO: need more tests (set and del)
+                # TODO: need more tests (set and del)
 
     def test_sub_rules(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
@@ -2274,15 +2269,15 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         for relation_id in sub_meta_rules:
             rules = self.admin_manager.get_rules_dict(admin_subject_id, authz_ie_dict["id"], relation_id)
             rule_length = len(sub_meta_rules[relation_id]["subject_categories"]) + \
-                len(sub_meta_rules[relation_id]["object_categories"]) + \
-                len(sub_meta_rules[relation_id]["action_categories"]) + 1
+                          len(sub_meta_rules[relation_id]["object_categories"]) + \
+                          len(sub_meta_rules[relation_id]["action_categories"]) + 1
             for rule_id in rules:
                 self.assertEqual(rule_length, len(rules[rule_id]))
                 rule = list(rules[rule_id])
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_scope"),
-                    ("action_categories", self.admin_manager.get_action_scopes_dict, "action_scope"),
-                    ("object_categories", self.admin_manager.get_object_scopes_dict, "object_scope"),
+                        ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_scope"),
+                        ("action_categories", self.admin_manager.get_action_scopes_dict, "action_scope"),
+                        ("object_categories", self.admin_manager.get_object_scopes_dict, "object_scope"),
                 ):
                     for cat_value in sub_meta_rules[relation_id][cat]:
                         scope = cat_func(
@@ -2298,9 +2293,9 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
             sub_rule = []
             for cat, cat_func, func_name in (
-                ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_scope"),
-                ("action_categories", self.admin_manager.get_action_scopes_dict, "action_scope"),
-                ("object_categories", self.admin_manager.get_object_scopes_dict, "object_scope"),
+                    ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_scope"),
+                    ("action_categories", self.admin_manager.get_action_scopes_dict, "action_scope"),
+                    ("object_categories", self.admin_manager.get_object_scopes_dict, "object_scope"),
             ):
                 for cat_value in sub_meta_rules[relation_id][cat]:
                     scope = cat_func(
@@ -2323,9 +2318,9 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
             for rule_id, rule_value in sub_rules.iteritems():
                 for cat, cat_func, func_name in (
-                    ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_category_scope"),
-                    ("action_categories", self.admin_manager.get_action_scopes_dict, "action_category_scope"),
-                    ("object_categories", self.admin_manager.get_object_scopes_dict, "object_category_scope"),
+                        ("subject_categories", self.admin_manager.get_subject_scopes_dict, "subject_category_scope"),
+                        ("action_categories", self.admin_manager.get_action_scopes_dict, "action_category_scope"),
+                        ("object_categories", self.admin_manager.get_object_scopes_dict, "object_category_scope"),
                 ):
                     for cat_value in sub_meta_rules[relation_id][cat]:
                         scope = cat_func(
@@ -2336,4 +2331,4 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
                         a_scope = rule_value.pop(0)
                         self.assertIn(a_scope, scope.keys())
 
-        # TODO: add test for the delete function
+                        # TODO: add test for the delete function

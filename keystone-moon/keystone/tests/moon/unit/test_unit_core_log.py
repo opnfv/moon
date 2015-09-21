@@ -11,7 +11,8 @@ import uuid
 import time
 from oslo_config import cfg
 from keystone.tests import unit as tests
-from keystone.contrib.moon.core import IntraExtensionAdminManager
+from keystone.contrib.moon.core import ConfigurationManager
+from keystone.contrib.moon.core import IntraExtensionAuthzManager
 from keystone.tests.unit.ksfixtures import database
 from keystone import resource
 from keystone.contrib.moon.exception import *
@@ -60,7 +61,9 @@ class TestIntraExtensionAdminManager(tests.TestCase):
     def load_extra_backends(self):
         return {
             "moonlog_api": LogManager(),
+            "authz_api": IntraExtensionAuthzManager(),
             "tenant_api": TenantManager(),
+            "configuration_api": ConfigurationManager(),
             # "resource_api": resource.Manager(),
         }
 

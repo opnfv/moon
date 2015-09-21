@@ -15,6 +15,8 @@ from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager
 from keystone.contrib.moon.core import IntraExtensionAdminManager
 from keystone.contrib.moon.core import IntraExtensionRootManager
+from keystone.contrib.moon.core import ConfigurationManager
+from keystone.contrib.moon.core import IntraExtensionAuthzManager
 from keystone.tests.moon.unit import *
 
 CONF = cfg.CONF
@@ -43,7 +45,9 @@ class TestConfigurationManager(tests.TestCase):
         return {
             "moonlog_api": LogManager(),
             "admin_api": IntraExtensionAdminManager(),
-            "root_api": IntraExtensionRootManager()
+            "configuration_api": ConfigurationManager(),
+            "root_api": IntraExtensionRootManager(),
+            "authz_api": IntraExtensionAuthzManager()
         }
 
     def config_overrides(self):

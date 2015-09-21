@@ -366,13 +366,6 @@ class Routers(wsgi.V3ExtensionRouter):
             mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithm',
             post_action='set_aggregation_algorithm',
-            rel=self._get_rel('aggregation_algorithms'),
-            path_vars={
-                'intra_extension_id': self._get_path('intra_extensions'),
-            })
-        self._add_resource(
-            mapper, intra_ext_controller,
-            path=self.PATH_PREFIX+'/intra_extensions/{intra_extension_id}/aggregation_algorithm/{aggregation_algorithm_id}',
             get_action='get_aggregation_algorithm',
             rel=self._get_rel('aggregation_algorithms'),
             path_vars={
