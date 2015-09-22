@@ -15,6 +15,8 @@ from keystone.contrib.moon.exception import *
 from oslo_serialization import jsonutils
 from keystone.contrib.moon import IntraExtensionDriver
 from keystone.contrib.moon import TenantDriver
+
+from sqlalchemy.orm.exc import UnmappedInstanceError
 # from keystone.contrib.moon import InterExtensionDriver
 
 CONF = config.CONF
@@ -256,22 +258,6 @@ class ActionAssignment(sql.ModelBase, sql.DictBase):
         return dict(six.iteritems(self))
 
 
-class AggregationAlgorithm(sql.ModelBase, sql.DictBase):
-    __tablename__ = 'aggregation_algorithm'
-    attributes = ['id', 'aggregation_algorithm', 'intra_extension_id']
-    id = sql.Column(sql.String(64), primary_key=True)
-    aggregation_algorithm = sql.Column(sql.JsonBlob(), nullable=True)
-    intra_extension_id = sql.Column(sql.ForeignKey("intra_extensions.id"), nullable=False)
-
-    @classmethod
-    def from_dict(cls, d):
-        new_d = d.copy()
-        return cls(**new_d)
-
-    def to_dict(self):
-        return dict(six.iteritems(self))
-
-
 class SubMetaRule(sql.ModelBase, sql.DictBase):
     __tablename__ = 'sub_meta_rules'
     attributes = ['id', 'sub_meta_rule', 'intra_extension_id']
@@ -318,7 +304,6 @@ __all_objects__ = (
     SubjectAssignment,
     ObjectAssignment,
     ActionAssignment,
-    AggregationAlgorithm,
     SubMetaRule,
     Rule,
 )
@@ -964,10 +949,13 @@ class IntraExtensionConnector(IntraExtensionDriver):
 
     def del_aggregation_algorithm(self, intra_extension_id):
         with sql.transaction() as session:
-            query = session.query(AggregationAlgorithm)
-            query = query.filter_by(intra_extension_id=intra_extension_id)
+            query = session.query(IntraExtension)
+            query = query.filter_by(id=intra_extension_id)
             ref = query.first()
-            session.delete(ref)
+            intra_extension_dict = dict(ref.intra_extension)
+            intra_extension_dict["aggregation_algorithm"] = ""
+            setattr(ref, "intra_extension", intra_extension_dict)
+            return self.get_aggregation_algorithm_id(intra_extension_id)
 
     # Getter and Setter for sub_meta_rule
 
@@ -993,6 +981,9 @@ class IntraExtensionConnector(IntraExtensionDriver):
             if not ref:
                 session.add(new_ref)
             else:
+                _sub_meta_rule_dict = dict(ref.sub_meta_rule)
+                _sub_meta_rule_dict.update(sub_meta_rule_dict)
+                setattr(new_ref, "sub_meta_rule", _sub_meta_rule_dict)
                 for attr in SubMetaRule.attributes:
                     if attr != 'id':
                         setattr(ref, attr, getattr(new_ref, attr))

@@ -158,16 +158,6 @@ def upgrade(migrate_engine):
         mysql_charset='utf8')
     action_assignments_table.create(migrate_engine, checkfirst=True)
 
-    aggregation_algorithm_table = sql.Table(
-        'aggregation_algorithm',
-        meta,
-        sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('aggregation_algorithm', k_sql.JsonBlob(), nullable=True),
-        sql.Column('intra_extension_id', sql.ForeignKey("intra_extensions.id"), nullable=False),
-        mysql_engine='InnoDB',
-        mysql_charset='utf8')
-    aggregation_algorithm_table.create(migrate_engine, checkfirst=True)
-
     sub_meta_rules_table = sql.Table(
         'sub_meta_rules',
         meta,
