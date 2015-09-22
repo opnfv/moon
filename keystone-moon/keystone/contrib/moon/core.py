@@ -1702,6 +1702,9 @@ class IntraExtensionManager(manager.Manager):
     def set_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict):
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
+        for attribute in sub_meta_rule_dict.keys():
+            if not sub_meta_rule_dict[attribute]:
+                sub_meta_rule_dict.pop(attribute)
         return self.driver.set_sub_meta_rule_dict(intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict)
 
     # Rule functions
