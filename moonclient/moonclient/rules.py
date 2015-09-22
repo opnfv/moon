@@ -10,7 +10,7 @@ from cliff.command import Command
 from cliff.show import ShowOne
 
 
-class RulesList(ShowOne):
+class RulesList(Lister):
     """List all aggregation algorithms."""
 
     log = logging.getLogger(__name__)
@@ -18,28 +18,108 @@ class RulesList(ShowOne):
     def get_parser(self, prog_name):
         parser = super(RulesList, self).get_parser(prog_name)
         parser.add_argument(
+            'submetarule_id',
+            metavar='<submetarule-uuid>',
+            help='Sub Meta Rule UUID',
+        )
+        parser.add_argument(
             '--intraextension',
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
         )
         return parser
 
+    def __get_subject_category_name(self, intraextension, category_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
+                                authtoken=True)
+        if category_id in data:
+            return data[category_id]["name"]
+
+    def __get_object_category_name(self, intraextension, category_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
+                                authtoken=True)
+        if category_id in data:
+            return data[category_id]["name"]
+
+    def __get_action_category_name(self, intraextension, category_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
+                                authtoken=True)
+        if category_id in data:
+            return data[category_id]["name"]
+
+    def __get_subject_scope_name(self, intraextension, category_id, scope_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        if scope_id in data:
+            return data[scope_id]["name"]
+        return scope_id
+
+    def __get_object_scope_name(self, intraextension, category_id, scope_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        if scope_id in data:
+            return data[scope_id]["name"]
+        return scope_id
+
+    def __get_action_scope_name(self, intraextension, category_id, scope_id):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        if scope_id in data:
+            return data[scope_id]["name"]
+        return scope_id
+
+    def __get_headers(self, intraextension, submetarule_id):
+        headers = list()
+        headers.append("")
+        headers.append("id")
+        self.sub_meta_rules = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(intraextension),
+                                               authtoken=True)
+        for cat in self.sub_meta_rules[submetarule_id]["subject_categories"]:
+            headers.append("s:" + self.__get_subject_category_name(intraextension, cat))
+        for cat in self.sub_meta_rules[submetarule_id]["action_categories"]:
+            headers.append("a:" + self.__get_action_category_name(intraextension, cat))
+        for cat in self.sub_meta_rules[submetarule_id]["object_categories"]:
+            headers.append("o:" + self.__get_object_category_name(intraextension, cat))
+        headers.append("enabled")
+        return headers
+
+    def __get_data(self, intraextension, submetarule_id, data_dict):
+        rules = list()
+        cpt = 0
+        for key in data_dict:
+            sub_rule = list()
+            sub_rule.append(cpt)
+            cpt += 1
+            sub_rule.append(key)
+            rule_item = list(data_dict[key])
+            for cat in self.sub_meta_rules[submetarule_id]["subject_categories"]:
+                sub_rule.append(self.__get_subject_scope_name(intraextension, cat, rule_item.pop(0)))
+            for cat in self.sub_meta_rules[submetarule_id]["action_categories"]:
+                sub_rule.append(self.__get_action_scope_name(intraextension, cat, rule_item.pop(0)))
+            for cat in self.sub_meta_rules[submetarule_id]["object_categories"]:
+                sub_rule.append(self.__get_object_scope_name(intraextension, cat, rule_item.pop(0)))
+            sub_rule.append(rule_item.pop(0))
+            rules.append(sub_rule)
+        return rules
+
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_rules".format(
-            parsed_args.intraextension),
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/rule/{}".format(
+            parsed_args.intraextension,
+            parsed_args.submetarule_id,
+        ),
             authtoken=True)
-        if "sub_rules" not in data:
-            raise Exception("Error in command {}: {}".format("RulesList", data))
-        # TODO (dthom): a better view with a Lister
+        self.log.debug(data)
+        headers = self.__get_headers(parsed_args.intraextension, parsed_args.submetarule_id)
+        data_list = self.__get_data(parsed_args.intraextension, parsed_args.submetarule_id, data)
         return (
-            ("sub_rules",),
-            (data["sub_rules"],)
+            headers,
+            data_list
         )
 
 
-class RuleAdd(ShowOne):
+class RuleAdd(Command):
     """List the current aggregation algorithm."""
 
     log = logging.getLogger(__name__)
@@ -47,14 +127,19 @@ class RuleAdd(ShowOne):
     def get_parser(self, prog_name):
         parser = super(RuleAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'relation',
-            metavar='<relation-uuid>',
-            help='Relation UUID',
+            'submetarule_id',
+            metavar='<submetarule-uuid>',
+            help='Sub Meta Rule UUID',
         )
+        # parser.add_argument(
+        #     'relation',
+        #     metavar='<relation-uuid>',
+        #     help='Relation UUID',
+        # )
         parser.add_argument(
             'rule',
             metavar='<argument-list>',
-            help='Rule list (example: admin,vm_admin,servers)',
+            help='Rule list (example: admin,start,servers) with that ordering: subject, action, object',
         )
         parser.add_argument(
             '--intraextension',
@@ -63,27 +148,86 @@ class RuleAdd(ShowOne):
         )
         return parser
 
+    # def __get_subject_category_name(self, intraextension, category_id):
+    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
+    #                             authtoken=True)
+    #     if category_id in data:
+    #         return data[category_id]["name"]
+    #
+    # def __get_object_category_name(self, intraextension, category_id):
+    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
+    #                             authtoken=True)
+    #     if category_id in data:
+    #         return data[category_id]["name"]
+    #
+    # def __get_action_category_name(self, intraextension, category_id):
+    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
+    #                             authtoken=True)
+    #     if category_id in data:
+    #         return data[category_id]["name"]
+
+    def __get_subject_scope_id(self, intraextension, category_id, scope_name):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        self.log.debug("__get_subject_scope_id {}".format(data))
+        for scope_id in data:
+            if data[scope_id]["name"] == scope_name:
+                return scope_id
+        return scope_name
+
+    def __get_object_scope_id(self, intraextension, category_id, scope_name):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        self.log.debug("__get_action_scope_id {}".format(data))
+        for scope_id in data:
+            if data[scope_id]["name"] == scope_name:
+                return scope_id
+        return scope_name
+
+    def __get_action_scope_id(self, intraextension, category_id, scope_name):
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
+                                authtoken=True)
+        self.log.debug("__get_object_scope_id {}".format(data))
+        for scope_id in data:
+            if data[scope_id]["name"] == scope_name:
+                return scope_id
+        return scope_name
+
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        rule = parsed_args.rule.split(",")
+        self.sub_meta_rules = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(
+            parsed_args.intraextension),
+            authtoken=True)
+        new_rule = map(lambda x: x.strip(), parsed_args.rule.split(","))
         post = {
-            "rule": rule,
-            "relation": parsed_args.relation
+            "subject_categories": [],
+            "object_categories": [],
+            "action_categories": [],
+            "enabled": True
         }
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{intraextension}/sub_rules".format(
-            intraextension=parsed_args.intraextension),
+        for cat in self.sub_meta_rules[parsed_args.submetarule_id]["subject_categories"]:
+            self.log.debug("annalysing s {}".format(cat))
+            post["subject_categories"].append(self.__get_subject_scope_id(
+                parsed_args.intraextension, cat, new_rule.pop(0))
+            )
+        for cat in self.sub_meta_rules[parsed_args.submetarule_id]["action_categories"]:
+            self.log.debug("annalysing a {}".format(cat))
+            post["action_categories"].append(self.__get_action_scope_id(
+                parsed_args.intraextension, cat, new_rule.pop(0))
+            )
+        for cat in self.sub_meta_rules[parsed_args.submetarule_id]["object_categories"]:
+            self.log.debug("annalysing o {}".format(cat))
+            post["object_categories"].append(self.__get_object_scope_id(
+                parsed_args.intraextension, cat, new_rule.pop(0))
+            )
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/rule/{}".format(
+            parsed_args.intraextension, parsed_args.submetarule_id),
             post_data=post,
             authtoken=True)
-        if "sub_rules" not in data:
-            raise Exception("Error in command {}: {}".format("RuleAdd", data))
-        return (
-            ("sub_rules",),
-            (data["sub_rules"],)
-        )
 
 
-class RuleDelete(ShowOne):
+class RuleDelete(Command):
     """Set the current aggregation algorithm."""
 
     log = logging.getLogger(__name__)
@@ -91,14 +235,14 @@ class RuleDelete(ShowOne):
     def get_parser(self, prog_name):
         parser = super(RuleDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'relation',
-            metavar='<relation-uuid>',
-            help='Relation UUID',
+            'submetarule_id',
+            metavar='<submetarule-uuid>',
+            help='Sub Meta Rule UUID',
         )
         parser.add_argument(
-            'rule',
-            metavar='<argument-list>',
-            help='Rule list (example: admin,vm_admin,servers)',
+            'rule_id',
+            metavar='<rule-uuid>',
+            help='Rule UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -110,18 +254,11 @@ class RuleDelete(ShowOne):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        rule = "+".join(parsed_args.rule.split(","))
-        data = self.app.get_url(
-            "/v3/OS-MOON/intra_extensions/{intra_extensions_id}/sub_rules/{relation_name}/{rule}".format(
+        self.app.get_url(
+            "/v3/OS-MOON/intra_extensions/{intra_extensions_id}/rule/{submetarule_id}/{rule_id}".format(
                 intra_extensions_id=parsed_args.intraextension,
-                relation_name=parsed_args.relation,
-                rule=rule,
+                submetarule_id=parsed_args.submetarule_id,
+                rule_id=parsed_args.rule_id
             ),
             method="DELETE",
             authtoken=True)
-        if "sub_rules" not in data:
-            raise Exception("Error in command {}: {}".format("RuleDelete", data))
-        return (
-            ("sub_rules",),
-            (data["sub_rules"],)
-        )

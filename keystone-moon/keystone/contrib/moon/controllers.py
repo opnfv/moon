@@ -704,11 +704,11 @@ class IntraExtensions(controller.V3Controller):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         intra_extension_id = kw.get('intra_extension_id', None)
         sub_meta_rule_id = kw.get('sub_meta_rule_id', None)
-        rule_list = list()
         subject_category_list = kw.get('subject_categories', [])
         object_category_list = kw.get('object_categories', [])
         action_category_list = kw.get('action_categories', [])
-        rule_list = subject_category_list + action_category_list + object_category_list
+        enabled_bool = kw.get('enabled', True)
+        rule_list = subject_category_list + action_category_list + object_category_list + [enabled_bool, ]
         return self.admin_api.add_rule_dict(user_id, intra_extension_id, sub_meta_rule_id, rule_list)
 
     @controller.protected()
