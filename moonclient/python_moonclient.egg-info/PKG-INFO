@@ -7,13 +7,20 @@ Author: Thomas Duval
 Author-email: thomas.duval@orange.com
 License: UNKNOWN
 Download-URL: https://github.com/.../tarball/master
-Description: # Copyright 2015 Open Platform for NFV Project, Inc. and its contributors
-        # This software is distributed under the terms and conditions of the 'Apache-2.0'
-        # license which can be found in the file 'LICENSE' in this package distribution
-        # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+Description: Moon Client
+        ===========
+        
+        Installation
+        ------------
+        
+        * `sudo python setup.py install`
         
         
-        Moon Client
+        Manipulation
+        ------------
+        
+        * `keystone moon`
+        
         
         
 Platform: Any

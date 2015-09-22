@@ -1,2 +1,1 @@
 include README.rst
-include moonclient/tests/functional_tests.sh
