@@ -110,15 +110,18 @@ setup(
             'action_scope_list = moonclient.action_category_scope:ActionCategoryScopeList',
             'action_scope_add = moonclient.action_category_scope:ActionCategoryScopeAdd',
             'action_scope_delete = moonclient.action_category_scope:ActionCategoryScopeDelete',
-            'aggregation_algorithm_list = moonclient.metarules:AggregationAlgorithmsList',
-            'aggregation_algorithm_show = moonclient.metarules:AggregationAlgorithmShow',
+
+            'aggregation_algorithm_show = moonclient.metarules:AggregationAlgorithmsList',
             'aggregation_algorithm_set = moonclient.metarules:AggregationAlgorithmSet',
+
             'submetarule_show = moonclient.metarules:SubMetaRuleShow',
             'submetarule_set = moonclient.metarules:SubMetaRuleSet',
             'submetarule_relation_list = moonclient.metarules:SubMetaRuleRelationList',
+
             'rule_list = moonclient.rules:RulesList',
             'rule_add = moonclient.rules:RuleAdd',
             'rule_delete = moonclient.rules:RuleDelete',
+
             'log = moonclient.logs:LogsList',
 
             'tests = moonclient.tests:TestsLaunch',
