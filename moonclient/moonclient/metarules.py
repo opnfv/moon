@@ -119,8 +119,6 @@ class SubMetaRuleShow(Lister):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(parsed_args.intraextension),
                                 authtoken=True)
-        import json
-        self.log.debug(json.dumps(data, indent=4))
         return (
             ("id", "name", "algorithm", "subject categories", "object categories", "action categories"),
             ((
@@ -190,7 +188,6 @@ class SubMetaRuleSet(Command):
         action_categories = parsed_args.action_categories
         if not action_categories:
             action_categories = ""
-        self.log.debug("object_categories = {}".format(object_categories))
         subject_categories = map(lambda x: x.strip(), subject_categories.split(','))
         action_categories = map(lambda x: x.strip(), action_categories.split(','))
         object_categories = map(lambda x: x.strip(), object_categories.split(','))
