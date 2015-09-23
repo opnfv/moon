@@ -9,6 +9,7 @@ from keystone import config
 from keystone.models import token_model
 from keystone.contrib.moon.exception import *
 from oslo_log import log
+from uuid import uuid4
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -59,11 +60,36 @@ class Tenants(controller.V3Controller):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         return self.tenant_api.get_tenants_dict(user_id)
 
+    def __get_keystone_tenant_dict(self, tenant_id="", tenant_name="", tenant_description="", domain="default"):
+        tenants = self.resource_api.list_projects()
+        for tenant in tenants:
+            if tenant_id and tenant_id == tenant['id']:
+                return tenant
+            if tenant_name and tenant_name == tenant['name']:
+                return tenant
+        if not tenant_id:
+            tenant_id = uuid4().hex
+        if not tenant_name:
+            tenant_name = tenant_id
+        tenant = {
+            "id": tenant_id,
+            "name": tenant_name,
+            "description": tenant_description,
+            "enabled": True,
+            "domain_id": domain
+        }
+        keystone_tenant = self.resource_api.create_project(tenant["id"], tenant)
+        return keystone_tenant
+
     @controller.protected()
     def add_tenant(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
-        # Next line will raise an error if tenant doesn't exist
-        k_tenant_dict = self.resource_api.get_project_by_name(kw.get('tenant_name'), "default")
+        k_tenant_dict = self.__get_keystone_tenant_dict(
+            tenant_name=kw.get('tenant_name'),
+            tenant_description=kw.get('tenant_description', kw.get('tenant_name')),
+            domain=kw.get('tenant_domain', "default"),
+
+        )
         tenant_dict = dict()
         tenant_dict['id'] = k_tenant_dict['id']
         tenant_dict['name'] = kw.get('tenant_name', None)
