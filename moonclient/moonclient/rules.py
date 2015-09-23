@@ -131,11 +131,6 @@ class RuleAdd(Command):
             metavar='<submetarule-uuid>',
             help='Sub Meta Rule UUID',
         )
-        # parser.add_argument(
-        #     'relation',
-        #     metavar='<relation-uuid>',
-        #     help='Relation UUID',
-        # )
         parser.add_argument(
             'rule',
             metavar='<argument-list>',
@@ -147,24 +142,6 @@ class RuleAdd(Command):
             help='IntraExtension UUID',
         )
         return parser
-
-    # def __get_subject_category_name(self, intraextension, category_id):
-    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
-    #                             authtoken=True)
-    #     if category_id in data:
-    #         return data[category_id]["name"]
-    #
-    # def __get_object_category_name(self, intraextension, category_id):
-    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
-    #                             authtoken=True)
-    #     if category_id in data:
-    #         return data[category_id]["name"]
-    #
-    # def __get_action_category_name(self, intraextension, category_id):
-    #     data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
-    #                             authtoken=True)
-    #     if category_id in data:
-    #         return data[category_id]["name"]
 
     def __get_subject_scope_id(self, intraextension, category_id, scope_name):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
@@ -261,4 +238,5 @@ class RuleDelete(Command):
                 rule_id=parsed_args.rule_id
             ),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

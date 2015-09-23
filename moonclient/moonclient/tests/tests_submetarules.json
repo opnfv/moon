@@ -79,7 +79,7 @@
       },
       {
         "name": "set_submetarule",
-        "command": "submetarule set $submetarule_uuid --subject_categories=\"$category_level_uuid,$category_domain_uuid\"",
+        "command": "submetarule set $submetarule_uuid --subject_category_id=\"$category_level_uuid,$category_domain_uuid\"",
         "result": "^$",
         "description": "Set a new submetarule",
         "command_options": ""
@@ -238,7 +238,7 @@
       },
       {
         "name": "set_submetarule",
-        "command": "submetarule set $submetarule_uuid --subject_categories=\"$category_level_uuid,$category_domain_uuid\"",
+        "command": "submetarule set $submetarule_uuid --subject_category_id=\"$category_level_uuid,$category_domain_uuid\"",
         "result": "^$",
         "description": "Set a new submetarule",
         "command_options": ""

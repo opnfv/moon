@@ -57,22 +57,22 @@
       },
 
       {
-        "name": "get_templates",
-        "command": "templates list",
+        "name": "list template",
+        "command": "template list",
         "result": "policy_root",
         "description": "Check that we have the root policy templates",
         "command_options": "-c id -f value"
       },
       {
-        "name": "list_aggregation_algorithms",
-        "command": "aggregation algorithms list",
+        "name": "list aggregation_algorithm",
+        "command": "aggregation algorithm list",
         "result": "all_true",
         "description": "Check that the aggregation algorithm all_true exists.",
         "command_options": "-c name -f value"
       },
       {
-        "name": "list_submetarule_algorithms",
-        "command": "submetarule algorithms list",
+        "name": "list submetarule_algorithm",
+        "command": "submetarule algorithm list",
         "result": "comparison",
         "description": "Check that the aggregation algorithm all_true exists.",
         "command_options": "-c name -f value"
@@ -183,22 +183,22 @@
       },
 
       {
-        "name": "get_templates",
-        "command": "templates list",
+        "name": "lst template",
+        "command": "template list",
         "result": "policy_root",
         "description": "Check that we have the root policy templates",
         "command_options": "-c id -f value"
       },
       {
-        "name": "list_aggregation_algorithms",
-        "command": "aggregation algorithms list",
+        "name": "list aggregation_algorithm",
+        "command": "aggregation algorithm list",
         "result": "all_true",
         "description": "Check that the aggregation algorithm all_true exists.",
         "command_options": "-c name -f value"
       },
       {
-        "name": "list_submetarule_algorithms",
-        "command": "submetarule algorithms list",
+        "name": "list submetarule_algorithm",
+        "command": "submetarule algorithm list",
         "result": "comparison",
         "description": "Check that the aggregation algorithm all_true exists.",
         "command_options": "-c name -f value"

@@ -148,11 +148,11 @@ class SubMetaRuleSet(Command):
         parser = super(SubMetaRuleSet, self).get_parser(prog_name)
         parser.add_argument(
             'submetarule_id',
-            metavar='<sub_meta_rule-uuid>',
+            metavar='<sub-meta-rule-uuid>',
             help='Sub Meta Rule UUID (example: "12346")',
         )
         parser.add_argument(
-            '--algorithm',
+            '--algorithm_name',
             metavar='<algorithm-str>',
             help='algorithm to use (example: "inclusion")',
         )
@@ -198,44 +198,17 @@ class SubMetaRuleSet(Command):
         subject_category_id = map(lambda x: x.strip(), subject_category_id.split(','))
         action_category_id = map(lambda x: x.strip(), action_category_id.split(','))
         object_category_id = map(lambda x: x.strip(), object_category_id.split(','))
-        sub_meta_rule_id = parsed_args.id
+        sub_meta_rule_id = parsed_args.submetarule_id
         post_data = dict()
         post_data["sub_meta_rule_name"] = parsed_args.name
-        post_data["sub_meta_rule_algorithm"] = parsed_args.algorithm
-        post_data["sub_meta_rule_subject_categories"] = filter(lambda x: x, subject_category_id)  # TODO: check for multiple categories
+        post_data["sub_meta_rule_algorithm"] = parsed_args.algorithm_name
+        post_data["sub_meta_rule_subject_categories"] = filter(lambda x: x, subject_category_id)
         post_data["sub_meta_rule_object_categories"] = filter(lambda x: x, object_category_id)
         post_data["sub_meta_rule_action_categories"] = filter(lambda x: x, action_category_id)
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules/{}".format(parsed_args.intraextension, sub_meta_rule_id),
+        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules/{}".format(parsed_args.intraextension,
+                                                                                    sub_meta_rule_id),
                          post_data=post_data,
                          method="POST",
                          authtoken=True)
-
-
-class SubMetaRuleRelationList(Lister):
-    """List all sub meta rule relations."""
-
-    log = logging.getLogger(__name__)
-
-    def get_parser(self, prog_name):
-        parser = super(SubMetaRuleRelationList, self).get_parser(prog_name)
-        parser.add_argument(
-            '--intraextension',
-            metavar='<intraextension-uuid>',
-            help='IntraExtension UUID',
-        )
-        return parser
-
-    def take_action(self, parsed_args):
-        if not parsed_args.intraextension:
-            parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rule_relations".format(
-            parsed_args.intraextension),
-            authtoken=True)
-        if "sub_meta_rule_relations" not in data:
-            raise Exception("Error in command {}: {}".format("AggregationAlgorithmList", data))
-        return (
-            ("sub_meta_rule_relations",),
-            ((_uuid, ) for _uuid in data["sub_meta_rule_relations"])
-        )
 
 

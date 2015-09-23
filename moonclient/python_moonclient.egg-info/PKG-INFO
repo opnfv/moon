@@ -15,11 +15,13 @@ Description: Moon Client
         
         * `sudo python setup.py install`
         
+        * `cd ~/devstack || source openrc admin`
+        
         
         Manipulation
         ------------
         
-        * `keystone moon`
+        * `moon tenant list`
         
         
         
