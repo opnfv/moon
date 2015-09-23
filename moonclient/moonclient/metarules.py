@@ -57,14 +57,19 @@ class AggregationAlgorithmSet(Command):
     def get_parser(self, prog_name):
         parser = super(AggregationAlgorithmSet, self).get_parser(prog_name)
         parser.add_argument(
-            'aggregation_algorithm',
-            metavar='<aggregation_algorithm-uuid>',
+            'aggregation_algorithm_id',
+            metavar='<aggregation-algorithm-uuid>',
             help='Aggregation algorithm UUID',
         )
         parser.add_argument(
             '--intraextension',
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
+        )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Action description',
         )
         return parser
 
@@ -73,7 +78,9 @@ class AggregationAlgorithmSet(Command):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/aggregation_algorithm".format(
             parsed_args.intraextension),
-            post_data={"aggregation_algorithm_id": parsed_args.aggregation_algorithm},
+            post_data={
+                "aggregation_algorithm_id": parsed_args.aggregation_algorithm_id,
+                "aggregation_algorithm_description": parsed_args.description},
             authtoken=True)
         algorithm = self.__get_aggregation_algorithm_from_id(data['content'])
         return (
@@ -96,23 +103,23 @@ class SubMetaRuleShow(Lister):
         )
         return parser
 
-    def __get_subject_category_name(self, intraextension, category_id):
+    def __get_subject_category_name(self, intraextension, subject_category_id):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
                                 authtoken=True)
-        if category_id in data:
-            return data[category_id]["name"]
+        if subject_category_id in data:
+            return data[subject_category_id]["name"]
 
-    def __get_object_category_name(self, intraextension, category_id):
+    def __get_object_category_name(self, intraextension, object_category_id):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
                                 authtoken=True)
-        if category_id in data:
-            return data[category_id]["name"]
+        if object_category_id in data:
+            return data[object_category_id]["name"]
 
-    def __get_action_category_name(self, intraextension, category_id):
+    def __get_action_category_name(self, intraextension, action_category_id):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
                                 authtoken=True)
-        if category_id in data:
-            return data[category_id]["name"]
+        if action_category_id in data:
+            return data[action_category_id]["name"]
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
@@ -140,7 +147,7 @@ class SubMetaRuleSet(Command):
     def get_parser(self, prog_name):
         parser = super(SubMetaRuleSet, self).get_parser(prog_name)
         parser.add_argument(
-            'id',
+            'submetarule_id',
             metavar='<sub_meta_rule-uuid>',
             help='Sub Meta Rule UUID (example: "12346")',
         )
@@ -155,19 +162,19 @@ class SubMetaRuleSet(Command):
             help='name to set (example: "my new sub meta rule")',
         )
         parser.add_argument(
-            '--subject_categories',
-            metavar='<subject_categories-uuid>',
-            help='subject_categories UUID (example: "12346,")',
+            '--subject_category_id',
+            metavar='<subject-category-uuid>',
+            help='subject category UUID (example: "12346,")',
         )
         parser.add_argument(
-            '--action_categories',
-            metavar='<action_categories-uuid>',
-            help='action_categories UUID (example: "12346,0987654")',
+            '--object_category_id',
+            metavar='<object-category-uuid>',
+            help='object category UUID (example: "12346")',
         )
         parser.add_argument(
-            '--object_categories',
-            metavar='<object_categories-uuid>',
-            help='object_categories UUID (example: "12346")',
+            '--action_category_id',
+            metavar='<action-category-uuid>',
+            help='action category UUID (example: "12346,0987654")',
         )
         parser.add_argument(
             '--intraextension',
@@ -179,25 +186,25 @@ class SubMetaRuleSet(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        subject_categories = parsed_args.subject_categories
-        if not subject_categories:
-            subject_categories = ""
-        object_categories = parsed_args.object_categories
-        if not object_categories:
-            object_categories = ""
-        action_categories = parsed_args.action_categories
-        if not action_categories:
-            action_categories = ""
-        subject_categories = map(lambda x: x.strip(), subject_categories.split(','))
-        action_categories = map(lambda x: x.strip(), action_categories.split(','))
-        object_categories = map(lambda x: x.strip(), object_categories.split(','))
+        subject_category_id = parsed_args.subject_category_id
+        if not subject_category_id:
+            subject_category_id = ""
+        object_category_id = parsed_args.object_category_id
+        if not object_category_id:
+            object_category_id = ""
+        action_category_id = parsed_args.action_category_id
+        if not action_category_id:
+            action_category_id = ""
+        subject_category_id = map(lambda x: x.strip(), subject_category_id.split(','))
+        action_category_id = map(lambda x: x.strip(), action_category_id.split(','))
+        object_category_id = map(lambda x: x.strip(), object_category_id.split(','))
         sub_meta_rule_id = parsed_args.id
         post_data = dict()
         post_data["sub_meta_rule_name"] = parsed_args.name
         post_data["sub_meta_rule_algorithm"] = parsed_args.algorithm
-        post_data["sub_meta_rule_subject_categories"] = filter(lambda x: x, subject_categories)
-        post_data["sub_meta_rule_object_categories"] = filter(lambda x: x, object_categories)
-        post_data["sub_meta_rule_action_categories"] = filter(lambda x: x, action_categories)
+        post_data["sub_meta_rule_subject_categories"] = filter(lambda x: x, subject_category_id)  # TODO: check for multiple categories
+        post_data["sub_meta_rule_object_categories"] = filter(lambda x: x, object_category_id)
+        post_data["sub_meta_rule_action_categories"] = filter(lambda x: x, action_category_id)
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules/{}".format(parsed_args.intraextension, sub_meta_rule_id),
                          post_data=post_data,
                          method="POST",

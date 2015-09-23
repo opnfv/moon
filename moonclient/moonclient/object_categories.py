@@ -35,16 +35,16 @@ class ObjectCategoriesList(Lister):
 
 
 class ObjectCategoriesAdd(Command):
-    """List all Intra_Extensions."""
+    """Add a new object category."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(ObjectCategoriesAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'object_category',
-            metavar='<object_category-uuid>',
-            help='Object UUID',
+            'object_category_name',
+            metavar='<object_category-name>',
+            help='Object category name',
         )
         parser.add_argument(
             '--intraextension',
@@ -54,7 +54,7 @@ class ObjectCategoriesAdd(Command):
         parser.add_argument(
             '--description',
             metavar='<description-str>',
-            help='Category description',
+            help='Object category description',
         )
         return parser
 
@@ -63,9 +63,8 @@ class ObjectCategoriesAdd(Command):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(parsed_args.intraextension),
                                 post_data={
-                                    "object_category_name": parsed_args.object_category,
-                                    "object_category_description": parsed_args.description,
-                                },
+                                    "object_category_name": parsed_args.object_category_name,
+                                    "object_category_description": parsed_args.description},
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -74,16 +73,16 @@ class ObjectCategoriesAdd(Command):
 
 
 class ObjectCategoriesDelete(Command):
-    """List all Intra_Extensions."""
+    """Delete an object category."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(ObjectCategoriesDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'object_category',
+            'object_category_id',
             metavar='<object_category-uuid>',
-            help='Object UUID',
+            help='Object category UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -97,7 +96,7 @@ class ObjectCategoriesDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories/{}".format(
             parsed_args.intraextension,
-            parsed_args.object_category
-        ),
+            parsed_args.object_category_id),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

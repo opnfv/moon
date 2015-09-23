@@ -11,7 +11,7 @@ from cliff.show import ShowOne
 
 
 class RulesList(Lister):
-    """List all aggregation algorithms."""
+    """List all rules."""
 
     log = logging.getLogger(__name__)
 
@@ -120,7 +120,7 @@ class RulesList(Lister):
 
 
 class RuleAdd(Command):
-    """List the current aggregation algorithm."""
+    """Add a new rule."""
 
     log = logging.getLogger(__name__)
 
@@ -228,7 +228,7 @@ class RuleAdd(Command):
 
 
 class RuleDelete(Command):
-    """Set the current aggregation algorithm."""
+    """Delete a new rule."""
 
     log = logging.getLogger(__name__)
 

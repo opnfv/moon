@@ -9,17 +9,17 @@ from cliff.lister import Lister
 from cliff.command import Command
 
 
-class SubjectCategoryScopeList(Lister):
-    """List all Intra_Extensions."""
+class SubjectScopesList(Lister):
+    """List all subject scopes."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
-        parser = super(SubjectCategoryScopeList, self).get_parser(prog_name)
+        parser = super(SubjectScopesList, self).get_parser(prog_name)
         parser.add_argument(
-            'category',
-            metavar='<category-uuid>',
-            help='Category UUID',
+            'subject_category_id',
+            metavar='<subject-category-uuid>',
+            help='Subject category UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -32,30 +32,31 @@ class SubjectCategoryScopeList(Lister):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
-            parsed_args.intraextension, parsed_args.category),
-                                authtoken=True)
+            parsed_args.intraextension,
+            parsed_args.subject_category_id),
+            authtoken=True)
         return (
             ("id", "name", "description"),
             ((_id, data[_id]["name"], data[_id]["description"]) for _id in data)
         )
 
 
-class SubjectCategoryScopeAdd(Command):
-    """List all Intra_Extensions."""
+class SubjectScopesAdd(Command):
+    """Add a new subject scope."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
-        parser = super(SubjectCategoryScopeAdd, self).get_parser(prog_name)
+        parser = super(SubjectScopesAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'category',
-            metavar='<category-uuid>',
-            help='Category UUID',
+            'subject_category_id',
+            metavar='<subject-category-uuid>',
+            help='Subject category UUID',
         )
         parser.add_argument(
-            'scope_name',
-            metavar='<scope-str>',
-            help='Scope Name',
+            'subject_scope_name',
+            metavar='<subject-scope-str>',
+            help='Subject scope Name',
         )
         parser.add_argument(
             '--description',
@@ -73,34 +74,34 @@ class SubjectCategoryScopeAdd(Command):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
-            parsed_args.intraextension, parsed_args.category),
-                                post_data={
-                                    "subject_scope_name": parsed_args.scope_name,
-                                    "subject_scope_description": parsed_args.description,
-                                },
-                                authtoken=True)
+            parsed_args.intraextension, parsed_args.subject_category_id),
+            post_data={
+                "subject_scope_name": parsed_args.subject_scope_name,
+                "subject_scope_description": parsed_args.description,
+            },
+            authtoken=True)
         return (
             ("id", "name", "description"),
             ((_id, data[_id]["name"], data[_id]["description"]) for _id in data)
         )
 
 
-class SubjectCategoryScopeDelete(Command):
-    """List all Intra_Extensions."""
+class SubjectScopesDelete(Command):
+    """Delete a subject scope."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
-        parser = super(SubjectCategoryScopeDelete, self).get_parser(prog_name)
+        parser = super(SubjectScopesDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'category',
-            metavar='<category-uuid>',
-            help='Category  UUID',
+            'subject_category_id',
+            metavar='<subject-category-uuid>',
+            help='Subject category  UUID',
         )
         parser.add_argument(
-            'scope_id',
-            metavar='<scope-uuid>',
-            help='Scope UUID',
+            'subject_scope_id',
+            metavar='<subject-scope-uuid>',
+            help='Subject scope UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -114,8 +115,9 @@ class SubjectCategoryScopeDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}/{}".format(
             parsed_args.intraextension,
-            parsed_args.category,
-            parsed_args.scope_id
+            parsed_args.subject_category_id,
+            parsed_args.subject_scope_id
         ),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

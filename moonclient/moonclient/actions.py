@@ -10,7 +10,7 @@ from cliff.command import Command
 
 
 class ActionsList(Lister):
-    """List all Intra_Extensions."""
+    """List all actions."""
 
     log = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class ActionsList(Lister):
 
 
 class ActionsAdd(Command):
-    """List all Intra_Extensions."""
+    """Add a new action."""
 
     log = logging.getLogger(__name__)
 
@@ -61,11 +61,10 @@ class ActionsAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/actions".format(parsed_args.intraextension),
+        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/actions".format(parsed_args.intraextension),  # TODO: check method POST?
                                 post_data={
                                     "action_name": parsed_args.action_name,
-                                    "action_description": parsed_args.description,
-                                },
+                                    "action_description": parsed_args.description},
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -74,14 +73,14 @@ class ActionsAdd(Command):
 
 
 class ActionsDelete(Command):
-    """List all Intra_Extensions."""
+    """Delete an action."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(ActionsDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'action',
+            'action_id',
             metavar='<action-uuid>',
             help='Action UUID',
         )
@@ -97,7 +96,7 @@ class ActionsDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/actions/{}".format(
             parsed_args.intraextension,
-            parsed_args.action
-        ),
+            parsed_args.action_id),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

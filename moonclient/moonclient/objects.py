@@ -10,7 +10,7 @@ from cliff.command import Command
 
 
 class ObjectsList(Lister):
-    """List all Intra_Extensions."""
+    """List all objects."""
 
     log = logging.getLogger(__name__)
 
@@ -35,16 +35,16 @@ class ObjectsList(Lister):
 
 
 class ObjectsAdd(Command):
-    """List all Intra_Extensions."""
+    """Add a new object."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(ObjectsAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'object_id',
-            metavar='<object-id>',
-            help='Object UUID',
+            'object_name',
+            metavar='<object-name>',
+            help='Object name',
         )
         parser.add_argument(
             '--intraextension',
@@ -63,9 +63,8 @@ class ObjectsAdd(Command):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects".format(parsed_args.intraextension),
                                 post_data={
-                                    "object_name": parsed_args.object_id,
-                                    "object_description": parsed_args.description,
-                                },
+                                    "object_name": parsed_args.object_name,
+                                    "object_description": parsed_args.description},
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -81,7 +80,7 @@ class ObjectsDelete(Command):
     def get_parser(self, prog_name):
         parser = super(ObjectsDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'object',
+            'object_id',
             metavar='<object-uuid>',
             help='Object UUID',
         )
@@ -97,7 +96,7 @@ class ObjectsDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects/{}".format(
             parsed_args.intraextension,
-            parsed_args.object
-        ),
+            parsed_args.object_id),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

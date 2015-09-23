@@ -84,6 +84,7 @@ class MoonClient(App):
         if not self._tenant_id:
             self._tenant_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
                                            authtoken=True)["projects"][0]["id"]
+            # TODO: change '/v3/projects?name={}'
         return self._tenant_id
 
     @property
@@ -101,6 +102,7 @@ class MoonClient(App):
 
     def get_tenant_uuid(self, tenant_name):
         return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True)["projects"][0]["id"]
+        # TODO: change '/v3/projects?name={}'
 
     def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None):
         if post_data:

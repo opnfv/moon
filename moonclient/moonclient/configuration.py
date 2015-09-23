@@ -45,7 +45,7 @@ class AggregationAlgorithmsList(Lister):
 
 
 class SubMetaRuleAlgorithmsList(Lister):
-    """List all aggregation algorithms."""
+    """List all sub meta rule algorithms."""
 
     log = logging.getLogger(__name__)
 

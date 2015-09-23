@@ -12,7 +12,7 @@ import os
 
 
 class IntraExtensionSelect(Command):
-    """Select a Intra_Extension to work with."""
+    """Select an Intra_Extension to work with."""
 
     log = logging.getLogger(__name__)
 
@@ -84,8 +84,6 @@ class IntraExtensionList(Lister):
 
     def take_action(self, parsed_args):
         ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
-        # if "intra_extensions" not in ie:
-        #     raise Exception("Error in command {}".format(ie))
         return (
             ("id", "name", "model"),
             ((_id, ie[_id]["name"], ie[_id]["model"]) for _id in ie.keys())
@@ -107,10 +105,9 @@ class IntraExtensionDelete(Command):
         return parser
 
     def take_action(self, parsed_args):
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(parsed_args.uuid),
-                              method="DELETE",
-                              authtoken=True)
-        return
+        self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(parsed_args.uuid),
+                         method="DELETE",
+                         authtoken=True)
 
 
 class IntraExtensionShow(ShowOne):

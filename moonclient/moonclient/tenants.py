@@ -29,8 +29,8 @@ class TenantList(Lister):
                 tenants[tenant_id]["description"],
                 tenants[tenant_id]["intra_authz_extension_id"],
                 tenants[tenant_id]["intra_admin_extension_id"],
-             )
-             for tenant_id in tenants)
+                )
+                for tenant_id in tenants)
         )
 
 
@@ -73,8 +73,8 @@ class TenantAdd(Command):
         if parsed_args.desc:
             post_data["tenant_description"] = parsed_args.desc
         tenants = self.app.get_url("/v3/OS-MOON/tenants",
-                                post_data=post_data,
-                                authtoken=True)
+                                   post_data=post_data,
+                                   authtoken=True)
         return (
             ("id", "name", "description", "intra_authz_extension_id", "intra_admin_extension_id"),
             ((
@@ -83,13 +83,13 @@ class TenantAdd(Command):
                 tenants[tenant_id]["description"],
                 tenants[tenant_id]["intra_authz_extension_id"],
                 tenants[tenant_id]["intra_admin_extension_id"],
-             )
+                )
              for tenant_id in tenants)
         )
 
 
 class TenantShow(Command):
-    """Show information about a tenant."""
+    """Show information of one tenant."""
 
     log = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class TenantShow(Command):
 
     def take_action(self, parsed_args):
         tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(parsed_args.tenant_name),
-                                authtoken=True)
+                                   authtoken=True)
         return (
             ("id", "name", "description", "intra_authz_extension_id", "intra_admin_extension_id"),
             ((
@@ -113,7 +113,7 @@ class TenantShow(Command):
                 tenants[tenant_id]["description"],
                 tenants[tenant_id]["intra_authz_extension_id"],
                 tenants[tenant_id]["intra_admin_extension_id"],
-             )
+                )
              for tenant_id in tenants)
         )
 
@@ -164,8 +164,8 @@ class TenantSet(Command):
         if parsed_args.desc is not None:
             post_data["tenant_description"] = parsed_args.desc
         tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(post_data["tenant_id"]),
-                                post_data=post_data,
-                                authtoken=True)
+                                   post_data=post_data,
+                                   authtoken=True)
         return (
             ("id", "name", "description", "authz", "admin"),
             ((
@@ -174,13 +174,13 @@ class TenantSet(Command):
                 tenants[tenant_id]["description"],
                 tenants[tenant_id]["intra_authz_extension_id"],
                 tenants[tenant_id]["intra_admin_extension_id"],
-             )
+                )
              for tenant_id in tenants)
         )
 
 
 class TenantDelete(Command):
-    """Modify a tenant."""
+    """Delete a tenant."""
 
     log = logging.getLogger(__name__)
 
@@ -195,5 +195,5 @@ class TenantDelete(Command):
 
     def take_action(self, parsed_args):
         self.app.get_url("/v3/OS-MOON/tenants/{}".format(parsed_args.tenant_id),
-                                method="DELETE",
-                                authtoken=True)
+                         method="DELETE",
+                         authtoken=True)

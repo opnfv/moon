@@ -10,7 +10,7 @@ from cliff.command import Command
 
 
 class ActionAssignmentsList(Lister):
-    """List all Intra_Extensions."""
+    """List all action assignments."""
 
     log = logging.getLogger(__name__)
 
@@ -22,9 +22,9 @@ class ActionAssignmentsList(Lister):
             help='Action UUID',
         )
         parser.add_argument(
-            'category_id',
-            metavar='<category-uuid>',
-            help='Category UUID',
+            'action_category_id',
+            metavar='<action-category-uuid>',
+            help='Action category UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -33,27 +33,29 @@ class ActionAssignmentsList(Lister):
         )
         return parser
 
-    def __get_scope_from_id(self, intraextension_id, category_id, scope_id):
+    def __get_scope_from_id(self, intraextension_id, action_category_id, action_scope_id):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(
-            intraextension_id, category_id),
+            intraextension_id, action_category_id),
             authtoken=True)
-        if scope_id in data:
-            return data[scope_id]
+        if action_scope_id in data:
+            return data[action_scope_id]
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_assignments/{}/{}".format(
-            parsed_args.intraextension, parsed_args.action_id, parsed_args.category_id),
+            parsed_args.intraextension, parsed_args.action_id, parsed_args.action_category_id),
             authtoken=True)
         return (
             ("id", "name"),
-            ((_id, self.__get_scope_from_id(parsed_args.intraextension, parsed_args.category_id, _id)['name']) for _id in data)
+            ((_id, self.__get_scope_from_id(parsed_args.intraextension,
+                                            parsed_args.action_category_id,
+                                            _id)['name']) for _id in data)
         )
 
 
 class ActionAssignmentsAdd(Command):
-    """List all Intra_Extensions."""
+    """Add a new action assignment."""
 
     log = logging.getLogger(__name__)
 
@@ -65,14 +67,14 @@ class ActionAssignmentsAdd(Command):
             help='Action UUID',
         )
         parser.add_argument(
-            'action_category',
-            metavar='<action_category-uuid>',
-            help='Action Category',
+            'action_category_id',
+            metavar='<action-category-uuid>',
+            help='Action category UUID',
         )
         parser.add_argument(
-            'action_category_scope',
-            metavar='<action_category_scope-uuid>',
-            help='Action Category Scope',
+            'action_scope_id',
+            metavar='<action-scope-uuid>',
+            help='Action scope UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -81,12 +83,12 @@ class ActionAssignmentsAdd(Command):
         )
         return parser
 
-    def __get_scope_from_id(self, intraextension_id, category_id, scope_id):
+    def __get_scope_from_id(self, intraextension_id, action_category_id, action_scope_id):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(
-            intraextension_id, category_id),
+            intraextension_id, action_category_id),
             authtoken=True)
-        if scope_id in data:
-            return data[scope_id]
+        if action_scope_id in data:
+            return data[action_scope_id]
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
@@ -94,18 +96,19 @@ class ActionAssignmentsAdd(Command):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_assignments".format(parsed_args.intraextension),
                                 post_data={
                                     "action_id": parsed_args.action_id,
-                                    "action_category_id": parsed_args.action_category,
-                                    "action_scope_id": parsed_args.action_category_scope
-                                },
+                                    "action_category_id": parsed_args.action_category_id,
+                                    "action_scope_id": parsed_args.action_scope_id},
                                 authtoken=True)
         return (
             ("id", "name"),
-            ((_id, self.__get_scope_from_id(parsed_args.intraextension, parsed_args.category_id, _id)['name']) for _id in data)
+            ((_id, self.__get_scope_from_id(parsed_args.intraextension,
+                                            parsed_args.action_category_id,
+                                            _id)['name']) for _id in data)
         )
 
 
 class ActionAssignmentsDelete(Command):
-    """List all Intra_Extensions."""
+    """Delete an action assignment."""
 
     log = logging.getLogger(__name__)
 
@@ -117,14 +120,14 @@ class ActionAssignmentsDelete(Command):
             help='Action UUID',
         )
         parser.add_argument(
-            'action_category',
-            metavar='<action_category>',
-            help='Action Category',
+            'action_category_id',
+            metavar='<action-category-uuid>',
+            help='Action category UUID',
         )
         parser.add_argument(
-            'action_category_scope',
-            metavar='<action_category_scope>',
-            help='Action Category Scope',
+            'action_scope_id',
+            metavar='<action-scope-uuid>',
+            help='Action scope UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -139,8 +142,8 @@ class ActionAssignmentsDelete(Command):
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_assignments/{}/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.action_id,
-            parsed_args.action_category,
-            parsed_args.action_category_scope
-        ),
+            parsed_args.action_category_id,
+            parsed_args.action_scope_id),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

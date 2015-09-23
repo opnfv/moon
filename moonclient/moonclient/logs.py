@@ -11,7 +11,7 @@ from cliff.show import ShowOne
 
 
 class LogsList(Lister):
-    """List all aggregation algorithms."""
+    """List all logs."""
 
     log = logging.getLogger(__name__)
 

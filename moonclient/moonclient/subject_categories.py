@@ -10,7 +10,7 @@ from cliff.command import Command
 
 
 class SubjectCategoriesList(Lister):
-    """List all Intra_Extensions."""
+    """List all subject categories."""
 
     log = logging.getLogger(__name__)
 
@@ -35,16 +35,16 @@ class SubjectCategoriesList(Lister):
 
 
 class SubjectCategoriesAdd(Command):
-    """List all Intra_Extensions."""
+    """Add a new subject category."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(SubjectCategoriesAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'subject_category',
-            metavar='<subject_category-uuid>',
-            help='Subject UUID',
+            'subject_category_name',
+            metavar='<subject_category-name>',
+            help='Subject category name',
         )
         parser.add_argument(
             '--intraextension',
@@ -54,7 +54,7 @@ class SubjectCategoriesAdd(Command):
         parser.add_argument(
             '--description',
             metavar='<description-str>',
-            help='Category description',
+            help='Subject category description',
         )
         return parser
 
@@ -63,9 +63,8 @@ class SubjectCategoriesAdd(Command):
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(parsed_args.intraextension),
                                 post_data={
-                                    "subject_category_name": parsed_args.subject_category,
-                                    "subject_category_description": parsed_args.description,
-                                },
+                                    "subject_category_name": parsed_args.subject_category_name,
+                                    "subject_category_description": parsed_args.description},
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -74,16 +73,16 @@ class SubjectCategoriesAdd(Command):
 
 
 class SubjectCategoriesDelete(Command):
-    """List all Intra_Extensions."""
+    """Delete a subject category."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(SubjectCategoriesDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'subject_category',
+            'subject_category_id',
             metavar='<subject_category-uuid>',
-            help='Subject UUID',
+            help='Subject category UUID',
         )
         parser.add_argument(
             '--intraextension',
@@ -97,7 +96,7 @@ class SubjectCategoriesDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories/{}".format(
             parsed_args.intraextension,
-            parsed_args.subject_category
-        ),
+            parsed_args.subject_category_id),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )

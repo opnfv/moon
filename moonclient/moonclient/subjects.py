@@ -10,7 +10,7 @@ from cliff.command import Command
 
 
 class SubjectsList(Lister):
-    """List all Intra_Extensions."""
+    """List all subjects."""
 
     log = logging.getLogger(__name__)
 
@@ -35,14 +35,14 @@ class SubjectsList(Lister):
 
 
 class SubjectsAdd(Command):
-    """List all Intra_Extensions."""
+    """add a new subject."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(SubjectsAdd, self).get_parser(prog_name)
         parser.add_argument(
-            'subject',
+            'subject_name',
             metavar='<subject-name>',
             help='Subject name',
         )
@@ -51,13 +51,21 @@ class SubjectsAdd(Command):
             metavar='<intraextension-uuid>',
             help='IntraExtension UUID',
         )
+        parser.add_argument(
+            '--description',
+            metavar='<description-str>',
+            help='Subject description',
+        )
         return parser
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
-                                post_data={"subject_name": parsed_args.subject},
+                                post_data={
+                                    "subject_name": parsed_args.subject_name,
+                                    "subject_description": parsed_args.description
+                                    },
                                 authtoken=True)
         return (
             ("id", "name", "Keystone ID"),
@@ -66,14 +74,14 @@ class SubjectsAdd(Command):
 
 
 class SubjectsDelete(Command):
-    """List all Intra_Extensions."""
+    """Delete a subject."""
 
     log = logging.getLogger(__name__)
 
     def get_parser(self, prog_name):
         parser = super(SubjectsDelete, self).get_parser(prog_name)
         parser.add_argument(
-            'subject',
+            'subject_id',
             metavar='<subject-uuid>',
             help='Subject UUID',
         )
@@ -89,7 +97,8 @@ class SubjectsDelete(Command):
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects/{}".format(
             parsed_args.intraextension,
-            parsed_args.subject
-        ),
+            parsed_args.subject_id
+            ),
             method="DELETE",
-            authtoken=True)
+            authtoken=True
+        )
