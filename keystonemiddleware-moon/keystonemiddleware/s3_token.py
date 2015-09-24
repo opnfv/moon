@@ -35,6 +35,7 @@ import logging
 import webob
 
 from oslo_serialization import jsonutils
+from oslo_utils import strutils
 import requests
 import six
 from six.moves import urllib
@@ -116,7 +117,7 @@ class S3Token(object):
                                             auth_port)
 
         # SSL
-        insecure = conf.get('insecure', False)
+        insecure = strutils.bool_from_string(conf.get('insecure', False))
         cert_file = conf.get('certfile')
         key_file = conf.get('keyfile')
 
@@ -250,6 +251,8 @@ class S3Token(object):
 
         req.headers['X-Auth-Token'] = token_id
         tenant_to_connect = force_tenant or tenant['id']
+        if six.PY2 and isinstance(tenant_to_connect, six.text_type):
+            tenant_to_connect = tenant_to_connect.encode('utf-8')
         self._logger.debug('Connecting with tenant: %s', tenant_to_connect)
         new_tenant_name = '%s%s' % (self._reseller_prefix, tenant_to_connect)
         environ['PATH_INFO'] = environ['PATH_INFO'].replace(account,

@@ -13,7 +13,7 @@ import httplib
 
 from keystone import exception
 from cStringIO import StringIO
-from oslo.config import cfg
+from oslo_config import cfg
 # from keystoneclient import auth
 from keystonemiddleware.i18n import _, _LC, _LE, _LI, _LW
 
