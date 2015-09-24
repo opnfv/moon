@@ -7,6 +7,7 @@ import logging
 
 from cliff.lister import Lister
 from cliff.command import Command
+import getpass
 
 
 class SubjectsList(Lister):
@@ -56,15 +57,29 @@ class SubjectsAdd(Command):
             metavar='<description-str>',
             help='Subject description',
         )
+        parser.add_argument(
+            '--password',
+            metavar='<password-str>',
+            help='Password for subject (if not given, user will be prompted for one)',
+        )
+        parser.add_argument(
+            '--email',
+            metavar='<email-str>',
+            help='Email for the user',
+        )
         return parser
 
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
+        if not parsed_args.password:
+            parsed_args.password = getpass.getpass("Password for user {}:".format(parsed_args.subject_name))
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
                                 post_data={
                                     "subject_name": parsed_args.subject_name,
-                                    "subject_description": parsed_args.description
+                                    "subject_description": parsed_args.description,
+                                    "subject_password": parsed_args.password,
+                                    "subject_email": parsed_args.email
                                     },
                                 authtoken=True)
         return (

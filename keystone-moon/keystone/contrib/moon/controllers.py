@@ -340,6 +340,9 @@ class IntraExtensions(controller.V3Controller):
         subject_dict = dict()
         subject_dict['name'] = kw.get('subject_name', None)
         subject_dict['description'] = kw.get('subject_description', None)
+        subject_dict['password'] = kw.get('subject_password', None)
+        subject_dict['email'] = kw.get('subject_email', None)
+        LOG.debug("controllers.add_subject {}".format(subject_dict))
         return self.admin_api.add_subject_dict(user_id, intra_extension_id, subject_dict)
 
     @controller.protected()
