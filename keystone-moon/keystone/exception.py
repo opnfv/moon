@@ -357,6 +357,13 @@ class DomainConfigNotFound(NotFound):
                        'configuration for domain %(domain_id)s')
 
 
+class ConfigRegistrationNotFound(Exception):
+    # This is used internally between the domain config backend and the
+    # manager, so should not escape to the client.  If it did, it is a coding
+    # error on our part, and would end up, appropriately, as a 500 error.
+    pass
+
+
 class Conflict(Error):
     message_format = _("Conflict occurred attempting to store %(type)s -"
                        " %(details)s")
@@ -480,3 +487,9 @@ class OAuthHeadersMissingError(UnexpectedError):
                              'HTTPd or Apache, ensure WSGIPassAuthorization '
                              'is set to On.')
     title = 'Error retrieving OAuth headers'
+
+
+class TokenlessAuthConfigError(ValidationError):
+    message_format = _('Could not determine Identity Provider ID. The '
+                       'configuration option %(issuer_attribute)s '
+                       'was not found in the request environment.')

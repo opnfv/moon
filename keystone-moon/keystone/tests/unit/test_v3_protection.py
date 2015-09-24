@@ -17,10 +17,11 @@ import uuid
 
 from oslo_config import cfg
 from oslo_serialization import jsonutils
+from six.moves import http_client
 
 from keystone import exception
 from keystone.policy.backends import rules
-from keystone.tests import unit as tests
+from keystone.tests import unit
 from keystone.tests.unit.ksfixtures import temporaryfile
 from keystone.tests.unit import test_v3
 
@@ -428,7 +429,8 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
         user2_token = self.get_requested_token(user2_auth)
 
         self.get('/auth/tokens', token=user1_token,
-                 headers={'X-Subject-Token': user2_token}, expected_status=403)
+                 headers={'X-Subject-Token': user2_token},
+                 expected_status=http_client.FORBIDDEN)
 
     def test_admin_validate_user_token(self):
         # An admin can validate a user's token.
@@ -459,7 +461,8 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
         token = self.get_requested_token(auth)
 
         self.head('/auth/tokens', token=token,
-                  headers={'X-Subject-Token': token}, expected_status=200)
+                  headers={'X-Subject-Token': token},
+                  expected_status=http_client.OK)
 
     def test_user_check_user_token(self):
         # A user can check one of their own tokens.
@@ -472,7 +475,8 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
         token2 = self.get_requested_token(auth)
 
         self.head('/auth/tokens', token=token1,
-                  headers={'X-Subject-Token': token2}, expected_status=200)
+                  headers={'X-Subject-Token': token2},
+                  expected_status=http_client.OK)
 
     def test_user_check_other_user_token_rejected(self):
         # A user cannot check another user's token.
@@ -490,7 +494,7 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
 
         self.head('/auth/tokens', token=user1_token,
                   headers={'X-Subject-Token': user2_token},
-                  expected_status=403)
+                  expected_status=http_client.FORBIDDEN)
 
     def test_admin_check_user_token(self):
         # An admin can check a user's token.
@@ -508,7 +512,8 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
         user_token = self.get_requested_token(user_auth)
 
         self.head('/auth/tokens', token=admin_token,
-                  headers={'X-Subject-Token': user_token}, expected_status=200)
+                  headers={'X-Subject-Token': user_token},
+                  expected_status=http_client.OK)
 
     def test_user_revoke_same_token(self):
         # Given a non-admin user token, the token can be used to revoke
@@ -552,7 +557,7 @@ class IdentityTestPolicySample(test_v3.RestfulTestCase):
 
         self.delete('/auth/tokens', token=user1_token,
                     headers={'X-Subject-Token': user2_token},
-                    expected_status=403)
+                    expected_status=http_client.FORBIDDEN)
 
     def test_admin_revoke_user_token(self):
         # An admin can revoke a user's token.
@@ -607,7 +612,7 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         rules.reset()
         self.config_fixture.config(
             group='oslo_policy',
-            policy_file=tests.dirs.etc('policy.v3cloudsample.json'))
+            policy_file=unit.dirs.etc('policy.v3cloudsample.json'))
 
     def load_sample_data(self):
         # Start by creating a couple of domains
@@ -681,7 +686,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         # Return the expected return codes for APIs with and without data
         # with any specified status overriding the normal values
         if expected_status is None:
-            return (200, 201, 204)
+            return (http_client.OK, http_client.CREATED,
+                    http_client.NO_CONTENT)
         else:
             return (expected_status, expected_status, expected_status)
 
@@ -948,7 +954,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
 
         collection_url = self.build_role_assignment_query_url(
             domain_id=self.domainB['id'])
-        self.get(collection_url, auth=self.auth, expected_status=403)
+        self.get(collection_url, auth=self.auth,
+                 expected_status=http_client.FORBIDDEN)
 
     def test_domain_user_list_assignments_of_domain_failed(self):
         self.auth = self.build_authentication_request(
@@ -958,7 +965,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
 
         collection_url = self.build_role_assignment_query_url(
             domain_id=self.domainA['id'])
-        self.get(collection_url, auth=self.auth, expected_status=403)
+        self.get(collection_url, auth=self.auth,
+                 expected_status=http_client.FORBIDDEN)
 
     def test_cloud_admin_list_assignments_of_project(self):
         self.auth = self.build_authentication_request(
@@ -986,7 +994,7 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         self.assertRoleAssignmentInListResponse(r, project_admin_entity)
         self.assertRoleAssignmentInListResponse(r, project_user_entity)
 
-    @tests.utils.wip('waiting on bug #1437407')
+    @unit.utils.wip('waiting on bug #1437407')
     def test_domain_admin_list_assignments_of_project(self):
         self.auth = self.build_authentication_request(
             user_id=self.domain_admin_user['id'],
@@ -1021,7 +1029,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
 
         collection_url = self.build_role_assignment_query_url(
             project_id=self.project['id'])
-        self.get(collection_url, auth=self.auth, expected_status=403)
+        self.get(collection_url, auth=self.auth,
+                 expected_status=http_client.FORBIDDEN)
 
     def test_cloud_admin(self):
         self.auth = self.build_authentication_request(
@@ -1045,7 +1054,7 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
             password=self.domain_admin_user['password'],
             domain_id=self.domainA['id'])
         entity_url = '/domains/%s' % self.domainA['id']
-        self.get(entity_url, auth=self.auth, expected_status=200)
+        self.get(entity_url, auth=self.auth)
 
     def test_list_user_credentials(self):
         self.credential_user = self.new_credential_ref(self.just_a_user['id'])
@@ -1145,7 +1154,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         user2_token = self.get_requested_token(user2_auth)
 
         self.get('/auth/tokens', token=user1_token,
-                 headers={'X-Subject-Token': user2_token}, expected_status=403)
+                 headers={'X-Subject-Token': user2_token},
+                 expected_status=http_client.FORBIDDEN)
 
     def test_admin_validate_user_token(self):
         # An admin can validate a user's token.
@@ -1176,7 +1186,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         token = self.get_requested_token(auth)
 
         self.head('/auth/tokens', token=token,
-                  headers={'X-Subject-Token': token}, expected_status=200)
+                  headers={'X-Subject-Token': token},
+                  expected_status=http_client.OK)
 
     def test_user_check_user_token(self):
         # A user can check one of their own tokens.
@@ -1189,7 +1200,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         token2 = self.get_requested_token(auth)
 
         self.head('/auth/tokens', token=token1,
-                  headers={'X-Subject-Token': token2}, expected_status=200)
+                  headers={'X-Subject-Token': token2},
+                  expected_status=http_client.OK)
 
     def test_user_check_other_user_token_rejected(self):
         # A user cannot check another user's token.
@@ -1207,7 +1219,7 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
 
         self.head('/auth/tokens', token=user1_token,
                   headers={'X-Subject-Token': user2_token},
-                  expected_status=403)
+                  expected_status=http_client.FORBIDDEN)
 
     def test_admin_check_user_token(self):
         # An admin can check a user's token.
@@ -1225,7 +1237,8 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
         user_token = self.get_requested_token(user_auth)
 
         self.head('/auth/tokens', token=admin_token,
-                  headers={'X-Subject-Token': user_token}, expected_status=200)
+                  headers={'X-Subject-Token': user_token},
+                  expected_status=http_client.OK)
 
     def test_user_revoke_same_token(self):
         # Given a non-admin user token, the token can be used to revoke
@@ -1269,7 +1282,7 @@ class IdentityTestv3CloudPolicySample(test_v3.RestfulTestCase,
 
         self.delete('/auth/tokens', token=user1_token,
                     headers={'X-Subject-Token': user2_token},
-                    expected_status=403)
+                    expected_status=http_client.FORBIDDEN)
 
     def test_admin_revoke_user_token(self):
         # An admin can revoke a user's token.

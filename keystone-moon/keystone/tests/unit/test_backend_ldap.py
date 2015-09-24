@@ -21,6 +21,7 @@ import ldap
 import mock
 from oslo_config import cfg
 import pkg_resources
+from six.moves import http_client
 from six.moves import range
 from testtools import matchers
 
@@ -31,7 +32,7 @@ from keystone import exception
 from keystone import identity
 from keystone.identity.mapping_backends import mapping as map
 from keystone import resource
-from keystone.tests import unit as tests
+from keystone.tests import unit
 from keystone.tests.unit import default_fixtures
 from keystone.tests.unit import identity_mapping as mapping_sql
 from keystone.tests.unit.ksfixtures import database
@@ -138,7 +139,7 @@ class BaseLDAPIdentity(test_backend.IdentityTests):
 
     def config_files(self):
         config_files = super(BaseLDAPIdentity, self).config_files()
-        config_files.append(tests.dirs.tests_conf('backend_ldap.conf'))
+        config_files.append(unit.dirs.tests_conf('backend_ldap.conf'))
         return config_files
 
     def get_user_enabled_vals(self, user):
@@ -712,7 +713,7 @@ class BaseLDAPIdentity(test_backend.IdentityTests):
                           self.identity_api.get_group,
                           group['id'])
 
-    @tests.skip_if_cache_disabled('identity')
+    @unit.skip_if_cache_disabled('identity')
     def test_cache_layer_group_crud(self):
         group = {
             'domain_id': CONF.identity.default_domain_id,
@@ -979,8 +980,21 @@ class BaseLDAPIdentity(test_backend.IdentityTests):
         # returned as part of the ref.
         self.assertIs(True, project_info['enabled'])
 
+    def test_list_role_assignment_by_domain(self):
+        """Multiple domain assignments are not supported."""
+        self.assertRaises(
+            (exception.Forbidden, exception.DomainNotFound),
+            super(BaseLDAPIdentity, self).test_list_role_assignment_by_domain)
 
-class LDAPIdentity(BaseLDAPIdentity, tests.TestCase):
+    def test_list_role_assignment_by_user_with_domain_group_roles(self):
+        """Multiple domain assignments are not supported."""
+        self.assertRaises(
+            (exception.Forbidden, exception.DomainNotFound),
+            super(BaseLDAPIdentity, self).
+            test_list_role_assignment_by_user_with_domain_group_roles)
+
+
+class LDAPIdentity(BaseLDAPIdentity, unit.TestCase):
 
     def setUp(self):
         # NOTE(dstanek): The database must be setup prior to calling the
@@ -1578,7 +1592,7 @@ class LDAPIdentity(BaseLDAPIdentity, tests.TestCase):
                           self.resource_api.get_domain,
                           domain['id'])
 
-    @tests.skip_if_no_multiple_domains_support
+    @unit.skip_if_no_multiple_domains_support
     def test_create_domain_case_sensitivity(self):
         # domains are read-only, so case sensitivity isn't an issue
         ref = {
@@ -1633,7 +1647,7 @@ class LDAPIdentity(BaseLDAPIdentity, tests.TestCase):
                           self.resource_api.get_project,
                           project['id'])
 
-    @tests.skip_if_cache_disabled('assignment')
+    @unit.skip_if_cache_disabled('assignment')
     def test_cache_layer_project_crud(self):
         # NOTE(morganfainberg): LDAP implementation does not currently support
         # updating project names.  This method override provides a different
@@ -2091,7 +2105,7 @@ class LDAPIdentityEnabledEmulation(LDAPIdentity):
 
     def config_files(self):
         config_files = super(LDAPIdentityEnabledEmulation, self).config_files()
-        config_files.append(tests.dirs.tests_conf('backend_ldap.conf'))
+        config_files.append(unit.dirs.tests_conf('backend_ldap.conf'))
         return config_files
 
     def config_overrides(self):
@@ -2250,12 +2264,12 @@ class LDAPIdentityEnabledEmulation(LDAPIdentity):
         self.assertIs(False, user_ref['enabled'])
 
 
-class LdapIdentitySqlAssignment(BaseLDAPIdentity, tests.SQLDriverOverrides,
-                                tests.TestCase):
+class LdapIdentitySqlAssignment(BaseLDAPIdentity, unit.SQLDriverOverrides,
+                                unit.TestCase):
 
     def config_files(self):
         config_files = super(LdapIdentitySqlAssignment, self).config_files()
-        config_files.append(tests.dirs.tests_conf('backend_ldap_sql.conf'))
+        config_files.append(unit.dirs.tests_conf('backend_ldap_sql.conf'))
         return config_files
 
     def setUp(self):
@@ -2473,7 +2487,7 @@ class BaseMultiLDAPandSQLIdentity(object):
             self.identity_api._get_domain_driver_and_entity_id(
                 user['id']))
 
-        if expected_status == 200:
+        if expected_status == http_client.OK:
             ref = driver.get_user(entity_id)
             ref = self.identity_api._set_domain_id_and_mapping(
                 ref, domain_id, driver, map.EntityType.USER)
@@ -2518,8 +2532,8 @@ class BaseMultiLDAPandSQLIdentity(object):
                 password=self.users[user]['password'])
 
 
-class MultiLDAPandSQLIdentity(BaseLDAPIdentity, tests.SQLDriverOverrides,
-                              tests.TestCase, BaseMultiLDAPandSQLIdentity):
+class MultiLDAPandSQLIdentity(BaseLDAPIdentity, unit.SQLDriverOverrides,
+                              unit.TestCase, BaseMultiLDAPandSQLIdentity):
     """Class to test common SQL plus individual LDAP backends.
 
     We define a set of domains and domain-specific backends:
@@ -2598,7 +2612,7 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, tests.SQLDriverOverrides,
         """
         self.config_fixture.config(
             group='identity', domain_specific_drivers_enabled=True,
-            domain_config_dir=tests.TESTCONF + '/domain_configs_multi_ldap')
+            domain_config_dir=unit.TESTCONF + '/domain_configs_multi_ldap')
         self.config_fixture.config(group='identity_mapping',
                                    backward_compatible_ids=False)
 
@@ -2647,21 +2661,23 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, tests.SQLDriverOverrides,
 
         check_user = self.check_user
         check_user(self.users['user0'],
-                   self.domains['domain_default']['id'], 200)
+                   self.domains['domain_default']['id'], http_client.OK)
         for domain in [self.domains['domain1']['id'],
                        self.domains['domain2']['id'],
                        self.domains['domain3']['id'],
                        self.domains['domain4']['id']]:
             check_user(self.users['user0'], domain, exception.UserNotFound)
 
-        check_user(self.users['user1'], self.domains['domain1']['id'], 200)
+        check_user(self.users['user1'], self.domains['domain1']['id'],
+                   http_client.OK)
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain2']['id'],
                        self.domains['domain3']['id'],
                        self.domains['domain4']['id']]:
             check_user(self.users['user1'], domain, exception.UserNotFound)
 
-        check_user(self.users['user2'], self.domains['domain2']['id'], 200)
+        check_user(self.users['user2'], self.domains['domain2']['id'],
+                   http_client.OK)
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain1']['id'],
                        self.domains['domain3']['id'],
@@ -2671,10 +2687,14 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, tests.SQLDriverOverrides,
         # domain3 and domain4 share the same backend, so you should be
         # able to see user3 and user4 from either.
 
-        check_user(self.users['user3'], self.domains['domain3']['id'], 200)
-        check_user(self.users['user3'], self.domains['domain4']['id'], 200)
-        check_user(self.users['user4'], self.domains['domain3']['id'], 200)
-        check_user(self.users['user4'], self.domains['domain4']['id'], 200)
+        check_user(self.users['user3'], self.domains['domain3']['id'],
+                   http_client.OK)
+        check_user(self.users['user3'], self.domains['domain4']['id'],
+                   http_client.OK)
+        check_user(self.users['user4'], self.domains['domain3']['id'],
+                   http_client.OK)
+        check_user(self.users['user4'], self.domains['domain4']['id'],
+                   http_client.OK)
 
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain1']['id'],
@@ -2803,6 +2823,17 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, tests.SQLDriverOverrides,
         base = super(BaseLDAPIdentity, self)
         base.test_list_role_assignments_filtered_by_role()
 
+    def test_list_role_assignment_by_domain(self):
+        # With multi LDAP this method should work, so override the override
+        # from BaseLDAPIdentity
+        super(BaseLDAPIdentity, self).test_list_role_assignment_by_domain
+
+    def test_list_role_assignment_by_user_with_domain_group_roles(self):
+        # With multi LDAP this method should work, so override the override
+        # from BaseLDAPIdentity
+        super(BaseLDAPIdentity, self).\
+            test_list_role_assignment_by_user_with_domain_group_roles
+
 
 class MultiLDAPandSQLIdentityDomainConfigsInSQL(MultiLDAPandSQLIdentity):
     """Class to test the use of domain configs stored in the database.
@@ -2919,19 +2950,104 @@ class MultiLDAPandSQLIdentityDomainConfigsInSQL(MultiLDAPandSQLIdentity):
             domain_cfgs.get_domain_conf(CONF.identity.default_domain_id))
         self.assertEqual(CONF.ldap.url, default_config.ldap.url)
 
-    def test_setting_sql_driver_raises_exception(self):
-        """Ensure setting of domain specific sql driver is prevented."""
+    def test_setting_multiple_sql_driver_raises_exception(self):
+        """Ensure setting multiple domain specific sql drivers is prevented."""
 
         new_config = {'identity': {'driver': 'sql'}}
         self.domain_config_api.create_config(
             CONF.identity.default_domain_id, new_config)
-        self.assertRaises(exception.InvalidDomainConfig,
+        self.identity_api.domain_configs.get_domain_conf(
+            CONF.identity.default_domain_id)
+        self.domain_config_api.create_config(self.domains['domain1']['id'],
+                                             new_config)
+        self.assertRaises(exception.MultipleSQLDriversInConfig,
                           self.identity_api.domain_configs.get_domain_conf,
-                          CONF.identity.default_domain_id)
+                          self.domains['domain1']['id'])
+
+    def test_same_domain_gets_sql_driver(self):
+        """Ensure we can set an SQL driver if we have had it before."""
+
+        new_config = {'identity': {'driver': 'sql'}}
+        self.domain_config_api.create_config(
+            CONF.identity.default_domain_id, new_config)
+        self.identity_api.domain_configs.get_domain_conf(
+            CONF.identity.default_domain_id)
+
+        # By using a slightly different config, we cause the driver to be
+        # reloaded...and hence check if we can reuse the sql driver
+        new_config = {'identity': {'driver': 'sql'},
+                      'ldap': {'url': 'fake://memory1'}}
+        self.domain_config_api.create_config(
+            CONF.identity.default_domain_id, new_config)
+        self.identity_api.domain_configs.get_domain_conf(
+            CONF.identity.default_domain_id)
+
+    def test_delete_domain_clears_sql_registration(self):
+        """Ensure registration is deleted when a domain is deleted."""
+
+        domain = {'id': uuid.uuid4().hex, 'name': uuid.uuid4().hex}
+        domain = self.resource_api.create_domain(domain['id'], domain)
+        new_config = {'identity': {'driver': 'sql'}}
+        self.domain_config_api.create_config(domain['id'], new_config)
+        self.identity_api.domain_configs.get_domain_conf(domain['id'])
+
+        # First show that trying to set SQL for another driver fails
+        self.domain_config_api.create_config(self.domains['domain1']['id'],
+                                             new_config)
+        self.assertRaises(exception.MultipleSQLDriversInConfig,
+                          self.identity_api.domain_configs.get_domain_conf,
+                          self.domains['domain1']['id'])
+        self.domain_config_api.delete_config(self.domains['domain1']['id'])
+
+        # Now we delete the domain
+        domain['enabled'] = False
+        self.resource_api.update_domain(domain['id'], domain)
+        self.resource_api.delete_domain(domain['id'])
+
+        # The registration should now be available
+        self.domain_config_api.create_config(self.domains['domain1']['id'],
+                                             new_config)
+        self.identity_api.domain_configs.get_domain_conf(
+            self.domains['domain1']['id'])
+
+    def test_orphaned_registration_does_not_prevent_getting_sql_driver(self):
+        """Ensure we self heal an orphaned sql registration."""
+
+        domain = {'id': uuid.uuid4().hex, 'name': uuid.uuid4().hex}
+        domain = self.resource_api.create_domain(domain['id'], domain)
+        new_config = {'identity': {'driver': 'sql'}}
+        self.domain_config_api.create_config(domain['id'], new_config)
+        self.identity_api.domain_configs.get_domain_conf(domain['id'])
+
+        # First show that trying to set SQL for another driver fails
+        self.domain_config_api.create_config(self.domains['domain1']['id'],
+                                             new_config)
+        self.assertRaises(exception.MultipleSQLDriversInConfig,
+                          self.identity_api.domain_configs.get_domain_conf,
+                          self.domains['domain1']['id'])
+
+        # Now we delete the domain by using the backend driver directly,
+        # which causes the domain to be deleted without any of the cleanup
+        # that is in the manager (this is simulating a server process crashing
+        # in the middle of a delete domain operation, and somehow leaving the
+        # domain config settings in place, but the domain is deleted). We
+        # should still be able to set another domain to SQL, since we should
+        # self heal this issue.
+
+        self.resource_api.driver.delete_domain(domain['id'])
+        # Invalidate cache (so we will see the domain has gone)
+        self.resource_api.get_domain.invalidate(
+            self.resource_api, domain['id'])
+
+        # The registration should now be available
+        self.domain_config_api.create_config(self.domains['domain1']['id'],
+                                             new_config)
+        self.identity_api.domain_configs.get_domain_conf(
+            self.domains['domain1']['id'])
 
 
 class DomainSpecificLDAPandSQLIdentity(
-    BaseLDAPIdentity, tests.SQLDriverOverrides, tests.TestCase,
+    BaseLDAPIdentity, unit.SQLDriverOverrides, unit.TestCase,
         BaseMultiLDAPandSQLIdentity):
     """Class to test when all domains use specific configs, including SQL.
 
@@ -2954,7 +3070,7 @@ class DomainSpecificLDAPandSQLIdentity(
         self.config_fixture.config(
             group='identity', domain_specific_drivers_enabled=True,
             domain_config_dir=(
-                tests.TESTCONF + '/domain_configs_one_sql_one_ldap'))
+                unit.TESTCONF + '/domain_configs_one_sql_one_ldap'))
         self.config_fixture.config(group='identity_mapping',
                                    backward_compatible_ids=False)
 
@@ -3035,12 +3151,12 @@ class DomainSpecificLDAPandSQLIdentity(
         # driver, but won't find it via any other domain driver
 
         self.check_user(self.users['user0'],
-                        self.domains['domain_default']['id'], 200)
+                        self.domains['domain_default']['id'], http_client.OK)
         self.check_user(self.users['user0'],
                         self.domains['domain1']['id'], exception.UserNotFound)
 
         self.check_user(self.users['user1'],
-                        self.domains['domain1']['id'], 200)
+                        self.domains['domain1']['id'], http_client.OK)
         self.check_user(self.users['user1'],
                         self.domains['domain_default']['id'],
                         exception.UserNotFound)
@@ -3113,7 +3229,7 @@ class DomainSpecificSQLIdentity(DomainSpecificLDAPandSQLIdentity):
         self.config_fixture.config(
             group='identity', domain_specific_drivers_enabled=True,
             domain_config_dir=(
-                tests.TESTCONF + '/domain_configs_default_ldap_one_sql'))
+                unit.TESTCONF + '/domain_configs_default_ldap_one_sql'))
         # Part of the testing counts how many new mappings get created as
         # we create users, so ensure we are NOT using mapping for the default
         # LDAP domain so this doesn't confuse the calculation.
@@ -3189,12 +3305,12 @@ class DomainSpecificSQLIdentity(DomainSpecificLDAPandSQLIdentity):
             exception.MultipleSQLDriversInConfig,
             self.identity_api.domain_configs._load_config_from_file,
             self.resource_api,
-            [tests.TESTCONF + '/domain_configs_one_extra_sql/' +
+            [unit.TESTCONF + '/domain_configs_one_extra_sql/' +
              'keystone.domain2.conf'],
             'domain2')
 
 
-class LdapFilterTests(test_backend.FilterTests, tests.TestCase):
+class LdapFilterTests(test_backend.FilterTests, unit.TestCase):
 
     def setUp(self):
         super(LdapFilterTests, self).setUp()
@@ -3212,7 +3328,7 @@ class LdapFilterTests(test_backend.FilterTests, tests.TestCase):
 
     def config_files(self):
         config_files = super(LdapFilterTests, self).config_files()
-        config_files.append(tests.dirs.tests_conf('backend_ldap.conf'))
+        config_files.append(unit.dirs.tests_conf('backend_ldap.conf'))
         return config_files
 
     def test_list_users_in_group_filtered(self):

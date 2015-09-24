@@ -6,12 +6,13 @@
 # Alper Çiftçi <alprciftci@gmail.com>, 2015
 # Andreas Jaeger <jaegerandi@gmail.com>, 2015
 # catborise <muhammetalisag@gmail.com>, 2013
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version:  Keystone\n"
+"Project-Id-Version: keystone 9.0.0.dev14\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/keystone\n"
-"POT-Creation-Date: 2015-08-16 06:06+0000\n"
-"PO-Revision-Date: 2015-08-15 18:05+0000\n"
+"POT-Creation-Date: 2015-09-24 06:09+0000\n"
+"PO-Revision-Date: 2015-09-03 12:54+0000\n"
 "Last-Translator: openstackjenkins <jenkins@openstack.org>\n"
 "Language-Team: Turkish (Turkey) (http://www.transifex.com/openstack/keystone/"
 "language/tr_TR/)\n"
@@ -376,14 +377,6 @@ msgstr "Alan metadata'sı LDAP tarafından desteklenmiyor"
 
 msgid "Domain scoped token is not supported"
 msgstr "Alan kapsamlı jeton desteklenmiyor"
-
-#, python-format
-msgid ""
-"Domain specific sql drivers are not supported via the Identity API. One is "
-"specified in /domains/%s/config"
-msgstr ""
-"Alana özel sql sürücüleri Kimlik API'si tarafından desteklenmiyor. Birisi /"
-"domains/%s/config içinde tanımlanmış"
 
 #, python-format
 msgid ""

@@ -14,6 +14,7 @@
 
 from __future__ import absolute_import
 import atexit
+import datetime
 import functools
 import logging
 import os
@@ -21,18 +22,21 @@ import re
 import shutil
 import socket
 import sys
+import uuid
 import warnings
 
 import fixtures
 from oslo_config import cfg
 from oslo_config import fixture as config_fixture
+from oslo_log import fixture as log_fixture
 from oslo_log import log
+from oslo_utils import timeutils
 import oslotest.base as oslotest
 from oslotest import mockpatch
+from paste.deploy import loadwsgi
 import six
 from sqlalchemy import exc
 from testtools import testcase
-import webob
 
 # NOTE(ayoung)
 # environment.use_eventlet must run before any of the code that will
@@ -82,6 +86,8 @@ rules.init()
 
 IN_MEM_DB_CONN_STRING = 'sqlite://'
 
+TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
+
 exception._FATAL_EXCEPTION_FORMAT_ERRORS = True
 os.makedirs(TMPDIR)
 atexit.register(shutil.rmtree, TMPDIR)
@@ -111,6 +117,26 @@ class dirs(object):
 
 # keystone.common.sql.initialize() for testing.
 DEFAULT_TEST_DB_FILE = dirs.tmp('test.db')
+
+
+class EggLoader(loadwsgi.EggLoader):
+    _basket = {}
+
+    def find_egg_entry_point(self, object_type, name=None):
+        egg_key = '%s:%s' % (object_type, name)
+        egg_ep = self._basket.get(egg_key)
+        if not egg_ep:
+            egg_ep = super(EggLoader, self).find_egg_entry_point(
+                object_type, name=name)
+            self._basket[egg_key] = egg_ep
+        return egg_ep
+
+
+# NOTE(dstanek): class paths were remove from the keystone-paste.ini in
+# favor of using entry points. This caused tests to slow to a crawl
+# since we reload the application object for each RESTful test. This
+# monkey-patching adds caching to paste deploy's egg lookup.
+loadwsgi.EggLoader = EggLoader
 
 
 @atexit.register
@@ -197,39 +223,135 @@ class UnexpectedExit(Exception):
     pass
 
 
-class BadLog(Exception):
-    """Raised on invalid call to logging (parameter mismatch)."""
-    pass
+def new_ref():
+    """Populates a ref with attributes common to some API entities."""
+    return {
+        'id': uuid.uuid4().hex,
+        'name': uuid.uuid4().hex,
+        'description': uuid.uuid4().hex,
+        'enabled': True}
 
 
-class TestClient(object):
-    def __init__(self, app=None, token=None):
-        self.app = app
-        self.token = token
+def new_region_ref():
+    ref = new_ref()
+    # Region doesn't have name or enabled.
+    del ref['name']
+    del ref['enabled']
+    ref['parent_region_id'] = None
+    return ref
 
-    def request(self, method, path, headers=None, body=None):
-        if headers is None:
-            headers = {}
 
-        if self.token:
-            headers.setdefault('X-Auth-Token', self.token)
+def new_service_ref():
+    ref = new_ref()
+    ref['type'] = uuid.uuid4().hex
+    return ref
 
-        req = webob.Request.blank(path)
-        req.method = method
-        for k, v in headers.items():
-            req.headers[k] = v
-        if body:
-            req.body = body
-        return req.get_response(self.app)
 
-    def get(self, path, headers=None):
-        return self.request('GET', path=path, headers=headers)
+def new_endpoint_ref(service_id, interface='public', default_region_id=None,
+                     **kwargs):
+    ref = new_ref()
+    del ref['enabled']  # enabled is optional
+    ref['interface'] = interface
+    ref['service_id'] = service_id
+    ref['url'] = 'https://' + uuid.uuid4().hex + '.com'
+    ref['region_id'] = default_region_id
+    ref.update(kwargs)
+    return ref
 
-    def post(self, path, headers=None, body=None):
-        return self.request('POST', path=path, headers=headers, body=body)
 
-    def put(self, path, headers=None, body=None):
-        return self.request('PUT', path=path, headers=headers, body=body)
+def new_domain_ref():
+    ref = new_ref()
+    return ref
+
+
+def new_project_ref(domain_id=None, parent_id=None, is_domain=False):
+    ref = new_ref()
+    ref['domain_id'] = domain_id
+    ref['parent_id'] = parent_id
+    ref['is_domain'] = is_domain
+    return ref
+
+
+def new_user_ref(domain_id, project_id=None):
+    ref = new_ref()
+    ref['domain_id'] = domain_id
+    ref['email'] = uuid.uuid4().hex
+    ref['password'] = uuid.uuid4().hex
+    if project_id:
+        ref['default_project_id'] = project_id
+    return ref
+
+
+def new_group_ref(domain_id):
+    ref = new_ref()
+    ref['domain_id'] = domain_id
+    return ref
+
+
+def new_credential_ref(user_id, project_id=None, cred_type=None):
+    ref = dict()
+    ref['id'] = uuid.uuid4().hex
+    ref['user_id'] = user_id
+    if cred_type == 'ec2':
+        ref['type'] = 'ec2'
+        ref['blob'] = uuid.uuid4().hex
+    else:
+        ref['type'] = 'cert'
+        ref['blob'] = uuid.uuid4().hex
+    if project_id:
+        ref['project_id'] = project_id
+    return ref
+
+
+def new_role_ref():
+    ref = new_ref()
+    # Roles don't have a description or the enabled flag
+    del ref['description']
+    del ref['enabled']
+    return ref
+
+
+def new_policy_ref():
+    ref = new_ref()
+    ref['blob'] = uuid.uuid4().hex
+    ref['type'] = uuid.uuid4().hex
+    return ref
+
+
+def new_trust_ref(trustor_user_id, trustee_user_id, project_id=None,
+                  impersonation=None, expires=None, role_ids=None,
+                  role_names=None, remaining_uses=None,
+                  allow_redelegation=False):
+    ref = dict()
+    ref['id'] = uuid.uuid4().hex
+    ref['trustor_user_id'] = trustor_user_id
+    ref['trustee_user_id'] = trustee_user_id
+    ref['impersonation'] = impersonation or False
+    ref['project_id'] = project_id
+    ref['remaining_uses'] = remaining_uses
+    ref['allow_redelegation'] = allow_redelegation
+
+    if isinstance(expires, six.string_types):
+        ref['expires_at'] = expires
+    elif isinstance(expires, dict):
+        ref['expires_at'] = (
+            timeutils.utcnow() + datetime.timedelta(**expires)
+        ).strftime(TIME_FORMAT)
+    elif expires is None:
+        pass
+    else:
+        raise NotImplementedError('Unexpected value for "expires"')
+
+    role_ids = role_ids or []
+    role_names = role_names or []
+    if role_ids or role_names:
+        ref['roles'] = []
+        for role_id in role_ids:
+            ref['roles'].append({'id': role_id})
+        for role_name in role_names:
+            ref['roles'].append({'name': role_name})
+
+    return ref
 
 
 class BaseTestCase(oslotest.BaseTestCase):
@@ -245,8 +367,7 @@ class BaseTestCase(oslotest.BaseTestCase):
         super(BaseTestCase, self).setUp()
         self.useFixture(mockpatch.PatchObject(sys, 'exit',
                                               side_effect=UnexpectedExit))
-        self.useFixture(mockpatch.PatchObject(logging.Handler, 'handleError',
-                                              side_effect=BadLog))
+        self.useFixture(log_fixture.get_logging_handle_error_fixture())
 
         warnings.filterwarnings('error', category=DeprecationWarning,
                                 module='^keystone\\.')

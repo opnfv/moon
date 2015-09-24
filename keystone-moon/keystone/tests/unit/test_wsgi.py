@@ -23,13 +23,14 @@ import mock
 import oslo_i18n
 from oslo_serialization import jsonutils
 import six
+from six.moves import http_client
 from testtools import matchers
 import webob
 
 from keystone.common import environment
 from keystone.common import wsgi
 from keystone import exception
-from keystone.tests import unit as tests
+from keystone.tests import unit
 
 
 class FakeApp(wsgi.Application):
@@ -52,7 +53,7 @@ class FakeAttributeCheckerApp(wsgi.Application):
         self._require_attributes(ref, attr)
 
 
-class RouterTest(tests.TestCase):
+class RouterTest(unit.TestCase):
     def setUp(self):
         self.router = wsgi.RoutersBase()
         super(RouterTest, self).setUp()
@@ -68,7 +69,7 @@ class RouterTest(tests.TestCase):
                           status=uuid.uuid4().hex)
 
 
-class BaseWSGITest(tests.TestCase):
+class BaseWSGITest(unit.TestCase):
     def setUp(self):
         self.app = FakeApp()
         super(BaseWSGITest, self).setUp()
@@ -111,15 +112,16 @@ class ApplicationTest(BaseWSGITest):
 
         resp = wsgi.render_response(body=data)
         self.assertEqual('200 OK', resp.status)
-        self.assertEqual(200, resp.status_int)
+        self.assertEqual(http_client.OK, resp.status_int)
         self.assertEqual(body, resp.body)
         self.assertEqual('X-Auth-Token', resp.headers.get('Vary'))
         self.assertEqual(str(len(body)), resp.headers.get('Content-Length'))
 
     def test_render_response_custom_status(self):
-        resp = wsgi.render_response(status=(501, 'Not Implemented'))
+        resp = wsgi.render_response(
+            status=(http_client.NOT_IMPLEMENTED, 'Not Implemented'))
         self.assertEqual('501 Not Implemented', resp.status)
-        self.assertEqual(501, resp.status_int)
+        self.assertEqual(http_client.NOT_IMPLEMENTED, resp.status_int)
 
     def test_successful_require_attribute(self):
         app = FakeAttributeCheckerApp()
@@ -171,14 +173,14 @@ class ApplicationTest(BaseWSGITest):
     def test_render_response_no_body(self):
         resp = wsgi.render_response()
         self.assertEqual('204 No Content', resp.status)
-        self.assertEqual(204, resp.status_int)
+        self.assertEqual(http_client.NO_CONTENT, resp.status_int)
         self.assertEqual(b'', resp.body)
         self.assertEqual('0', resp.headers.get('Content-Length'))
         self.assertIsNone(resp.headers.get('Content-Type'))
 
     def test_render_response_head_with_body(self):
         resp = wsgi.render_response({'id': uuid.uuid4().hex}, method='HEAD')
-        self.assertEqual(200, resp.status_int)
+        self.assertEqual(http_client.OK, resp.status_int)
         self.assertEqual(b'', resp.body)
         self.assertNotEqual(resp.headers.get('Content-Length'), '0')
         self.assertEqual('application/json', resp.headers.get('Content-Type'))
@@ -195,14 +197,14 @@ class ApplicationTest(BaseWSGITest):
     def test_render_exception(self):
         e = exception.Unauthorized(message=u'\u7f51\u7edc')
         resp = wsgi.render_exception(e)
-        self.assertEqual(401, resp.status_int)
+        self.assertEqual(http_client.UNAUTHORIZED, resp.status_int)
 
     def test_render_exception_host(self):
         e = exception.Unauthorized(message=u'\u7f51\u7edc')
         context = {'host_url': 'http://%s:5000' % uuid.uuid4().hex}
         resp = wsgi.render_exception(e, context=context)
 
-        self.assertEqual(401, resp.status_int)
+        self.assertEqual(http_client.UNAUTHORIZED, resp.status_int)
 
     def test_improperly_encoded_params(self):
         class FakeApp(wsgi.Application):
@@ -311,7 +313,7 @@ class MiddlewareTest(BaseWSGITest):
         self.assertEqual("test", app.kwargs["testkey"])
 
 
-class LocalizedResponseTest(tests.TestCase):
+class LocalizedResponseTest(unit.TestCase):
     def test_request_match_default(self):
         # The default language if no Accept-Language is provided is None
         req = webob.Request.blank('/')
@@ -409,7 +411,7 @@ class LocalizedResponseTest(tests.TestCase):
             self.assertThat(xlation_mock.called, matchers.Equals(True))
 
 
-class ServerTest(tests.TestCase):
+class ServerTest(unit.TestCase):
 
     def setUp(self):
         super(ServerTest, self).setUp()

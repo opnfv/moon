@@ -15,10 +15,11 @@
 import copy
 import uuid
 
+from six.moves import http_client
 from testtools import matchers
 
 from keystone import catalog
-from keystone.tests import unit as tests
+from keystone.tests import unit
 from keystone.tests.unit.ksfixtures import database
 from keystone.tests.unit import test_v3
 
@@ -35,7 +36,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         r = self.put(
             '/regions/%s' % region_id,
             body={'region': ref},
-            expected_status=201)
+            expected_status=http_client.CREATED)
         self.assertValidRegionResponse(r, ref)
         # Double-check that the region ID was kept as-is and not
         # populated with a UUID, as is the case with POST /v3/regions
@@ -48,7 +49,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         r = self.put(
             '/regions/%s' % region_id,
             body={'region': ref},
-            expected_status=201)
+            expected_status=http_client.CREATED)
         self.assertValidRegionResponse(r, ref)
         # Double-check that the region ID was kept as-is and not
         # populated with a UUID, as is the case with POST /v3/regions
@@ -59,7 +60,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = dict(description="my region")
         self.put(
             '/regions/myregion',
-            body={'region': ref}, expected_status=201)
+            body={'region': ref}, expected_status=http_client.CREATED)
         # Create region again with duplicate id
         self.put(
             '/regions/myregion',
@@ -85,9 +86,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = self.new_region_ref()
         ref['id'] = ''
 
-        r = self.post(
-            '/regions',
-            body={'region': ref}, expected_status=201)
+        r = self.post('/regions', body={'region': ref})
         self.assertValidRegionResponse(r, ref)
         self.assertNotEmpty(r.result['region'].get('id'))
 
@@ -99,10 +98,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         del ref['id']
 
         # let the service define the ID
-        r = self.post(
-            '/regions',
-            body={'region': ref},
-            expected_status=201)
+        r = self.post('/regions', body={'region': ref})
         self.assertValidRegionResponse(r, ref)
 
     def test_create_region_without_description(self):
@@ -111,10 +107,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
 
         del ref['description']
 
-        r = self.post(
-            '/regions',
-            body={'region': ref},
-            expected_status=201)
+        r = self.post('/regions', body={'region': ref})
         # Create the description in the reference to compare to since the
         # response should now have a description, even though we didn't send
         # it with the original reference.
@@ -134,16 +127,10 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref1['description'] = region_desc
         ref2['description'] = region_desc
 
-        resp1 = self.post(
-            '/regions',
-            body={'region': ref1},
-            expected_status=201)
+        resp1 = self.post('/regions', body={'region': ref1})
         self.assertValidRegionResponse(resp1, ref1)
 
-        resp2 = self.post(
-            '/regions',
-            body={'region': ref2},
-            expected_status=201)
+        resp2 = self.post('/regions', body={'region': ref2})
         self.assertValidRegionResponse(resp2, ref2)
 
     def test_create_regions_without_descriptions(self):
@@ -158,15 +145,9 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         del ref1['description']
         ref2['description'] = None
 
-        resp1 = self.post(
-            '/regions',
-            body={'region': ref1},
-            expected_status=201)
+        resp1 = self.post('/regions', body={'region': ref1})
 
-        resp2 = self.post(
-            '/regions',
-            body={'region': ref2},
-            expected_status=201)
+        resp2 = self.post('/regions', body={'region': ref2})
         # Create the descriptions in the references to compare to since the
         # responses should now have descriptions, even though we didn't send
         # a description with the original references.
@@ -184,7 +165,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         self.put(
             '/regions/%s' % uuid.uuid4().hex,
             body={'region': ref},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_list_regions(self):
         """Call ``GET /regions``."""
@@ -230,16 +211,14 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """Call ``PATCH /regions/{region_id}``."""
         region_ref = self.new_region_ref()
 
-        resp = self.post('/regions', body={'region': region_ref},
-                         expected_status=201)
+        resp = self.post('/regions', body={'region': region_ref})
 
         region_updates = {
             # update with something that's not the description
             'parent_region_id': self.region_id,
         }
         resp = self.patch('/regions/%s' % region_ref['id'],
-                          body={'region': region_updates},
-                          expected_status=200)
+                          body={'region': region_updates})
 
         # NOTE(dstanek): Keystone should keep the original description.
         self.assertEqual(region_ref['description'],
@@ -326,19 +305,22 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """Call ``POST /services``."""
         ref = self.new_service_ref()
         ref['enabled'] = 'True'
-        self.post('/services', body={'service': ref}, expected_status=400)
+        self.post('/services', body={'service': ref},
+                  expected_status=http_client.BAD_REQUEST)
 
     def test_create_service_enabled_str_false(self):
         """Call ``POST /services``."""
         ref = self.new_service_ref()
         ref['enabled'] = 'False'
-        self.post('/services', body={'service': ref}, expected_status=400)
+        self.post('/services', body={'service': ref},
+                  expected_status=http_client.BAD_REQUEST)
 
     def test_create_service_enabled_str_random(self):
         """Call ``POST /services``."""
         ref = self.new_service_ref()
         ref['enabled'] = 'puppies'
-        self.post('/services', body={'service': ref}, expected_status=400)
+        self.post('/services', body={'service': ref},
+                  expected_status=http_client.BAD_REQUEST)
 
     def test_list_services(self):
         """Call ``GET /services``."""
@@ -575,7 +557,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         self.post(
             '/endpoints',
             body={'endpoint': ref},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_create_endpoint_enabled_str_false(self):
         """Call ``POST /endpoints`` with enabled: 'False'."""
@@ -584,7 +566,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         self.post(
             '/endpoints',
             body={'endpoint': ref},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_create_endpoint_enabled_str_random(self):
         """Call ``POST /endpoints`` with enabled: 'puppies'."""
@@ -593,13 +575,14 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         self.post(
             '/endpoints',
             body={'endpoint': ref},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_create_endpoint_with_invalid_region_id(self):
         """Call ``POST /endpoints``."""
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref["region_id"] = uuid.uuid4().hex
-        self.post('/endpoints', body={'endpoint': ref}, expected_status=400)
+        self.post('/endpoints', body={'endpoint': ref},
+                  expected_status=http_client.BAD_REQUEST)
 
     def test_create_endpoint_with_region(self):
         """EndpointV3 creates the region before creating the endpoint, if
@@ -608,7 +591,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref["region"] = uuid.uuid4().hex
         ref.pop('region_id')
-        self.post('/endpoints', body={'endpoint': ref}, expected_status=201)
+        self.post('/endpoints', body={'endpoint': ref})
         # Make sure the region is created
         self.get('/regions/%(region_id)s' % {
             'region_id': ref["region"]})
@@ -617,13 +600,14 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """EndpointV3 allows to creates the endpoint without region."""
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref.pop('region_id')
-        self.post('/endpoints', body={'endpoint': ref}, expected_status=201)
+        self.post('/endpoints', body={'endpoint': ref})
 
     def test_create_endpoint_with_empty_url(self):
         """Call ``POST /endpoints``."""
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref["url"] = ''
-        self.post('/endpoints', body={'endpoint': ref}, expected_status=400)
+        self.post('/endpoints', body={'endpoint': ref},
+                  expected_status=http_client.BAD_REQUEST)
 
     def test_get_endpoint(self):
         """Call ``GET /endpoints/{endpoint_id}``."""
@@ -667,7 +651,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
             '/endpoints/%(endpoint_id)s' % {
                 'endpoint_id': self.endpoint_id},
             body={'endpoint': {'enabled': 'True'}},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_update_endpoint_enabled_str_false(self):
         """Call ``PATCH /endpoints/{endpoint_id}`` with enabled: 'False'."""
@@ -675,7 +659,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
             '/endpoints/%(endpoint_id)s' % {
                 'endpoint_id': self.endpoint_id},
             body={'endpoint': {'enabled': 'False'}},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_update_endpoint_enabled_str_random(self):
         """Call ``PATCH /endpoints/{endpoint_id}`` with enabled: 'kitties'."""
@@ -683,7 +667,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
             '/endpoints/%(endpoint_id)s' % {
                 'endpoint_id': self.endpoint_id},
             body={'endpoint': {'enabled': 'kitties'}},
-            expected_status=400)
+            expected_status=http_client.BAD_REQUEST)
 
     def test_delete_endpoint(self):
         """Call ``DELETE /endpoints/{endpoint_id}``."""
@@ -762,7 +746,8 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         self.delete('/endpoints/%s' % ref['id'])
 
         # make sure it's deleted (GET should return 404)
-        self.get('/endpoints/%s' % ref['id'], expected_status=404)
+        self.get('/endpoints/%s' % ref['id'],
+                 expected_status=http_client.NOT_FOUND)
 
     def test_endpoint_create_with_valid_url(self):
         """Create endpoint with valid url should be tested,too."""
@@ -771,9 +756,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
 
         ref = self.new_endpoint_ref(self.service_id)
         ref['url'] = valid_url
-        self.post('/endpoints',
-                  body={'endpoint': ref},
-                  expected_status=201)
+        self.post('/endpoints', body={'endpoint': ref})
 
     def test_endpoint_create_with_invalid_url(self):
         """Test the invalid cases: substitutions is not exactly right.
@@ -798,10 +781,10 @@ class CatalogTestCase(test_v3.RestfulTestCase):
             ref['url'] = invalid_url
             self.post('/endpoints',
                       body={'endpoint': ref},
-                      expected_status=400)
+                      expected_status=http_client.BAD_REQUEST)
 
 
-class TestCatalogAPISQL(tests.TestCase):
+class TestCatalogAPISQL(unit.TestCase):
     """Tests for the catalog Manager against the SQL backend.
 
     """
@@ -909,7 +892,7 @@ class TestCatalogAPISQL(tests.TestCase):
 
 # TODO(dstanek): this needs refactoring with the test above, but we are in a
 # crunch so that will happen in a future patch.
-class TestCatalogAPISQLRegions(tests.TestCase):
+class TestCatalogAPISQLRegions(unit.TestCase):
     """Tests for the catalog Manager against the SQL backend.
 
     """
