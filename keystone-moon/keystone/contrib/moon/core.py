@@ -13,7 +13,7 @@ import time
 import types
 
 from keystone.common import manager
-from keystone import config
+from keystone.exception import UserNotFound
 from oslo_log import log
 from keystone.common import dependency
 from keystone import exception
@@ -78,6 +78,22 @@ def filter_input(func_or_str):
             return "".join(re.findall("[\w\- +]*", string))
         return string
 
+    def __filter_dict(arg):
+        result = dict()
+        for key in arg.keys():
+            if key == "email":
+                result["email"] = __filter_email(arg[key])
+            elif key == "password":
+                result["password"] = arg['password']
+            else:
+                result[key] = __filter(arg[key])
+        return result
+
+    def __filter_email(string):
+        if string and type(string) in (str, unicode):
+            return "".join(re.findall("[\w@\._\- +]*", string))
+        return string
+
     def wrapped(*args, **kwargs):
         _args = []
         for arg in args:
@@ -88,7 +104,7 @@ def filter_input(func_or_str):
             elif isinstance(arg, tuple):
                 arg = (__filter(item) for item in arg)
             elif isinstance(arg, dict):
-                arg = {item: __filter(arg[item]) for item in arg.keys()}
+                arg = __filter_dict(arg)
             _args.append(arg)
         for arg in kwargs:
             if type(kwargs[arg]) in (unicode, str):
@@ -100,7 +116,7 @@ def filter_input(func_or_str):
             elif isinstance(kwargs[arg], tuple):
                 kwargs[arg] = (__filter(item) for item in kwargs[arg])
             elif isinstance(kwargs[arg], dict):
-                kwargs[arg] = {item: __filter(kwargs[arg][item]) for item in kwargs[arg].keys()}
+                kwargs[arg] = __filter_dict(kwargs[arg])
         return func_or_str(*_args, **kwargs)
 
     if isinstance(func_or_str, str) or isinstance(func_or_str, unicode):
@@ -110,7 +126,7 @@ def filter_input(func_or_str):
     if isinstance(func_or_str, tuple):
         return (__filter(item) for item in func_or_str)
     if isinstance(func_or_str, dict):
-        return {item: __filter(func_or_str[item]) for item in func_or_str.keys()}
+        return __filter_dict(func_or_str)
     if isinstance(func_or_str, types.FunctionType):
         return wrapped
     return None
@@ -1110,11 +1126,32 @@ class IntraExtensionManager(manager.Manager):
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
         subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
         for subject_id in subjects_dict:
-            print(subjects_dict[subject_id]["name"], subject_dict['name'])
             if subjects_dict[subject_id]["name"] == subject_dict['name']:
                 raise SubjectNameExisting()
-        # Next line will raise an error if user is not present in Keystone database
-        subject_keystone_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
+        try:
+            subject_keystone_dict = self.identity_api.get_user_by_name(subject_dict['name'], "default")
+        except UserNotFound as e:
+            if 'domain_id' not in subject_dict:
+                subject_dict['domain_id'] = "default"
+            if 'project_id' not in subject_dict:
+                tenants = self.tenant_api.get_tenants_dict(user_id)
+                # Get the tenant ID for that intra_extension
+                for tenant_id, tenant_value in tenants.iteritems():
+                    if intra_extension_id == tenant_value['intra_admin_extension_id'] or \
+                        intra_extension_id == tenant_value['intra_authz_extension_id']:
+                        subject_dict['project_id'] = tenant_value['id']
+                        break
+                else:
+                    # If no tenant is found default to the admin tenant
+                    for tenant_id, tenant_value in tenants.iteritems():
+                        if tenant_value['name'] == 'admin':
+                            subject_dict['project_id'] = tenant_value['id']
+            if 'email' not in subject_dict:
+                subject_dict['email'] = ""
+            if 'password' not in subject_dict:
+                # Default passord to the name of the new user
+                subject_dict['password'] = subject_dict['name']
+            subject_keystone_dict = self.identity_api.create_user(subject_dict)
         subject_dict["keystone_id"] = subject_keystone_dict["id"]
         subject_dict["keystone_name"] = subject_keystone_dict["name"]
         return self.driver.set_subject_dict(intra_extension_id, uuid4().hex, subject_dict)
@@ -1826,12 +1863,14 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         subject_id,  subject_value = subject.iteritems().next()
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] and \
+                            tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
                 _subjects = self.driver.get_subjects_dict(tenants_dict[tenant_id]["intra_admin_extension_id"])
                 if subject_value["name"] not in [_subjects[_id]["name"] for _id in _subjects]:
                     self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], uuid4().hex, subject_value)
                 break
-            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] and \
+                            tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
                 _subjects = self.driver.get_subjects_dict(tenants_dict[tenant_id]["intra_authz_extension_id"])
                 if subject_value["name"] not in [_subjects[_id]["name"] for _id in _subjects]:
                     self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], uuid4().hex, subject_value)
@@ -1987,12 +2026,14 @@ class IntraExtensionAdminManager(IntraExtensionManager):
         subject_id,  subject_value = subject.iteritems().next()
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] and \
+                            tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
                 _subjects = self.driver.get_subjects_dict(tenants_dict[tenant_id]["intra_admin_extension_id"])
                 if subject_value["name"] not in [_subjects[_id]["name"] for _id in _subjects]:
                     self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], uuid4().hex, subject_value)
                 break
-            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] and \
+                            tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
                 _subjects = self.driver.get_subjects_dict(tenants_dict[tenant_id]["intra_authz_extension_id"])
                 if subject_value["name"] not in [_subjects[_id]["name"] for _id in _subjects]:
                     self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_authz_extension_id"], uuid4().hex, subject_value)
