@@ -21,25 +21,13 @@ This WSGI component:
 * Verifies that incoming client requests have valid tokens by validating
   tokens with the auth service.
 * Rejects unauthenticated requests unless the auth_token middleware is in
-  'delay_auth_decision' mode, which means the final decision is delegated to
+  ``delay_auth_decision`` mode, which means the final decision is delegated to
   the downstream WSGI component (usually the OpenStack service).
 * Collects and forwards identity information based on a valid token
-  such as user name, tenant, etc
+  such as user name, domain, project, etc.
 
 Refer to: http://docs.openstack.org/developer/keystonemiddleware/\
 middlewarearchitecture.html
-
-
-Echo test server
-----------------
-
-Run this module directly to start a protected echo service on port 8000::
-
- $ python -m keystonemiddleware.auth_token
-
-When the ``auth_token`` module authenticates a request, the echo service
-will respond with all the environment variables presented to it by this
-module.
 
 
 Headers
@@ -62,7 +50,7 @@ Used for communication between components
 
 WWW-Authenticate
     HTTP header returned to a user indicating which endpoint to use
-    to retrieve a new token
+    to retrieve a new token.
 
 What auth_token adds to the request for use by the OpenStack service
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -70,34 +58,35 @@ What auth_token adds to the request for use by the OpenStack service
 When using composite authentication (a user and service token are
 present) additional service headers relating to the service user
 will be added. They take the same form as the standard headers but add
-'_SERVICE_'. These headers will not exist in the environment if no
+``_SERVICE_``. These headers will not exist in the environment if no
 service token is present.
 
 HTTP_X_IDENTITY_STATUS, HTTP_X_SERVICE_IDENTITY_STATUS
-    'Confirmed' or 'Invalid'
-    The underlying service will only see a value of 'Invalid' if the Middleware
-    is configured to run in 'delay_auth_decision' mode. As with all such
-    headers, HTTP_X_SERVICE_IDENTITY_STATUS will only exist in the
+    Will be set to either ``Confirmed`` or ``Invalid``.
+
+    The underlying service will only see a value of 'Invalid' if the middleware
+    is configured to run in ``delay_auth_decision`` mode. As with all such
+    headers, ``HTTP_X_SERVICE_IDENTITY_STATUS`` will only exist in the
     environment if a service token is presented. This is different than
-    HTTP_X_IDENTITY_STATUS which is always set even if no user token is
+    ``HTTP_X_IDENTITY_STATUS`` which is always set even if no user token is
     presented. This allows the underlying service to determine if a
-    denial should use 401 or 403.
+    denial should use ``401 Unauthenticated`` or ``403 Forbidden``.
 
 HTTP_X_DOMAIN_ID, HTTP_X_SERVICE_DOMAIN_ID
     Identity service managed unique identifier, string. Only present if
-    this is a domain-scoped v3 token.
+    this is a domain-scoped token.
 
 HTTP_X_DOMAIN_NAME, HTTP_X_SERVICE_DOMAIN_NAME
     Unique domain name, string. Only present if this is a domain-scoped
-    v3 token.
+    token.
 
 HTTP_X_PROJECT_ID, HTTP_X_SERVICE_PROJECT_ID
     Identity service managed unique identifier, string. Only present if
-    this is a project-scoped v3 token, or a tenant-scoped v2 token.
+    this is a project-scoped token.
 
 HTTP_X_PROJECT_NAME, HTTP_X_SERVICE_PROJECT_NAME
     Project name, unique within owning domain, string. Only present if
-    this is a project-scoped v3 token, or a tenant-scoped v2 token.
+    this is a project-scoped token.
 
 HTTP_X_PROJECT_DOMAIN_ID, HTTP_X_SERVICE_PROJECT_DOMAIN_ID
     Identity service managed unique identifier of owning domain of
@@ -111,10 +100,10 @@ HTTP_X_PROJECT_DOMAIN_NAME, HTTP_X_SERVICE_PROJECT_DOMAIN_NAME
     the PROJECT_NAME can only be assumed to be unique within this domain.
 
 HTTP_X_USER_ID, HTTP_X_SERVICE_USER_ID
-    Identity-service managed unique identifier, string
+    Identity-service managed unique identifier, string.
 
 HTTP_X_USER_NAME, HTTP_X_SERVICE_USER_NAME
-    User identifier, unique within owning domain, string
+    User identifier, unique within owning domain, string.
 
 HTTP_X_USER_DOMAIN_ID, HTTP_X_SERVICE_USER_DOMAIN_ID
     Identity service managed unique identifier of owning domain of
@@ -127,39 +116,45 @@ HTTP_X_USER_DOMAIN_NAME, HTTP_X_SERVICE_USER_DOMAIN_NAME
     this domain.
 
 HTTP_X_ROLES, HTTP_X_SERVICE_ROLES
-    Comma delimited list of case-sensitive role names
+    Comma delimited list of case-sensitive role names.
 
 HTTP_X_SERVICE_CATALOG
-    json encoded service catalog (optional).
+    service catalog (optional, JSON string).
+
     For compatibility reasons this catalog will always be in the V2 catalog
     format even if it is a v3 token.
 
-    Note: This is an exception in that it contains 'SERVICE' but relates to a
-          user token, not a service token. The existing user's
-          catalog can be very large; it was decided not to present a catalog
-          relating to the service token to avoid using more HTTP header space.
+    .. note:: This is an exception in that it contains 'SERVICE' but relates to
+        a user token, not a service token. The existing user's catalog can be
+        very large; it was decided not to present a catalog relating to the
+        service token to avoid using more HTTP header space.
 
 HTTP_X_TENANT_ID
-    *Deprecated* in favor of HTTP_X_PROJECT_ID
+    *Deprecated* in favor of HTTP_X_PROJECT_ID.
+
     Identity service managed unique identifier, string. For v3 tokens, this
-    will be set to the same value as HTTP_X_PROJECT_ID
+    will be set to the same value as HTTP_X_PROJECT_ID.
 
 HTTP_X_TENANT_NAME
-    *Deprecated* in favor of HTTP_X_PROJECT_NAME
+    *Deprecated* in favor of HTTP_X_PROJECT_NAME.
+
     Project identifier, unique within owning domain, string. For v3 tokens,
-    this will be set to the same value as HTTP_X_PROJECT_NAME
+    this will be set to the same value as HTTP_X_PROJECT_NAME.
 
 HTTP_X_TENANT
-    *Deprecated* in favor of HTTP_X_TENANT_ID and HTTP_X_TENANT_NAME
-    identity server-assigned unique identifier, string. For v3 tokens, this
-    will be set to the same value as HTTP_X_PROJECT_ID
+    *Deprecated* in favor of HTTP_X_TENANT_ID and HTTP_X_TENANT_NAME.
+
+    Identity server-assigned unique identifier, string. For v3 tokens, this
+    will be set to the same value as HTTP_X_PROJECT_ID.
 
 HTTP_X_USER
-    *Deprecated* in favor of HTTP_X_USER_ID and HTTP_X_USER_NAME
-    User name, unique within owning domain, string
+    *Deprecated* in favor of HTTP_X_USER_ID and HTTP_X_USER_NAME.
+
+    User name, unique within owning domain, string.
 
 HTTP_X_ROLE
-    *Deprecated* in favor of HTTP_X_ROLES
+    *Deprecated* in favor of HTTP_X_ROLES.
+
     Will contain the same values as HTTP_X_ROLES.
 
 Environment Variables
@@ -171,7 +166,7 @@ WSGI component.
 keystone.token_info
     Information about the token discovered in the process of validation.  This
     may include extended information returned by the token validation call, as
-    well as basic information about the tenant and user.
+    well as basic information about the project and user.
 
 keystone.token_auth
     A keystoneclient auth plugin that may be used with a
@@ -182,8 +177,8 @@ keystone.token_auth
 Configuration
 -------------
 
-Middleware configuration can be in the main application's configuration file,
-e.g. in ``nova.conf``:
+auth_token middleware configuration can be in the main application's
+configuration file, e.g. in ``nova.conf``:
 
 .. code-block:: ini
 
@@ -202,12 +197,12 @@ but this is discouraged.
 Swift
 -----
 
-When deploy Keystone auth_token middleware with Swift, user may elect to use
-Swift memcache instead of the local auth_token memcache. Swift memcache is
-passed in from the request environment and it's identified by the
-``swift.cache`` key. However it could be different, depending on deployment. To
-use Swift memcache, you must set the ``cache`` option to the environment key
-where the Swift cache object is stored.
+When deploy auth_token middleware with Swift, user may elect to use Swift
+memcache instead of the local auth_token memcache. Swift memcache is passed in
+from the request environment and it's identified by the ``swift.cache`` key.
+However it could be different, depending on deployment. To use Swift memcache,
+you must set the ``cache`` option to the environment key where the Swift cache
+object is stored.
 
 """
 
@@ -223,18 +218,19 @@ from keystoneclient import exceptions
 from keystoneclient import session
 from oslo_config import cfg
 from oslo_serialization import jsonutils
-from oslo_utils import timeutils
+import pkg_resources
 import six
+import webob.dec
 
 from keystonemiddleware.auth_token import _auth
 from keystonemiddleware.auth_token import _base
 from keystonemiddleware.auth_token import _cache
 from keystonemiddleware.auth_token import _exceptions as exc
 from keystonemiddleware.auth_token import _identity
+from keystonemiddleware.auth_token import _request
 from keystonemiddleware.auth_token import _revocations
 from keystonemiddleware.auth_token import _signing_dir
 from keystonemiddleware.auth_token import _user_plugin
-from keystonemiddleware.auth_token import _utils
 from keystonemiddleware.i18n import _, _LC, _LE, _LI, _LW
 
 
@@ -281,6 +277,8 @@ _OPTS = [
                help='A PEM encoded Certificate Authority to use when '
                     'verifying HTTPs connections. Defaults to system CAs.'),
     cfg.BoolOpt('insecure', default=False, help='Verify HTTPS connections.'),
+    cfg.StrOpt('region_name', default=None,
+               help='The region in which the identity server can be found.'),
     cfg.StrOpt('signing_dir',
                help='Directory used to cache files related to PKI tokens.'),
     cfg.ListOpt('memcached_servers',
@@ -325,7 +323,7 @@ _OPTS = [
     cfg.IntOpt('memcache_pool_socket_timeout',
                default=3,
                help='(Optional) Socket timeout in seconds for communicating '
-                    'with a memcache server.'),
+                    'with a memcached server.'),
     cfg.IntOpt('memcache_pool_unused_timeout',
                default=60,
                help='(Optional) Number of seconds a connection to memcached'
@@ -333,10 +331,10 @@ _OPTS = [
     cfg.IntOpt('memcache_pool_conn_get_timeout',
                default=10,
                help='(Optional) Number of seconds that an operation will wait '
-                    'to get a memcache client connection from the pool.'),
+                    'to get a memcached client connection from the pool.'),
     cfg.BoolOpt('memcache_use_advanced_pool',
                 default=False,
-                help='(Optional) Use the advanced (eventlet safe) memcache '
+                help='(Optional) Use the advanced (eventlet safe) memcached '
                      'client pool. The advanced pool will only work under '
                      'python 2.x.'),
     cfg.BoolOpt('include_service_catalog',
@@ -376,26 +374,6 @@ CONF.register_opts(_OPTS, group=_base.AUTHTOKEN_GROUP)
 
 _LOG = logging.getLogger(__name__)
 
-_HEADER_TEMPLATE = {
-    'X%s-Domain-Id': 'domain_id',
-    'X%s-Domain-Name': 'domain_name',
-    'X%s-Project-Id': 'project_id',
-    'X%s-Project-Name': 'project_name',
-    'X%s-Project-Domain-Id': 'project_domain_id',
-    'X%s-Project-Domain-Name': 'project_domain_name',
-    'X%s-User-Id': 'user_id',
-    'X%s-User-Name': 'username',
-    'X%s-User-Domain-Id': 'user_domain_id',
-    'X%s-User-Domain-Name': 'user_domain_name',
-}
-
-_DEPRECATED_HEADER_TEMPLATE = {
-    'X-User': 'username',
-    'X-Tenant-Id': 'project_id',
-    'X-Tenant-Name': 'project_name',
-    'X-Tenant': 'project_name',
-}
-
 
 class _BIND_MODE(object):
     DISABLED = 'disabled'
@@ -411,61 +389,6 @@ def _token_is_v2(token_info):
 
 def _token_is_v3(token_info):
     return ('token' in token_info)
-
-
-def _get_token_expiration(data):
-    if not data:
-        raise exc.InvalidToken(_('Token authorization failed'))
-    if _token_is_v2(data):
-        return data['access']['token']['expires']
-    elif _token_is_v3(data):
-        return data['token']['expires_at']
-    else:
-        raise exc.InvalidToken(_('Token authorization failed'))
-
-
-def _confirm_token_not_expired(expires):
-    expires = timeutils.parse_isotime(expires)
-    expires = timeutils.normalize_time(expires)
-    utcnow = timeutils.utcnow()
-    if utcnow >= expires:
-        raise exc.InvalidToken(_('Token authorization failed'))
-
-
-def _v3_to_v2_catalog(catalog):
-    """Convert a catalog to v2 format.
-
-    X_SERVICE_CATALOG must be specified in v2 format. If you get a token
-    that is in v3 convert it.
-    """
-    v2_services = []
-    for v3_service in catalog:
-        # first copy over the entries we allow for the service
-        v2_service = {'type': v3_service['type']}
-        try:
-            v2_service['name'] = v3_service['name']
-        except KeyError:
-            pass
-
-        # now convert the endpoints. Because in v3 we specify region per
-        # URL not per group we have to collect all the entries of the same
-        # region together before adding it to the new service.
-        regions = {}
-        for v3_endpoint in v3_service.get('endpoints', []):
-            region_name = v3_endpoint.get('region')
-            try:
-                region = regions[region_name]
-            except KeyError:
-                region = {'region': region_name} if region_name else {}
-                regions[region_name] = region
-
-            interface_name = v3_endpoint['interface'].lower() + 'URL'
-            region[interface_name] = v3_endpoint['url']
-
-        v2_service['endpoints'] = list(regions.values())
-        v2_services.append(v2_service)
-
-    return v2_services
 
 
 def _conf_values_type_convert(conf):
@@ -499,32 +422,263 @@ def _conf_values_type_convert(conf):
     return opts
 
 
-class AuthProtocol(object):
+def _get_project_version(project):
+    return pkg_resources.get_distribution(project).version
+
+
+class _BaseAuthProtocol(object):
+    """A base class for AuthProtocol token checking implementations.
+
+    :param Callable app: The next application to call after middleware.
+    :param logging.Logger log: The logging object to use for output. By default
+                               it will use a logger in the
+                               keystonemiddleware.auth_token namespace.
+    :param str enforce_token_bind: The style of token binding enforcement to
+                                   perform.
+    """
+
+    def __init__(self,
+                 app,
+                 log=_LOG,
+                 enforce_token_bind=_BIND_MODE.PERMISSIVE):
+        self.log = log
+        self._app = app
+        self._enforce_token_bind = enforce_token_bind
+
+    @webob.dec.wsgify(RequestClass=_request._AuthTokenRequest)
+    def __call__(self, req):
+        """Handle incoming request."""
+        response = self.process_request(req)
+        if response:
+            return response
+        response = req.get_response(self._app)
+        return self.process_response(response)
+
+    def process_request(self, request):
+        """Process request.
+
+        If this method returns a value then that value will be used as the
+        response. The next application down the stack will not be executed and
+        process_response will not be called.
+
+        Otherwise, the next application down the stack will be executed and
+        process_response will be called with the generated response.
+
+        By default this method does not return a value.
+
+        :param request: Incoming request
+        :type request: _request.AuthTokenRequest
+
+        """
+        request.remove_auth_headers()
+
+        user_auth_ref = None
+        serv_auth_ref = None
+
+        if request.user_token:
+            self.log.debug('Authenticating user token')
+            try:
+                data, user_auth_ref = self._do_fetch_token(request.user_token)
+                self._validate_token(user_auth_ref)
+                self._confirm_token_bind(user_auth_ref, request)
+            except exc.InvalidToken:
+                self.log.info(_LI('Invalid user token'))
+                request.user_token_valid = False
+            else:
+                request.user_token_valid = True
+                request.environ['keystone.token_info'] = data
+
+        if request.service_token:
+            self.log.debug('Authenticating service token')
+            try:
+                _, serv_auth_ref = self._do_fetch_token(request.service_token)
+                self._validate_token(serv_auth_ref)
+                self._confirm_token_bind(serv_auth_ref, request)
+            except exc.InvalidToken:
+                self.log.info(_LI('Invalid service token'))
+                request.service_token_valid = False
+            else:
+                request.service_token_valid = True
+
+        p = _user_plugin.UserAuthPlugin(user_auth_ref, serv_auth_ref)
+        request.environ['keystone.token_auth'] = p
+
+    def _validate_token(self, auth_ref):
+        """Perform the validation steps on the token.
+
+        :param auth_ref: The token data
+        :type auth_ref: keystoneclient.access.AccessInfo
+
+        :raises exc.InvalidToken: if token is rejected
+        """
+        # 0 seconds of validity means it is invalid right now
+        if auth_ref.will_expire_soon(stale_duration=0):
+            raise exc.InvalidToken(_('Token authorization failed'))
+
+    def _do_fetch_token(self, token):
+        """Helper method to fetch a token and convert it into an AccessInfo"""
+        data = self._fetch_token(token)
+
+        try:
+            return data, access.AccessInfo.factory(body=data, auth_token=token)
+        except Exception:
+            self.log.warning(_LW('Invalid token contents.'), exc_info=True)
+            raise exc.InvalidToken(_('Token authorization failed'))
+
+    def _fetch_token(self, token):
+        """Fetch the token data based on the value in the header.
+
+        Retrieve the data associated with the token value that was in the
+        header. This can be from PKI, contacting the identity server or
+        whatever is required.
+
+        :param str token: The token present in the request header.
+
+        :raises exc.InvalidToken: if token is invalid.
+
+        :returns: The token data
+        :rtype: dict
+        """
+        raise NotImplemented()
+
+    def process_response(self, response):
+        """Do whatever you'd like to the response.
+
+        By default the response is returned unmodified.
+
+        :param response: Response object
+        :type response: ._request._AuthTokenResponse
+        """
+        return response
+
+    def _invalid_user_token(self, msg=False):
+        # NOTE(jamielennox): use False as the default so that None is valid
+        if msg is False:
+            msg = _('Token authorization failed')
+
+        raise exc.InvalidToken(msg)
+
+    def _confirm_token_bind(self, auth_ref, req):
+        if self._enforce_token_bind == _BIND_MODE.DISABLED:
+            return
+
+        try:
+            if auth_ref.version == 'v2.0':
+                bind = auth_ref['token']['bind']
+            elif auth_ref.version == 'v3':
+                bind = auth_ref['bind']
+            else:
+                self._invalid_user_token()
+        except KeyError:
+            bind = {}
+
+        # permissive and strict modes don't require there to be a bind
+        permissive = self._enforce_token_bind in (_BIND_MODE.PERMISSIVE,
+                                                  _BIND_MODE.STRICT)
+
+        if not bind:
+            if permissive:
+                # no bind provided and none required
+                return
+            else:
+                self.log.info(_LI('No bind information present in token.'))
+                self._invalid_user_token()
+
+        # get the named mode if bind_mode is not one of the predefined
+        if permissive or self._enforce_token_bind == _BIND_MODE.REQUIRED:
+            name = None
+        else:
+            name = self._enforce_token_bind
+
+        if name and name not in bind:
+            self.log.info(_LI('Named bind mode %s not in bind information'),
+                          name)
+            self._invalid_user_token()
+
+        for bind_type, identifier in six.iteritems(bind):
+            if bind_type == _BIND_MODE.KERBEROS:
+                if req.auth_type != 'negotiate':
+                    self.log.info(_LI('Kerberos credentials required and '
+                                      'not present.'))
+                    self._invalid_user_token()
+
+                if req.remote_user != identifier:
+                    self.log.info(_LI('Kerberos credentials do not match '
+                                      'those in bind.'))
+                    self._invalid_user_token()
+
+                self.log.debug('Kerberos bind authentication successful.')
+
+            elif self._enforce_token_bind == _BIND_MODE.PERMISSIVE:
+                self.log.debug('Ignoring Unknown bind for permissive mode: '
+                               '%(bind_type)s: %(identifier)s.',
+                               {'bind_type': bind_type,
+                                'identifier': identifier})
+
+            else:
+                self.log.info(
+                    _LI('Couldn`t verify unknown bind: %(bind_type)s: '
+                        '%(identifier)s.'),
+                    {'bind_type': bind_type, 'identifier': identifier})
+                self._invalid_user_token()
+
+
+class AuthProtocol(_BaseAuthProtocol):
     """Middleware that handles authenticating client calls."""
 
     _SIGNING_CERT_FILE_NAME = 'signing_cert.pem'
     _SIGNING_CA_FILE_NAME = 'cacert.pem'
 
     def __init__(self, app, conf):
-        self._LOG = logging.getLogger(conf.get('log_name', __name__))
-        self._LOG.info(_LI('Starting Keystone auth_token middleware'))
+        log = logging.getLogger(conf.get('log_name', __name__))
+        log.info(_LI('Starting Keystone auth_token middleware'))
+
         # NOTE(wanghong): If options are set in paste file, all the option
         # values passed into conf are string type. So, we should convert the
         # conf value into correct type.
         self._conf = _conf_values_type_convert(conf)
-        self._app = app
+
+        # NOTE(sileht): If we don't want to use oslo.config global object
+        # we can set the paste "oslo_config_project" and the middleware
+        # will load the configuration with a local oslo.config object.
+        self._local_oslo_config = None
+        if 'oslo_config_project' in conf:
+            if 'oslo_config_file' in conf:
+                default_config_files = [conf['oslo_config_file']]
+            else:
+                default_config_files = None
+
+            # For unit tests, support passing in a ConfigOpts in
+            # oslo_config_config.
+            self._local_oslo_config = conf.get('oslo_config_config',
+                                               cfg.ConfigOpts())
+            self._local_oslo_config(
+                {}, project=conf['oslo_config_project'],
+                default_config_files=default_config_files,
+                validate_default_values=True)
+
+            self._local_oslo_config.register_opts(
+                _OPTS, group=_base.AUTHTOKEN_GROUP)
+            auth.register_conf_options(self._local_oslo_config,
+                                       group=_base.AUTHTOKEN_GROUP)
+
+        super(AuthProtocol, self).__init__(
+            app,
+            log=log,
+            enforce_token_bind=self._conf_get('enforce_token_bind'))
 
         # delay_auth_decision means we still allow unauthenticated requests
         # through and we let the downstream service make the final decision
         self._delay_auth_decision = self._conf_get('delay_auth_decision')
         self._include_service_catalog = self._conf_get(
             'include_service_catalog')
+        self._hash_algorithms = self._conf_get('hash_algorithms')
 
         self._identity_server = self._create_identity_server()
 
         self._auth_uri = self._conf_get('auth_uri')
         if not self._auth_uri:
-            self._LOG.warning(
+            self.log.warning(
                 _LW('Configuring auth_uri to point to the public identity '
                     'endpoint is required; clients may not be able to '
                     'authenticate against an admin endpoint'))
@@ -535,7 +689,7 @@ class AuthProtocol(object):
             self._auth_uri = self._identity_server.auth_uri
 
         self._signing_directory = _signing_dir.SigningDirectory(
-            directory_name=self._conf_get('signing_dir'), log=self._LOG)
+            directory_name=self._conf_get('signing_dir'), log=self.log)
 
         self._token_cache = self._token_cache_factory()
 
@@ -545,184 +699,82 @@ class AuthProtocol(object):
                                                      self._signing_directory,
                                                      self._identity_server,
                                                      self._cms_verify,
-                                                     self._LOG)
+                                                     self.log)
 
         self._check_revocations_for_cached = self._conf_get(
             'check_revocations_for_cached')
-        self._init_auth_headers()
 
     def _conf_get(self, name, group=_base.AUTHTOKEN_GROUP):
         # try config from paste-deploy first
         if name in self._conf:
             return self._conf[name]
+        elif self._local_oslo_config:
+            return self._local_oslo_config[group][name]
         else:
             return CONF[group][name]
 
-    def _call_app(self, env, start_response):
-        # NOTE(jamielennox): We wrap the given start response so that if an
-        # application with a 'delay_auth_decision' setting fails, or otherwise
-        # raises Unauthorized that we include the Authentication URL headers.
-        def _fake_start_response(status, response_headers, exc_info=None):
-            if status.startswith('401'):
-                response_headers.extend(self._reject_auth_headers)
+    def process_request(self, request):
+        """Process request.
 
-            return start_response(status, response_headers, exc_info)
-
-        return self._app(env, _fake_start_response)
-
-    def __call__(self, env, start_response):
-        """Handle incoming request.
-
-        Authenticate send downstream on success. Reject request if
-        we can't authenticate.
-
+        Evaluate the headers in a request and attempt to authenticate the
+        request. If authenticated then additional headers are added to the
+        request for use by applications. If not authenticated the request will
+        be rejected or marked unauthenticated depending on configuration.
         """
-        def _fmt_msg(env):
-            msg = ('user: user_id %s, project_id %s, roles %s '
-                   'service: user_id %s, project_id %s, roles %s' % (
-                       env.get('HTTP_X_USER_ID'), env.get('HTTP_X_PROJECT_ID'),
-                       env.get('HTTP_X_ROLES'),
-                       env.get('HTTP_X_SERVICE_USER_ID'),
-                       env.get('HTTP_X_SERVICE_PROJECT_ID'),
-                       env.get('HTTP_X_SERVICE_ROLES')))
-            return msg
+        self._token_cache.initialize(request.environ)
 
-        self._token_cache.initialize(env)
-        self._remove_auth_headers(env)
+        resp = super(AuthProtocol, self).process_request(request)
+        if resp:
+            return resp
 
-        try:
-            user_auth_ref = None
-            serv_auth_ref = None
+        if not request.user_token:
+            # if no user token is present then that's an invalid request
+            request.user_token_valid = False
 
-            try:
-                self._LOG.debug('Authenticating user token')
-                user_token = self._get_user_token_from_header(env)
-                user_token_info = self._validate_token(user_token, env)
-                user_auth_ref = access.AccessInfo.factory(
-                    body=user_token_info,
-                    auth_token=user_token)
-                env['keystone.token_info'] = user_token_info
-                user_headers = self._build_user_headers(user_auth_ref,
-                                                        user_token_info)
-                self._add_headers(env, user_headers)
-            except exc.InvalidToken:
-                if self._delay_auth_decision:
-                    self._LOG.info(
-                        _LI('Invalid user token - deferring reject '
-                            'downstream'))
-                    self._add_headers(env, {'X-Identity-Status': 'Invalid'})
-                else:
-                    self._LOG.info(
-                        _LI('Invalid user token - rejecting request'))
-                    return self._reject_request(env, start_response)
+        # NOTE(jamielennox): The service status is allowed to be missing if a
+        # service token is not passed. If the service status is missing that's
+        # a valid request. We should find a better way to expose this from the
+        # request object.
+        user_status = request.user_token and request.user_token_valid
+        service_status = request.headers.get('X-Service-Identity-Status',
+                                             'Confirmed')
 
-            try:
-                self._LOG.debug('Authenticating service token')
-                serv_token = self._get_service_token_from_header(env)
-                if serv_token is not None:
-                    serv_token_info = self._validate_token(
-                        serv_token, env)
-                    serv_auth_ref = access.AccessInfo.factory(
-                        body=serv_token_info,
-                        auth_token=serv_token)
-                    serv_headers = self._build_service_headers(serv_token_info)
-                    self._add_headers(env, serv_headers)
-            except exc.InvalidToken:
-                if self._delay_auth_decision:
-                    self._LOG.info(
-                        _LI('Invalid service token - deferring reject '
-                            'downstream'))
-                    self._add_headers(env,
-                                      {'X-Service-Identity-Status': 'Invalid'})
-                else:
-                    self._LOG.info(
-                        _LI('Invalid service token - rejecting request'))
-                    return self._reject_request(env, start_response)
+        if not (user_status and service_status == 'Confirmed'):
+            if self._delay_auth_decision:
+                self.log.info(_LI('Deferring reject downstream'))
+            else:
+                self.log.info(_LI('Rejecting request'))
+                self._reject_request()
 
-            env['keystone.token_auth'] = _user_plugin.UserAuthPlugin(
-                user_auth_ref, serv_auth_ref)
+        if request.user_token_valid:
+            request.set_user_headers(request.token_auth._user_auth_ref,
+                                     self._include_service_catalog)
 
-        except exc.ServiceError as e:
-            self._LOG.critical(_LC('Unable to obtain admin token: %s'), e)
-            return self._do_503_error(env, start_response)
+        if request.service_token and request.service_token_valid:
+            request.set_service_headers(request.token_auth._serv_auth_ref)
 
-        self._LOG.debug("Received request from %s", _fmt_msg(env))
+        if self.log.isEnabledFor(logging.DEBUG):
+            self.log.debug('Received request from %s',
+                           request.token_auth._log_format)
 
-        return self._call_app(env, start_response)
+    def process_response(self, response):
+        """Process Response.
 
-    def _do_503_error(self, env, start_response):
-        resp = _utils.MiniResp('Service unavailable', env)
-        start_response('503 Service Unavailable', resp.headers)
-        return resp.body
-
-    def _init_auth_headers(self):
-        """Initialize auth header list.
-
-        Both user and service token headers are generated.
+        Add ``WWW-Authenticate`` headers to requests that failed with
+        ``401 Unauthenticated`` so users know where to authenticate for future
+        requests.
         """
-        auth_headers = ['X-Service-Catalog',
-                        'X-Identity-Status',
-                        'X-Service-Identity-Status',
-                        'X-Roles',
-                        'X-Service-Roles']
-        for key in six.iterkeys(_HEADER_TEMPLATE):
-            auth_headers.append(key % '')
-            # Service headers
-            auth_headers.append(key % '-Service')
+        if response.status_int == 401:
+            response.headers.extend(self._reject_auth_headers)
 
-        # Deprecated headers
-        auth_headers.append('X-Role')
-        for key in six.iterkeys(_DEPRECATED_HEADER_TEMPLATE):
-            auth_headers.append(key)
-
-        self._auth_headers = auth_headers
-
-    def _remove_auth_headers(self, env):
-        """Remove headers so a user can't fake authentication.
-
-        Both user and service token headers are removed.
-
-        :param env: wsgi request environment
-
-        """
-        self._LOG.debug('Removing headers from request environment: %s',
-                        ','.join(self._auth_headers))
-        self._remove_headers(env, self._auth_headers)
-
-    def _get_user_token_from_header(self, env):
-        """Get token id from request.
-
-        :param env: wsgi request environment
-        :returns: token id
-        :raises exc.InvalidToken: if no token is provided in request
-
-        """
-        token = self._get_header(env, 'X-Auth-Token',
-                                 self._get_header(env, 'X-Storage-Token'))
-        if token:
-            return token
-        else:
-            if not self._delay_auth_decision:
-                self._LOG.warn(_LW('Unable to find authentication token'
-                                   ' in headers'))
-                self._LOG.debug('Headers: %s', env)
-            raise exc.InvalidToken(_('Unable to find token in headers'))
-
-    def _get_service_token_from_header(self, env):
-        """Get service token id from request.
-
-        :param env: wsgi request environment
-        :returns: service token id or None if not present
-
-        """
-        return self._get_header(env, 'X-Service-Token')
+        return response
 
     @property
     def _reject_auth_headers(self):
         header_val = 'Keystone uri=\'%s\'' % self._auth_uri
         return [('WWW-Authenticate', header_val)]
 
-    def _reject_request(self, env, start_response):
+    def _reject_request(self):
         """Redirect client to auth server.
 
         :param env: wsgi request environment
@@ -730,246 +782,113 @@ class AuthProtocol(object):
         :returns: HTTPUnauthorized http response
 
         """
-        resp = _utils.MiniResp('Authentication required',
-                               env, self._reject_auth_headers)
-        start_response('401 Unauthorized', resp.headers)
-        return resp.body
+        raise webob.exc.HTTPUnauthorized(body='Authentication required',
+                                         headers=self._reject_auth_headers)
 
-    def _validate_token(self, token, env, retry=True):
-        """Authenticate user token
+    def _token_hashes(self, token):
+        """Generate a list of hashes that the current token may be cached as.
 
-        :param token: token id
-        :param env: wsgi environment
-        :param retry: Ignored, as it is not longer relevant
-        :returns: uncrypted body of the token if the token is valid
-        :raises exc.InvalidToken: if token is rejected
+        With PKI tokens we have multiple hashing algorithms that we test with
+        revocations. This generates that whole list.
 
+        The first element of this list is the preferred algorithm and is what
+        new cache values should be saved as.
+
+        :param str token: The token being presented by a user.
+
+        :returns: list of str token hashes.
         """
-        token_id = None
+        if cms.is_asn1_token(token) or cms.is_pkiz(token):
+            return list(cms.cms_hash_token(token, mode=algo)
+                        for algo in self._hash_algorithms)
+        else:
+            return [token]
+
+    def _cache_get_hashes(self, token_hashes):
+        """Check if the token is cached already.
+
+        Functions takes a list of hashes that might be in the cache and matches
+        the first one that is present. If nothing is found in the cache it
+        returns None.
+
+        :returns: token data if found else None.
+        """
+
+        for token in token_hashes:
+            cached = self._token_cache.get(token)
+
+            if cached:
+                return cached
+
+    def _fetch_token(self, token):
+        """Retrieve a token from either a PKI bundle or the identity server.
+
+        :param str token: token id
+
+        :raises exc.InvalidToken: if token is rejected
+        """
+        data = None
+        token_hashes = None
 
         try:
-            token_ids, cached = self._token_cache.get(token)
-            token_id = token_ids[0]
-            if cached:
-                # Token was retrieved from the cache. In this case, there's no
-                # need to check that the token is expired because the cache
-                # fetch fails for an expired token. Also, there's no need to
-                # put the token in the cache because it's already in the cache.
+            token_hashes = self._token_hashes(token)
+            cached = self._cache_get_hashes(token_hashes)
 
+            if cached:
                 data = cached
 
                 if self._check_revocations_for_cached:
-                    # A token stored in Memcached might have been revoked
-                    # regardless of initial mechanism used to validate it,
-                    # and needs to be checked.
-                    self._revocations.check(token_ids)
-                self._confirm_token_bind(data, env)
+                    # A token might have been revoked, regardless of initial
+                    # mechanism used to validate it, and needs to be checked.
+                    self._revocations.check(token_hashes)
             else:
-                verified = None
-                # Token wasn't cached. In this case, the token needs to be
-                # checked that it's not expired, and also put in the cache.
-                try:
-                    if cms.is_pkiz(token):
-                        verified = self._verify_pkiz_token(token, token_ids)
-                    elif cms.is_asn1_token(token):
-                        verified = self._verify_signed_token(token, token_ids)
-                except exceptions.CertificateConfigError:
-                    self._LOG.warn(_LW('Fetch certificate config failed, '
-                                       'fallback to online validation.'))
-                except exc.RevocationListError:
-                    self._LOG.warn(_LW('Fetch revocation list failed, '
-                                       'fallback to online validation.'))
+                data = self._validate_offline(token, token_hashes)
+                if not data:
+                    data = self._identity_server.verify_token(token)
 
-                if verified is not None:
-                    data = jsonutils.loads(verified)
-                    expires = _get_token_expiration(data)
-                    _confirm_token_not_expired(expires)
-                else:
-                    data = self._identity_server.verify_token(token, retry)
-                    # No need to confirm token expiration here since
-                    # verify_token fails for expired tokens.
-                    expires = _get_token_expiration(data)
-                self._confirm_token_bind(data, env)
-                self._token_cache.store(token_id, data, expires)
-            return data
+                self._token_cache.store(token_hashes[0], data)
+
         except (exceptions.ConnectionRefused, exceptions.RequestTimeout):
-            self._LOG.debug('Token validation failure.', exc_info=True)
-            self._LOG.warn(_LW('Authorization failed for token'))
+            self.log.debug('Token validation failure.', exc_info=True)
+            self.log.warning(_LW('Authorization failed for token'))
             raise exc.InvalidToken(_('Token authorization failed'))
-        except exc.ServiceError:
-            raise
+        except exc.ServiceError as e:
+            self.log.critical(_LC('Unable to obtain admin token: %s'), e)
+            raise webob.exc.HTTPServiceUnavailable()
         except Exception:
-            self._LOG.debug('Token validation failure.', exc_info=True)
-            if token_id:
-                self._token_cache.store_invalid(token_id)
-            self._LOG.warn(_LW('Authorization failed for token'))
+            self.log.debug('Token validation failure.', exc_info=True)
+            if token_hashes:
+                self._token_cache.store_invalid(token_hashes[0])
+            self.log.warning(_LW('Authorization failed for token'))
             raise exc.InvalidToken(_('Token authorization failed'))
 
-    def _build_user_headers(self, auth_ref, token_info):
-        """Convert token object into headers.
+        return data
 
-        Build headers that represent authenticated user - see main
-        doc info at start of file for details of headers to be defined.
-
-        :param token_info: token object returned by identity
-                           server on authentication
-        :raises exc.InvalidToken: when unable to parse token object
-
-        """
-        roles = ','.join(auth_ref.role_names)
-
-        if _token_is_v2(token_info) and not auth_ref.project_id:
-            raise exc.InvalidToken(_('Unable to determine tenancy.'))
-
-        rval = {
-            'X-Identity-Status': 'Confirmed',
-            'X-Roles': roles,
-        }
-
-        for header_tmplt, attr in six.iteritems(_HEADER_TEMPLATE):
-            rval[header_tmplt % ''] = getattr(auth_ref, attr)
-
-        # Deprecated headers
-        rval['X-Role'] = roles
-        for header_tmplt, attr in six.iteritems(_DEPRECATED_HEADER_TEMPLATE):
-            rval[header_tmplt] = getattr(auth_ref, attr)
-
-        if self._include_service_catalog and auth_ref.has_service_catalog():
-            catalog = auth_ref.service_catalog.get_data()
-            if _token_is_v3(token_info):
-                catalog = _v3_to_v2_catalog(catalog)
-            rval['X-Service-Catalog'] = jsonutils.dumps(catalog)
-
-        return rval
-
-    def _build_service_headers(self, token_info):
-        """Convert token object into service headers.
-
-        Build headers that represent authenticated user - see main
-        doc info at start of file for details of headers to be defined.
-
-        :param token_info: token object returned by identity
-                           server on authentication
-        :raises exc.InvalidToken: when unable to parse token object
-
-        """
-        auth_ref = access.AccessInfo.factory(body=token_info)
-
-        if _token_is_v2(token_info) and not auth_ref.project_id:
-            raise exc.InvalidToken(_('Unable to determine service tenancy.'))
-
-        roles = ','.join(auth_ref.role_names)
-        rval = {
-            'X-Service-Identity-Status': 'Confirmed',
-            'X-Service-Roles': roles,
-        }
-
-        header_type = '-Service'
-        for header_tmplt, attr in six.iteritems(_HEADER_TEMPLATE):
-            rval[header_tmplt % header_type] = getattr(auth_ref, attr)
-
-        return rval
-
-    def _header_to_env_var(self, key):
-        """Convert header to wsgi env variable.
-
-        :param key: http header name (ex. 'X-Auth-Token')
-        :returns: wsgi env variable name (ex. 'HTTP_X_AUTH_TOKEN')
-
-        """
-        return 'HTTP_%s' % key.replace('-', '_').upper()
-
-    def _add_headers(self, env, headers):
-        """Add http headers to environment."""
-        for (k, v) in six.iteritems(headers):
-            env_key = self._header_to_env_var(k)
-            env[env_key] = v
-
-    def _remove_headers(self, env, keys):
-        """Remove http headers from environment."""
-        for k in keys:
-            env_key = self._header_to_env_var(k)
-            try:
-                del env[env_key]
-            except KeyError:
-                pass
-
-    def _get_header(self, env, key, default=None):
-        """Get http header from environment."""
-        env_key = self._header_to_env_var(key)
-        return env.get(env_key, default)
-
-    def _invalid_user_token(self, msg=False):
-        # NOTE(jamielennox): use False as the default so that None is valid
-        if msg is False:
-            msg = _('Token authorization failed')
-
-        raise exc.InvalidToken(msg)
-
-    def _confirm_token_bind(self, data, env):
-        bind_mode = self._conf_get('enforce_token_bind')
-
-        if bind_mode == _BIND_MODE.DISABLED:
-            return
-
+    def _validate_offline(self, token, token_hashes):
         try:
-            if _token_is_v2(data):
-                bind = data['access']['token']['bind']
-            elif _token_is_v3(data):
-                bind = data['token']['bind']
+            if cms.is_pkiz(token):
+                verified = self._verify_pkiz_token(token, token_hashes)
+            elif cms.is_asn1_token(token):
+                verified = self._verify_signed_token(token, token_hashes)
             else:
-                self._invalid_user_token()
-        except KeyError:
-            bind = {}
-
-        # permissive and strict modes don't require there to be a bind
-        permissive = bind_mode in (_BIND_MODE.PERMISSIVE, _BIND_MODE.STRICT)
-
-        if not bind:
-            if permissive:
-                # no bind provided and none required
+                # Can't do offline validation for this type of token.
                 return
-            else:
-                self._LOG.info(_LI('No bind information present in token.'))
-                self._invalid_user_token()
-
-        # get the named mode if bind_mode is not one of the predefined
-        if permissive or bind_mode == _BIND_MODE.REQUIRED:
-            name = None
+        except exceptions.CertificateConfigError:
+            self.log.warning(_LW('Fetch certificate config failed, '
+                                 'fallback to online validation.'))
+        except exc.RevocationListError:
+            self.log.warning(_LW('Fetch revocation list failed, '
+                                 'fallback to online validation.'))
         else:
-            name = bind_mode
+            data = jsonutils.loads(verified)
+            return data
 
-        if name and name not in bind:
-            self._LOG.info(_LI('Named bind mode %s not in bind information'),
-                           name)
-            self._invalid_user_token()
+    def _validate_token(self, auth_ref):
+        super(AuthProtocol, self)._validate_token(auth_ref)
 
-        for bind_type, identifier in six.iteritems(bind):
-            if bind_type == _BIND_MODE.KERBEROS:
-                if not env.get('AUTH_TYPE', '').lower() == 'negotiate':
-                    self._LOG.info(_LI('Kerberos credentials required and '
-                                       'not present.'))
-                    self._invalid_user_token()
-
-                if not env.get('REMOTE_USER') == identifier:
-                    self._LOG.info(_LI('Kerberos credentials do not match '
-                                       'those in bind.'))
-                    self._invalid_user_token()
-
-                self._LOG.debug('Kerberos bind authentication successful.')
-
-            elif bind_mode == _BIND_MODE.PERMISSIVE:
-                self._LOG.debug('Ignoring Unknown bind for permissive mode: '
-                                '%(bind_type)s: %(identifier)s.',
-                                {'bind_type': bind_type,
-                                 'identifier': identifier})
-
-            else:
-                self._LOG.info(
-                    _LI('Couldn`t verify unknown bind: %(bind_type)s: '
-                        '%(identifier)s.'),
-                    {'bind_type': bind_type, 'identifier': identifier})
-                self._invalid_user_token()
+        if auth_ref.version == 'v2.0' and not auth_ref.project_id:
+            msg = _('Unable to determine service tenancy.')
+            raise exc.InvalidToken(msg)
 
     def _cms_verify(self, data, inform=cms.PKI_ASN1_FORM):
         """Verifies the signature of the provided data's IAW CMS syntax.
@@ -987,7 +906,7 @@ class AuthProtocol(object):
                                       signing_ca_path,
                                       inform=inform).decode('utf-8')
             except cms.subprocess.CalledProcessError as err:
-                self._LOG.warning(_LW('Verify error: %s'), err)
+                self.log.warning(_LW('Verify error: %s'), err)
                 raise
 
         try:
@@ -1003,7 +922,7 @@ class AuthProtocol(object):
             except exceptions.CertificateConfigError as err:
                 # if this is still occurring, something else is wrong and we
                 # need err.output to identify the problem
-                self._LOG.error(_LE('CMS Verify output: %s'), err.output)
+                self.log.error(_LE('CMS Verify output: %s'), err.output)
                 raise
 
     def _verify_signed_token(self, signed_text, token_ids):
@@ -1056,10 +975,11 @@ class AuthProtocol(object):
         else:
             plugin_class = _auth.AuthTokenPlugin
             # logger object is a required parameter of the default plugin
-            plugin_kwargs['log'] = self._LOG
+            plugin_kwargs['log'] = self.log
 
         plugin_opts = plugin_class.get_options()
-        CONF.register_opts(plugin_opts, group=group)
+        (self._local_oslo_config or CONF).register_opts(plugin_opts,
+                                                        group=group)
 
         for opt in plugin_opts:
             val = self._conf_get(opt.dest, group=group)
@@ -1068,6 +988,45 @@ class AuthProtocol(object):
             plugin_kwargs[opt.dest] = val
 
         return plugin_class.load_from_options(**plugin_kwargs)
+
+    def _determine_project(self):
+        """Determine a project name from all available config sources.
+
+        The sources are checked in the following order:
+
+          1. The paste-deploy config for auth_token middleware
+          2. The keystone_authtoken in the project's config
+          3. The oslo.config CONF.project property
+
+        """
+        try:
+            return self._conf_get('project')
+        except cfg.NoSuchOptError:
+            # Prefer local oslo config object
+            if self._local_oslo_config:
+                return self._local_oslo_config.project
+            try:
+                # CONF.project will exist only if the service uses
+                # oslo.config. It will only be set when the project
+                # calls CONF(...) and when not set oslo.config oddly
+                # raises a NoSuchOptError exception.
+                return CONF.project
+            except cfg.NoSuchOptError:
+                return ''
+
+    def _build_useragent_string(self):
+        project = self._determine_project()
+        if project:
+            project_version = _get_project_version(project)
+            project = '{project}/{project_version} '.format(
+                project=project,
+                project_version=project_version)
+
+        ua_template = ('{project}'
+                       'keystonemiddleware.auth_token/{ksm_version}')
+        return ua_template.format(
+            project=project,
+            ksm_version=_get_project_version('keystonemiddleware'))
 
     def _create_identity_server(self):
         # NOTE(jamielennox): Loading Session here should be exactly the
@@ -1079,7 +1038,8 @@ class AuthProtocol(object):
             key=self._conf_get('keyfile'),
             cacert=self._conf_get('cafile'),
             insecure=self._conf_get('insecure'),
-            timeout=self._conf_get('http_connect_timeout')
+            timeout=self._conf_get('http_connect_timeout'),
+            user_agent=self._build_useragent_string()
         ))
 
         auth_plugin = self._get_auth_plugin()
@@ -1089,13 +1049,14 @@ class AuthProtocol(object):
             auth=auth_plugin,
             service_type='identity',
             interface='admin',
+            region_name=self._conf_get('region_name'),
             connect_retries=self._conf_get('http_request_max_retries'))
 
         auth_version = self._conf_get('auth_version')
         if auth_version is not None:
             auth_version = discover.normalize_version_number(auth_version)
         return _identity.IdentityServer(
-            self._LOG,
+            self.log,
             adap,
             include_service_catalog=self._include_service_catalog,
             requested_auth_version=auth_version)
@@ -1105,7 +1066,6 @@ class AuthProtocol(object):
 
         cache_kwargs = dict(
             cache_time=int(self._conf_get('token_cache_time')),
-            hash_algorithms=self._conf_get('hash_algorithms'),
             env_cache_name=self._conf_get('cache'),
             memcached_servers=self._conf_get('memcached_servers'),
             use_advanced_pool=self._conf_get('memcache_use_advanced_pool'),
@@ -1122,12 +1082,12 @@ class AuthProtocol(object):
 
         if security_strategy:
             secret_key = self._conf_get('memcache_secret_key')
-            return _cache.SecureTokenCache(self._LOG,
+            return _cache.SecureTokenCache(self.log,
                                            security_strategy,
                                            secret_key,
                                            **cache_kwargs)
         else:
-            return _cache.TokenCache(self._LOG, **cache_kwargs)
+            return _cache.TokenCache(self.log, **cache_kwargs)
 
 
 def filter_factory(global_conf, **local_conf):
@@ -1144,24 +1104,6 @@ def app_factory(global_conf, **local_conf):
     conf = global_conf.copy()
     conf.update(local_conf)
     return AuthProtocol(None, conf)
-
-
-if __name__ == '__main__':
-    def echo_app(environ, start_response):
-        """A WSGI application that echoes the CGI environment to the user."""
-        start_response('200 OK', [('Content-Type', 'application/json')])
-        environment = dict((k, v) for k, v in six.iteritems(environ)
-                           if k.startswith('HTTP_X_'))
-        yield jsonutils.dumps(environment)
-
-    from wsgiref import simple_server
-
-    # hardcode any non-default configuration here
-    conf = {'auth_protocol': 'http', 'admin_token': 'ADMIN'}
-    app = AuthProtocol(echo_app, conf)
-    server = simple_server.make_server('', 8000, app)
-    print('Serving on port 8000 (Ctrl+C to end)...')
-    server.serve_forever()
 
 
 # NOTE(jamielennox): Maintained here for public API compatibility.

@@ -105,6 +105,13 @@ class _TokenData(object):
         """
         return frozenset(self._stored_auth_ref.role_names or [])
 
+    @property
+    def _log_format(self):
+        roles = ','.join(self.role_names)
+        return 'user_id %s, project_id %s, roles %s' % (self.user_id,
+                                                        self.project_id,
+                                                        roles)
+
 
 class UserAuthPlugin(base_identity.BaseIdentityPlugin):
     """The incoming authentication credentials.
@@ -119,8 +126,13 @@ class UserAuthPlugin(base_identity.BaseIdentityPlugin):
 
     def __init__(self, user_auth_ref, serv_auth_ref):
         super(UserAuthPlugin, self).__init__(reauthenticate=False)
+
+        # NOTE(jamielennox): _user_auth_ref and _serv_auth_ref are private
+        # because this object ends up in the environ that is passed to the
+        # service, however they are used within auth_token middleware.
         self._user_auth_ref = user_auth_ref
         self._serv_auth_ref = serv_auth_ref
+
         self._user_data = None
         self._serv_data = None
 
@@ -167,3 +179,15 @@ class UserAuthPlugin(base_identity.BaseIdentityPlugin):
         # calculated by the middleware. reauthenticate=False in __init__ should
         # ensure that this function is only called on the first access.
         return self._user_auth_ref
+
+    @property
+    def _log_format(self):
+        msg = []
+
+        if self.has_user_token:
+            msg.append('user: %s' % self.user._log_format)
+
+        if self.has_service_token:
+            msg.append('service: %s' % self.service._log_format)
+
+        return ' '.join(msg)

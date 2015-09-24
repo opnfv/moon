@@ -196,7 +196,7 @@ a WSGI component. Example for the auth_token middleware:
     # value)
     #signing_dir=<None>
 
-    # If defined, the memcache server(s) to use for caching (list
+    # If defined, the memcached server(s) to use for caching (list
     # value)
     # Deprecated group/name - [DEFAULT]/memcache_servers
     #memcached_servers=<None>
@@ -271,6 +271,20 @@ and set in ``nova.conf``:
 Note that middleware parameters in paste config take priority, they must be
 removed to use values in [keystone_authtoken] section.
 
+If the service doesn't use the global oslo.config object (CONF), then the
+olso config project name can be set it in paste config and
+keystonemiddleware will load the project configuration itself.
+Optionally the location of the configuration file can be set if oslo.config
+is not able to discover it.
+
+.. code-block:: ini
+
+    [filter:authtoken]
+    paste.filter_factory = keystonemiddleware.auth_token:filter_factory
+    oslo_config_project = nova
+    # oslo_config_file = /not_discoverable_location/nova.conf
+
+
 Configuration Options
 ---------------------
 
@@ -315,7 +329,7 @@ Configuration Options
 * ``signing_dir``: (optional) Directory used to cache files related to PKI
   tokens
 
-* ``memcached_servers``: (optional) If defined, the memcache server(s) to use
+* ``memcached_servers``: (optional) If defined, the memcached server(s) to use
   for caching
 * ``token_cache_time``: (default 300) In order to prevent excessive requests
   and validations, the middleware uses an in-memory cache for the tokens the
@@ -350,7 +364,7 @@ invalidated tokens may continue to work if they are still in the token cache,
 so token_cache_time is configurable. For larger deployments, the middleware
 also supports memcache based caching.
 
-* ``memcached_servers``: (optonal) if defined, the memcache server(s) to use for
+* ``memcached_servers``: (optonal) if defined, the memcached server(s) to use for
   cacheing. It will be ignored if Swift MemcacheRing is used instead.
 * ``token_cache_time``: (optional, default 300 seconds) Set to -1 to disable
   caching completely.
@@ -391,7 +405,7 @@ Memcache Protection
 
 When using memcached, we are storing user tokens and token validation
 information into the cache as raw data. Which means that anyone who
-has access to the memcache servers can read and modify data stored
+has access to the memcached servers can read and modify data stored
 there. To mitigate this risk, ``auth_token`` middleware provides an
 option to authenticate and optionally encrypt the token data stored in
 the cache.
