@@ -666,14 +666,14 @@ class IntraExtensions(controller.V3Controller):
     def get_aggregation_algorithm(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         intra_extension_id = kw.get('intra_extension_id', None)
-        return self.admin_api.get_aggregation_algorithm_dict(user_id, intra_extension_id)
+        return self.admin_api.get_aggregation_algorithm_id(user_id, intra_extension_id)
 
     @controller.protected()
     def set_aggregation_algorithm(self, context, **kw):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         intra_extension_id = kw.get('intra_extension_id', None)
         aggregation_algorithm_id = kw.get('aggregation_algorithm_id', None)
-        return self.admin_api.set_aggregation_algorithm_dict(user_id, intra_extension_id, aggregation_algorithm_id)
+        return self.admin_api.set_aggregation_algorithm_id(user_id, intra_extension_id, aggregation_algorithm_id)
 
     @controller.protected()
     def get_sub_meta_rules(self, context, **kw):
