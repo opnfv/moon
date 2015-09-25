@@ -16,10 +16,6 @@
         "storage_list"
     ],
     "objects": [
-        "servers",
-        "vm1",
-        "vm2",
-        "file1",
-        "file2"
+        "servers"
     ]
 }
