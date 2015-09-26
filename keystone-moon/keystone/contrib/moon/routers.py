@@ -76,12 +76,12 @@ class Routers(wsgi.V3ExtensionRouter):
         # Authz route
         self._add_resource(
             mapper, authz_controller,
-            path=self.PATH_PREFIX+'/authz/{tenant_name}/{subject_name}/{object_name}/{action_name}',
+            path=self.PATH_PREFIX+'/authz/{tenant_id}/{subject_k_id}/{object_name}/{action_name}',
             get_action='get_authz',
             rel=self._get_rel('authz'),
             path_vars={
-                'tenant_name': self._get_path('tenants'),
-                'subject_name': self._get_path('subjects'),
+                'tenant_id': self._get_path('tenants'),
+                'subject_k_id': self._get_path('subjects'),
                 'object_name': self._get_path('objects'),
                 'action_name': self._get_path('actions'),
             })

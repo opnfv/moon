@@ -598,13 +598,10 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
         objects_dict = self.authz_manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        object_vm1_id = None
-        object_vm2_id = None
-        for _object_id in objects_dict:
-            if objects_dict[_object_id]['name'] == 'vm1':
-                object_vm1_id = _object_id
-            if objects_dict[_object_id]['name'] == 'vm2':
-                object_vm2_id = _object_id
+        object_vm1 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm1", "description": "vm1"})
+        object_vm2 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm2", "description": "vm2"})
+        object_vm1_id = object_vm1.keys()[0]
+        object_vm2_id = object_vm2.keys()[0]
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 
@@ -1690,13 +1687,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
         objects_dict = self.authz_manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        object_vm1_id = None
-        object_vm2_id = None
-        for _object_id in objects_dict:
-            if objects_dict[_object_id]['name'] == 'vm1':
-                object_vm1_id = _object_id
-            if objects_dict[_object_id]['name'] == 'vm2':
-                object_vm2_id = _object_id
+        object_vm1 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm1", "description": "vm1"})
+        object_vm2 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm2", "description": "vm2"})
+        object_vm1_id = object_vm1.keys()[0]
+        object_vm2_id = object_vm2.keys()[0]
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 

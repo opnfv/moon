@@ -586,13 +586,10 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
 
         objects_dict = self.authz_manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        object_vm1_id = None
-        object_vm2_id = None
-        for _object_id in objects_dict:
-            if objects_dict[_object_id]['name'] == 'vm1':
-                object_vm1_id = _object_id
-            if objects_dict[_object_id]['name'] == 'vm2':
-                object_vm2_id = _object_id
+        object_vm1 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm1", "description": "vm1"})
+        object_vm2 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm2", "description": "vm2"})
+        object_vm1_id = object_vm1.keys()[0]
+        object_vm2_id = object_vm2.keys()[0]
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 
@@ -1021,7 +1018,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             SubjectUnknown,
             self.authz_manager.authz,
-            tenant["name"], uuid.uuid4().hex, uuid.uuid4().hex, uuid.uuid4().hex
+            tenant["id"], uuid.uuid4().hex, uuid.uuid4().hex, uuid.uuid4().hex
         )
 
         # Test when subject is known but not the object
@@ -1037,7 +1034,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             ObjectUnknown,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], uuid.uuid4().hex, uuid.uuid4().hex
+            tenant["id"], demo_subject_dict["keystone_id"], uuid.uuid4().hex, uuid.uuid4().hex
         )
 
         # Test when subject and object are known but not the action
@@ -1052,7 +1049,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             ActionUnknown,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], uuid.uuid4().hex
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], uuid.uuid4().hex
         )
 
         # Test when subject and object and action are known
@@ -1067,7 +1064,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add a subject scope and test ObjectCategoryAssignmentOutOfScope
@@ -1091,7 +1088,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add an object scope and test ActionCategoryAssignmentOutOfScope
@@ -1115,7 +1112,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add an action scope and test SubjectCategoryAssignmentUnknown
@@ -1139,7 +1136,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add a subject assignment and test ObjectCategoryAssignmentUnknown
@@ -1154,7 +1151,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add an object assignment and test ActionCategoryAssignmentUnknown
@@ -1169,7 +1166,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add an action assignment and test RuleUnknown
@@ -1184,7 +1181,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], admin_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], admin_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
         # Add the correct rule and test that no exception is raised
@@ -1200,7 +1197,6 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
             authz_ie_dict["id"]
         )
 
-        print("authz_ie_dict[\"id\"]", authz_ie_dict["id"])
         self.assertRaises(
             SubMetaRuleAlgorithmNotExisting,
             self.admin_manager.add_sub_meta_rule_dict,
@@ -1243,11 +1239,13 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.assertRaises(
             AuthzException,
             self.authz_manager.authz,
-            tenant["name"], admin_subject_dict["name"], my_object["name"], my_action["name"]
+            tenant["id"], admin_subject_dict["keystone_id"], my_object["name"], my_action["name"]
         )
 
-        result = self.authz_manager.authz(tenant["name"], demo_subject_dict["name"], my_object["name"], my_action["name"])
-        self.assertEqual(True, result)
+        result = self.authz_manager.authz(tenant["id"], demo_subject_dict["keystone_id"], my_object["name"], my_action["name"])
+        self.assertIsInstance(result, dict)
+        self.assertIn('authz', result)
+        self.assertEquals(result['authz'], True)
 
     def test_subjects(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
@@ -1916,13 +1914,10 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
         objects_dict = self.authz_manager.get_objects_dict(admin_subject_id, authz_ie_dict["id"])
 
-        object_vm1_id = None
-        object_vm2_id = None
-        for _object_id in objects_dict:
-            if objects_dict[_object_id]['name'] == 'vm1':
-                object_vm1_id = _object_id
-            if objects_dict[_object_id]['name'] == 'vm2':
-                object_vm2_id = _object_id
+        object_vm1 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm1", "description": "vm1"})
+        object_vm2 = self.admin_manager.add_object_dict(admin_subject_id, authz_ie_dict["id"], {"name": "vm2", "description": "vm2"})
+        object_vm1_id = object_vm1.keys()[0]
+        object_vm2_id = object_vm2.keys()[0]
         if not object_vm1_id or not object_vm2_id:
             raise Exception("Cannot run tests, database is corrupted ? (need upload and list in objects)")
 

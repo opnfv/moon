@@ -584,7 +584,7 @@ class IntraExtensionManager(manager.Manager):
             decision = one_true(decision_buffer)
         if not decision:
             raise AuthzException("{} {}-{}-{}".format(intra_extension_id, subject_id, action_id, object_id))
-        return decision
+        return {'authz': decision, 'comment': ''}
 
     @enforce("read", "intra_extensions")
     def get_intra_extensions_dict(self, user_id):
@@ -1808,7 +1808,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
     def __init__(self):
         super(IntraExtensionAuthzManager, self).__init__()
 
-    def authz(self, tenant_name, subject_name, object_name, action_name, genre="authz"):
+    def authz(self, tenant_id, subject_k_id, object_name, action_name, genre="authz"):
         """Check authorization for a particular action.
         :return: True or False or raise an exception
         """
@@ -1818,27 +1818,20 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
             genre = "intra_admin_extension_id"
 
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
-        tenant_id = None
-        for _tenant_id in tenants_dict:
-            if tenants_dict[_tenant_id]["name"] == tenant_name:
-                tenant_id = _tenant_id
-                break
-        if not tenant_id:
-            raise TenantUnknown
+
+        if tenant_id not in tenants_dict:
+            raise TenantUnknown()
         intra_extension_id = tenants_dict[tenant_id][genre]
         if not intra_extension_id:
             raise TenantNoIntraExtension()
-
         subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
         subject_id = None
         for _subject_id in subjects_dict:
-            if subjects_dict[_subject_id]['keystone_name'] == subject_name:
-                # subject_id = subjects_dict[_subject_id]['keystone_id']
+            if subjects_dict[_subject_id]['keystone_id'] == subject_k_id:
                 subject_id = _subject_id
                 break
         if not subject_id:
             raise SubjectUnknown()
-
         objects_dict = self.driver.get_objects_dict(intra_extension_id)
         object_id = None
         for _object_id in objects_dict:

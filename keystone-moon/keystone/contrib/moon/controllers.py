@@ -134,11 +134,11 @@ class Authz_v3(controller.V3Controller):
         super(Authz_v3, self).__init__()
 
     @controller.protected()
-    def get_authz(self, context, tenant_name, subject_name, object_name, action_name):
+    def get_authz(self, context, tenant_id, subject_k_id, object_name, action_name):
         try:
-            return self.authz_api.authz(tenant_name, subject_name, object_name, action_name)
-        except:
-            return False
+            return self.authz_api.authz(tenant_id, subject_k_id, object_name, action_name)
+        except Exception as e:
+            return {'authz': False, 'comment': unicode(e)}
 
 
 @dependency.requires('admin_api', 'authz_api')

@@ -43,25 +43,13 @@
 
     "object_assignments": {
         "object_security_level": {
-            "servers": ["low"],
-			"vm1": ["low"],
-			"vm2": ["medium"],
-			"file1": ["low"],
-			"file2": ["medium"]
+            "servers": ["low"]
         },
 		"type": {
-			"servers": ["computing"],
-			"vm1": ["computing"],
-			"vm2": ["computing"],
-			"file1": ["storage"],
-			"file2": ["storage"]
+			"servers": ["computing"]
 		},
 		"object_id": {
-			"servers": ["servers"],
-			"vm1": ["vm1"],
-			"vm2": ["vm2"],
-			"file1": ["file1"],
-			"file2": ["file2"]
+			"servers": ["servers"]
 		}
     }
 }

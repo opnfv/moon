@@ -245,6 +245,7 @@ class AuthZProtocol(object):
         :return: the action or ""
         """
         action = ""
+        self.input = ""
         if component == "nova":
             length = int(env.get('CONTENT_LENGTH', '0'))
             # TODO (dthom): compute for Nova, Cinder, Neutron, ...
@@ -252,6 +253,7 @@ class AuthZProtocol(object):
             if length > 0:
                 try:
                     sub_action_object = env['wsgi.input'].read(length)
+                    self.input = sub_action_object
                     action = json.loads(sub_action_object).keys()[0]
                     body = StringIO(sub_action_object)
                     env['wsgi.input'] = body
@@ -272,8 +274,23 @@ class AuthZProtocol(object):
     @staticmethod
     def _get_object(env, component):
         if component == "nova":
-            # get the object ID which is located before "action" in the URL
-            return env.get("PATH_INFO").split("/")[-2]
+            # http://developer.openstack.org/api-ref-compute-v2.1.html
+            # nova URLs:
+            #    /<tenant_id>/servers/<server_id>
+            #       list details for server_id
+            #    /<tenant_id>/servers/<server_id>/action
+            #       execute action to server_id
+            #    /<tenant_id>/servers/<server_id>/metadata
+            #       show metadata from server_id
+            #    /<tenant_id>/servers/details
+            #       list servers
+            url = env.get("PATH_INFO").split("/")
+            if url[-1] == "detail":
+                return "servers"
+            try:
+                return url[3]
+            except IndexError:
+                return
         elif component == "swift":
             # remove the "/v1/" part of the URL
             return env.get("PATH_INFO").split("/", 2)[-1].replace("/", "-")
@@ -293,12 +310,11 @@ class AuthZProtocol(object):
         component = self._find_openstack_component(env)
         action_id = self._get_action(env, component)
         if action_id:
-            self._LOG.debug("OpenStack component {}".format(component))
             object_id = self._get_object(env, component)
-            self._LOG.debug("{}-{}-{}-{}".format(subject_id, object_id, action_id, tenant_id))
+            if not object_id:
+                object_id = "servers"
             self.__set_token()
             resp = self._get_authz_from_moon(self.x_subject_token, tenant_id, subject_id, object_id, action_id)
-            self._LOG.info("Moon answer: {}-{}".format(resp.status_code, resp.content))
             self.__unset_token()
             if resp.status_code == 200:
                 try:
@@ -306,8 +322,9 @@ class AuthZProtocol(object):
                     self._LOG.debug(answer)
                     if "authz" in answer and answer["authz"]:
                         return self._app(env, start_response)
-                except:
-                    raise exception.Unauthorized(message="You are not authorized to do that!")
+                except Exception as e:
+                    # self._LOG.error("You are not authorized to do that!")
+                    raise exception.Unauthorized(message="You are not authorized to do that! ({})".format(unicode(e)))
         self._LOG.debug("No action_id found for {}".format(env.get("PATH_INFO")))
         # If action is not found, we can't raise an exception because a lots of action is missing
         # in function self._get_action, it is not possible to get them all.

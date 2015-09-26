@@ -1,4 +1,7 @@
 import itertools
+from oslo_log import log
+LOG = log.getLogger(__name__)
+
 
 """ an example of authz_buffer, sub_meta_rule_dict, rule_dict
 authz_buffer = {

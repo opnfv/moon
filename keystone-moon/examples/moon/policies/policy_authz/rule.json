@@ -19,23 +19,7 @@
 	],
 	"rbac_rule":[
 		["dev", "xx", "read", "servers"],
-		["dev", "xx", "read", "vm1"],
-		["dev", "xx", "read", "vm2"],
-		["dev", "xx", "read", "file1"],
-		["dev", "xx", "read", "file2"],
-		["dev", "xx", "write", "vm1"],
-		["dev", "xx", "write", "vm2"],
-		["dev", "xx", "write", "file1"],
-		["dev", "xx", "write", "file2"],
 		["admin", "xx", "read", "servers"],
-		["admin", "ft", "read", "servers"],
-		["admin", "ft", "read", "vm1"],
-		["admin", "ft", "read", "vm2"],
-		["admin", "ft", "read", "file1"],
-		["admin", "ft", "read", "file2"],
-		["admin", "ft", "write", "vm1"],
-		["admin", "ft", "write", "vm2"],
-		["admin", "ft", "write", "file1"],
-		["admin", "ft", "write", "file2"]
+		["admin", "ft", "read", "servers"]
 	]
 }
