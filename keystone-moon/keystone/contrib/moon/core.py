@@ -1239,14 +1239,14 @@ class IntraExtensionManager(manager.Manager):
     def get_object_dict(self, user_id, intra_extension_id, object_id):
         objects_dict = self.driver.get_objects_dict(intra_extension_id)
         if object_id not in objects_dict:
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
         return objects_dict[object_id]
 
     @filter_input
     @enforce(("read", "write"), "objects")
     def del_object(self, user_id, intra_extension_id, object_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
         # Destroy assignments related to this category
         for object_category_id in self.driver.get_object_categories_dict(intra_extension_id):
             for _object_id in self.driver.get_objects_dict(intra_extension_id):
@@ -1570,7 +1570,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce("read", "object_categories")
     def get_object_assignment_list(self, user_id, intra_extension_id, object_id, object_category_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
         return self.driver.get_object_assignment_list(intra_extension_id, object_id, object_category_id)
@@ -1581,7 +1581,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce("read", "object_categories")
     def add_object_assignment_list(self, user_id, intra_extension_id, object_id, object_category_id, object_scope_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
         if object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
@@ -1597,7 +1597,7 @@ class IntraExtensionManager(manager.Manager):
     @enforce("read", "object_scopes")
     def del_object_assignment(self, user_id, intra_extension_id, object_id, object_category_id, object_scope_id):
         if object_id not in self.driver.get_objects_dict(intra_extension_id):
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
         if object_category_id not in self.driver.get_object_categories_dict(intra_extension_id):
             raise ObjectCategoryUnknown()
         if object_scope_id not in self.driver.get_object_scopes_dict(intra_extension_id, object_category_id):
@@ -1839,7 +1839,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
                 object_id = _object_id
                 break
         if not object_id:
-            raise ObjectUnknown()
+            raise ObjectUnknown("Unknown object name: {}".format(object_id))
 
         actions_dict = self.driver.get_actions_dict(intra_extension_id)
         action_id = None
