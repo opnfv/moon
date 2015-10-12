@@ -23,7 +23,7 @@ function test_cmd {
 }
 
 test_cmd "intraextension list"
-test_cmd "intraextension create --policy_model policy_rbac func_test"
+test_cmd "intraextension add --policy_model policy_rbac func_test"
 uuid=$(cat /tmp/_ | cut -d " " -f 3)
 test_cmd "intraextension tenant set $uuid $OS_TENANT_NAME"
 test_cmd "intraextension show $uuid"

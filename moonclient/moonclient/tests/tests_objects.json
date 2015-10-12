@@ -23,7 +23,7 @@
       },
       {
         "name": "create_intraextension_authz",
-        "command": "intraextension create --policy_model policy_authz authz_test",
+        "command": "intraextension add --policy_model policy_authz authz_test",
         "result": "IntraExtension created: (?P<uuid_authz>\\w+)",
         "description": "Create an authz intra extension",
         "command_options": ""
@@ -118,7 +118,7 @@
       },
       {
         "name": "create_intraextension_authz",
-        "command": "intraextension create --policy_model policy_authz authz_test",
+        "command": "intraextension add --policy_model policy_authz authz_test",
         "result": "IntraExtension created: (?P<uuid_authz>\\w+)",
         "description": "Create an authz intra extension",
         "command_options": ""
@@ -131,7 +131,7 @@
       },
       {
         "name": "create_intraextension_admin",
-        "command": "intraextension create --policy_model policy_admin admin_test",
+        "command": "intraextension add --policy_model policy_rbac_admin admin_test",
         "result": "IntraExtension created: (?P<uuid_admin>\\w+)",
         "description": "Create an admin intra extension",
         "command_options": ""

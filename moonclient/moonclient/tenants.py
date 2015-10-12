@@ -123,6 +123,7 @@ class TenantSet(Command):
 
     log = logging.getLogger(__name__)
 
+    # TODO: could use a PATCH method also
     def get_parser(self, prog_name):
         parser = super(TenantSet, self).get_parser(prog_name)
         parser.add_argument(
