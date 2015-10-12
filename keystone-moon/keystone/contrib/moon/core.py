@@ -413,8 +413,9 @@ class TenantManager(manager.Manager):
         keystone_tenant = self.__get_keystone_tenant_dict(tenant_dict['id'], tenant_dict['name'])
         tenant_dict.update(keystone_tenant)
         # Sync users between intra_authz_extension and intra_admin_extension
-        if 'intra_admin_extension_id' in tenant_dict:
-            if 'intra_authz_extension_id' in tenant_dict:
+        self.moonlog_api.debug("add_tenant_dict {}".format(tenant_dict))
+        if 'intra_admin_extension_id' in tenant_dict and tenant_dict['intra_admin_extension_id']:
+            if 'intra_authz_extension_id' in tenant_dict and tenant_dict['intra_authz_extension_id']:
                 # authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
                 # admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
                 # for _subject_id in authz_subjects_dict:
