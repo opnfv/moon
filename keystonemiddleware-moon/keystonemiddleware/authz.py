@@ -317,14 +317,11 @@ class AuthZProtocol(object):
             resp = self._get_authz_from_moon(self.x_subject_token, tenant_id, subject_id, object_id, action_id)
             self.__unset_token()
             if resp.status_code == 200:
-                try:
-                    answer = json.loads(resp.content)
-                    self._LOG.debug(answer)
-                    if "authz" in answer and answer["authz"]:
-                        return self._app(env, start_response)
-                except Exception as e:
-                    # self._LOG.error("You are not authorized to do that!")
-                    raise exception.Unauthorized(message="You are not authorized to do that! ({})".format(unicode(e)))
+                answer = json.loads(resp.content)
+                self._LOG.debug(answer)
+                if "authz" in answer and answer["authz"]:
+                    return self._app(env, start_response)
+                raise exception.Unauthorized(message="You are not authorized to do that! ({})".format(unicode(answer["comment"])))
         self._LOG.debug("No action_id found for {}".format(env.get("PATH_INFO")))
         # If action is not found, we can't raise an exception because a lots of action is missing
         # in function self._get_action, it is not possible to get them all.
