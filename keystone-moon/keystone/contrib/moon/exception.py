@@ -6,7 +6,7 @@
 from keystone.common import dependency
 from keystone.exception import Error
 from keystone.i18n import _, _LW
-
+import logging
 
 class MoonErrorMetaClass(type):
 
@@ -23,6 +23,11 @@ class MoonError(Error):
     code = 400
     title = 'Moon Error'
     logger = "ERROR"
+
+    def __init__(self, message=""):
+        if message:
+            self.message_format = message
+        super(MoonError, self).__init__()
 
     def __del__(self):
         message = "{} ({})".format(self.hierarchy, self.message_format)
@@ -96,6 +101,7 @@ class RootExtensionUnknown(IntraExtensionUnknown):
     code = 400
     title = 'Root Extension Unknown'
     logger = "Error"
+
 
 class RootExtensionNotInitialized(IntraExtensionException):
     message_format = _("The root_extension is not initialized.")
