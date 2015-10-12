@@ -2,7 +2,7 @@
     "subject_assignments": {
         "role": {
 			"admin": ["root_role"],
-            "demo": ["dev"]
+            "demo": ["dev_role"]
 		}
     },
     "action_assignments": {
