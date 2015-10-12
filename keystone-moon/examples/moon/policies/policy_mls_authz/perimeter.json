@@ -1,0 +1,21 @@
+{
+    "subjects": [
+        "admin",
+        "demo"
+    ],
+    "actions": [
+        "pause",
+        "unpause",
+        "start",
+        "stop",
+        "create",
+        "list",
+        "upload",
+        "download",
+        "post",
+        "storage_list"
+    ],
+    "objects": [
+        "servers"
+    ]
+}

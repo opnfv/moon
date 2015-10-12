@@ -1,7 +1,8 @@
 {
     "subject_scopes": {
         "role": [
-            "root_role"
+            "root_role",
+            "dev_role"
         ]
     },
     "action_scopes": {

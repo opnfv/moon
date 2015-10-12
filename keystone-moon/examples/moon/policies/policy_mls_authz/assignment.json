@@ -1,0 +1,29 @@
+{
+    "subject_assignments": {
+        "subject_security_level":{
+			"admin": ["high"],
+			"demo": ["medium"]
+        }
+	},
+
+    "action_assignments": {
+        "resource_action":{
+			"pause": ["vm_admin"],
+			"unpause": ["vm_admin"],
+			"start": ["vm_admin"],
+			"stop": ["vm_admin"],
+			"list": ["vm_access", "vm_admin"],
+			"create": ["vm_admin"],
+			"storage_list": ["storage_access"],
+			"download": ["storage_access"],
+			"post": ["storage_admin"],
+			"upload": ["storage_admin"]
+        }
+	},
+
+    "object_assignments": {
+        "object_security_level": {
+            "servers": ["low"]
+        }
+    }
+}
