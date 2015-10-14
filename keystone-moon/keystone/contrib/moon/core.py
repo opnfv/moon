@@ -411,7 +411,9 @@ class TenantManager(manager.Manager):
         if 'id' not in tenant_dict:
             tenant_dict['id'] = None
         keystone_tenant = self.__get_keystone_tenant_dict(tenant_dict['id'], tenant_dict['name'])
-        tenant_dict.update(keystone_tenant)
+        for att in keystone_tenant:
+            if keystone_tenant[att]:
+                tenant_dict[att] = keystone_tenant[att]
         # Sync users between intra_authz_extension and intra_admin_extension
         self.moonlog_api.debug("add_tenant_dict {}".format(tenant_dict))
         if 'intra_admin_extension_id' in tenant_dict and tenant_dict['intra_admin_extension_id']:
