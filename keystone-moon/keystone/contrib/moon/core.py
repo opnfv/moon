@@ -1823,7 +1823,9 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
 
         if tenant_id not in tenants_dict:
-            raise TenantUnknown()
+            # raise TenantUnknown("Cannot authz because Tenant is unknown {}".format(tenant_id))
+            LOG.warning("Cannot authz because Tenant is not managed by Moon {}".format(tenant_id))
+            return {'authz': True, 'comment': "Cannot authz because Tenant is not managed by Moon {}".format(tenant_id)}
         intra_extension_id = tenants_dict[tenant_id][genre]
         if not intra_extension_id:
             raise TenantNoIntraExtension()
