@@ -35,3 +35,5 @@ keystone/locale/*/LC_MESSAGES/*.mo
 .idea/
 keystone/contrib/moon_v2/
 vagrant*/
+moon-abe/pbc-0.5.14/.libs/
+
