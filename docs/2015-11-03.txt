@@ -1,0 +1,190 @@
+(13:00:03) MaximeC left the room (quit: Client Quit).
+(13:00:22) MaximeC [c1f83226@gateway/web/freenode/ip.193.248.50.38] entered the room.
+(13:01:07) heruan: let's wait 5 mins before starting the meeting
+(13:01:36) asteroide: ok
+(13:01:54) Nir [c074be92@gateway/web/freenode/ip.192.116.190.146] entered the room.
+(13:03:13) alioune [c202ca51@gateway/web/freenode/ip.194.2.202.81] entered the room.
+(13:03:27) heruan: Hi all
+(13:03:45) heruan: Jamil will join the meeting later
+(13:04:24) heruan: in the chat room, there all the moon team from Orange, except Jamil
+(13:04:34) heruan: and Nir from Huawei
+(13:04:50) heruan: the ordre of today's meeting is: 
+(13:05:16) heruan:   -          present opnfv-moon-core release2 and its main feature
+(13:05:16) heruan: -          present opnfv-moonclient, a cmd line tool to administrate security
+(13:05:16) heruan: -          present the DevOps environment for code continue integration
+(13:05:16) heruan: -          present the progress moon-webview, a graphic interface for security management
+(13:05:16) heruan: -          discussion about the roadmap: provide a demo next year? integration release C or D? which main features to be integrated? 
+(13:05:16) heruan: -          fix a monthly review meeting to follow its dev and establish an acting plan 
+(13:05:30) heruan: do all of you agree on the schedule?
+(13:05:39) asteroide: yes
+(13:06:06) MaximeC: That's ok for me
+(13:06:17) Nir: me too
+(13:06:59) heruan: #present opnfv-moon-cre release2
+(13:07:08) Jamil [a16a0005@gateway/web/freenode/ip.161.106.0.5] entered the room.
+(13:07:33) heruan: we started the second release since the beginning of this year
+(13:08:16) heruan: the main idea is to refactor the code in order to conform OpenStack's criteria and build a stable policy engine
+(13:08:45) heruan: now the core part has almost finished, we on now on the test stage
+(13:09:12) heruan: @asteroide, can you talk a little about the ongoing test?
+(13:09:18) asteroide: yep
+(13:09:36) asteroide: all functionnal tests are OK
+(13:09:56) Jamil: What are the main features of this Rel ? 
+(13:09:59) asteroide: those tests are located in the code of Keystone-moon 
+(13:10:26) asteroide: and I am testing Moon with moonclient
+(13:10:41) asteroide: by adding a test feature inside moonclient
+(13:11:19) asteroide: the main feature is the policy engine written in pue python
+(13:11:26) asteroide: pure python
+(13:11:29) Jamil: waht do you mean by moonclient ?
+(13:11:57) heruan: @Jamil, the main features can be found in Jira: https://jira.opnfv.org/browse/MOON-2?jql=project%20%3D%20MOON%20AND%20resolution%20%3D%20Unresolved%20AND%20issuetype%20%3D%20Task%20ORDER%20BY%20priority%20DESChttps://jira.opnfv.org/browse/MOON-2?jql=project%20%3D%20MOON%20AND%20resolution%20%3D%20Unresolved%20AND%20issuetype%20%3D%20Task%20ORDER%20BY%20priority%20DESC
+(13:12:07) asteroide: moonclient is a console based client used to configure keystone-moon
+(13:12:18) asteroide: through moon API
+(13:12:29) alioune left the room (quit: Quit: Page closed).
+(13:12:44) heruan: yes, moon has 2 interfaces: moonclient (CLI) and moonwebview (GUI)
+(13:12:57) alioune [c202ca51@gateway/web/freenode/ip.194.2.202.81] entered the room.
+(13:13:14) asteroide: here is an example of moonclient usage : "moon tenant list" "moon subject add admin --password nomoresecrete", ...
+(13:13:37) asteroide: you can add subject object, action, categories rules and so on
+(13:13:48) asteroide: on a particular intraextension
+(13:14:03) asteroide: on a "selected" intraextension
+(13:14:30) heruan: PI: extension in moon is a security manager to protect one tenant
+(13:15:09) heruan: in conclusion, now to moon-core, it only lacks tests?
+(13:15:39) heruan: @asteroide?
+(13:16:06) asteroide: for me, tests in keystone moon are OK in core
+(13:16:14) asteroide: but not through moonclient
+(13:16:35) heruan: how much time it needs to finish all the tests?
+(13:16:45) asteroide: I need to add more test on nova
+(13:16:49) asteroide: on swift
+(13:17:06) asteroide: and tests with different users (not admin)
+(13:17:21) asteroide: all through moonclient
+(13:17:34) heruan: yes, the 3 sub-tasks we have listed in Jira
+(13:17:39) asteroide: nova tests will be OK at the end of this week
+(13:18:17) asteroide: I think that swift and users tests can be done at the end of the next week
+(13:18:25) heruan: ok
+(13:18:51) heruan: moon core release 2  will be finished in 2 weeks!
+(13:19:03) heruan: thank asteroide 
+(13:19:09) asteroide: :)
+(13:19:26) heruan: next topic is about #moonclient
+(13:19:37) heruan: since we have already discussed about it 
+(13:19:56) heruan: my understanding is that moonclient will be finished with moon-core?
+(13:20:17) asteroide: yes
+(13:20:35) heruan: ok, moonclient will also be finished in 2 weeks!!
+(13:20:54) heruan: the 3rd topic is about moonwebview (GUI)
+(13:21:01) heruan: @MaximeC?
+(13:21:06) MaximeC: Ok,
+(13:21:19) Jamil: what are next steps to integrate moon in OPNFV Rel x ?
+(13:21:41) heruan: this is the 5th topic
+(13:21:41) MaximeC: So, basically, MoonWebUI aims at providing a WebUI for Moon
+(13:21:58) Jamil: ok
+(13:22:06) MaximeC: to manage tenants, intra-extension & inter-etension
+(13:22:19) MaximeC: with an Authc based on Keystone
+(13:23:04) MaximeC: This interface is still in development as we refactore the code to be client-side, and independant from Horizon
+(13:23:24) MaximeC: This is the actual state of the code:
+(13:23:43) MaximeC: * Tenants Management is implemented
+(13:24:17) MaximeC: * Intra-etension management is in progress (70% of functionality are working)
+(13:24:39) MaximeC: * Inter-extension is not yet developped
+(13:24:51) MaximeC: * AuthC dev has just begun
+(13:24:51) heruan: inter-extension is not included in release 2
+(13:25:18) heruan: i think maxime needs asteroide's help for a server-side django module
+(13:25:34) asteroide: ok no problem
+(13:25:45) MaximeC: The WebUI is bound to MoonServer through REST API, so
+(13:26:21) MaximeC: even if there are major changes in moon server code, as logn as API will remain the same
+(13:26:44) MaximeC: no changes will be due in MoonWebview code
+(13:27:00) heruan: Maxime, do you have an idea about the delay?
+(13:27:35) MaximeC: To my mind, i think dev will last 1 month
+(13:27:58) heruan: ok, 4 weeks for the monwebview
+(13:28:00) asteroide: is there a plan to add a link to the log API inside the web client ?
+(13:28:14) heruan: not in release 2
+(13:28:28) asteroide: ok
+(13:28:50) heruan: the 4th topic is about the dev environment
+(13:29:57) heruan: @Nir, it's not so easy to install the whole dev env, so if someone in your team wants, ask him to directly contact us
+(13:30:22) heruan: we will try to remotely install all modules for him
+(13:31:13) heruan: we switch to the 5th topic
+(13:31:28) heruan: moon's roadmap
+(13:31:41) Nir: ok, i will inform them
+(13:31:46) heruan: @Jamil @Nir, what's your opinion?
+(13:32:19) Jamil: its good to have moon in Rel C
+(13:32:56) heruan: this depends on @alioune's work on OpenDaylight integration
+(13:33:22) Nir: agree, what are we missing to put it into Rel C?
+(13:33:56) heruan: we'd like to implement the identity federation use case through moon
+(13:34:15) Jamil: my undestanding integration with ODL ID
+(13:34:33) heruan: this means that moon at the same time, synchronizes and manages OpenStack's users and OpenDaylight's users
+(13:34:54) heruan: to demonstrate that moon is a unified security manager 
+(13:35:05) Jamil: yes
+(13:35:09) heruan: @alioune works on the ODL integration
+(13:35:20) heruan: @aliounce, what's your progress?
+(13:35:57) heruan: he's maybe offlne
+(13:36:34) heruan: my understanding is that the integration will be difficulte to finished for the beginning of 2016
+(13:36:44) Jamil: do we need any support from ODL project ?
+(13:36:57) heruan: yes, of cause
+(13:37:11) heruan: if we can get some supplementary helps
+(13:37:17) Jamil: Rel C will be in Sept 2016
+(13:37:41) heruan: but we should provide a demo at the begining of 2016
+(13:37:46) Jamil: yes I can ask a support
+(13:37:51) Nir: I can check if we have someone in Huawei that can help 
+(13:38:04) heruan: that's great!!
+(13:38:07) Nir: Do we have a target date for the demo
+(13:38:08) Nir: ?
+(13:38:44) heruan: let's fix the date to 15th Jan 2016
+(13:39:36) Nir: OK, I will check internally and update. 
+(13:39:41) alioune: hi all, currently I am analysing ODL architecture and main used frameworks in the controller
+(13:39:43) heruan: thanks 
+(13:40:28) heruan: so, the roadmap of moon is to push its code to Release C
+(13:40:38) Jamil: Jan 2016 will be one month before Rel B
+(13:40:52) heruan: we prepare the demo for Jan 2016
+(13:41:15) Jamil: I think Rel c will be discussed in March 2016
+(13:41:33) asteroide: the demo will be on release 2 of Moon or release 3 ?
+(13:41:52) heruan: ok, in this case we will have more time
+(13:42:04) heruan: the demo will be based on Moon release 2
+(13:42:13) Jamil: for OPNFV, the first integrated code for moon will be the Rel1 for moon
+(13:42:13) asteroide: ok
+(13:42:45) heruan: release 2 will be ready, son we can directly contribute with release 2
+(13:43:20) heruan: the second sub-topic is about next week's OPNFV summit
+(13:43:37) heruan: Jamil will chair a dedicated session on Moon
+(13:43:58) heruan: Nir, maybe you can help Jamil for the session?
+(13:44:07) Jamil: ODL will be integrated in moon Rel 3 ?
+(13:44:13) Nir: I will participate in a security panel presenting Moon in the first day
+(13:44:34) Nir: and i have a session about the moon in the theater at teh second day as well
+(13:44:41) Nir: :-)
+(13:44:46) heruan: great!!
+(13:45:11) heruan: @Jamil, ODL doesn't touch Moon-core
+(13:45:20) Nir: Unless you think otherwise i recommend to keep all of them so we can reach as many people and increase the community
+(13:45:39) Nir: altough we may have some overlap
+(13:45:54) heruan: the ecosystem for moon will be important
+(13:46:14) heruan: all contributors and commiters will be welcome
+(13:46:27) Nir: I am also planning to present moon to TI and Telefonica hoping to get them on board
+(13:46:34) asteroide: and all beta-testers also ;)
+(13:46:40) Nir: agree :-)
+(13:47:11) heruan: we will provide a public testbed of Moon by Descember 2015
+(13:47:35) heruan: based on moon-core release 2
+(13:47:42) Nir: as for our suggestions for Rel 3 I asked my team to analyze Rel 2 and update the offer we have presented on our last meeting
+(13:48:10) Jamil: moon session will be Thursday November 12, 2015 12:10pm - 12:30pm 
+(13:48:25) heruan: yes, some of the issues you mentioned have been already implemented
+(13:49:00) heruan: @Jamil, can you annonce Moon's roadmap of OPNFV releaseC integration during your session?
+(13:49:29) Jamil: yes It will do 
+(13:49:58) heruan: ok, i think we finished the fifth topic 
+(13:49:58) Jamil: I will do 
+(13:50:19) heruan: last one, I propose to have a monthly moon meeting
+(13:50:38) heruan: the last wensday of each month
+(13:50:51) heruan: it's ok for everyone?
+(13:50:52) Nir: agree
+(13:50:56) Jamil: ok
+(13:51:01) asteroide: agree
+(13:51:02) Jamil: same time ?
+(13:51:13) MaximeC: Ok for me
+(13:51:32) heruan: at 14h CEST? on hour later
+(13:51:38) alioune: ok
+(13:52:12) asteroide: ok for 14h CEST
+(13:52:30) heruan: @Nir?
+(13:52:37) Nir: ok with me
+(13:52:41) heruan: ok
+(13:52:50) heruan: we finished all the topics
+(13:53:03) heruan: do you have anything else to discuss?
+(13:53:47) asteroide: nothing to add
+(13:54:00) Nir: not on my side. 
+(13:54:03) heruan: if you don't have anything else, we close today's meeting
+(13:54:26) Jamil: have a nice day
+(13:54:28) Nir: thanks, and gooddbye everyone
+(13:54:34) asteroide: bye!
+(13:54:39) heruan: I'll update the meeting report to moon's workspace
+(13:54:41) Nir left the room (quit: Quit: Page closed).
+(13:54:50) Jamil left the room (quit: Quit: Page closed).
+(13:55:03) MaximeC left the room.
+(13:55:09) asteroide left the room (quit: Quit: Page closed).
