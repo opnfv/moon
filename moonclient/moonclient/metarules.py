@@ -84,8 +84,8 @@ class AggregationAlgorithmSet(Command):
             authtoken=True)
         algorithm = self.__get_aggregation_algorithm_from_id(data['content'])
         return (
-            ("id", "name", "description"),
-            ((data['content'], algorithm["name"], algorithm["description"]), )
+            ("id",),
+            (algorithm,)
         )
 
 
