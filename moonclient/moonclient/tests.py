@@ -102,8 +102,12 @@ class TestsLaunch(Lister):
                 compare = self.__compare_results(self.__replace_var_in_str(test["result"]), result_str)
                 self.logfile.write("----->{} ({})\n\n".format(compare, self.__replace_var_in_str(test["result"])))
                 if error_str:
-                    compare = "\033[1m\033[31mFalse\033[m"
-                    overall_result = False
+                    if compare:
+                        compare = "\033[33mTrue\033[m"
+                        overall_result = True
+                    else:
+                        compare = "\033[1m\033[31mFalse\033[m"
+                        overall_result = False
                 else:
                     overall_result = overall_result and compare
                     if compare:
