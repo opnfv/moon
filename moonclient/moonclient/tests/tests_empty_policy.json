@@ -910,7 +910,7 @@
         "name": "add_assignment",
         "command": "object assignment add $uuid_object_nova_server $uuid_object_category $uuid_object_scope_low",
         "result": "^$",
-        "description": "Add a new assignment to nova server",
+        "description": "Set the assignment 'low' to nova server",
         "command_options": ""
       },
       {
@@ -937,7 +937,54 @@
         "name": "check nova command",
         "external_command": "nova list",
         "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| PAUSED\\s+\\| [\\w\\-]+\\s+\\| Paused",
-        "description": "Check that we cannot list nova servers due to the current rules"
+        "description": "Check that we can still list nova servers due to the current rules"
+      },
+      {
+        "name": "reactivate nova instance",
+        "external_command": "nova unpause $uuid_server",
+        "result": "^$",
+        "description": "Unpausing the server for next tests"
+      },
+
+      {
+        "name": "del_assignment",
+        "command": "object assignment delete $uuid_object_nova_server $uuid_object_category $uuid_object_scope_low",
+        "result": "^$",
+        "description": "Delete the assignment 'low' to nova server",
+        "command_options": ""
+      },
+      {
+        "name": "add_assignment",
+        "command": "object assignment add $uuid_object_nova_server $uuid_object_category $uuid_object_scope_high",
+        "result": "^$",
+        "description": "Set the assignment 'high' to nova server",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "object assignment list $uuid_object_nova_server $uuid_object_category",
+        "result": "$uuid_object_scope_high high",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Check that we can now list nova servers due to the current rules"
+      },
+      {
+        "name": "try to pause nova instance",
+        "external_command": "nova pause $uuid_server",
+        "result": "^$",
+        "description": "Pausing the server must be not possible now"
+      },
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Check that we can still list nova servers due to the current rules"
       },
 
 
