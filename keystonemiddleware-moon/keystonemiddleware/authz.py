@@ -39,24 +39,25 @@ _OPTS = [
 _AUTHZ_GROUP = 'keystone_authz'
 CONF = cfg.CONF
 CONF.register_opts(_OPTS, group=_AUTHZ_GROUP)
+CONF.debug = True
 # auth.register_conf_options(CONF, _AUTHZ_GROUP)
 
 # from http://developer.openstack.org/api-ref-objectstorage-v1.html
 SWIFT_API = (
-    ("^/v1/(?P<account>[\w-]+)$", "GET", "get_account_details"),
-    ("^/v1/(?P<account>[\w-]+)$", "POST", "modify_account"),
-    ("^/v1/(?P<account>[\w-]+)$", "HEAD", "get_account"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)$", "GET", "get_container"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)$", "PUT", "create_container"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)$", "POST", "update_container_metadata"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)$", "DELETE", "delete_container"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)$", "HEAD", "get_container_metadata"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "GET", "get_object"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "PUT", "create_object"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "COPY", "copy_object"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "POST", "update_object_metadata"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "DELETE", "delete_object"),
-    ("^/v1/(?P<account>[\w-]+)/(?P<container>[\w-]+)/(?P<object>[\w-]+)$", "HEAD", "get_object_metadata"),
+    ("^/v1/(?P<account>[\w_-]+)$", "GET", "get_account_details"),
+    ("^/v1/(?P<account>[\w_-]+)$", "POST", "modify_account"),
+    ("^/v1/(?P<account>[\w_-]+)$", "HEAD", "get_account"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)$", "GET", "get_container"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)$", "PUT", "create_container"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)$", "POST", "update_container_metadata"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)$", "DELETE", "delete_container"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)$", "HEAD", "get_container_metadata"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "GET", "get_object"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "PUT", "create_object"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "COPY", "copy_object"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "POST", "update_object_metadata"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "DELETE", "delete_object"),
+    ("^/v1/(?P<account>[\w_-]+)/(?P<container>[\w-]+)/(?P<object>.+)$", "HEAD", "get_object_metadata"),
 )
 
 
@@ -269,6 +270,21 @@ class AuthZProtocol(object):
             for api in SWIFT_API:
                 if re.match(api[0], path) and method == api[1]:
                     action = api[2]
+            length = int(env.get('CONTENT_LENGTH', '0'))
+            # TODO (dthom): compute for Nova, Cinder, Neutron, ...
+            _action = ""
+            if length > 0:
+                try:
+                    sub_action_object = env['wsgi.input'].read(length)
+                    self.input = sub_action_object
+                    _action = json.loads(sub_action_object).keys()[0]
+                    body = StringIO(sub_action_object)
+                    env['wsgi.input'] = body
+                    self._LOG.debug("wsgi.input={}".format(_action))
+                except ValueError:
+                    self._LOG.error("Error in decoding sub-action")
+                except Exception as e:
+                    self._LOG.error(str(e))
         return action
 
     @staticmethod
@@ -293,7 +309,7 @@ class AuthZProtocol(object):
                 return
         elif component == "swift":
             # remove the "/v1/" part of the URL
-            return env.get("PATH_INFO").split("/", 2)[-1].replace("/", "-")
+            return env.get("PATH_INFO").split("/", 2)[-1].replace("/", "-").replace(".", "-")
         return "unknown"
 
     def __call__(self, env, start_response):
@@ -306,25 +322,38 @@ class AuthZProtocol(object):
         #     return self._app(env, start_response)
 
         subject_id = env.get("HTTP_X_USER_ID")
+        if not subject_id:
+            self._LOG.warning("No subject_id found for {}".format(env.get("PATH_INFO")))
+            return self._app(env, start_response)
         tenant_id = env.get("HTTP_X_TENANT_ID")
+        if not tenant_id:
+            self._LOG.warning("No tenant_id found for {}".format(env.get("PATH_INFO")))
+            return self._app(env, start_response)
         component = self._find_openstack_component(env)
         action_id = self._get_action(env, component)
+        self._LOG.debug("\033[1m\033[31mrequest={}\033[m".format(env["PATH_INFO"]))
         if action_id:
             object_id = self._get_object(env, component)
             if not object_id:
                 object_id = "servers"
+            self._LOG.debug("object_id={}".format(object_id))
             self.__set_token()
             resp = self._get_authz_from_moon(self.x_subject_token, tenant_id, subject_id, object_id, action_id)
             self.__unset_token()
             if resp.status_code == 200:
                 answer = json.loads(resp.content)
+                self._LOG.debug("action_id={}/{}".format(component, action_id))
                 self._LOG.debug(answer)
                 if "authz" in answer and answer["authz"]:
                     return self._app(env, start_response)
+                self._LOG.error("You are not authorized to do that! ({})".format(unicode(answer["comment"])))
                 raise exception.Unauthorized(message="You are not authorized to do that! ({})".format(unicode(answer["comment"])))
-        self._LOG.debug("No action_id found for {}".format(env.get("PATH_INFO")))
-        # If action is not found, we can't raise an exception because a lots of action is missing
-        # in function self._get_action, it is not possible to get them all.
+            else:
+                self._LOG.error("Unable to request Moon ({}: {})".format(resp.status_code, resp.reason))
+        else:
+            self._LOG.debug("No action_id found for {}".format(env.get("PATH_INFO")))
+            # If action is not found, we can't raise an exception because a lots of action is missing
+            # in function self._get_action, it is not possible to get them all.
         return self._app(env, start_response)
         # raise exception.Unauthorized(message="You are not authorized to do that!")
 
