@@ -1,0 +1,1013 @@
+{
+  "command_options": "-f value",
+  "tests_group": {
+    "authz": [
+      {
+        "name": "nova image-list",
+        "external_command": "nova image-list",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
+        "description": "Get an Image ID"
+      },
+      {
+        "name": "nova boot new server",
+        "external_command": "nova boot  --flavor m1.micro --image $uuid_image test_moonclient",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
+        "description": "Get an Image ID"
+      },
+      {
+        "name": "sleep",
+        "external_command": "sleep 5",
+        "result": "",
+        "description": "time for server to really boot"
+      },
+      {
+        "name": "nova get new server",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Get the ID of the new server"
+      },
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "(?!demo)",
+        "description": "Check if tenant demo is used."
+      },
+      {
+        "name": "add tenant demo",
+        "command": "tenant add demo",
+        "result": "^$",
+        "description": "Add a new tenant",
+        "command_options": ""
+      },
+      {
+        "name": "check tenant demo",
+        "command": "tenant list",
+        "result": "(?P<uuid>\\w+)\\s+demo",
+        "description": "Check that tenant demo has been correctly added"
+      },
+      {
+        "name": "create_intraextension_authz",
+        "command": "intraextension add --policy_model policy_empty_authz empty_test",
+        "result": "IntraExtension created: (?P<uuid_authz>\\w+)",
+        "description": "Create an authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "list_intraextension_authz",
+        "command": "intraextension list",
+        "result": "$uuid_authz",
+        "description": "Check the existence of that authz intra extension"
+      },
+      {
+        "name": "set_tenant_authz",
+        "command": "tenant set --authz $uuid_authz $uuid",
+        "result": "",
+        "description": "Connect the authz intra extension to the tenant demo",
+        "command_options": ""
+      },
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "demo",
+        "description": "Check if tenant demo is used."
+      },
+      {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "add_subject",
+        "command": "subject add admin --password nomoresecrete",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_subject",
+        "command": "subject list",
+        "result": "(?P<uuid_subject_admin>\\w+)\\s+admin",
+        "description": "Check that admin subject was added."
+      },
+      {
+        "name": "add_subject",
+        "command": "subject add demo --password nomoresecrete",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_subject",
+        "command": "subject list",
+        "result": "(?P<uuid_subject_demo>\\w+)\\s+demo",
+        "description": "Check that demo subject was added."
+      },
+      {
+        "name": "add_object",
+        "command": "object add servers",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_object",
+        "command": "object list",
+        "result": "(?P<uuid_object_servers>\\w+)\\s+servers",
+        "description": "Check that servers subject was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add pause",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_pause>\\w+)\\s+pause",
+        "description": "Check that pause action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add unpause",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_unpause>\\w+)\\s+unpause",
+        "description": "Check that unpause action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add list",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_list>\\w+)\\s+list",
+        "description": "Check that list action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add start",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_start>\\w+)\\s+start",
+        "description": "Check that start action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add stop",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_stop>\\w+)\\s+stop",
+        "description": "Check that stop action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add create",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_create>\\w+)\\s+create",
+        "description": "Check that create action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add upload",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_upload>\\w+)\\s+upload",
+        "description": "Check that upload action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add download",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_download>\\w+)\\s+download",
+        "description": "Check that download action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add post",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_post>\\w+)\\s+post",
+        "description": "Check that post action was added."
+      },
+      {
+        "name": "add_action",
+        "command": "action add storage_list",
+        "result": "",
+        "description": "",
+        "command_options": ""
+      },
+      {
+        "name": "list_action",
+        "command": "action list",
+        "result": "(?P<uuid_action_storage_list>\\w+)\\s+storage_list",
+        "description": "Check that storage_list action was added."
+      },
+
+      {
+        "name": "add_subject_category",
+        "command": "subject category add subject_security_level",
+        "result": "",
+        "description": "Add the new subject category subject_security_level",
+        "command_options": ""
+      },
+      {
+        "name": "list_subject_category",
+        "command": "subject category list",
+        "result": "(?P<uuid_subject_category>\\w+)\\s+subject_security_level",
+        "description": "Check that subject_security_level subject_category was added."
+      },
+      {
+        "name": "add_object_category",
+        "command": "object category add object_security_level",
+        "result": "",
+        "description": "Add the new object category object_security_level",
+        "command_options": ""
+      },
+      {
+        "name": "list_object_category",
+        "command": "object category list",
+        "result": "(?P<uuid_object_category>\\w+)\\s+object_security_level",
+        "description": "Check that object_security_level object_category was added."
+      },
+      {
+        "name": "add_action_category",
+        "command": "action category add resource_action",
+        "result": "",
+        "description": "Add the new action category resource_action",
+        "command_options": ""
+      },
+      {
+        "name": "list_subject_category",
+        "command": "action category list",
+        "result": "(?P<uuid_action_category>\\w+)\\s+resource_action",
+        "description": "Check that resource_action action_category was added."
+      },
+
+      {
+        "name": "add_scope",
+        "command": "subject scope add $uuid_subject_category high --description \"high\"",
+        "result": "^$",
+        "description": "Add one scope to subject category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "subject scope list $uuid_subject_category",
+        "result": "(?P<uuid_subject_scope_high>\\w+)\\s+high\\s+high",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "subject scope add $uuid_subject_category medium --description \"medium\"",
+        "result": "^$",
+        "description": "Add one scope to subject category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "subject scope list $uuid_subject_category",
+        "result": "(?P<uuid_subject_scope_medium>\\w+)\\s+medium\\s+medium",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "subject scope add $uuid_subject_category low --description \"low\"",
+        "result": "^$",
+        "description": "Add one scope to subject category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "subject scope list $uuid_subject_category",
+        "result": "(?P<uuid_subject_scope_low>\\w+)\\s+low\\s+low",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "object scope add $uuid_object_category high --description \"high\"",
+        "result": "^$",
+        "description": "Add one scope to object category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "object scope list $uuid_object_category",
+        "result": "(?P<uuid_object_scope_high>\\w+)\\s+high\\s+high",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "object scope add $uuid_object_category medium --description \"medium\"",
+        "result": "^$",
+        "description": "Add one scope to object category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "object scope list $uuid_object_category",
+        "result": "(?P<uuid_object_scope_medium>\\w+)\\s+medium\\s+medium",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "object scope add $uuid_object_category low --description \"low\"",
+        "result": "^$",
+        "description": "Add one scope to object category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "object scope list $uuid_object_category",
+        "result": "(?P<uuid_object_scope_low>\\w+)\\s+low\\s+low",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "action scope add $uuid_action_category vm_admin --description \"vm_admin\"",
+        "result": "^$",
+        "description": "Add one scope to action category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "action scope list $uuid_action_category",
+        "result": "(?P<uuid_action_scope_vm_admin>\\w+)\\s+vm_admin\\s+vm_admin",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "action scope add $uuid_action_category vm_access --description \"vm_access\"",
+        "result": "^$",
+        "description": "Add one scope to action category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "action scope list $uuid_action_category",
+        "result": "(?P<uuid_action_scope_vm_access>\\w+)\\s+vm_access\\s+vm_access",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "action scope add $uuid_action_category storage_admin --description \"storage_admin\"",
+        "result": "^$",
+        "description": "Add one scope to action category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "action scope list $uuid_action_category",
+        "result": "(?P<uuid_action_scope_storage_admin>\\w+)\\s+storage_admin\\s+storage_admin",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+      {
+        "name": "add_scope",
+        "command": "action scope add $uuid_action_category storage_access --description \"storage_access\"",
+        "result": "^$",
+        "description": "Add one scope to action category role",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_scope",
+        "command": "action scope list $uuid_action_category",
+        "result": "(?P<uuid_action_scope_storage_access>\\w+)\\s+storage_access\\s+storage_access",
+        "description": "Check added scope.",
+        "command_options": "-c id -c name -c description -f value"
+      },
+
+      {
+        "name": "add_assignment",
+        "command": "subject assignment add $uuid_subject_admin $uuid_subject_category $uuid_subject_scope_high",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "subject assignment list $uuid_subject_admin $uuid_subject_category",
+        "result": "$uuid_subject_scope_high high",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "subject assignment add $uuid_subject_demo $uuid_subject_category $uuid_subject_scope_medium",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "subject assignment list $uuid_subject_demo $uuid_subject_category",
+        "result": "$uuid_subject_scope_medium medium",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "object assignment add $uuid_object_servers $uuid_object_category $uuid_object_scope_low",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "object assignment list $uuid_object_servers $uuid_object_category",
+        "result": "$uuid_object_scope_low low",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_pause $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_pause $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_unpause $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_unpause $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_start $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_start $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_stop $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_stop $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_list $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_list $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_list $uuid_action_category $uuid_action_scope_vm_access",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_list $uuid_action_category",
+        "result": "$uuid_action_scope_vm_access vm_access",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_create $uuid_action_category $uuid_action_scope_vm_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_create $uuid_action_category",
+        "result": "$uuid_action_scope_vm_admin vm_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },      
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_storage_list $uuid_action_category $uuid_action_scope_storage_access",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_storage_list $uuid_action_category",
+        "result": "$uuid_action_scope_storage_access storage_access",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_download $uuid_action_category $uuid_action_scope_storage_access",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_download $uuid_action_category",
+        "result": "$uuid_action_scope_storage_access storage_access",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_upload $uuid_action_category $uuid_action_scope_storage_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_upload $uuid_action_category",
+        "result": "$uuid_action_scope_storage_admin storage_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "add_assignment",
+        "command": "action assignment add $uuid_action_post $uuid_action_category $uuid_action_scope_storage_admin",
+        "result": "^$",
+        "description": "Add a new assignment",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "action assignment list $uuid_action_post $uuid_action_category",
+        "result": "$uuid_action_scope_storage_admin storage_admin",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+
+      {
+        "name": "check_submetarules",
+        "command": "submetarule show",
+        "result": "(?P<submetarule_uuid>\\w+)",
+        "description": "Get one submetarule ID",
+        "command_options": "-c id -f value"
+      },
+      {
+        "name": "set_submetarule",
+        "command": "submetarule set $submetarule_uuid --subject_category_id=\"$uuid_subject_category\" --object_category_id=\"$uuid_object_category\" --action_category_id=\"$uuid_action_category\"",
+        "result": "^$",
+        "description": "Set a new submetarule",
+        "command_options": ""
+      },
+      {
+        "name": "check_submetarule",
+        "command": "submetarule show",
+        "result": "$submetarule_uuid \\s*subject_security_level",
+        "description": "Check the new submetarule",
+        "command_options": "-c id -c \"subject categories\" -f value"
+      },
+      {
+        "name": "check_submetarule",
+        "command": "submetarule show",
+        "result": "$submetarule_uuid \\s*object_security_level",
+        "description": "Check the new submetarule",
+        "command_options": "-c id -c \"object categories\" -f value"
+      },
+      {
+        "name": "check_submetarule",
+        "command": "submetarule show",
+        "result": "$submetarule_uuid \\s*resource_action",
+        "description": "Check the new submetarule",
+        "command_options": "-c id -c \"action categories\" -f value"
+      },
+
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,vm_admin,medium\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+vm_admin\\s+medium",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,vm_admin,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+vm_admin\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"medium,vm_admin,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+medium\\s+vm_admin\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,vm_access,medium\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+vm_access\\s+medium",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,vm_access,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+vm_access\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"medium,vm_access,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+medium\\s+vm_access\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,storage_admin,medium\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+storage_admin\\s+medium",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,storage_admin,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+storage_admin\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"medium,storage_admin,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+medium\\s+storage_admin\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,storage_access,medium\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+storage_access\\s+medium",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"high,storage_access,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+high\\s+storage_access\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid \"medium,storage_access,low\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid",
+        "result": "(?P<rule_id>\\w+)\\s+medium\\s+storage_access\\s+low",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:subject_security_level -c a:resource_action -c o:object_security_level -f value"
+      },
+      {
+        "name": "get aggregation algorithm",
+        "command": "aggregation algorithm list",
+        "result": "(?P<uuid_aggregation>\\w+)\\s+one_true",
+        "description": "Get aggregation algorithm.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "set aggregation algorithm",
+        "command": "aggregation algorithm set $uuid_aggregation",
+        "result": "",
+        "description": "Set aggregation algorithm to one_true.",
+        "command_options": ""
+      },
+      {
+        "name": "get aggregation algorithm",
+        "command": "aggregation algorithm show",
+        "result": "$uuid_aggregation\\s+one_true",
+        "description": "Check aggregation algorithm.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "get submetarule algorithm",
+        "command": "submetarule algorithm list",
+        "result": "(?P<uuid_submetarule_algo>\\w+)\\s+inclusion",
+        "description": "Get submetarule algorithm named inclusion.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "set submetarule algorithm",
+        "command": "submetarule set --algorithm_name inclusion $submetarule_uuid",
+        "result": "",
+        "description": "Set submetarule algorithm to inclusion.",
+        "command_options": ""
+      },
+
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "(?!test_moonclient)",
+        "description": "Check that we cannot list nova servers due to the current rules"
+      },
+      {
+        "name": "try to pause nova instance",
+        "external_command": "nova pause $uuid_server",
+        "result": "^$",
+        "description": "Pausing the server must be impossible due to the current rules"
+      },
+
+      {
+        "name": "list tenant",
+        "command": "tenant list",
+        "result": "demo",
+        "description": "Check if tenant demo is used."
+      },
+
+      {
+        "name": "add_object",
+        "command": "object add $uuid_server",
+        "result": "",
+        "description": "Add the new nova server",
+        "command_options": ""
+      },
+      {
+        "name": "list_object",
+        "command": "object list",
+        "result": "(?P<uuid_object_nova_server>\\w+)\\s+$uuid_server",
+        "description": "Check that the new nova server was added."
+      },
+      {
+        "name": "add_assignment",
+        "command": "object assignment add $uuid_object_nova_server $uuid_object_category $uuid_object_scope_low",
+        "result": "^$",
+        "description": "Set the assignment 'low' to nova server",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "object assignment list $uuid_object_nova_server $uuid_object_category",
+        "result": "$uuid_object_scope_low low",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Check that we can now list nova servers due to the current rules"
+      },
+      {
+        "name": "try to pause nova instance",
+        "external_command": "nova pause $uuid_server",
+        "result": "^$",
+        "description": "Pausing the server must be possible now"
+      },
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| PAUSED\\s+\\| [\\w\\-]+\\s+\\| Paused",
+        "description": "Check that we can still list nova servers due to the current rules"
+      },
+      {
+        "name": "reactivate nova instance",
+        "external_command": "nova unpause $uuid_server",
+        "result": "^$",
+        "description": "Unpausing the server for next tests"
+      },
+
+      {
+        "name": "del_assignment",
+        "command": "object assignment delete $uuid_object_nova_server $uuid_object_category $uuid_object_scope_low",
+        "result": "^$",
+        "description": "Delete the assignment 'low' to nova server",
+        "command_options": ""
+      },
+      {
+        "name": "add_assignment",
+        "command": "object assignment add $uuid_object_nova_server $uuid_object_category $uuid_object_scope_high",
+        "result": "^$",
+        "description": "Set the assignment 'high' to nova server",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_assignment",
+        "command": "object assignment list $uuid_object_nova_server $uuid_object_category",
+        "result": "$uuid_object_scope_high high",
+        "description": "Check added assignment.",
+        "command_options": "-c id -c name -f value"
+      },
+
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Check that we can now list nova servers due to the current rules"
+      },
+      {
+        "name": "try to pause nova instance",
+        "external_command": "nova pause $uuid_server",
+        "result": "^$",
+        "description": "Pausing the server must be not possible now"
+      },
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
+        "description": "Check that we can still list nova servers due to the current rules"
+      },
+
+
+      {
+        "name": "delete_authz_intra_extension",
+        "command": "intraextension delete $uuid_authz",
+        "result": "",
+        "description": "Delete the authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "delete_tenant",
+        "command": "tenant delete $uuid",
+        "result": "",
+        "description": "Delete the tenant demo",
+        "command_options": ""
+      },
+      {
+        "name": "nova delete new server",
+        "external_command": "nova delete $uuid_server",
+        "result": "",
+        "description": "Delete the new server"
+      }
+    ]
+  }
+}
