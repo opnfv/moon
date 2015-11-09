@@ -154,6 +154,24 @@ class MoonClient(App):
         except ValueError:
             return {"content": content}
 
+    def auth_keystone(self, username=None, password=None, host=None, port=None):
+        """Send a new authentication request to Keystone
+
+        :param username: user identification name
+        :return:
+        """
+        if username:
+            self.post["auth"]["identity"]["password"]["user"]["name"] = username
+        if password:
+            self.post["auth"]["identity"]["password"]["user"]["password"] = password
+        if host:
+            self.host = host
+        if port:
+            self.port = port
+        data = self.get_url("/v3/auth/tokens", post_data=self.post)
+        if "token" not in data:
+            raise Exception("Authentication problem ({})".format(data))
+
     def initialize_app(self, argv):
         self.log.debug('initialize_app: {}'.format(argv))
         if self.options.username:
