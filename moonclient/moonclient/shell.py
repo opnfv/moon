@@ -78,6 +78,18 @@ class MoonClient(App):
         self.host = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
         self.port = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[1]
         self._tenant_name = creds["tenant_name"]
+        self.parser.add_argument(
+            '--username',
+            metavar='<username-str>',
+            help='Force OpenStack username',
+            default=None
+        )
+        self.parser.add_argument(
+            '--tenant',
+            metavar='<tenantname-str>',
+            help='Force OpenStack tenant',
+            default=None
+        )
 
     @property
     def tenant_id(self):
@@ -144,7 +156,13 @@ class MoonClient(App):
 
     def initialize_app(self, argv):
         self.log.debug('initialize_app: {}'.format(argv))
-        # TODO: get credentials from OS env
+        if self.options.username:
+            self.post["auth"]["identity"]["password"]["user"]["name"] = self.options.username
+            self.log.debug("change username {}".format(self.options.username))
+        if self.options.tenant:
+            self.post["auth"]["scope"]["project"]["name"] = self.options.tenant
+            self._tenant_name = self.options.tenant
+            self.log.debug("change tenant {}".format(self.options.tenant))
         data = self.get_url("/v3/auth/tokens", post_data=self.post)
         if "token" not in data:
             raise Exception("Authentication problem ({})".format(data))
