@@ -68,16 +68,57 @@ class TestsLaunch(Lister):
             for test in tests_list:
                 result_str = ""
                 error_str = ""
+                if "auth_name" in test or "auth_password" in test or "auth_url" in test:
+                    username = None
+                    password = None
+                    host = None
+                    port = None
+                    description = ""
+                    if "auth_name" in test:
+                        username = test["auth_name"]
+                    if "auth_password" in test:
+                        password = test["auth_password"]
+                    if "auth_host" in test:
+                        host = test["auth_host"]
+                    if "auth_port" in test:
+                        port = test["auth_port"]
+                    if "description" in test:
+                        description = test["description"]
+                    self.app.auth_keystone(username, password, host, port)
+                    title = "Change auth to "
+                    if username:
+                        title += username
+                    if host:
+                        title += "@" + host
+                    if port:
+                        title += ":" + port
+                    title += "\n"
+                    self.logfile.write(title)
+                    self.log.info(title)
+                    data_tmp = list()
+                    data_tmp.append("")
+                    data_tmp.append(title.strip())
+                    data_tmp.append("\033[32mOK\033[m")
+                    data_tmp.append(description.strip())
+                    data.append(data_tmp)
+                    continue
                 data_tmp = list()
                 tmp_filename = os.path.join("/tmp", uuid4().hex)
                 tmp_filename_fd = open(tmp_filename, "w")
                 self.log.debug("test={}".format(test))
                 if "command" not in test:
-                    ext_command = test["external_command"]
+                    if "external_command" in test:
+                        ext_command = test["external_command"]
+                    else:
+                        ext_command = test["shell_command"]
                     ext_command = self.__replace_var_in_str(ext_command)
                     self.logfile.write("-----> {}\n".format(ext_command))
                     self.log.info("    \\-executing external \"{}\"".format(ext_command))
-                    pipe = subprocess.Popen(shlex.split(ext_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    if "external_command" in test:
+                        pipe = subprocess.Popen(shlex.split(ext_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    else:
+                        # Note (asteroide): security hazard! Must reduce the possible commands here.
+                        pipe = subprocess.Popen(ext_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     com = pipe.communicate()
                     result_str = com[0]
                     error_str = com[1]
@@ -104,14 +145,17 @@ class TestsLaunch(Lister):
                 if error_str:
                     if compare:
                         compare = "\033[33mTrue\033[m"
-                        overall_result = True
+                        overall_result = overall_result and True
                     else:
                         compare = "\033[1m\033[31mFalse\033[m"
-                        overall_result = False
+                        overall_result = overall_result and False
                 else:
                     overall_result = overall_result and compare
                     if compare:
-                        compare = "\033[32mTrue\033[m"
+                        if overall_result:
+                            compare = "\033[32mTrue\033[m"
+                        else:
+                            compare = "\033[mTrue\033[m"
                     else:
                         compare = "\033[1m\033[31mFalse\033[m"
                 data_tmp.append(compare)
