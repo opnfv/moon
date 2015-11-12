@@ -68,33 +68,6 @@ class ServiceError(Exception):
 class AuthZProtocol(object):
     """Middleware that handles authenticating client calls."""
 
-    post = {
-        "auth": {
-            "identity": {
-                "methods": [
-                    "password"
-                ],
-                "password": {
-                    "user": {
-                        "domain": {
-                            "id": "Default"
-                        },
-                        "name": "admin",
-                        "password": "nomoresecrete"
-                    }
-                }
-            },
-            "scope": {
-                "project": {
-                    "domain": {
-                        "id": "Default"
-                    },
-                    "name": "demo"
-                }
-            }
-        }
-    }
-
     def __init__(self, app, conf):
         self._LOG = logging.getLogger(conf.get('log_name', __name__))
         # FIXME: events are duplicated in log file
@@ -126,52 +99,14 @@ class AuthZProtocol(object):
         else:
             self._verify = None
 
-    def __set_token(self):
-        data = self.get_url("/v3/auth/tokens", post_data=self.post)
-        if "token" not in data:
-            raise Exception("Authentication problem ({})".format(data))
-        self.token = data["token"]
-
-    def __unset_token(self):
-        data = self.get_url("/v3/auth/tokens", method="DELETE", authtoken=True)
-        if "content" in data and len(data["content"]) > 0:
-            self._LOG.error("Error while unsetting token {}".format(data["content"]))
-        self.token = None
-
-    def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None):
-        if post_data:
-            method = "POST"
-        if delete_data:
-            method = "DELETE"
-        self._LOG.debug("\033[32m{} {}\033[m".format(method, url))
+    def get_url(self, url):
         conn = httplib.HTTPConnection(self.auth_host, self.auth_port)
         headers = {
             "Content-type": "application/x-www-form-urlencoded",
             "Accept": "text/plain,text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         }
-        if authtoken:
-            if self.x_subject_token:
-                if method == "DELETE":
-                    headers["X-Subject-Token"] = self.x_subject_token
-                    headers["X-Auth-Token"] = self.x_subject_token
-                else:
-                    headers["X-Auth-Token"] = self.x_subject_token
-        if post_data:
-            method = "POST"
-            headers["Content-type"] = "application/json"
-            post_data = json.dumps(post_data)
-            conn.request(method, url, post_data, headers=headers)
-        elif delete_data:
-            method = "DELETE"
-            conn.request(method, url, json.dumps(delete_data), headers=headers)
-        else:
-            conn.request(method, url, headers=headers)
+        conn.request('GET', url, headers=headers)
         resp = conn.getresponse()
-        headers = resp.getheaders()
-        try:
-            self.x_subject_token = dict(headers)["x-subject-token"]
-        except KeyError:
-            pass
         content = resp.read()
         conn.close()
         try:
@@ -197,9 +132,7 @@ class AuthZProtocol(object):
         resp.body = error_msg
         return resp
 
-    def _get_authz_from_moon(self, auth_token, tenant_id, subject_id, object_id, action_id):
-        headers = {'X-Auth-Token': auth_token}
-        self._LOG.debug('X-Auth-Token={}'.format(auth_token))
+    def _get_authz_from_moon(self, tenant_id, subject_id, object_id, action_id):
         try:
             _url ='{}/v3/OS-MOON/authz/{}/{}/{}/{}'.format(
                                         self._request_uri,
@@ -208,9 +141,7 @@ class AuthZProtocol(object):
                                         object_id,
                                         action_id)
             self._LOG.info(_url)
-            response = requests.get(_url,
-                                    headers=headers,
-                                    verify=self._verify)
+            response = requests.get(_url,verify=self._verify)
         except requests.exceptions.RequestException as e:
             self._LOG.error(_LI('HTTP connection exception: %s'), e)
             resp = self._deny_request('InvalidURI')
@@ -240,7 +171,7 @@ class AuthZProtocol(object):
 
     def _get_action(self, env, component):
         """ Find and return the action of the request
-        Actually, find only Nova action (start, destroy, pause, unpause, ...)
+        Actually, find only Nova (start, destroy, pause, unpause, ...) and swift actions
 
         :param env: the request
         :return: the action or ""
@@ -315,12 +246,6 @@ class AuthZProtocol(object):
     def __call__(self, env, start_response):
         req = webob.Request(env)
 
-        # token = req.headers.get('X-Auth-Token',
-        #                         req.headers.get('X-Storage-Token'))
-        # if not token:
-        #     self._LOG.error("No token")
-        #     return self._app(env, start_response)
-
         subject_id = env.get("HTTP_X_USER_ID")
         if not subject_id:
             self._LOG.warning("No subject_id found for {}".format(env.get("PATH_INFO")))
@@ -337,9 +262,7 @@ class AuthZProtocol(object):
             if not object_id:
                 object_id = "servers"
             self._LOG.debug("object_id={}".format(object_id))
-            self.__set_token()
-            resp = self._get_authz_from_moon(self.x_subject_token, tenant_id, subject_id, object_id, action_id)
-            self.__unset_token()
+            resp = self._get_authz_from_moon(tenant_id, subject_id, object_id, action_id)
             if resp.status_code == 200:
                 answer = json.loads(resp.content)
                 self._LOG.debug("action_id={}/{}".format(component, action_id))
