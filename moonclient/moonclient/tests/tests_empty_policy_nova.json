@@ -16,7 +16,7 @@
       },
       {
         "name": "sleep",
-        "external_command": "sleep 5",
+        "external_command": "sleep 10",
         "result": "",
         "description": "time for server to really boot"
       },
