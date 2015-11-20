@@ -176,28 +176,27 @@ def enforce(action_names, object_name, **extra):
                 else:
                     intra_extension_id = intra_root_extension_id
 
+            try:
+                tenants_dict = self.tenant_api.driver.get_tenants_dict()
+            except AttributeError:
+                tenants_dict = self.driver.get_tenants_dict()
             if self.root_api.is_admin_subject(user_id):
                 # TODO: check if there is no security hole here
+                self.moonlog_api.driver.info("Authorizing because it is the user admin of the root intra-extension")
                 returned_value_for_func = func(*args, **kwargs)
             else:
                 intra_extensions_dict = self.admin_api.driver.get_intra_extensions_dict()
                 if intra_extension_id not in intra_extensions_dict:
                     # if id is not an intra_extension, maybe it is a tenant id
-                    try:
-                        tenants_dict = self.tenant_api.driver.get_tenants_dict()
-                    except AttributeError:
-                        tenants_dict = self.driver.get_tenants_dict()
+                    intra_extension_id = intra_root_extension_id
                     if intra_extension_id in tenants_dict:
                         # id is in fact a tenant id so, we must check against the Root intra_extension
                         intra_extension_id = intra_root_extension_id
+                        LOG.warning("intra_extension_id is a tenant ID ({})".format(intra_extension_id))
                     else:
                         # id is not a known tenant ID, so we must check against the Root intra_extension
                         intra_extension_id = intra_root_extension_id
-                        LOG.warning("Cannot enforce because the intra-extension is unknown ({})".format(intra_extension_id))
-                try:
-                    tenants_dict = self.tenant_api.driver.get_tenants_dict()
-                except AttributeError:
-                    tenants_dict = self.driver.get_tenants_dict()
+                        LOG.warning("Cannot enforce because the intra-extension is unknown (fallback to the root intraextension)")
                 for _tenant_id in tenants_dict:
                     if tenants_dict[_tenant_id]['intra_authz_extension_id'] == intra_extension_id or \
                                     tenants_dict[_tenant_id]['intra_admin_extension_id'] == intra_extension_id:
@@ -261,7 +260,9 @@ def enforce(action_names, object_name, **extra):
 
                     authz_result = False
                     for action_id in action_id_list:
-                        if self.admin_api.authz(intra_admin_extension_id, user_id, object_id, action_id):
+                        res = self.admin_api.authz(intra_admin_extension_id, user_id, object_id, action_id)
+                        self.moonlog_api.info("res={}".format(res))
+                        if res:
                             authz_result = True
                         else:
                             self.moonlog_api.authz("No authorization for ({} {}-{}-{})".format(
@@ -519,6 +520,13 @@ class IntraExtensionManager(manager.Manager):
         }
         """
         authz_buffer = dict()
+        # Sometimes it is not the subject ID but the User Keystone ID, so, we have to check
+        subjects_dict = self.driver.get_subjects_dict(intra_extension_id)
+        if subject_id not in subjects_dict.keys():
+            for _subject_id in subjects_dict:
+                if subjects_dict[_subject_id]['keystone_id']:
+                    subject_id = _subject_id
+                    break
         authz_buffer['subject_id'] = subject_id
         authz_buffer['object_id'] = object_id
         authz_buffer['action_id'] = action_id
@@ -882,7 +890,7 @@ class IntraExtensionManager(manager.Manager):
         self.__load_rule_file(ie_dict, template_dir)
         return ref
 
-    def load_root_intra_extension_dict(self, policy_template):
+    def load_root_intra_extension_dict(self, policy_template=CONF.moon.root_policy_directory):
         # Note (asteroide): Only one root Extension is authorized
         # and this extension is created at the very beginning of the server
         # so we don't need to use enforce here
@@ -897,13 +905,8 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
-        try:
-            self.moonlog_api.debug("Creation of IE: {}".format(ref))
-        except AttributeError:
-            pass
-            # Creation of the root intra extension raise an error here because
-            # self.moonlog_api doesn't exist.
-        # FIXME (asteroide): understand why moonlog_api raise an error here...
+        self.moonlog_api.debug("Creation of root IE: {}".format(ref))
+
         # read the template given by "model" and populate default variables
         template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
         self.__load_metadata_file(ie_dict, template_dir)
