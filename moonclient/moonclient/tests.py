@@ -93,7 +93,7 @@ class TestsLaunch(Lister):
                     if port:
                         title += ":" + port
                     title += "\n"
-                    self.logfile.write(title)
+                    self.logfile.write(title + "\n")
                     self.log.info(title)
                     data_tmp = list()
                     data_tmp.append("")
@@ -141,7 +141,7 @@ class TestsLaunch(Lister):
                 data_tmp.append(group_name)
                 data_tmp.append(test["name"])
                 compare = self.__compare_results(self.__replace_var_in_str(test["result"]), result_str)
-                self.logfile.write("----->{} ({})\n\n".format(compare, self.__replace_var_in_str(test["result"])))
+                self.logfile.write("\\---->{}: {}\n\n".format(compare, self.__replace_var_in_str(test["result"])))
                 if error_str:
                     if compare:
                         compare = "\033[33mTrue\033[m"
