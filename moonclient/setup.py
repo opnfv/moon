@@ -73,6 +73,7 @@ setup(
             'intraextension_list = moonclient.intraextension:IntraExtensionList',
             'intraextension_delete = moonclient.intraextension:IntraExtensionDelete',
             'intraextension_show = moonclient.intraextension:IntraExtensionShow',
+            'intraextension_init = moonclient.intraextension:IntraExtensionInit',
 
             'subject_list = moonclient.subjects:SubjectsList',
             'subject_add = moonclient.subjects:SubjectsAdd',

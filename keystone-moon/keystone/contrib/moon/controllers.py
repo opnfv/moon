@@ -208,6 +208,10 @@ class IntraExtensions(controller.V3Controller):
         intra_extension_dict['description'] = kw.get('intra_extension_description', None)
         return self.admin_api.set_intra_extension_dict(user_id, intra_extension_id, intra_extension_dict)
 
+    @controller.protected()
+    def load_root_intra_extension(self, context, **kw):
+        self.admin_api.load_root_intra_extension_dict()
+
     # Metadata functions
     @controller.protected()
     def get_subject_categories(self, context, **kw):

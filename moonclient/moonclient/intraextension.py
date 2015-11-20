@@ -110,6 +110,21 @@ class IntraExtensionDelete(Command):
                          authtoken=True)
 
 
+class IntraExtensionInit(Command):
+    """Initialize the root Intra_Extension (if needed)."""
+
+    log = logging.getLogger(__name__)
+
+    def get_parser(self, prog_name):
+        parser = super(IntraExtensionInit, self).get_parser(prog_name)
+        return parser
+
+    def take_action(self, parsed_args):
+        self.app.get_url("/v3/OS-MOON/intra_extensions/init",
+                         method="GET",
+                         authtoken=True)
+
+
 class IntraExtensionShow(ShowOne):
     """Show detail about one Intra_Extension."""
 
