@@ -39,6 +39,37 @@ class LogsList(Lister):
         )
         return parser
 
+    @staticmethod
+    def split_into_line(line, max_char=60):
+        """ Split a long line into multiple lines
+
+        :param line: the line to split
+        :param max_char: maximal characters to have on one line
+        :return: a string with new lines
+        """
+        words = line.split(" ")
+        return_line = ""
+        prev_modulo = 0
+        while True:
+            try:
+                modulo = len(return_line) % max_char
+                if modulo < prev_modulo:
+                    return_line += "\n" + words.pop(0) + " "
+                else:
+                    return_line += words.pop(0) + " "
+                prev_modulo = modulo
+            except IndexError:
+                return return_line
+
+    def split_time_message(self, line):
+        """Split a log string into a table (date, message)
+
+        :param line: the line to split
+        :return: a table (date, message)
+        """
+        _time, _blank, _message = line.split(" ", 2)
+        return _time, self.split_into_line(_message)
+
     def take_action(self, parsed_args):
         filter_str = parsed_args.filter
         from_date = parsed_args.fromdate
@@ -58,10 +89,8 @@ class LogsList(Lister):
         else:
             url = "/v3/OS-MOON/logs"
         data = self.app.get_url(url, authtoken=True)
-        if "logs" not in data:
-            raise Exception("Error in command {}: {}".format("LogsList", data))
         return (
-            ("Logs",),
-            ((log, ) for log in data["logs"])
+            ("Time", "Message",),
+            (self.split_time_message(log) for log in data)
         )
 
