@@ -89,6 +89,12 @@ class Routers(wsgi.V3ExtensionRouter):
         # IntraExtensions/Admin route
         self._add_resource(
             mapper, intra_ext_controller,
+            path=self.PATH_PREFIX+'/intra_extensions/init',
+            get_action='load_root_intra_extension',
+            rel=self._get_rel('intra_extensions'),
+            path_vars={})
+        self._add_resource(
+            mapper, intra_ext_controller,
             path=self.PATH_PREFIX+'/intra_extensions',
             get_action='get_intra_extensions',
             post_action='add_intra_extension',
