@@ -37,6 +37,7 @@ class MoonClient(App):
     _intraextension = None
     _tenant_id = None
     _tenant_name = None
+    secureprotocol = False
     user_saving_file = ".moonclient"
     post = {
         "auth": {
@@ -77,6 +78,10 @@ class MoonClient(App):
         self.post["auth"]["scope"]["project"]["name"] = creds["tenant_name"]
         self.host = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
         self.port = creds["auth_url"].replace("https://", "").replace("http://", "").split("/")[0].split(":")[1]
+        if "https" in creds["auth_url"]:
+            self.secureprotocol = True
+        else:
+            self.secureprotocol = False
         self._tenant_name = creds["tenant_name"]
         self.parser.add_argument(
             '--username',
@@ -90,13 +95,24 @@ class MoonClient(App):
             help='Force OpenStack tenant',
             default=None
         )
+        self.parser.add_argument(
+            '--password',
+            metavar='<password-str>',
+            help='Force OpenStack password',
+            default=None
+        )
+        self.parser.add_argument(
+            '--authurl',
+            metavar='<authurl-str>',
+            help='Force OpenStack authentication URL',
+            default=None
+        )
 
     @property
     def tenant_id(self):
         if not self._tenant_id:
             self._tenant_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
                                            authtoken=True)["projects"][0]["id"]
-            # TODO: change '/v3/projects?name={}'
         return self._tenant_id
 
     @property
@@ -114,7 +130,6 @@ class MoonClient(App):
 
     def get_tenant_uuid(self, tenant_name):
         return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True)["projects"][0]["id"]
-        # TODO: change '/v3/projects?name={}'
 
     def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None):
         if post_data:
@@ -122,6 +137,7 @@ class MoonClient(App):
         if delete_data:
             method = "DELETE"
         self.log.debug("\033[32m{} {}\033[m".format(method, url))
+        # TODO: we must manage authentication and requests with secure protocol (ie. HTTPS)
         conn = httplib.HTTPConnection(self.host, self.port)
         self.log.debug("Host: {}:{}".format(self.host, self.port))
         headers = {
@@ -189,10 +205,20 @@ class MoonClient(App):
         if self.options.username:
             self.post["auth"]["identity"]["password"]["user"]["name"] = self.options.username
             self.log.debug("change username {}".format(self.options.username))
+        if self.options.password:
+            self.post["auth"]["identity"]["password"]["user"]["password"] = self.options.password
+            self.log.debug("change password")
         if self.options.tenant:
             self.post["auth"]["scope"]["project"]["name"] = self.options.tenant
             self._tenant_name = self.options.tenant
             self.log.debug("change tenant {}".format(self.options.tenant))
+        if self.options.authurl:
+            self.host = self.options.authurl.replace("https://", "").replace("http://", "").split("/")[0].split(":")[0]
+            self.port = self.options.authurl.replace("https://", "").replace("http://", "").split("/")[0].split(":")[1]
+            if "https" in self.options.authurl:
+                self.secureprotocol = True
+            else:
+                self.secureprotocol = False
         data = self.get_url("/v3/auth/tokens", post_data=self.post)
         if "token" not in data:
             raise Exception("Authentication problem ({})".format(data))
