@@ -820,7 +820,7 @@ class Logs(controller.V3Controller):
     def __init__(self):
         super(Logs, self).__init__()
 
-    def _get_user_from_token(self, token_id):
+    def _get_user_id_from_token(self, token_id):
         response = self.token_provider_api.validate_token(token_id)
         token_ref = token_model.KeystoneToken(token_id=token_id, token_data=response)
         return token_ref['user']
