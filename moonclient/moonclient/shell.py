@@ -165,6 +165,8 @@ class MoonClient(App):
             pass
         content = resp.read()
         conn.close()
+        if len(content) == 0:
+            return {}
         try:
             content = json.loads(content)
             if "error" in content:
@@ -180,7 +182,6 @@ class MoonClient(App):
             return content
         except ValueError:
             raise Exception("Getting an error while requiring {} ({})".format(url, content))
-            # return {"content": content}
 
     def auth_keystone(self, username=None, password=None, host=None, port=None):
         """Send a new authentication request to Keystone
