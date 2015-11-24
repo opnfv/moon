@@ -36,7 +36,7 @@
       },
       {
         "name": "set_tenant_authz",
-        "command": "tenant set --authz $uuid_authz alt_demo",
+        "command": "tenant set --authz $uuid_authz $uuid",
         "result": "",
         "description": "Connect the authz intra extension to the tenant alt_demo",
         "command_options": ""
@@ -57,9 +57,9 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo",
+        "command": "subject add alt_demo --password nomoresecrete",
         "result": "",
-        "description": "Connect the authz intra extension to the tenant demo",
+        "description": "Add the alt_demo subject",
         "command_options": ""
       },
       {
@@ -186,9 +186,9 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo",
+        "command": "subject add alt_demo --password nomoresecrete",
         "result": "",
-        "description": "Connect the authz intra extension to the tenant alt_demo",
+        "description": "Add the alt_demo subject",
         "command_options": ""
       },
       {

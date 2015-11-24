@@ -1883,13 +1883,15 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         super(IntraExtensionAuthzManager, self).del_subject(user_id, intra_extension_id, subject_id)
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id and \
+                tenants_dict[tenant_id]["intra_admin_extension_id"]:
                 subject_id = self.driver.get_uuid_from_name(tenants_dict[tenant_id]["intra_admin_extension_id"],
                                                             subject_name,
                                                             self.driver.SUBJECT)
                 self.driver.del_subject(tenants_dict[tenant_id]["intra_admin_extension_id"], subject_id)
                 break
-            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id and \
+                tenants_dict[tenant_id]["intra_authz_extension_id"]:
                 subject_id = self.driver.get_uuid_from_name(tenants_dict[tenant_id]["intra_authz_extension_id"],
                                                             subject_name,
                                                             self.driver.SUBJECT)
@@ -2046,13 +2048,15 @@ class IntraExtensionAdminManager(IntraExtensionManager):
         super(IntraExtensionAdminManager, self).del_subject(user_id, intra_extension_id, subject_id)
         tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
         for tenant_id in tenants_dict:
-            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id and \
+                tenants_dict[tenant_id]["intra_admin_extension_id"]:
                 subject_id = self.driver.get_uuid_from_name(tenants_dict[tenant_id]["intra_admin_extension_id"],
                                                             subject_name,
                                                             self.driver.SUBJECT)
                 self.driver.del_subject(tenants_dict[tenant_id]["intra_admin_extension_id"], subject_id)
                 break
-            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id:
+            if tenants_dict[tenant_id]["intra_admin_extension_id"] == intra_extension_id and \
+                tenants_dict[tenant_id]["intra_authz_extension_id"]:
                 subject_id = self.driver.get_uuid_from_name(tenants_dict[tenant_id]["intra_authz_extension_id"],
                                                             subject_name,
                                                             self.driver.SUBJECT)
