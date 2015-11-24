@@ -110,15 +110,11 @@ class TestsLaunch(Lister):
                     if "external_command" in test:
                         ext_command = test["external_command"]
                     else:
-                        ext_command = test["shell_command"]
+                        continue
                     ext_command = self.__replace_var_in_str(ext_command)
                     self.logfile.write("-----> {}\n".format(ext_command))
                     self.log.info("    \\-executing external \"{}\"".format(ext_command))
-                    if "external_command" in test:
-                        pipe = subprocess.Popen(shlex.split(ext_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    else:
-                        # Note (asteroide): security hazard! Must reduce the possible commands here.
-                        pipe = subprocess.Popen(ext_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    pipe = subprocess.Popen(shlex.split(ext_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     com = pipe.communicate()
                     result_str = com[0]
                     error_str = com[1]
