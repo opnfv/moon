@@ -73,7 +73,7 @@ class TestConfigurationManager(tests.TestCase):
         self.assertIn("policy_root", data)
 
     # def test_get_aggregation_algorithm_dict(self):
-    #     admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+    #     admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
     #     print(admin_intra_extension)
     #     data = self.manager.get_aggregation_algorithm_dict(self.ADMIN_ID, admin_intra_extension['id'])
     #     print(data)

@@ -70,7 +70,7 @@ class LogConnector(LogDriver):
         if filter_str:
             _logs = filter(lambda x: filter_str in x, _logs)
         if time_from:
-            if type(time_from) is basestring:
+            if isinstance(time_from, basestring):
                 time_from = time.strptime(time_from.split(" ")[0], self.TIME_FORMAT)
             try:
                 __logs = []
@@ -83,7 +83,7 @@ class LogConnector(LogDriver):
                 self.error("Time format error")
         if time_to:
             try:
-                if type(time_to) is basestring:
+                if isinstance(time_to, basestring):
                     time_to = time.strptime(time_to.split(" ")[0], self.TIME_FORMAT)
                 __logs = []
                 for log in _logs:

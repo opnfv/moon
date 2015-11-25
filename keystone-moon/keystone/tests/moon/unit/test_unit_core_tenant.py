@@ -74,7 +74,7 @@ class TestTenantManager(tests.TestCase):
 
     def test_add_tenant(self):
         authz_intra_extension = create_intra_extension(self, policy_model="policy_authz")
-        admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+        admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
         new_tenant = {
             "id": uuid.uuid4().hex,
             "name": "demo",
@@ -99,7 +99,7 @@ class TestTenantManager(tests.TestCase):
 
     def test_del_tenant(self):
         authz_intra_extension = create_intra_extension(self, policy_model="policy_authz")
-        admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+        admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
         new_tenant = {
             "id": uuid.uuid4().hex,
             "name": "demo",
@@ -120,7 +120,7 @@ class TestTenantManager(tests.TestCase):
 
     def test_set_tenant(self):
         authz_intra_extension = create_intra_extension(self, policy_model="policy_authz")
-        admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+        admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
         new_tenant = {
             "id": uuid.uuid4().hex,
             "name": "demo",
@@ -150,7 +150,7 @@ class TestTenantManager(tests.TestCase):
         self.assertRaises(TenantUnknown, self.tenant_manager.set_tenant_dict, self.ADMIN_ID, uuid.uuid4().hex, {})
 
         authz_intra_extension = create_intra_extension(self, policy_model="policy_authz")
-        admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+        admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
         new_tenant = {
             "id": uuid.uuid4().hex,
             "name": "demo",
@@ -170,7 +170,7 @@ class TestTenantManager(tests.TestCase):
 
     def test_exception_tenant_added_name_existing(self):
         authz_intra_extension = create_intra_extension(self, policy_model="policy_authz")
-        admin_intra_extension = create_intra_extension(self, policy_model="policy_admin")
+        admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
         new_tenant = {
             "id": uuid.uuid4().hex,
             "name": "demo",

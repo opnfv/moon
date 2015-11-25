@@ -81,7 +81,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_subjects(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -122,7 +122,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_objects(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -140,7 +140,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_actions(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -158,7 +158,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_subject_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -196,7 +196,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_object_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -235,7 +235,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_action_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -274,7 +274,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_subject_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -337,7 +337,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_object_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -400,7 +400,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_action_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -463,7 +463,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_subject_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -586,7 +586,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_object_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -712,7 +712,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_action_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -841,7 +841,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_sub_meta_rules(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -880,7 +880,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def test_sub_rules(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1000,7 +1000,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_subjects(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1052,7 +1052,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_objects(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1106,7 +1106,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_actions(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1160,7 +1160,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_subject_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1209,7 +1209,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_object_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1258,7 +1258,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_action_categories(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1307,7 +1307,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_subject_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1379,7 +1379,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_object_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1451,7 +1451,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_action_category_scope(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1523,7 +1523,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_subject_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1675,7 +1675,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_object_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1830,7 +1830,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_action_category_assignment(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -1988,7 +1988,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_sub_meta_rules(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
@@ -2027,7 +2027,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def test_sub_rules(self):
         authz_ie_dict = create_intra_extension(self, "policy_authz")
-        admin_ie_dict = create_intra_extension(self, "policy_admin")
+        admin_ie_dict = create_intra_extension(self, "policy_rbac_admin")
         tenant, mapping = create_mapping(self, "demo", authz_ie_dict['id'], admin_ie_dict['id'])
 
         admin_subject_id, admin_subject_dict = \
