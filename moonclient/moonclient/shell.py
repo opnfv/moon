@@ -178,7 +178,7 @@ class MoonClient(App):
                         content['error']['message'],
                     ))
                 except ValueError:
-                    raise Exception("Getting an error while requiring {} ({})".format(url, content))
+                    raise Exception("Bad error format while requiring {} ({})".format(url, content))
             return content
         except ValueError:
             raise Exception("Getting an error while requiring {} ({})".format(url, content))

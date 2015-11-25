@@ -5,7 +5,7 @@
       {
         "name": "swift list",
         "external_command": "swift list",
-        "result": "(?!moonclient_test)",
+        "no_result": "moonclient_test",
         "description": "Check Swift command"
       },
       {
@@ -30,7 +30,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!demo)",
+        "no_result": "demo",
         "description": "Check if tenant demo is used."
       },
       {
@@ -877,7 +877,7 @@
       {
         "name": "swift list",
         "external_command": "swift list",
-        "result": "(?!moonclient_test)",
+        "no_result": "moonclient_test",
         "description": "Check Swift command, it must be impossible due to current rules"
       },
 
@@ -964,7 +964,7 @@
       {
         "name": "swift list",
         "external_command": "swift list moonclient_test",
-        "result": "(?!tmp/test.txt)",
+        "no_result": "tmp/test.txt",
         "description": "Check that test file has not been uploaded."
       },
       {

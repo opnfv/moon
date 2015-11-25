@@ -29,7 +29,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!demo)",
+        "no_result": "demo",
         "description": "Check if tenant demo is used."
       },
       {
@@ -876,7 +876,7 @@
       {
         "name": "check nova command",
         "external_command": "nova list",
-        "result": "(?!test_moonclient)",
+        "no_result": "test_moonclient",
         "description": "Check that we cannot list nova servers due to the current rules"
       },
       {
