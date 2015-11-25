@@ -136,8 +136,12 @@ class TestsLaunch(Lister):
                     self.logfile.write("{}".format(result_str))
                 data_tmp.append(group_name)
                 data_tmp.append(test["name"])
-                compare = self.__compare_results(self.__replace_var_in_str(test["result"]), result_str)
-                self.logfile.write("\\---->{}: {}\n\n".format(compare, self.__replace_var_in_str(test["result"])))
+                if "result" in test:
+                    compare = self.__compare_results(self.__replace_var_in_str(test["result"]), result_str)
+                    self.logfile.write("\\---->{}: {}\n\n".format(compare, self.__replace_var_in_str(test["result"])))
+                else:
+                    compare = not self.__compare_results(self.__replace_var_in_str(test["no_result"]), result_str)
+                    self.logfile.write("\\---->{}: not {}\n\n".format(compare, self.__replace_var_in_str(test["no_result"])))
                 if error_str:
                     if compare:
                         compare = "\033[33mTrue\033[m"

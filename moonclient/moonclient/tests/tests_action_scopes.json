@@ -5,7 +5,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -86,7 +86,7 @@
       {
         "name": "check_deleted_scope",
         "command": "action scope list $uuid_action_category",
-        "result": "(?!$uuid_action_scope)",
+        "no_result": "$uuid_action_scope",
         "description": "Check deleted scope.",
         "command_options": "-c id -f value"
       },
@@ -109,7 +109,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -224,7 +224,7 @@
       {
         "name": "check_deleted_scope",
         "command": "action scope list $uuid_action_category",
-        "result": "(?!$uuid_action_scope)",
+        "no_result": "$uuid_action_scope",
         "description": "Check deleted scope.",
         "command_options": "-c id -f value"
       },

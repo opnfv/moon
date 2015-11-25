@@ -5,7 +5,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -121,7 +121,7 @@
       {
         "name": "check_deleted_assignment",
         "command": "action assignment list $uuid_action $uuid_action_category",
-        "result": "(?!$uuid_action_scope)",
+        "no_result": "$uuid_action_scope",
         "description": "Check deleted assignment.",
         "command_options": "-c id -f value"
       },
@@ -143,7 +143,7 @@
       {
         "name": "list_action_category",
         "command": "action category list",
-        "result": "(?!$uuid_action_category)",
+        "no_result": "$uuid_action_category",
         "description": "Check that my_new_action_category action_category was deleted."
       },
       {
@@ -165,7 +165,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -315,7 +315,7 @@
       {
         "name": "check_deleted_assignment",
         "command": "action assignment list $uuid_action $uuid_action_category",
-        "result": "(?!$uuid_action_scope)",
+        "no_result": "$uuid_action_scope",
         "description": "Check deleted assignment.",
         "command_options": "-c id -f value"
       },
@@ -337,7 +337,7 @@
       {
         "name": "list_action_category",
         "command": "action category list",
-        "result": "(?!$uuid_action_category)",
+        "no_result": "$uuid_action_category",
         "description": "Check that my_new_action_category action_category was deleted."
       },
       {

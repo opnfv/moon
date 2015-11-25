@@ -5,7 +5,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -78,7 +78,7 @@
       {
         "name": "list_action_category",
         "command": "action category list",
-        "result": "(?!$uuid_action_category)",
+        "no_result": "$uuid_action_category",
         "description": "Check that my_new_action_category action_category was deleted."
       },
       {
@@ -100,7 +100,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -207,7 +207,7 @@
       {
         "name": "list_action_category",
         "command": "action category list",
-        "result": "(?!$uuid_action_category)",
+        "no_result": "$uuid_action_category",
         "description": "Check that my_new_action_category action_category was deleted."
       },
       {

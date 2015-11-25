@@ -5,7 +5,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -57,7 +57,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo",
+        "command": "subject add alt_demo --password nomoresecrete",
         "result": "",
         "description": "Add the new subject category alt_demo",
         "command_options": ""
@@ -121,7 +121,7 @@
       {
         "name": "check_deleted_assignment",
         "command": "subject assignment list $uuid_subject $uuid_subject_category",
-        "result": "(?!$uuid_subject_scope)",
+        "no_result": "$uuid_subject_scope",
         "description": "Check deleted assignment.",
         "command_options": "-c id -f value"
       },
@@ -143,7 +143,7 @@
       {
         "name": "list_subject_category",
         "command": "subject category list",
-        "result": "(?!$uuid_subject_category)",
+        "no_result": "$uuid_subject_category",
         "description": "Check that my_new_subject_category subject_category was deleted."
       },
       {
@@ -165,7 +165,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -251,7 +251,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo",
+        "command": "subject add alt_demo --password nomoresecrete",
         "result": "",
         "description": "Add the new subject category alt_demo",
         "command_options": ""
@@ -315,7 +315,7 @@
       {
         "name": "check_deleted_assignment",
         "command": "subject assignment list $uuid_subject $uuid_subject_category",
-        "result": "(?!$uuid_subject_scope)",
+        "no_result": "$uuid_subject_scope",
         "description": "Check deleted assignment.",
         "command_options": "-c id -f value"
       },
@@ -337,7 +337,7 @@
       {
         "name": "list_subject_category",
         "command": "subject category list",
-        "result": "(?!$uuid_subject_category)",
+        "no_result": "$uuid_subject_category",
         "description": "Check that my_new_subject_category subject_category was deleted."
       },
       {

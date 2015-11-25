@@ -5,7 +5,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -109,7 +109,7 @@
       {
         "name": "list_intraextension_authz",
         "command": "intraextension list",
-        "result": "(?!$uuid_authz)",
+        "no_result": "$uuid_authz",
         "description": "Check the existence of that authz intra extension"
       },
       {
@@ -122,7 +122,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       }
     ],
@@ -130,7 +130,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       },
       {
@@ -268,7 +268,7 @@
       {
         "name": "list_intraextension_authz",
         "command": "intraextension list",
-        "result": "(?!$uuid_authz)",
+        "no_result": "$uuid_authz",
         "description": "Check the existence of that authz intra extension"
       },
       {
@@ -281,7 +281,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!alt_demo)",
+        "no_result": "alt_demo",
         "description": "Check if tenant alt_demo is used."
       }
     ]

@@ -29,7 +29,7 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "(?!demo)",
+        "no_result": "demo",
         "description": "Check if tenant demo is used."
       },
       {
