@@ -4,63 +4,50 @@
 agenda
 ------
 
-* present opnfv-moon-core release2 and its main feature
+* present opnfv-moon-core release2 progess: main features are almost finished, moon-core release 2 finished by 27 Nov 2015
 
-* present opnfv-moonclient, a cmd line tool to administrate security
+* present opnfv-webview: finished by 4 Dec
 
-* present the DevOps environment for code continue integration
+* present moon-release2 code review: finished by 4 Dec
 
-* present the progress moon-webview, a graphic interface for security management
+* present the feedback from OPNFV summit:
 
-* discussion about the roadmap: provide a demo next year? integration release C or D? which main features to be integrated?
+    + several presentations during the Security Design, Security Pannel from Nokia, Huawei and Ericsson
 
-* fix a monthly review meeting to follow its dev and establish an acting plan
+    + new contributors (Ericsson, Radware)
+
+    + moon integration in OPNFV release C: propose to show the prototype in TSC
+
+* synchronize moon/OPNFV with ETSI/NFV security group
+
+    + propose a POD to ETSI/NFV security group
+
+    + to discuss in the next week's ESTI/NFV meeting
+
+* main features for moon release 3
+
+    + K2K is a big topic: assigned to thomas
+
+    + inter-tenant requires a lot of work
+
+    + separation of meta-data and meta-rule: assigned to ruan
+
+* next meeting: 16 Dec
+
+    + Ashutosh will present the feedback about our POC in ETSI/NFV security group
 
 
-moon core
+attendees
 ---------
 
-* functional tests will be finished in 2 weeks
+* Ruan HE
 
+* Thomas Duval
 
-moonclient
-----------
+* Maxime Compastie
 
-* moonclient tests, together with functional tests will be finished in 2 weeks
+* Jamil Chawki
 
+* Ashutosh Dutta
 
-moonwebview
------------
-
-* 70% is finished
-
-* the total will be finished in 4 weeks
-
-* the log will not be integrated in release 2
-
-
-dev environment
----------------
-
-* no documentation
-
-* for new committers, please contact ruan.he@orange.com
-
-
-project roadmap
----------------
-
-* integrate Moon code to release C
-
-* Jamil to ask for support from OpenDaylight
-
-* Nir to ask for support from  Huawei
-
-* prepare Moon demostration with OpenStack/OpenDaylight 03/2016
-
-
-monthly dev meeting
--------------------
-
-* all the contributors agree to set up a monthly dev meeting the last Wensday of each month
-
+* Alioune BA
