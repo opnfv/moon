@@ -437,6 +437,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(SubjectCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id, id=subject_category_id)
             ref = query.first()
+            self.del_subject_assignment(intra_extension_id, None, None, None)
             session.delete(ref)
 
     # Getter and Setter for object_category
@@ -475,6 +476,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(ObjectCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id, id=object_category_id)
             ref = query.first()
+            self.del_object_assignment(intra_extension_id, None, None, None)
             session.delete(ref)
 
     # Getter and Setter for action_category
@@ -513,6 +515,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = session.query(ActionCategory)
             query = query.filter_by(intra_extension_id=intra_extension_id, id=action_category_id)
             ref = query.first()
+            self.del_action_assignment(intra_extension_id, None, None, None)
             session.delete(ref)
 
     # Perimeter
