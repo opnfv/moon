@@ -13,6 +13,7 @@ from uuid import uuid4
 import os
 import time
 import subprocess
+import glob
 
 
 class TestsLaunch(Lister):
@@ -27,8 +28,10 @@ class TestsLaunch(Lister):
         parser = super(TestsLaunch, self).get_parser(prog_name)
         parser.add_argument(
             'testfile',
-            metavar='<filename>',
-            help='Filename that contains tests to run',
+            metavar='<filename(s)>',
+            help='Filenames that contains tests to run '
+                 '(examples: /path/to/test.json, /path/to/directory/, '
+                 '"/path/to/*-file.json" -- don\'t forget the quote)',
         )
         return parser
 
@@ -50,11 +53,45 @@ class TestsLaunch(Lister):
 
     def take_action(self, parsed_args):
         self.log.info("Write tests output to {}".format(self.logfile_name))
-        stdout_back = self.app.stdout
         if not parsed_args.testfile:
             self.log.error("You don't give a test filename.")
             raise Exception("Cannot execute tests.")
-        tests_dict = json.load(open(parsed_args.testfile))
+        if os.path.isfile(parsed_args.testfile):
+            return self.test_file(parsed_args.testfile)
+        else:
+            cpt = 1
+            filenames = []
+            global_result = {}
+            if os.path.isdir(parsed_args.testfile):
+                filenames = glob.glob(parsed_args.testfile + "/*.json")
+            else:
+                filenames = glob.glob(parsed_args.testfile)
+            for filename in filenames:
+                if os.path.isfile(filename):
+                    self.log.info("\n\033[1m\033[32mExecuting {} ({}/{})\033[m".format(filename, cpt, len(filenames)))
+                    global_result[filename] = self.test_file(filename)
+                    cpt += 1
+            results = []
+            for result_id, result_values in global_result.iteritems():
+                result_ok = True
+                # self.log.info(result_id)
+                # self.log.info(result_values[1])
+                for value in result_values[1]:
+                    if "False" in value[2]:
+                        result_ok = False
+                        break
+                if result_ok:
+                    results.append((result_id, "\033[32mTrue\033[m"))
+                else:
+                    results.append((result_id, "\033[1m\033[31mFalse\033[m"))
+            return (
+                ("filename", "results"),
+                results
+            )
+
+    def test_file(self, testfile):
+        stdout_back = self.app.stdout
+        tests_dict = json.load(open(testfile))
         self.log.debug("tests_dict = {}".format(tests_dict))
         global_command_options = ""
         if "command_options" in tests_dict:
