@@ -292,12 +292,6 @@ class Rule(sql.ModelBase, sql.DictBase):
 
 
 __all_objects__ = (
-    Subject,
-    Object,
-    Action,
-    SubjectCategory,
-    ObjectCategory,
-    ActionCategory,
     SubjectScope,
     ObjectScope,
     ActionScope,
@@ -305,6 +299,12 @@ __all_objects__ = (
     ObjectAssignment,
     ActionAssignment,
     SubMetaRule,
+    SubjectCategory,
+    ObjectCategory,
+    ActionCategory,
+    Subject,
+    Object,
+    Action,
     Rule,
 )
 
@@ -375,8 +375,8 @@ class IntraExtensionConnector(IntraExtensionDriver):
             for _object in __all_objects__:
                 query = session.query(_object)
                 query = query.filter_by(intra_extension_id=intra_extension_id)
-                _ref = query.first()
-                if _ref:
+                _refs = query.all()
+                for _ref in _refs:
                     session.delete(_ref)
             session.flush()
             session.delete(ref)
@@ -948,6 +948,8 @@ class IntraExtensionConnector(IntraExtensionDriver):
             intra_extension_dict = dict(ref.intra_extension)
             intra_extension_dict["aggregation_algorithm"] = aggregation_algorithm_id
             setattr(ref, "intra_extension", intra_extension_dict)
+            session.flush()
+            LOG.debug("set_aggregation_algorithm_id {}-{} {}".format(intra_extension_id, aggregation_algorithm_id, self.get_aggregation_algorithm_id(intra_extension_id)))
             return self.get_aggregation_algorithm_id(intra_extension_id)
 
     def del_aggregation_algorithm(self, intra_extension_id):
