@@ -496,7 +496,8 @@ class IntraExtensionManager(manager.Manager):
         try:
             self.root_extension_id = self.root_api.get_root_extension_id()
             self.aggregation_algorithm_dict = self.configuration_api.get_aggregation_algorithms_dict(self.root_extension_id)
-        except AttributeError:
+        except AttributeError as e:
+            LOG.warning("Error on init_aggregation_algorithm ({})".format(e))
             self.root_extension_id = None
             self.aggregation_algorithm_dict = {}
 
@@ -588,7 +589,7 @@ class IntraExtensionManager(manager.Manager):
 
         if not self.root_extension_id:
             self.__init_aggregation_algorithm()
-        aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)
+        aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)['aggregation_algorithm']
         if self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
             decision = all_true(decision_buffer)
         elif self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'one_true':
@@ -813,6 +814,9 @@ class IntraExtensionManager(manager.Manager):
         for _id, _value in self.configuration_api.driver.get_aggregation_algorithms_dict().iteritems():
             if _value["name"] == json_metarule["aggregation"]:
                 self.driver.set_aggregation_algorithm_id(intra_extension_dict["id"], _id)
+                break
+        else:
+            LOG.warning("No aggregation_algorithm found for '{}'".format(json_metarule["aggregation"]))
 
     def __load_rule_file(self, intra_extension_dict, policy_dir):
 

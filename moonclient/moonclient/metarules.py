@@ -36,10 +36,10 @@ class AggregationAlgorithmsList(Lister):
         data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/aggregation_algorithm".format(
             parsed_args.intraextension),
             authtoken=True)
-        algorithm = self.__get_aggregation_algorithm_from_id(data['content'])
+        algorithm = self.__get_aggregation_algorithm_from_id(data['aggregation_algorithm'])
         return (
             ("id", "name", "description"),
-            ((data['content'], algorithm["name"], algorithm["description"]), )
+            ((data['aggregation_algorithm'], algorithm["name"], algorithm["description"]), )
         )
 
 
@@ -82,7 +82,7 @@ class AggregationAlgorithmSet(Command):
                 "aggregation_algorithm_id": parsed_args.aggregation_algorithm_id,
                 "aggregation_algorithm_description": parsed_args.description},
             authtoken=True)
-        algorithm = self.__get_aggregation_algorithm_from_id(data['content'])
+        algorithm = self.__get_aggregation_algorithm_from_id(data['aggregation_algorithm'])
         return (
             ("id",),
             (algorithm,)

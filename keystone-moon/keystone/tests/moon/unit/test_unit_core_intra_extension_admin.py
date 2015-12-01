@@ -852,7 +852,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             self.admin_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         aggregation_algorithm = self.admin_manager.get_aggregation_algorithm_id(admin_subject_id, authz_ie_dict["id"])
-        self.assertIsInstance(aggregation_algorithm, basestring)
+        self.assertIsInstance(aggregation_algorithm, dict)
 
         # TODO: need more tests on aggregation_algorithms (set and del)
 
@@ -1999,7 +1999,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
             self.admin_api.get_subject_dict_from_keystone_name(tenant['id'], admin_ie_dict['id'], 'demo').iteritems().next()
 
         aggregation_algorithm = self.admin_manager.get_aggregation_algorithm_id(admin_subject_id, authz_ie_dict["id"])
-        self.assertIsInstance(aggregation_algorithm, basestring)
+        self.assertIsInstance(aggregation_algorithm, dict)
 
         # TODO: need more tests on aggregation_algorithms (set and del)
 

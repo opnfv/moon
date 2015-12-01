@@ -936,7 +936,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             query = query.filter_by(id=intra_extension_id)
             ref = query.first()
             try:
-                return ref.intra_extension["aggregation_algorithm"]
+                return {"aggregation_algorithm": ref.intra_extension["aggregation_algorithm"]}
             except KeyError:
                 return ""
 
@@ -949,8 +949,7 @@ class IntraExtensionConnector(IntraExtensionDriver):
             intra_extension_dict["aggregation_algorithm"] = aggregation_algorithm_id
             setattr(ref, "intra_extension", intra_extension_dict)
             session.flush()
-            LOG.debug("set_aggregation_algorithm_id {}-{} {}".format(intra_extension_id, aggregation_algorithm_id, self.get_aggregation_algorithm_id(intra_extension_id)))
-            return self.get_aggregation_algorithm_id(intra_extension_id)
+            return {"aggregation_algorithm": ref.intra_extension["aggregation_algorithm"]}
 
     def del_aggregation_algorithm(self, intra_extension_id):
         with sql.transaction() as session:
