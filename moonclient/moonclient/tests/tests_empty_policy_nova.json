@@ -3,6 +3,11 @@
   "tests_group": {
     "authz": [
       {
+        "auth_name": "admin",
+        "description": "Change user to admin (just in case...)"
+      },
+
+      {
         "name": "nova image-list",
         "external_command": "nova image-list",
         "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
@@ -45,6 +50,20 @@
         "result": "(?P<uuid>\\w+)\\s+demo",
         "description": "Check that tenant demo has been correctly added"
       },
+
+      {
+        "name": "check nova command",
+        "external_command": "nova list",
+        "no_result": "test_moonclient",
+        "description": "Check that we cannot list nova servers due to the current rules"
+      },
+      {
+        "name": "try to pause nova instance",
+        "external_command": "nova pause $uuid_server",
+        "result": "^$",
+        "description": "Pausing the server must be impossible due to the current rules"
+      },
+
       {
         "name": "create_intraextension_authz",
         "command": "intraextension add --policy_model policy_empty_authz empty_test",
@@ -871,19 +890,6 @@
         "result": "",
         "description": "Set submetarule algorithm to inclusion.",
         "command_options": ""
-      },
-
-      {
-        "name": "check nova command",
-        "external_command": "nova list",
-        "no_result": "test_moonclient",
-        "description": "Check that we cannot list nova servers due to the current rules"
-      },
-      {
-        "name": "try to pause nova instance",
-        "external_command": "nova pause $uuid_server",
-        "result": "^$",
-        "description": "Pausing the server must be impossible due to the current rules"
       },
 
       {

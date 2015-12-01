@@ -3,6 +3,11 @@
   "tests_group": {
     "authz": [
       {
+        "auth_name": "admin",
+        "description": "Change user to admin (just in case...)"
+      },
+
+      {
         "name": "nova image-list",
         "external_command": "nova image-list",
         "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
@@ -3276,6 +3281,62 @@
         "description": "Check that the rule was correctly added.",
         "command_options": "-c id -c s:role -c a:action_id -c o:object_id -f value"
       },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid_admin \"demo_role,read,authz_object_scopes\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid_admin",
+        "result": "(?P<rule_id>\\w+)\\s+demo_role\\s+read\\s+authz_object_scopes",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:role -c a:action_id -c o:object_id -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid_admin \"demo_role,write,authz_object_scopes\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid_admin",
+        "result": "(?P<rule_id>\\w+)\\s+demo_role\\s+write\\s+authz_object_scopes",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:role -c a:action_id -c o:object_id -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid_admin \"demo_role,read,authz_object_categories\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid_admin",
+        "result": "(?P<rule_id>\\w+)\\s+demo_role\\s+read\\s+authz_object_categories",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:role -c a:action_id -c o:object_id -f value"
+      },
+      {
+        "name": "add_a_new_rule",
+        "command": "rule add $submetarule_uuid_admin \"demo_role,write,authz_object_categories\"",
+        "result": "^$",
+        "description": "Add a new rule.",
+        "command_options": ""
+      },
+      {
+        "name": "check_added_rule",
+        "command": "rule list $submetarule_uuid_admin",
+        "result": "(?P<rule_id>\\w+)\\s+demo_role\\s+write\\s+authz_object_categories",
+        "description": "Check that the rule was correctly added.",
+        "command_options": "-c id -c s:role -c a:action_id -c o:object_id -f value"
+      },
 
       {
         "name": "select_authz_ie",
@@ -3447,10 +3508,22 @@
 
 
       {
+        "auth_name": "admin",
+        "description": "Change user to admin"
+      },
+
+      {
         "name": "delete_authz_intra_extension",
         "command": "intraextension delete $uuid_authz",
         "result": "",
         "description": "Delete the authz intra extension",
+        "command_options": ""
+      },
+      {
+        "name": "delete_admin_intra_extension",
+        "command": "intraextension delete $uuid_admin",
+        "result": "",
+        "description": "Delete the admin intra extension",
         "command_options": ""
       },
       {
