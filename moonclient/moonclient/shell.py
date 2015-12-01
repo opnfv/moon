@@ -182,6 +182,8 @@ class MoonClient(App):
             return content
         except ValueError:
             raise Exception("Getting an error while requiring {} ({})".format(url, content))
+        finally:
+            self.log.debug(str(content))
 
     def auth_keystone(self, username=None, password=None, host=None, port=None):
         """Send a new authentication request to Keystone
