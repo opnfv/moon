@@ -2,6 +2,10 @@
   "command_options": "-f value",
   "tests_group": {
     "main": [
+      {
+        "auth_name": "admin",
+        "description": "Change user to admin (just in case...)"
+      },
 
       {
         "name": "list_intraextension",

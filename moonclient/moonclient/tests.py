@@ -23,9 +23,14 @@ class TestsLaunch(Lister):
     result_vars = dict()
     logfile_name = "/tmp/moonclient_test_{}.log".format(time.strftime("%Y%m%d-%H%M%S"))
     logfile = open(logfile_name, "w")
+    TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
     def get_parser(self, prog_name):
         parser = super(TestsLaunch, self).get_parser(prog_name)
+        parser.add_argument(
+            '--stop-on-error',
+            help='Stop the test on the first error',
+        )
         parser.add_argument(
             'testfile',
             metavar='<filename(s)>',
@@ -130,7 +135,7 @@ class TestsLaunch(Lister):
                     if port:
                         title += ":" + port
                     title += "\n"
-                    self.logfile.write(title + "\n")
+                    self.logfile.write(time.strftime(self.TIME_FORMAT) + " " + title + "\n")
                     self.log.info(title)
                     data_tmp = list()
                     data_tmp.append("")
@@ -149,7 +154,7 @@ class TestsLaunch(Lister):
                     else:
                         continue
                     ext_command = self.__replace_var_in_str(ext_command)
-                    self.logfile.write("-----> {}\n".format(ext_command))
+                    self.logfile.write(time.strftime(self.TIME_FORMAT) + " " + "-----> {}\n".format(ext_command))
                     self.log.info("    \\-executing external \"{}\"".format(ext_command))
                     pipe = subprocess.Popen(shlex.split(ext_command), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     com = pipe.communicate()
@@ -163,7 +168,7 @@ class TestsLaunch(Lister):
                     else:
                         command = test["command"] + " " + global_command_options
                     command = self.__replace_var_in_str(command)
-                    self.logfile.write("-----> {}\n".format(command))
+                    self.logfile.write(time.strftime(self.TIME_FORMAT) + " " + "-----> {}\n".format(command))
                     self.log.info("    \\-executing {}".format(command))
                     self.app.stdout = tmp_filename_fd
                     result_id = self.app.run_subcommand(shlex.split(command))

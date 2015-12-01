@@ -3,6 +3,11 @@
   "tests_group": {
     "authz": [
       {
+        "auth_name": "admin",
+        "description": "Change user to admin (just in case...)"
+      },
+
+      {
         "name": "swift list",
         "external_command": "swift list",
         "no_result": "moonclient_test",
