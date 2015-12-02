@@ -21,7 +21,6 @@ import ldap
 import mock
 from oslo_config import cfg
 import pkg_resources
-from six.moves import http_client
 from six.moves import range
 from testtools import matchers
 
@@ -2182,6 +2181,26 @@ class LDAPIdentityEnabledEmulation(LDAPIdentity):
         self.skipTest(
             "Enabled emulation conflicts with enabled mask")
 
+    def test_user_enabled_use_group_config(self):
+        self.config_fixture.config(
+            group='ldap',
+            user_enabled_emulation_use_group_config=True,
+            group_member_attribute='uniqueMember',
+            group_objectclass='groupOfUniqueNames')
+        self.ldapdb.clear()
+        self.load_backends()
+        self.load_fixtures(default_fixtures)
+
+        # Create a user and ensure they are enabled.
+        user1 = {'name': u'fäké1', 'enabled': True,
+                 'domain_id': CONF.identity.default_domain_id}
+        user_ref = self.identity_api.create_user(user1)
+        self.assertIs(True, user_ref['enabled'])
+
+        # Get a user and ensure they are enabled.
+        user_ref = self.identity_api.get_user(user_ref['id'])
+        self.assertIs(True, user_ref['enabled'])
+
     def test_user_enabled_invert(self):
         self.config_fixture.config(group='ldap', user_enabled_invert=True,
                                    user_enabled_default=False)
@@ -2487,7 +2506,7 @@ class BaseMultiLDAPandSQLIdentity(object):
             self.identity_api._get_domain_driver_and_entity_id(
                 user['id']))
 
-        if expected_status == http_client.OK:
+        if expected_status == 200:
             ref = driver.get_user(entity_id)
             ref = self.identity_api._set_domain_id_and_mapping(
                 ref, domain_id, driver, map.EntityType.USER)
@@ -2661,23 +2680,21 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, unit.SQLDriverOverrides,
 
         check_user = self.check_user
         check_user(self.users['user0'],
-                   self.domains['domain_default']['id'], http_client.OK)
+                   self.domains['domain_default']['id'], 200)
         for domain in [self.domains['domain1']['id'],
                        self.domains['domain2']['id'],
                        self.domains['domain3']['id'],
                        self.domains['domain4']['id']]:
             check_user(self.users['user0'], domain, exception.UserNotFound)
 
-        check_user(self.users['user1'], self.domains['domain1']['id'],
-                   http_client.OK)
+        check_user(self.users['user1'], self.domains['domain1']['id'], 200)
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain2']['id'],
                        self.domains['domain3']['id'],
                        self.domains['domain4']['id']]:
             check_user(self.users['user1'], domain, exception.UserNotFound)
 
-        check_user(self.users['user2'], self.domains['domain2']['id'],
-                   http_client.OK)
+        check_user(self.users['user2'], self.domains['domain2']['id'], 200)
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain1']['id'],
                        self.domains['domain3']['id'],
@@ -2687,14 +2704,10 @@ class MultiLDAPandSQLIdentity(BaseLDAPIdentity, unit.SQLDriverOverrides,
         # domain3 and domain4 share the same backend, so you should be
         # able to see user3 and user4 from either.
 
-        check_user(self.users['user3'], self.domains['domain3']['id'],
-                   http_client.OK)
-        check_user(self.users['user3'], self.domains['domain4']['id'],
-                   http_client.OK)
-        check_user(self.users['user4'], self.domains['domain3']['id'],
-                   http_client.OK)
-        check_user(self.users['user4'], self.domains['domain4']['id'],
-                   http_client.OK)
+        check_user(self.users['user3'], self.domains['domain3']['id'], 200)
+        check_user(self.users['user3'], self.domains['domain4']['id'], 200)
+        check_user(self.users['user4'], self.domains['domain3']['id'], 200)
+        check_user(self.users['user4'], self.domains['domain4']['id'], 200)
 
         for domain in [self.domains['domain_default']['id'],
                        self.domains['domain1']['id'],
@@ -3151,12 +3164,12 @@ class DomainSpecificLDAPandSQLIdentity(
         # driver, but won't find it via any other domain driver
 
         self.check_user(self.users['user0'],
-                        self.domains['domain_default']['id'], http_client.OK)
+                        self.domains['domain_default']['id'], 200)
         self.check_user(self.users['user0'],
                         self.domains['domain1']['id'], exception.UserNotFound)
 
         self.check_user(self.users['user1'],
-                        self.domains['domain1']['id'], http_client.OK)
+                        self.domains['domain1']['id'], 200)
         self.check_user(self.users['user1'],
                         self.domains['domain_default']['id'],
                         exception.UserNotFound)

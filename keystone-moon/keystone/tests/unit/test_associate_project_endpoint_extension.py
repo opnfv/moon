@@ -48,7 +48,8 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
         Valid endpoint and project id test case.
 
         """
-        self.put(self.default_request_url)
+        self.put(self.default_request_url,
+                 expected_status=204)
 
     def test_create_endpoint_project_association_with_invalid_project(self):
         """PUT OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
@@ -81,7 +82,8 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
 
         """
         self.put(self.default_request_url,
-                 body={'project_id': self.default_domain_project_id})
+                 body={'project_id': self.default_domain_project_id},
+                 expected_status=204)
 
     def test_check_endpoint_project_association(self):
         """HEAD /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
@@ -89,11 +91,13 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
         Valid project and endpoint id test case.
 
         """
-        self.put(self.default_request_url)
+        self.put(self.default_request_url,
+                 expected_status=204)
         self.head('/OS-EP-FILTER/projects/%(project_id)s'
                   '/endpoints/%(endpoint_id)s' % {
                       'project_id': self.default_domain_project_id,
-                      'endpoint_id': self.endpoint_id})
+                      'endpoint_id': self.endpoint_id},
+                  expected_status=204)
 
     def test_check_endpoint_project_association_with_invalid_project(self):
         """HEAD /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
@@ -165,7 +169,8 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
 
         """
         r = self.get('/OS-EP-FILTER/endpoints/%(endpoint_id)s/projects' %
-                     {'endpoint_id': self.endpoint_id})
+                     {'endpoint_id': self.endpoint_id},
+                     expected_status=200)
         self.assertValidProjectListResponse(r, expected_length=0)
 
     def test_list_projects_associated_with_invalid_endpoint(self):
@@ -188,7 +193,8 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
         self.delete('/OS-EP-FILTER/projects/%(project_id)s'
                     '/endpoints/%(endpoint_id)s' % {
                         'project_id': self.default_domain_project_id,
-                        'endpoint_id': self.endpoint_id})
+                        'endpoint_id': self.endpoint_id},
+                    expected_status=204)
 
     def test_remove_endpoint_project_association_with_invalid_project(self):
         """DELETE /OS-EP-FILTER/projects/{project_id}/endpoints/{endpoint_id}
@@ -220,26 +226,26 @@ class EndpointFilterCRUDTestCase(TestExtensionCase):
         self.put(self.default_request_url)
         association_url = ('/OS-EP-FILTER/endpoints/%(endpoint_id)s/projects' %
                            {'endpoint_id': self.endpoint_id})
-        r = self.get(association_url)
+        r = self.get(association_url, expected_status=200)
         self.assertValidProjectListResponse(r, expected_length=1)
 
         self.delete('/projects/%(project_id)s' % {
             'project_id': self.default_domain_project_id})
 
-        r = self.get(association_url)
+        r = self.get(association_url, expected_status=200)
         self.assertValidProjectListResponse(r, expected_length=0)
 
     def test_endpoint_project_association_cleanup_when_endpoint_deleted(self):
         self.put(self.default_request_url)
         association_url = '/OS-EP-FILTER/projects/%(project_id)s/endpoints' % {
             'project_id': self.default_domain_project_id}
-        r = self.get(association_url)
+        r = self.get(association_url, expected_status=200)
         self.assertValidEndpointListResponse(r, expected_length=1)
 
         self.delete('/endpoints/%(endpoint_id)s' % {
             'endpoint_id': self.endpoint_id})
 
-        r = self.get(association_url)
+        r = self.get(association_url, expected_status=200)
         self.assertValidEndpointListResponse(r, expected_length=0)
 
 
@@ -270,7 +276,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         # attempt to authenticate without requesting a project
         auth_data = self.build_authentication_request(
@@ -290,7 +297,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         auth_data = self.build_authentication_request(
             user_id=self.user['id'],
@@ -310,7 +318,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         auth_data = self.build_authentication_request(
             user_id=self.user['id'],
@@ -329,7 +338,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         # create a second temporary endpoint
         self.endpoint_id2 = uuid.uuid4().hex
@@ -343,7 +353,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id2})
+                     'endpoint_id': self.endpoint_id2},
+                 expected_status=204)
 
         # remove the temporary reference
         # this will create inconsistency in the endpoint filter table
@@ -369,7 +380,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         # Add a disabled endpoint to the default project.
 
@@ -387,7 +399,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': disabled_endpoint_id})
+                     'endpoint_id': disabled_endpoint_id},
+                 expected_status=204)
 
         # Authenticate to get token with catalog
         auth_data = self.build_authentication_request(
@@ -416,11 +429,13 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': endpoint_id1})
+                     'endpoint_id': endpoint_id1},
+                 expected_status=204)
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': endpoint_id2})
+                     'endpoint_id': endpoint_id2},
+                 expected_status=204)
 
         # there should be only two endpoints in token catalog
         auth_data = self.build_authentication_request(
@@ -439,7 +454,8 @@ class EndpointFilterTokenRequestTestCase(TestExtensionCase):
         self.put('/OS-EP-FILTER/projects/%(project_id)s'
                  '/endpoints/%(endpoint_id)s' % {
                      'project_id': self.project['id'],
-                     'endpoint_id': self.endpoint_id})
+                     'endpoint_id': self.endpoint_id},
+                 expected_status=204)
 
         auth_data = self.build_authentication_request(
             user_id=self.user['id'],
@@ -622,7 +638,7 @@ class EndpointGroupCRUDTestCase(TestExtensionCase):
             self.DEFAULT_ENDPOINT_GROUP_URL, self.DEFAULT_ENDPOINT_GROUP_BODY)
         url = '/OS-EP-FILTER/endpoint_groups/%(endpoint_group_id)s' % {
             'endpoint_group_id': endpoint_group_id}
-        self.head(url, expected_status=http_client.OK)
+        self.head(url, expected_status=200)
 
     def test_check_invalid_endpoint_group(self):
         """HEAD /OS-EP-FILTER/endpoint_groups/{endpoint_group_id}
@@ -816,7 +832,7 @@ class EndpointGroupCRUDTestCase(TestExtensionCase):
                                                         self.project_id)
         url = self._get_project_endpoint_group_url(
             endpoint_group_id, self.project_id)
-        self.head(url, expected_status=http_client.OK)
+        self.head(url, expected_status=200)
 
     def test_check_endpoint_group_to_project_with_invalid_project_id(self):
         """Test HEAD with an invalid endpoint group and project association."""

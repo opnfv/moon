@@ -12,8 +12,6 @@
 
 import uuid
 
-from six.moves import http_client
-
 from keystone.tests.unit import test_v3
 
 
@@ -33,7 +31,7 @@ class TestSimpleCert(BaseTestCase):
                                 method='GET',
                                 path=path,
                                 headers={'Accept': content_type},
-                                expected_status=http_client.OK)
+                                expected_status=200)
 
         self.assertEqual(content_type, response.content_type.lower())
         self.assertIn('---BEGIN', response.body)
@@ -56,4 +54,4 @@ class TestSimpleCert(BaseTestCase):
             self.request(app=self.public_app,
                          method='GET',
                          path=path,
-                         expected_status=http_client.INTERNAL_SERVER_ERROR)
+                         expected_status=500)

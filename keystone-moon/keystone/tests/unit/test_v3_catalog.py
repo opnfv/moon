@@ -36,7 +36,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         r = self.put(
             '/regions/%s' % region_id,
             body={'region': ref},
-            expected_status=http_client.CREATED)
+            expected_status=201)
         self.assertValidRegionResponse(r, ref)
         # Double-check that the region ID was kept as-is and not
         # populated with a UUID, as is the case with POST /v3/regions
@@ -49,7 +49,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         r = self.put(
             '/regions/%s' % region_id,
             body={'region': ref},
-            expected_status=http_client.CREATED)
+            expected_status=201)
         self.assertValidRegionResponse(r, ref)
         # Double-check that the region ID was kept as-is and not
         # populated with a UUID, as is the case with POST /v3/regions
@@ -60,7 +60,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = dict(description="my region")
         self.put(
             '/regions/myregion',
-            body={'region': ref}, expected_status=http_client.CREATED)
+            body={'region': ref}, expected_status=201)
         # Create region again with duplicate id
         self.put(
             '/regions/myregion',
@@ -86,7 +86,9 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = self.new_region_ref()
         ref['id'] = ''
 
-        r = self.post('/regions', body={'region': ref})
+        r = self.post(
+            '/regions',
+            body={'region': ref}, expected_status=201)
         self.assertValidRegionResponse(r, ref)
         self.assertNotEmpty(r.result['region'].get('id'))
 
@@ -98,7 +100,10 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         del ref['id']
 
         # let the service define the ID
-        r = self.post('/regions', body={'region': ref})
+        r = self.post(
+            '/regions',
+            body={'region': ref},
+            expected_status=201)
         self.assertValidRegionResponse(r, ref)
 
     def test_create_region_without_description(self):
@@ -107,7 +112,10 @@ class CatalogTestCase(test_v3.RestfulTestCase):
 
         del ref['description']
 
-        r = self.post('/regions', body={'region': ref})
+        r = self.post(
+            '/regions',
+            body={'region': ref},
+            expected_status=201)
         # Create the description in the reference to compare to since the
         # response should now have a description, even though we didn't send
         # it with the original reference.
@@ -127,10 +135,16 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref1['description'] = region_desc
         ref2['description'] = region_desc
 
-        resp1 = self.post('/regions', body={'region': ref1})
+        resp1 = self.post(
+            '/regions',
+            body={'region': ref1},
+            expected_status=201)
         self.assertValidRegionResponse(resp1, ref1)
 
-        resp2 = self.post('/regions', body={'region': ref2})
+        resp2 = self.post(
+            '/regions',
+            body={'region': ref2},
+            expected_status=201)
         self.assertValidRegionResponse(resp2, ref2)
 
     def test_create_regions_without_descriptions(self):
@@ -145,9 +159,15 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         del ref1['description']
         ref2['description'] = None
 
-        resp1 = self.post('/regions', body={'region': ref1})
+        resp1 = self.post(
+            '/regions',
+            body={'region': ref1},
+            expected_status=201)
 
-        resp2 = self.post('/regions', body={'region': ref2})
+        resp2 = self.post(
+            '/regions',
+            body={'region': ref2},
+            expected_status=201)
         # Create the descriptions in the references to compare to since the
         # responses should now have descriptions, even though we didn't send
         # a description with the original references.
@@ -211,14 +231,16 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """Call ``PATCH /regions/{region_id}``."""
         region_ref = self.new_region_ref()
 
-        resp = self.post('/regions', body={'region': region_ref})
+        resp = self.post('/regions', body={'region': region_ref},
+                         expected_status=201)
 
         region_updates = {
             # update with something that's not the description
             'parent_region_id': self.region_id,
         }
         resp = self.patch('/regions/%s' % region_ref['id'],
-                          body={'region': region_updates})
+                          body={'region': region_updates},
+                          expected_status=200)
 
         # NOTE(dstanek): Keystone should keep the original description.
         self.assertEqual(region_ref['description'],
@@ -591,7 +613,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref["region"] = uuid.uuid4().hex
         ref.pop('region_id')
-        self.post('/endpoints', body={'endpoint': ref})
+        self.post('/endpoints', body={'endpoint': ref}, expected_status=201)
         # Make sure the region is created
         self.get('/regions/%(region_id)s' % {
             'region_id': ref["region"]})
@@ -600,7 +622,7 @@ class CatalogTestCase(test_v3.RestfulTestCase):
         """EndpointV3 allows to creates the endpoint without region."""
         ref = self.new_endpoint_ref(service_id=self.service_id)
         ref.pop('region_id')
-        self.post('/endpoints', body={'endpoint': ref})
+        self.post('/endpoints', body={'endpoint': ref}, expected_status=201)
 
     def test_create_endpoint_with_empty_url(self):
         """Call ``POST /endpoints``."""
@@ -756,7 +778,9 @@ class CatalogTestCase(test_v3.RestfulTestCase):
 
         ref = self.new_endpoint_ref(self.service_id)
         ref['url'] = valid_url
-        self.post('/endpoints', body={'endpoint': ref})
+        self.post('/endpoints',
+                  body={'endpoint': ref},
+                  expected_status=201)
 
     def test_endpoint_create_with_invalid_url(self):
         """Test the invalid cases: substitutions is not exactly right.

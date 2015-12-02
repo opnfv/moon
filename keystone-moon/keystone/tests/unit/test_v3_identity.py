@@ -295,17 +295,18 @@ class IdentityTestCase(test_v3.RestfulTestCase):
         old_password_auth = self.build_authentication_request(
             user_id=user_ref['id'],
             password=password)
-        r = self.v3_authenticate_token(old_password_auth)
+        r = self.v3_authenticate_token(old_password_auth, expected_status=201)
         old_token = r.headers.get('X-Subject-Token')
 
         # auth as user with a token should work before a password change
         old_token_auth = self.build_authentication_request(token=old_token)
-        self.v3_authenticate_token(old_token_auth)
+        self.v3_authenticate_token(old_token_auth, expected_status=201)
 
         # administrative password reset
         new_password = uuid.uuid4().hex
         self.patch('/users/%s' % user_ref['id'],
-                   body={'user': {'password': new_password}})
+                   body={'user': {'password': new_password}},
+                   expected_status=200)
 
         # auth as user with original password should not work after change
         self.v3_authenticate_token(old_password_auth,
@@ -319,7 +320,7 @@ class IdentityTestCase(test_v3.RestfulTestCase):
         new_password_auth = self.build_authentication_request(
             user_id=user_ref['id'],
             password=new_password)
-        self.v3_authenticate_token(new_password_auth)
+        self.v3_authenticate_token(new_password_auth, expected_status=201)
 
     def test_update_user_domain_id(self):
         """Call ``PATCH /users/{user_id}`` with domain_id."""
@@ -370,7 +371,7 @@ class IdentityTestCase(test_v3.RestfulTestCase):
         # Confirm token is valid for now
         self.head('/auth/tokens',
                   headers={'X-Subject-Token': token},
-                  expected_status=http_client.OK)
+                  expected_status=200)
 
         # Now delete the user
         self.delete('/users/%(user_id)s' % {
@@ -473,7 +474,8 @@ class IdentityTestCase(test_v3.RestfulTestCase):
         # administrative password reset
         new_password = uuid.uuid4().hex
         self.patch('/users/%s' % user_ref['id'],
-                   body={'user': {'password': new_password}})
+                   body={'user': {'password': new_password}},
+                   expected_status=200)
 
         self.assertNotIn(password, log_fix.output)
         self.assertNotIn(new_password, log_fix.output)
@@ -559,8 +561,7 @@ class UserSelfServiceChangingPasswordsTestCase(test_v3.RestfulTestCase):
         password = self.user_ref['password']
         self.user_ref = self.identity_api.create_user(self.user_ref)
         self.user_ref['password'] = password
-        self.token = self.get_request_token(self.user_ref['password'],
-                                            http_client.CREATED)
+        self.token = self.get_request_token(self.user_ref['password'], 201)
 
     def get_request_token(self, password, expected_status):
         auth_data = self.build_authentication_request(
@@ -580,16 +581,16 @@ class UserSelfServiceChangingPasswordsTestCase(test_v3.RestfulTestCase):
     def test_changing_password(self):
         # original password works
         token_id = self.get_request_token(self.user_ref['password'],
-                                          expected_status=http_client.CREATED)
+                                          expected_status=201)
         # original token works
         old_token_auth = self.build_authentication_request(token=token_id)
-        self.v3_authenticate_token(old_token_auth)
+        self.v3_authenticate_token(old_token_auth, expected_status=201)
 
         # change password
         new_password = uuid.uuid4().hex
         self.change_password(password=new_password,
                              original_password=self.user_ref['password'],
-                             expected_status=http_client.NO_CONTENT)
+                             expected_status=204)
 
         # old password fails
         self.get_request_token(self.user_ref['password'],
@@ -600,8 +601,7 @@ class UserSelfServiceChangingPasswordsTestCase(test_v3.RestfulTestCase):
                                    expected_status=http_client.NOT_FOUND)
 
         # new password works
-        self.get_request_token(new_password,
-                               expected_status=http_client.CREATED)
+        self.get_request_token(new_password, expected_status=201)
 
     def test_changing_password_with_missing_original_password_fails(self):
         r = self.change_password(password=uuid.uuid4().hex,
@@ -640,7 +640,7 @@ class UserSelfServiceChangingPasswordsTestCase(test_v3.RestfulTestCase):
         new_password = uuid.uuid4().hex
         self.change_password(password=new_password,
                              original_password=self.user_ref['password'],
-                             expected_status=http_client.NO_CONTENT)
+                             expected_status=204)
 
         self.assertNotIn(self.user_ref['password'], log_fix.output)
         self.assertNotIn(new_password, log_fix.output)

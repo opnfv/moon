@@ -53,14 +53,12 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
             url,
             expected_status=http_client.NOT_FOUND)
 
-        self.put(url)
+        self.put(url, expected_status=204)
 
         # test that the new resource is accessible.
-        self.assert_head_and_get_return_same_response(
-            url,
-            expected_status=http_client.NO_CONTENT)
+        self.assert_head_and_get_return_same_response(url, expected_status=204)
 
-        self.delete(url)
+        self.delete(url, expected_status=204)
 
         # test that the deleted resource is no longer accessible
         self.assert_head_and_get_return_same_response(
@@ -101,16 +99,18 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
         self.put('/policies/%(policy_id)s/OS-ENDPOINT-POLICY'
                  '/endpoints/%(endpoint_id)s' % {
                      'policy_id': self.policy['id'],
-                     'endpoint_id': self.endpoint['id']})
+                     'endpoint_id': self.endpoint['id']},
+                 expected_status=204)
 
         self.head('/endpoints/%(endpoint_id)s/OS-ENDPOINT-POLICY'
                   '/policy' % {
                       'endpoint_id': self.endpoint['id']},
-                  expected_status=http_client.OK)
+                  expected_status=200)
 
         r = self.get('/endpoints/%(endpoint_id)s/OS-ENDPOINT-POLICY'
                      '/policy' % {
-                         'endpoint_id': self.endpoint['id']})
+                         'endpoint_id': self.endpoint['id']},
+                     expected_status=200)
         self.assertValidPolicyResponse(r, ref=self.policy)
 
     def test_list_endpoints_for_policy(self):
@@ -119,11 +119,13 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
         self.put('/policies/%(policy_id)s/OS-ENDPOINT-POLICY'
                  '/endpoints/%(endpoint_id)s' % {
                      'policy_id': self.policy['id'],
-                     'endpoint_id': self.endpoint['id']})
+                     'endpoint_id': self.endpoint['id']},
+                 expected_status=204)
 
         r = self.get('/policies/%(policy_id)s/OS-ENDPOINT-POLICY'
                      '/endpoints' % {
-                         'policy_id': self.policy['id']})
+                         'policy_id': self.policy['id']},
+                     expected_status=200)
         self.assertValidEndpointListResponse(r, ref=self.endpoint)
         self.assertThat(r.result.get('endpoints'), matchers.HasLength(1))
 
@@ -133,8 +135,8 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
                    'policy_id': self.policy['id'],
                    'endpoint_id': self.endpoint['id']}
 
-        self.put(url)
-        self.head(url)
+        self.put(url, expected_status=204)
+        self.head(url, expected_status=204)
 
         self.delete('/endpoints/%(endpoint_id)s' % {
             'endpoint_id': self.endpoint['id']})
@@ -148,8 +150,8 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
                    'service_id': self.service['id'],
                    'region_id': self.region['id']}
 
-        self.put(url)
-        self.head(url)
+        self.put(url, expected_status=204)
+        self.head(url, expected_status=204)
 
         self.delete('/regions/%(region_id)s' % {
             'region_id': self.region['id']})
@@ -163,8 +165,8 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
                    'service_id': self.service['id'],
                    'region_id': self.region['id']}
 
-        self.put(url)
-        self.head(url)
+        self.put(url, expected_status=204)
+        self.head(url, expected_status=204)
 
         self.delete('/services/%(service_id)s' % {
             'service_id': self.service['id']})
@@ -177,8 +179,8 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
                    'policy_id': self.policy['id'],
                    'service_id': self.service['id']}
 
-        self.put(url)
-        self.get(url, expected_status=http_client.NO_CONTENT)
+        self.put(url, expected_status=204)
+        self.get(url, expected_status=204)
 
         self.delete('/policies/%(policy_id)s' % {
             'policy_id': self.policy['id']})
@@ -191,8 +193,8 @@ class EndpointPolicyTestCase(test_v3.RestfulTestCase):
                    'policy_id': self.policy['id'],
                    'service_id': self.service['id']}
 
-        self.put(url)
-        self.get(url, expected_status=http_client.NO_CONTENT)
+        self.put(url, expected_status=204)
+        self.get(url, expected_status=204)
 
         self.delete('/services/%(service_id)s' % {
             'service_id': self.service['id']})

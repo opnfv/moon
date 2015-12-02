@@ -112,16 +112,15 @@ class ApplicationTest(BaseWSGITest):
 
         resp = wsgi.render_response(body=data)
         self.assertEqual('200 OK', resp.status)
-        self.assertEqual(http_client.OK, resp.status_int)
+        self.assertEqual(200, resp.status_int)
         self.assertEqual(body, resp.body)
         self.assertEqual('X-Auth-Token', resp.headers.get('Vary'))
         self.assertEqual(str(len(body)), resp.headers.get('Content-Length'))
 
     def test_render_response_custom_status(self):
-        resp = wsgi.render_response(
-            status=(http_client.NOT_IMPLEMENTED, 'Not Implemented'))
+        resp = wsgi.render_response(status=(501, 'Not Implemented'))
         self.assertEqual('501 Not Implemented', resp.status)
-        self.assertEqual(http_client.NOT_IMPLEMENTED, resp.status_int)
+        self.assertEqual(501, resp.status_int)
 
     def test_successful_require_attribute(self):
         app = FakeAttributeCheckerApp()
@@ -173,14 +172,14 @@ class ApplicationTest(BaseWSGITest):
     def test_render_response_no_body(self):
         resp = wsgi.render_response()
         self.assertEqual('204 No Content', resp.status)
-        self.assertEqual(http_client.NO_CONTENT, resp.status_int)
+        self.assertEqual(204, resp.status_int)
         self.assertEqual(b'', resp.body)
         self.assertEqual('0', resp.headers.get('Content-Length'))
         self.assertIsNone(resp.headers.get('Content-Type'))
 
     def test_render_response_head_with_body(self):
         resp = wsgi.render_response({'id': uuid.uuid4().hex}, method='HEAD')
-        self.assertEqual(http_client.OK, resp.status_int)
+        self.assertEqual(200, resp.status_int)
         self.assertEqual(b'', resp.body)
         self.assertNotEqual(resp.headers.get('Content-Length'), '0')
         self.assertEqual('application/json', resp.headers.get('Content-Type'))

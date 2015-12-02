@@ -22,6 +22,7 @@ from oslo_log import log
 from oslo_utils import timeutils
 import six
 from six.moves import map
+from six.moves import urllib
 
 from keystone.auth import plugins as auth_plugins
 from keystone.common import utils as ks_utils
@@ -73,8 +74,19 @@ class TokenFormatter(object):
         """Unpack a token, and validate the payload."""
         token = six.binary_type(token)
 
-        # Restore padding on token before decoding it
-        token = TokenFormatter.restore_padding(token)
+        # TODO(lbragstad): Restore padding on token before decoding it.
+        # Initially in Kilo, Fernet tokens were returned to the user with
+        # padding appended to the token. Later in Liberty this padding was
+        # removed and restored in the Fernet provider. The following if
+        # statement ensures that we can validate tokens with and without token
+        # padding, in the event of an upgrade and the tokens that are issued
+        # throughout the upgrade. Remove this if statement when Mitaka opens
+        # for development and exclusively use the restore_padding() class
+        # method.
+        if token.endswith('%3D'):
+            token = urllib.parse.unquote(token)
+        else:
+            token = TokenFormatter.restore_padding(token)
 
         try:
             return self.crypto.decrypt(token)
@@ -338,15 +350,16 @@ class BasePayload(object):
         """Attempt to convert value to bytes or return value.
 
         :param value: value to attempt to convert to bytes
-        :returns: uuid value in bytes or value
+        :returns: tuple containing boolean indicating whether user_id was
+                  stored as bytes and uuid value as bytes or the original value
 
         """
         try:
-            return cls.convert_uuid_hex_to_bytes(value)
+            return (True, cls.convert_uuid_hex_to_bytes(value))
         except ValueError:
             # this might not be a UUID, depending on the situation (i.e.
             # federation)
-            return value
+            return (False, value)
 
     @classmethod
     def attempt_convert_uuid_bytes_to_hex(cls, value):
@@ -392,7 +405,9 @@ class UnscopedPayload(BasePayload):
                  audit_ids
 
         """
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
         expires_at_str = cls._convert_int_to_time_string(payload[2])
         audit_ids = list(map(provider.base64_encode, payload[3]))
@@ -438,7 +453,9 @@ class DomainScopedPayload(BasePayload):
                  expires_at_str, and audit_ids
 
         """
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
         try:
             domain_id = cls.convert_uuid_bytes_to_hex(payload[2])
@@ -486,9 +503,13 @@ class ProjectScopedPayload(BasePayload):
                  expires_at_str, and audit_ids
 
         """
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        project_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
+        (is_stored_as_bytes, project_id) = payload[2]
+        if is_stored_as_bytes:
+            project_id = cls.attempt_convert_uuid_bytes_to_hex(project_id)
         expires_at_str = cls._convert_int_to_time_string(payload[3])
         audit_ids = list(map(provider.base64_encode, payload[4]))
 
@@ -532,9 +553,13 @@ class TrustScopedPayload(BasePayload):
                   expires_at_str, audit_ids, and trust_id
 
         """
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        project_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
+        (is_stored_as_bytes, project_id) = payload[2]
+        if is_stored_as_bytes:
+            project_id = cls.attempt_convert_uuid_bytes_to_hex(project_id)
         expires_at_str = cls._convert_int_to_time_string(payload[3])
         audit_ids = list(map(provider.base64_encode, payload[4]))
         trust_id = cls.convert_uuid_bytes_to_hex(payload[5])
@@ -552,7 +577,9 @@ class FederatedUnscopedPayload(BasePayload):
 
     @classmethod
     def unpack_group_id(cls, group_id_in_bytes):
-        group_id = cls.attempt_convert_uuid_bytes_to_hex(group_id_in_bytes)
+        (is_stored_as_bytes, group_id) = group_id_in_bytes
+        if is_stored_as_bytes:
+            group_id = cls.attempt_convert_uuid_bytes_to_hex(group_id)
         return {'id': group_id}
 
     @classmethod
@@ -596,10 +623,14 @@ class FederatedUnscopedPayload(BasePayload):
 
         """
 
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
         group_ids = list(map(cls.unpack_group_id, payload[2]))
-        idp_id = cls.attempt_convert_uuid_bytes_to_hex(payload[3])
+        (is_stored_as_bytes, idp_id) = payload[3]
+        if is_stored_as_bytes:
+            idp_id = cls.attempt_convert_uuid_bytes_to_hex(idp_id)
         protocol_id = payload[4]
         expires_at_str = cls._convert_int_to_time_string(payload[5])
         audit_ids = list(map(provider.base64_encode, payload[6]))
@@ -653,11 +684,17 @@ class FederatedScopedPayload(FederatedUnscopedPayload):
                   group IDs
 
         """
-        user_id = cls.attempt_convert_uuid_bytes_to_hex(payload[0])
+        (is_stored_as_bytes, user_id) = payload[0]
+        if is_stored_as_bytes:
+            user_id = cls.attempt_convert_uuid_bytes_to_hex(user_id)
         methods = auth_plugins.convert_integer_to_method_list(payload[1])
-        scope_id = cls.attempt_convert_uuid_bytes_to_hex(payload[2])
+        (is_stored_as_bytes, scope_id) = payload[2]
+        if is_stored_as_bytes:
+            scope_id = cls.attempt_convert_uuid_bytes_to_hex(scope_id)
         group_ids = list(map(cls.unpack_group_id, payload[3]))
-        idp_id = cls.attempt_convert_uuid_bytes_to_hex(payload[4])
+        (is_stored_as_bytes, idp_id) = payload[4]
+        if is_stored_as_bytes:
+            idp_id = cls.attempt_convert_uuid_bytes_to_hex(idp_id)
         protocol_id = payload[5]
         expires_at_str = cls._convert_int_to_time_string(payload[6])
         audit_ids = list(map(provider.base64_encode, payload[7]))
