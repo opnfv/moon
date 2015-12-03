@@ -352,7 +352,6 @@ class ConfigurationManager(manager.Manager):
 
 
 @dependency.provider('tenant_api')
-@dependency.requires('admin_api', 'resource_api', 'root_api')
 @dependency.requires('moonlog_api', 'admin_api', 'configuration_api', 'root_api', 'resource_api')
 class TenantManager(manager.Manager):
 
@@ -909,7 +908,10 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
-        self.moonlog_api.debug("Creation of root IE: {}".format(ref))
+        try:
+            self.moonlog_api.debug("Creation of root IE: {}".format(ref))
+        except AttributeError:
+            LOG.debug("Creation of root IE: {}".format(ref))
 
         # read the template given by "model" and populate default variables
         template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
@@ -2112,7 +2114,7 @@ class IntraExtensionAdminManager(IntraExtensionManager):
 
 
 @dependency.provider('root_api')
-#@dependency.requires('admin_api')
+@dependency.requires('admin_api', 'moonlog_api')
 class IntraExtensionRootManager(IntraExtensionManager):
 
     def __init__(self):

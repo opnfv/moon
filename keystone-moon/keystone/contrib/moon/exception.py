@@ -7,6 +7,10 @@ from keystone.common import dependency
 from keystone.exception import Error
 from keystone.i18n import _, _LW
 import logging
+from oslo_log import log
+
+LOG = log.getLogger(__name__)
+
 
 class MoonErrorMetaClass(type):
 
@@ -32,16 +36,31 @@ class MoonError(Error):
     def __del__(self):
         message = "{} ({})".format(self.hierarchy, self.message_format)
         if self.logger == "ERROR":
-            self.moonlog_api.error(message)
+            try:
+                self.moonlog_api.error(message)
+            except AttributeError:
+                LOG.error(message)
         elif self.logger == "WARNING":
-            self.moonlog_api.warning(message)
+            try:
+                self.moonlog_api.warning(message)
+            except AttributeError:
+                LOG.warning(message)
         elif self.logger == "CRITICAL":
-            self.moonlog_api.critical(message)
+            try:
+                self.moonlog_api.critical(message)
+            except AttributeError:
+                LOG.critical(message)
         elif self.logger == "AUTHZ":
-            self.moonlog_api.authz(self.hierarchy)
-            self.moonlog_api.error(message)
+            try:
+                self.moonlog_api.authz(self.hierarchy)
+                self.moonlog_api.error(message)
+            except AttributeError:
+                LOG.error(message)
         else:
-            self.moonlog_api.info(message)
+            try:
+                self.moonlog_api.info(message)
+            except AttributeError:
+                LOG.info(message)
 
 
 # Exceptions for Tenant
