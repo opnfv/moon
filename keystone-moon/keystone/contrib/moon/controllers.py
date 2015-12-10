@@ -15,7 +15,7 @@ CONF = config.CONF
 LOG = log.getLogger(__name__)
 
 
-@dependency.requires('configuration_api', 'root_api', 'moonlog_api')
+@dependency.requires('configuration_api')
 class Configuration(controller.V3Controller):
     collection_name = 'configurations'
     member_name = 'configuration'
@@ -141,7 +141,7 @@ class Authz_v3(controller.V3Controller):
             return {'authz': False, 'comment': unicode(e)}
 
 
-@dependency.requires('admin_api', 'authz_api')
+@dependency.requires('admin_api', 'root_api')
 class IntraExtensions(controller.V3Controller):
     collection_name = 'intra_extensions'
     member_name = 'intra_extension'
@@ -210,7 +210,7 @@ class IntraExtensions(controller.V3Controller):
 
     @controller.protected()
     def load_root_intra_extension(self, context, **kw):
-        self.admin_api.load_root_intra_extension_dict()
+        self.root_api.load_root_intra_extension_dict()
 
     # Metadata functions
     @controller.protected()
@@ -346,7 +346,6 @@ class IntraExtensions(controller.V3Controller):
         subject_dict['description'] = kw.get('subject_description', None)
         subject_dict['password'] = kw.get('subject_password', None)
         subject_dict['email'] = kw.get('subject_email', None)
-        LOG.debug("controllers.add_subject {}".format(subject_dict))
         return self.admin_api.add_subject_dict(user_id, intra_extension_id, subject_dict)
 
     @controller.protected()

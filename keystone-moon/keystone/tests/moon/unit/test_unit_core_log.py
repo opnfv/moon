@@ -5,16 +5,12 @@
 
 """Unit tests for LogManager"""
 
-import json
-import os
-import uuid
 import time
 from oslo_config import cfg
 from keystone.tests import unit as tests
 from keystone.contrib.moon.core import ConfigurationManager
 from keystone.contrib.moon.core import IntraExtensionAuthzManager
 from keystone.tests.unit.ksfixtures import database
-from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
@@ -36,7 +32,7 @@ IE = {
 
 TIME_FORMAT = '%Y-%m-%d-%H:%M:%S'
 
-@dependency.requires('admin_api', 'tenant_api', 'configuration_api')
+
 class TestIntraExtensionAdminManager(tests.TestCase):
 
     def setUp(self):
@@ -48,9 +44,10 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
         self.tenant_manager = self.tenant_api
@@ -64,7 +61,6 @@ class TestIntraExtensionAdminManager(tests.TestCase):
             "authz_api": IntraExtensionAuthzManager(),
             "tenant_api": TenantManager(),
             "configuration_api": ConfigurationManager(),
-            # "resource_api": resource.Manager(),
         }
 
     def config_overrides(self):

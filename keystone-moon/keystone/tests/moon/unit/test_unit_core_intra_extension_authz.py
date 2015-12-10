@@ -5,15 +5,11 @@
 
 """Unit tests for core IntraExtensionAuthzManager"""
 
-import json
-import os
-import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
 from keystone.contrib.moon.core import IntraExtensionAdminManager, IntraExtensionAuthzManager, IntraExtensionRootManager
 from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
-from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
@@ -33,7 +29,7 @@ IE = {
     "description": "a simple description."
 }
 
-#@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
+
 class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
 
     def setUp(self):
@@ -45,9 +41,10 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
 
@@ -938,7 +935,6 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
         # TODO: add test for the delete function
 
 
-#@dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api', 'identity_api', 'root_api')
 class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
     def setUp(self):
@@ -950,9 +946,10 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
 

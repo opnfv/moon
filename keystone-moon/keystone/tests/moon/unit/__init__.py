@@ -24,26 +24,10 @@ def create_intra_extension(self, policy_model="policy_authz"):
     if "authz" in policy_model:
         genre = "authz"
     IE["genre"] = genre
-    ref = self.admin_api.load_intra_extension_dict(self.root_api.get_root_admin_id(),
+    ref = self.admin_api.load_intra_extension_dict(self.root_api.root_admin_id,
                                                    intra_extension_dict=IE)
     self.assertIsInstance(ref, dict)
     return ref
-
-
-# def create_tenant(self, authz_uuid):
-#     tenant = {
-#         "id": uuid.uuid4().hex,
-#         "name": "TestAuthzIntraExtensionManager",
-#         "enabled": True,
-#         "description": "",
-#         "domain_id": "default"
-#     }
-#     project = self.resource_api.create_project(tenant["id"], tenant)
-#     mapping = self.tenant_api.set_tenant_dict(project["id"], project["name"], authz_uuid, None)
-#     self.assertIsInstance(mapping, dict)
-#     self.assertIn("authz", mapping)
-#     self.assertEqual(mapping["authz"], authz_uuid)
-#     return mapping
 
 
 def create_user(self, username="TestAdminIntraExtensionManagerUser"):
@@ -56,6 +40,7 @@ def create_user(self, username="TestAdminIntraExtensionManagerUser"):
     }
     _user = self.identity_api.create_user(user)
     return _user
+
 
 def create_mapping(self, tenant_name=None, authz_id=None, admin_id=None):
 
@@ -72,7 +57,7 @@ def create_mapping(self, tenant_name=None, authz_id=None, admin_id=None):
         "domain_id": "default"
     }
     keystone_tenant = self.resource_api.create_project(tenant["id"], tenant)
-    mapping = self.tenant_api.add_tenant_dict(self.root_api.get_root_admin_id(), tenant["id"], tenant)
+    mapping = self.tenant_api.add_tenant_dict(self.root_api.root_admin_id, tenant["id"], tenant)
     self.assertIsInstance(mapping, dict)
     self.assertIn("intra_authz_extension_id", mapping[tenant["id"]])
     self.assertIn("intra_admin_extension_id", mapping[tenant["id"]])

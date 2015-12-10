@@ -42,34 +42,6 @@ EXTENSION_DATA = {
 extension.register_admin_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
 extension.register_public_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
 
-# _OPTS = [
-#     cfg.StrOpt('configuration_driver',
-#                default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
-#                help='Configuration backend driver.'),
-#     cfg.StrOpt('tenant_driver',
-#                default='keystone.contrib.moon.backends.sql.TenantConnector',
-#                help='Tenant backend driver.'),
-#     cfg.StrOpt('authz_driver',
-#                default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
-#                help='Authorisation backend driver.'),
-#     cfg.StrOpt('intraextension_driver',
-#                default='keystone.contrib.moon.backends.sql.IntraExtensionConnector',
-#                help='IntraExtension backend driver.'),
-#     cfg.StrOpt('interextension_driver',
-#                default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
-#                help='InterExtension backend driver.'),
-#     cfg.StrOpt('log_driver',
-#                default='keystone.contrib.moon.backends.flat.LogConnector',
-#                help='Logs backend driver.'),
-#     cfg.StrOpt('policy_directory',
-#                default='/etc/keystone/policies',
-#                help='Local directory where all policies are stored.'),
-#     cfg.StrOpt('root_policy_directory',
-#                default='policy_root',
-#                help='Local directory where Root IntraExtension configuration is stored.'),
-# ]
-# CONF.register_opts(_OPTS, group='moon')
-
 
 def filter_input(func_or_str):
 
@@ -133,33 +105,18 @@ def filter_input(func_or_str):
 
 
 def enforce(action_names, object_name, **extra):
-    _action_name_list = action_names
-    _object_name = object_name
-
-    # def get_root_extension(self, args, kwargs):
-    #     if not ROOT_EXTENSION_ID:
-    #         global ROOT_EXTENSION_MODEL, ROOT_EXTENSION_ID, ADMIN_ID
-    #         try:
-    #             # if it is the first time we passed here, the root extension may be not initialized
-    #             # specially during unittest. So we raise  RootExtensionNotInitialized to authorize the
-    #             # current creation process
-    #             if 'intra_extension_dict' in kwargs:
-    #                 intra_extension_dict = kwargs['intra_extension_dict']
-    #             else:
-    #                 intra_extension_dict = args[2]
-    #             if isinstance(intra_extension_dict, dict) and \
-    #                             "model" in intra_extension_dict and \
-    #                             intra_extension_dict["model"] == "policy_root":
-    #                 raise RootExtensionNotInitialized()
-    #         except KeyError:
-    #             pass
-    #     return ROOT_EXTENSION_ID
 
     def wrap(func):
+        _action_name_list = action_names
+        _object_name = object_name
+        dependency.resolve_future_dependencies()
 
         def wrapped(*args, **kwargs):
+            root_api = dependency._REGISTRY["root_api"][0]
+            admin_api = dependency._REGISTRY["admin_api"][0]
+            moonlog_api = dependency._REGISTRY["moonlog_api"][0]
+            tenant_api = dependency._REGISTRY["tenant_api"][0]
             returned_value_for_func = None
-            self = args[0]
             try:
                 user_id = args[1]
             except IndexError:
@@ -167,7 +124,7 @@ def enforce(action_names, object_name, **extra):
             intra_extension_id = None
             intra_admin_extension_id = None
 
-            intra_root_extension_id = self.root_api.get_root_extension_id()
+            intra_root_extension_id = root_api.root_extension_id
             try:
                 intra_extension_id = args[2]
             except IndexError:
@@ -176,16 +133,13 @@ def enforce(action_names, object_name, **extra):
                 else:
                     intra_extension_id = intra_root_extension_id
 
-            try:
-                tenants_dict = self.tenant_api.driver.get_tenants_dict()
-            except AttributeError:
-                tenants_dict = self.driver.get_tenants_dict()
-            if self.root_api.is_admin_subject(user_id):
+            tenants_dict = tenant_api.driver.get_tenants_dict()
+            if root_api.is_admin_subject(user_id):
                 # TODO: check if there is no security hole here
-                self.moonlog_api.driver.info("Authorizing because it is the user admin of the root intra-extension")
+                moonlog_api.driver.info("Authorizing because it is the user admin of the root intra-extension")
                 returned_value_for_func = func(*args, **kwargs)
             else:
-                intra_extensions_dict = self.admin_api.driver.get_intra_extensions_dict()
+                intra_extensions_dict = admin_api.driver.get_intra_extensions_dict()
                 if intra_extension_id not in intra_extensions_dict:
                     # if id is not an intra_extension, maybe it is a tenant id
                     intra_extension_id = intra_root_extension_id
@@ -196,19 +150,17 @@ def enforce(action_names, object_name, **extra):
                     else:
                         # id is not a known tenant ID, so we must check against the Root intra_extension
                         intra_extension_id = intra_root_extension_id
-                        LOG.warning("Cannot enforce because the intra-extension is unknown (fallback to the root intraextension)")
+                        LOG.warning("Cannot emanager because the intra-extension is unknown (fallback to the root intraextension)")
                 for _tenant_id in tenants_dict:
                     if tenants_dict[_tenant_id]['intra_authz_extension_id'] == intra_extension_id or \
                                     tenants_dict[_tenant_id]['intra_admin_extension_id'] == intra_extension_id:
                         intra_admin_extension_id = tenants_dict[_tenant_id]['intra_admin_extension_id']
                         break
                 if not intra_admin_extension_id:
-                    self.moonlog_api.driver.warning("No Intra_Admin_Extension found, authorization granted by default.")
+                    moonlog_api.driver.warning("No Intra_Admin_Extension found, authorization granted by default.")
                     returned_value_for_func = func(*args, **kwargs)
                 else:
-                    # subjects_dict = self.admin_api.driver.get_subjects_dict(intra_admin_extension_id)
-                    # keystone_user_id = subjects_dict[subject_id]["keystone_id"]
-                    objects_dict = self.admin_api.driver.get_objects_dict(intra_admin_extension_id)
+                    objects_dict = admin_api.driver.get_objects_dict(intra_admin_extension_id)
                     object_name = intra_extensions_dict[intra_extension_id]['genre'] + '.' + _object_name
                     object_id = None
                     for _object_id in objects_dict:
@@ -216,7 +168,7 @@ def enforce(action_names, object_name, **extra):
                             object_id = _object_id
                             break
                     if not object_id:
-                        objects_dict = self.admin_api.driver.get_objects_dict(intra_root_extension_id)
+                        objects_dict = admin_api.driver.get_objects_dict(intra_root_extension_id)
                         object_name = object_name.split(".")[-1]
                         for _object_id in objects_dict:
                             if objects_dict[_object_id]['name'] == object_name:
@@ -226,7 +178,7 @@ def enforce(action_names, object_name, **extra):
                             raise ObjectUnknown("Unknown object name: {}".format(object_name))
                         # if we found the object in intra_root_extension_id, so we change the intra_admin_extension_id
                         # into intra_root_extension_id and we modify the ID of the subject
-                        subjects_dict = self.admin_api.driver.get_subjects_dict(intra_admin_extension_id)
+                        subjects_dict = admin_api.driver.get_subjects_dict(intra_admin_extension_id)
                         try:
                             subject_name = subjects_dict[user_id]["name"]
                         except KeyError:
@@ -239,7 +191,7 @@ def enforce(action_names, object_name, **extra):
                             except KeyError:
                                 raise SubjectUnknown()
                         intra_admin_extension_id = intra_root_extension_id
-                        subjects_dict = self.admin_api.driver.get_subjects_dict(intra_admin_extension_id)
+                        subjects_dict = admin_api.driver.get_subjects_dict(intra_admin_extension_id)
                         user_id = None
                         for _subject_id in subjects_dict:
                             if subjects_dict[_subject_id]["name"] == subject_name:
@@ -250,7 +202,7 @@ def enforce(action_names, object_name, **extra):
                         action_name_list = (_action_name_list, )
                     else:
                         action_name_list = _action_name_list
-                    actions_dict = self.admin_api.driver.get_actions_dict(intra_admin_extension_id)
+                    actions_dict = admin_api.driver.get_actions_dict(intra_admin_extension_id)
                     action_id_list = list()
                     for _action_name in action_name_list:
                         for _action_id in actions_dict:
@@ -260,12 +212,12 @@ def enforce(action_names, object_name, **extra):
 
                     authz_result = False
                     for action_id in action_id_list:
-                        res = self.admin_api.authz(intra_admin_extension_id, user_id, object_id, action_id)
-                        self.moonlog_api.info("res={}".format(res))
+                        res = admin_api.authz(intra_admin_extension_id, user_id, object_id, action_id)
+                        moonlog_api.info("res={}".format(res))
                         if res:
                             authz_result = True
                         else:
-                            self.moonlog_api.authz("No authorization for ({} {}-{}-{})".format(
+                            moonlog_api.authz("No authorization for ({} {}-{}-{})".format(
                                 intra_admin_extension_id,
                                 user_id,
                                 object_name,
@@ -282,7 +234,6 @@ def enforce(action_names, object_name, **extra):
 
 
 @dependency.provider('configuration_api')
-@dependency.requires('moonlog_api', 'admin_api', 'tenant_api', 'root_api')
 class ConfigurationManager(manager.Manager):
 
     driver_namespace = 'keystone.moon.configuration'
@@ -352,7 +303,7 @@ class ConfigurationManager(manager.Manager):
 
 
 @dependency.provider('tenant_api')
-@dependency.requires('moonlog_api', 'admin_api', 'configuration_api', 'root_api', 'resource_api')
+@dependency.requires('moonlog_api', 'admin_api', 'root_api', 'resource_api', 'admin_api')
 class TenantManager(manager.Manager):
 
     driver_namespace = 'keystone.moon.tenant'
@@ -430,16 +381,16 @@ class TenantManager(manager.Manager):
                 # TODO (ateroide): check whether we can replace the below code by the above one
                 # NOTE (ateroide): at a first glance: no, subject_id changes depending on which intra_extesion is used
                 # we must use name which is constant.
-                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
+                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_authz_extension_id'])
                 authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
-                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
+                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_admin_extension_id'])
                 admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
                 for _subject_id in authz_subjects_dict:
                     if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
-                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+                        self.admin_api.add_subject_dict(self.root_api.root_admin_id, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
                 for _subject_id in admin_subjects_dict:
                     if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
-                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+                        self.admin_api.add_subject_dict(self.root_api.root_admin_id, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.add_tenant_dict(tenant_dict['id'], tenant_dict)
 
@@ -468,37 +419,102 @@ class TenantManager(manager.Manager):
         # Sync users between intra_authz_extension and intra_admin_extension
         if 'intra_admin_extension_id' in tenant_dict:
             if 'intra_authz_extension_id' in tenant_dict:
-                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
+                authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_authz_extension_id'])
                 authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
-                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
+                admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_admin_extension_id'])
                 admin_subject_names_list = [admin_subjects_dict[subject_id]["name"] for subject_id in admin_subjects_dict]
                 for _subject_id in authz_subjects_dict:
                     if authz_subjects_dict[_subject_id]["name"] not in admin_subject_names_list:
-                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
+                        self.admin_api.add_subject_dict(self.root_api.root_admin_id, tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
                 for _subject_id in admin_subjects_dict:
                     if admin_subjects_dict[_subject_id]["name"] not in authz_subject_names_list:
-                        self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
+                        self.admin_api.add_subject_dict(self.root_api.root_admin_id, tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
 
         return self.driver.set_tenant_dict(tenant_id, tenant_dict)
 
 
-@dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'moonlog_api', 'root_api')
+@dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'moonlog_api')
 class IntraExtensionManager(manager.Manager):
 
     driver_namespace = 'keystone.moon.intraextension'
 
     def __init__(self):
         super(IntraExtensionManager, self).__init__(CONF.moon.intraextension_driver)
-        self.__init_aggregation_algorithm()
+        # self.root_admin_id = self.__compute_admin_id_for_root_extension()
+        self._root_admin_id = None
+        self._root_extension_id = None
+        # self.__init_aggregation_algorithm()
 
-    def __init_aggregation_algorithm(self):
-        try:
-            self.root_extension_id = self.root_api.get_root_extension_id()
-            self.aggregation_algorithm_dict = self.configuration_api.get_aggregation_algorithms_dict(self.root_extension_id)
-        except AttributeError as e:
-            LOG.warning("Error on init_aggregation_algorithm ({})".format(e))
-            self.root_extension_id = None
-            self.aggregation_algorithm_dict = {}
+    def __init_root(self, root_extension_id=None):
+        LOG.debug("__init_root {}".format(root_extension_id))
+        LOG.debug(dependency._REGISTRY)
+        if root_extension_id:
+            self._root_extension_id = root_extension_id
+        else:
+            try:
+                self._root_extension_id = self.get_root_extension_id()
+                self.aggregation_algorithm_dict = self.configuration_api.driver.get_aggregation_algorithms_dict()
+            except AttributeError as e:
+                LOG.warning("Error on root intraextension initialization ({})".format(e))
+                self._root_extension_id = None
+                self.aggregation_algorithm_dict = {}
+        if self._root_extension_id:
+            for subject_id, subject_dict in self.driver.get_subjects_dict(self.root_extension_id).iteritems():
+                if subject_dict["name"] == "admin":
+                    self._root_admin_id = subject_id
+                    return
+            raise RootExtensionNotInitialized()
+
+    @property
+    def root_extension_id(self):
+        if not self._root_extension_id:
+            self.__init_root()
+        return self._root_extension_id
+
+    @root_extension_id.setter
+    def root_extension_id(self, value):
+        self._root_extension_id = value
+        LOG.info("set root_extension_id={}".format(self._root_extension_id))
+
+    @property
+    def root_admin_id(self):
+        if not self._root_admin_id:
+            self.__init_root()
+        return self._root_admin_id
+
+    def get_root_extension_dict(self):
+        """
+
+        :return: {id: {"name": "xxx"}}
+        """
+        LOG.debug("self.driver.get_intra_extensions_dict()={}".format(self.driver.get_intra_extensions_dict()))
+        return {self.root_extension_id: self.driver.get_intra_extensions_dict()[self.root_extension_id]}
+
+    # def __compute_admin_id_for_root_extension(self):
+    #     for subject_id, subject_dict in self.driver.get_subjects_dict(self.root_extension_id).iteritems():
+    #         if subject_dict["name"] == "admin":
+    #             return subject_id
+    #     raise RootExtensionNotInitialized()
+
+    def get_root_extension_id(self):
+        extensions = self.driver.get_intra_extensions_dict()
+        for extension_id, extension_dict in extensions.iteritems():
+            if extension_dict["name"] == CONF.moon.root_policy_directory:
+                return extension_id
+        else:
+            extension = self.load_root_intra_extension_dict(CONF.moon.root_policy_directory)
+            if not extension:
+                raise IntraExtensionCreationError("The root extension is not created.")
+            return extension['id']
+
+    # def __init_aggregation_algorithm(self):
+    #     try:
+    #         self._root_extension_id = self.get_root_extension_id()
+    #         self.aggregation_algorithm_dict = self.configuration_api.get_aggregation_algorithms_dict(self.root_extension_id)
+    #     except AttributeError as e:
+    #         LOG.warning("Error on init_aggregation_algorithm ({})".format(e))
+    #         self._root_extension_id = None
+    #         self.aggregation_algorithm_dict = {}
 
     def __get_authz_buffer(self, intra_extension_id, subject_id, object_id, action_id):
         """
@@ -586,8 +602,8 @@ class IntraExtensionManager(manager.Manager):
                     meta_rule_dict[sub_meta_rule_id],
                     self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values())
 
-        if not self.root_extension_id:
-            self.__init_aggregation_algorithm()
+        # if not self.root_extension_id:
+        #     self.__init_aggregation_algorithm()
         aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)['aggregation_algorithm']
         if self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
             decision = all_true(decision_buffer)
@@ -662,7 +678,8 @@ class IntraExtensionManager(manager.Manager):
             except exception.UserNotFound:
                 # TODO (asteroide): must add a configuration option to allow that exception
                 # maybe a debug option for unittest
-                keystone_user = {'id': "", 'name': _subject}
+                keystone_user = {'id': uuid4().hex, 'name': _subject}
+                self.moonlog_api.error("Keystone user not found ({})".format(_subject))
             subject_id = uuid4().hex
             subject_dict[subject_id] = keystone_user
             subject_dict[subject_id]['keystone_id'] = keystone_user["id"]
@@ -897,10 +914,15 @@ class IntraExtensionManager(manager.Manager):
         # Note (asteroide): Only one root Extension is authorized
         # and this extension is created at the very beginning of the server
         # so we don't need to use enforce here
-        for key in self.driver.get_intra_extensions_dict():
-            # Note (asteroide): if there is at least one Intra Extension, it implies that
-            # the Root Intra Extension had already been created...
-            return
+        # if self.get_root_extension_id():
+        #     # for ext in self.driver.get_intra_extensions_dict():
+        #     # Note (asteroide): if there is at least one Intra Extension, it implies that
+        #     # the Root Intra Extension had already been created...
+        #     return
+        extensions = self.driver.get_intra_extensions_dict()
+        for extension_id, extension_dict in extensions.iteritems():
+            if extension_dict["name"] == CONF.moon.root_policy_directory:
+                return {'id': extension_id}
         ie_dict = dict()
         ie_dict['id'] = uuid4().hex
         ie_dict["name"] = "policy_root"
@@ -908,10 +930,10 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
-        try:
-            self.moonlog_api.debug("Creation of root IE: {}".format(ref))
-        except AttributeError:
-            LOG.debug("Creation of root IE: {}".format(ref))
+        # try:
+        self.moonlog_api.debug("Creation of root IE: {}".format(ref))
+        # except AttributeError:
+        #     LOG.debug("Creation of root IE: {}".format(ref))
 
         # read the template given by "model" and populate default variables
         template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])
@@ -921,6 +943,7 @@ class IntraExtensionManager(manager.Manager):
         self.__load_assignment_file(ie_dict, template_dir)
         self.__load_metarule_file(ie_dict, template_dir)
         self.__load_rule_file(ie_dict, template_dir)
+        self.__init_root(root_extension_id=ie_dict['id'])
         return ref
 
     @enforce("read", "intra_extensions")
@@ -1209,9 +1232,9 @@ class IntraExtensionManager(manager.Manager):
         if intra_extension_id not in (tenants_dict[tenant_id]['intra_authz_extension_id'],
                                       tenants_dict[tenant_id]['intra_admin_extension_id'], ):
             raise IntraExtensionUnknown()
-        # Note (asteroide): We used self.root_api.get_root_admin_id() because the user requesting this information
+        # Note (asteroide): We used self.root_admin_id because the user requesting this information
         # may only know his keystone_id and not the subject ID in the requested intra_extension.
-        subjects_dict = self.get_subjects_dict(self.root_api.get_root_admin_id(), intra_extension_id)
+        subjects_dict = self.get_subjects_dict(self.root_admin_id, intra_extension_id)
         for subject_id in subjects_dict:
             if keystone_id == subjects_dict[subject_id]['keystone_id']:
                 return {subject_id: subjects_dict[subject_id]}
@@ -1224,9 +1247,9 @@ class IntraExtensionManager(manager.Manager):
         if intra_extension_id not in (tenants_dict[tenant_id]['intra_authz_extension_id'],
                                       tenants_dict[tenant_id]['intra_admin_extension_id'], ):
             raise IntraExtensionUnknown()
-        # Note (asteroide): We used self.root_api.get_root_admin_id() because the user requesting this information
+        # Note (asteroide): We used self.root_admin_id because the user requesting this information
         # may only know his keystone_name and not the subject ID in the requested intra_extension.
-        subjects_dict = self.get_subjects_dict(self.root_api.get_root_admin_id(), intra_extension_id)
+        subjects_dict = self.get_subjects_dict(self.root_admin_id, intra_extension_id)
         for subject_id in subjects_dict:
             if keystone_name == subjects_dict[subject_id]['keystone_name']:
                 return {subject_id: subjects_dict[subject_id]}
@@ -1682,7 +1705,7 @@ class IntraExtensionManager(manager.Manager):
     def set_aggregation_algorithm_id(self, user_id, intra_extension_id, aggregation_algorithm_id):
         if aggregation_algorithm_id:
             if aggregation_algorithm_id not in self.configuration_api.get_aggregation_algorithms_dict(
-                    self.root_api.get_root_admin_id()):
+                    self.root_admin_id):
                 raise AggregationAlgorithmUnknown()
         return self.driver.set_aggregation_algorithm_id(intra_extension_id, aggregation_algorithm_id)
 
@@ -1814,7 +1837,6 @@ class IntraExtensionManager(manager.Manager):
 
 
 @dependency.provider('authz_api')
-#@dependency.requires('resource_api')
 class IntraExtensionAuthzManager(IntraExtensionManager):
 
     def __init__(self):
@@ -1829,7 +1851,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
         elif genre == "admin":
             genre = "intra_admin_extension_id"
 
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
 
         if tenant_id not in tenants_dict:
             # raise TenantUnknown("Cannot authz because Tenant is unknown {}".format(tenant_id))
@@ -1868,7 +1890,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
         subject = super(IntraExtensionAuthzManager, self).add_subject_dict(user_id, intra_extension_id, subject_dict)
         subject_id,  subject_value = subject.iteritems().next()
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_admin_extension_id"] and \
                             tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
@@ -1887,7 +1909,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
     def del_subject(self, user_id, intra_extension_id, subject_id):
         subject_name = self.driver.get_subjects_dict(intra_extension_id)[subject_id]["name"]
         super(IntraExtensionAuthzManager, self).del_subject(user_id, intra_extension_id, subject_id)
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id and \
                 tenants_dict[tenant_id]["intra_admin_extension_id"]:
@@ -1907,7 +1929,7 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
     def set_subject_dict(self, user_id, intra_extension_id, subject_id, subject_dict):
         subject = super(IntraExtensionAuthzManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
         subject_id,  subject_value = subject.iteritems().next()
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
                 self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], uuid4().hex, subject_value)
@@ -2024,7 +2046,6 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
 
 
 @dependency.provider('admin_api')
-#@dependency.requires('resource_api')
 class IntraExtensionAdminManager(IntraExtensionManager):
 
     def __init__(self):
@@ -2033,7 +2054,7 @@ class IntraExtensionAdminManager(IntraExtensionManager):
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
         subject = super(IntraExtensionAdminManager, self).add_subject_dict(user_id, intra_extension_id, subject_dict)
         subject_id,  subject_value = subject.iteritems().next()
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_admin_extension_id"] and \
                             tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
@@ -2052,7 +2073,7 @@ class IntraExtensionAdminManager(IntraExtensionManager):
     def del_subject(self, user_id, intra_extension_id, subject_id):
         subject_name = self.driver.get_subjects_dict(intra_extension_id)[subject_id]["name"]
         super(IntraExtensionAdminManager, self).del_subject(user_id, intra_extension_id, subject_id)
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id and \
                 tenants_dict[tenant_id]["intra_admin_extension_id"]:
@@ -2072,7 +2093,7 @@ class IntraExtensionAdminManager(IntraExtensionManager):
     def set_subject_dict(self, user_id, intra_extension_id, subject_id, subject_dict):
         subject = super(IntraExtensionAdminManager, self).set_subject_dict(user_id, intra_extension_id, subject_dict)
         subject_id,  subject_value = subject.iteritems().next()
-        tenants_dict = self.tenant_api.get_tenants_dict(self.root_api.get_root_admin_id())
+        tenants_dict = self.tenant_api.get_tenants_dict(self.root_admin_id)
         for tenant_id in tenants_dict:
             if tenants_dict[tenant_id]["intra_authz_extension_id"] == intra_extension_id:
                 self.driver.set_subject_dict(tenants_dict[tenant_id]["intra_admin_extension_id"], uuid4().hex, subject_value)
@@ -2083,75 +2104,45 @@ class IntraExtensionAdminManager(IntraExtensionManager):
         return subject
 
     def add_object_dict(self, user_id, intra_extension_id, object_name):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ObjectsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).add_object_dict(user_id, intra_extension_id, object_name)
 
     def set_object_dict(self, user_id, intra_extension_id, object_id, object_dict):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ObjectsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).set_object_dict(user_id, intra_extension_id, object_id, object_dict)
 
     def del_object(self, user_id, intra_extension_id, object_id):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ObjectsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).del_object(user_id, intra_extension_id, object_id)
 
     def add_action_dict(self, user_id, intra_extension_id, action_name):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ActionsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).add_action_dict(user_id, intra_extension_id, action_name)
 
     def set_action_dict(self, user_id, intra_extension_id, action_id, action_dict):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ActionsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).set_action_dict(user_id, intra_extension_id, action_id, action_dict)
 
     def del_action(self, user_id, intra_extension_id, action_id):
-        if "admin" == self.get_intra_extension_dict(self.root_api.get_root_admin_id(), intra_extension_id)['genre']:
+        if "admin" == self.get_intra_extension_dict(self.root_admin_id, intra_extension_id)['genre']:
             raise ActionsWriteNoAuthorized()
         return super(IntraExtensionAdminManager, self).del_action(user_id, intra_extension_id, action_id)
 
 
 @dependency.provider('root_api')
-@dependency.requires('admin_api', 'moonlog_api')
+@dependency.requires('identity_api')
 class IntraExtensionRootManager(IntraExtensionManager):
 
     def __init__(self):
         super(IntraExtensionRootManager, self).__init__()
-        extensions = self.admin_api.driver.get_intra_extensions_dict()
-        for extension_id, extension_dict in extensions.iteritems():
-            if extension_dict["name"] == CONF.moon.root_policy_directory:
-                self.root_extension_id = extension_id
-                break
-        else:
-            extension = self.admin_api.load_root_intra_extension_dict(CONF.moon.root_policy_directory)
-            if not extension:
-                raise IntraExtensionCreationError("The root extension is not created.")
-            self.root_extension_id = extension['id']
-        self.root_admin_id = self.__compute_admin_id_for_root_extension()
-
-    def get_root_extension_dict(self):
-        """
-
-        :return: {id: {"name": "xxx"}}
-        """
-        return {self.root_extension_id: self.admin_api.driver.get_intra_extensions_dict()[self.root_extension_id]}
-
-    def __compute_admin_id_for_root_extension(self):
-        for subject_id, subject_dict in self.admin_api.driver.get_subjects_dict(self.root_extension_id).iteritems():
-            if subject_dict["name"] == "admin":
-                return subject_id
-        raise RootExtensionNotInitialized()
-
-    def get_root_extension_id(self):
-        return self.root_extension_id
-
-    def get_root_admin_id(self):
-        return self.root_admin_id
 
     def is_admin_subject(self, keystone_id):
-        for subject_id, subject_dict in self.admin_api.driver.get_subjects_dict(self.root_extension_id).iteritems():
+        for subject_id, subject_dict in self.driver.get_subjects_dict(self.root_extension_id).iteritems():
             if subject_id == keystone_id:
                 # subject_id may be a true id from an intra_extension
                 return True
@@ -2159,9 +2150,8 @@ class IntraExtensionRootManager(IntraExtensionManager):
                 return True
         return False
 
+
 @dependency.provider('moonlog_api')
-# Next line is mandatory in order to force keystone to process dependencies.
-#@dependency.requires('identity_api', 'tenant_api', 'configuration_api', 'authz_api', 'admin_api', 'root_api')
 class LogManager(manager.Manager):
 
     driver_namespace = 'keystone.moon.log'

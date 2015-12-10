@@ -5,12 +5,9 @@
 
 """Unit tests for core configuration."""
 
-import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
-from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
-from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager
 from keystone.contrib.moon.core import IntraExtensionAdminManager
@@ -22,7 +19,6 @@ from keystone.tests.moon.unit import *
 CONF = cfg.CONF
 
 
-# @dependency.requires('admin_api', 'authz_api', 'tenant_api', 'configuration_api', 'moonlog_api')
 class TestConfigurationManager(tests.TestCase):
 
     def setUp(self):
@@ -34,9 +30,10 @@ class TestConfigurationManager(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
         self.configuration_manager = self.configuration_api
@@ -71,16 +68,4 @@ class TestConfigurationManager(tests.TestCase):
         data = self.configuration_manager.get_policy_templates_dict(self.ADMIN_ID)
         self.assertIsInstance(data, dict)
         self.assertIn("policy_root", data)
-
-    # def test_get_aggregation_algorithm_dict(self):
-    #     admin_intra_extension = create_intra_extension(self, policy_model="policy_rbac_admin")
-    #     print(admin_intra_extension)
-    #     data = self.manager.get_aggregation_algorithm_dict(self.ADMIN_ID, admin_intra_extension['id'])
-    #     print(data)
-
-    # def test_get_sub_meta_rule_algorithm_dict(self):
-    #     data = self.manager.get_sub_meta_rule_algorithm_dict(self.ADMIN_ID)
-    #     print(data)
-    #
-    #     self.assertEqual("", "ee")
 

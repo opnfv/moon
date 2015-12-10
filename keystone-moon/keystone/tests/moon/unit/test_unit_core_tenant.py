@@ -5,7 +5,6 @@
 
 """Unit tests for core tenant."""
 
-import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
 from keystone.contrib.moon.core import ConfigurationManager
@@ -15,7 +14,7 @@ from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager
 from keystone.contrib.moon.core import IntraExtensionRootManager
 from keystone.contrib.moon.core import IntraExtensionAdminManager
-from keystone.common import dependency
+from keystone.contrib.moon.core import IntraExtensionAuthzManager
 from keystone.tests.moon.unit import *
 
 
@@ -31,7 +30,7 @@ IE = {
     "description": "a simple description."
 }
 
-@dependency.requires('admin_api', 'tenant_api', 'configuration_api')
+
 class TestTenantManager(tests.TestCase):
     ADMIN_ID = None
 
@@ -44,9 +43,10 @@ class TestTenantManager(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
         self.tenant_manager = self.tenant_api
@@ -55,6 +55,7 @@ class TestTenantManager(tests.TestCase):
         return {
             "moonlog_api": LogManager(),
             "admin_api": IntraExtensionAdminManager(),
+            "authz_api": IntraExtensionAuthzManager(),
             "configuration_api": ConfigurationManager(),
             "root_api": IntraExtensionRootManager(),
         }

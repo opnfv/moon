@@ -5,15 +5,11 @@
 
 """Unit tests for core IntraExtensionAdminManager"""
 
-import json
-import os
-import uuid
 from oslo_config import cfg
 from keystone.tests import unit as tests
 from keystone.contrib.moon.core import IntraExtensionAdminManager, IntraExtensionAuthzManager
-from keystone.contrib.moon.core import IntraExtensionRootManager, ConfigurationManager
+from keystone.contrib.moon.core import ConfigurationManager
 from keystone.tests.unit.ksfixtures import database
-from keystone import resource
 from keystone.contrib.moon.exception import *
 from keystone.tests.unit import default_fixtures
 from keystone.contrib.moon.core import LogManager, TenantManager
@@ -47,9 +43,10 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
 
@@ -63,7 +60,6 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
             "admin_api": IntraExtensionAdminManager(),
             "authz_api": IntraExtensionAuthzManager(),
             "configuration_api": ConfigurationManager(),
-            # "resource_api": resource.Manager(),
         }
 
     def config_overrides(self):
@@ -969,9 +965,10 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
+        self.root_api.load_root_intra_extension_dict()
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
-        self.ADMIN_ID = self.root_api.get_root_admin_id()
+        self.ADMIN_ID = self.root_api.root_admin_id
         self.authz_manager = self.authz_api
         self.admin_manager = self.admin_api
 
