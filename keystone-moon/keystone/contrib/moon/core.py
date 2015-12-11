@@ -2135,7 +2135,6 @@ class IntraExtensionAdminManager(IntraExtensionManager):
 
 
 @dependency.provider('root_api')
-@dependency.requires('identity_api')
 class IntraExtensionRootManager(IntraExtensionManager):
 
     def __init__(self):
