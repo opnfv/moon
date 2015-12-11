@@ -40,3 +40,8 @@ moon-abe/pbc-0.5.14/.libs/
 moonclient/dist
 moonclient/build
 moonclient/python_moonclient.egg-info
+
+*~
+/docs_build/
+/docs_output/
+/releng/
