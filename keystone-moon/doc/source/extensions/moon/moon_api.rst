@@ -3,626 +3,842 @@ Moon API
 
 Here are Moon API with some examples of posted data and returned data.
 
+All requests must be prefexied by /v3/OS-MOON.
+
+Authz
+-----
+
+**GET     /authz/{tenant_id}/{subject_k_id}/{object_name}/{action_name}**
+  Authorization API.
+
+.. code-block:: json
+
+               return = {
+                    "authz": "True or False"
+               }
+
+
 Intra-Extension API
 -------------------
 
-Authz
-~~~~~
+Configuration
+~~~~~~~~~~~~~
 
-* ``GET     /OS-MOON/authz/{tenant_id}/{subject_id}/{object_id}/{action_id}``
+**GET     /configuration/templates**
 
-.. code-block:: json
-
-               return = {
-                            "authz": "OK/KO/OutOfScope",
-                            "tenant_id": "tenant_id",
-                            "subject_id": "subject_id",
-                            "object_id": "object_id",
-                            "action_id": "action_id"
-                        }
-
-Intra_Extension
-~~~~~~~~~~~~~~~
-
-* ``GET     /OS-MOON/authz_policies``
+    List all policy templates.
 
 .. code-block:: json
 
                return = {
-                            "authz_policies": ["policy_name1", "policy_name2"]
-                        }
+                    "template_id": {
+                        "name": "name of the template",
+                        "description": "description of the template",
+                    }
+               }
 
-* ``GET     /OS-MOON/intra_extensions``
 
-.. code-block:: json
+**GET     /configuration/aggregation_algorithms**
 
-               return = {
-                            "intra_extensions": ["ie_uuid1", "ie_uuid2"]
-                        }
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}``
+    List all aggregation algorithms.
 
 .. code-block:: json
 
                return = {
-                            "intra_extensions": {
-                                "id": "uuid1",
-                                "description": "",
-                                "tenant": "tenant_uuid",
-                                "model": "",
-                                "genre": "",
-                                "authz": {},
-                                "admin": {}
-                            }
-                        }
+                    "algorithm_id": {
+                        "name": "name of the algorithm",
+                        "description": "description of the algorithm",
+                    }
+               }
 
-* ``POST    /OS-MOON/intra_extensions``
 
-.. code-block:: json
+**GET     /configuration/sub_meta_rule_algorithms**
 
-                 post = {
-                            "name" : "",
-                            "policymodel": "",
-                            "description": ""
-                        }
-               return = {
-                            "id": "uuid1",
-                            "description": "",
-                            "tenant": "tenant_uuid",
-                            "model": "",
-                            "genre": "",
-                            "authz": {},
-                            "admin": {}
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/tenant``
+    List all sub meta rule algorithms.
 
 .. code-block:: json
 
                return = {
-                            "tenant": "tenant_id"
-                        }
+                    "algorithm_id": {
+                        "name": "name of the algorithm",
+                        "description": "description of the algorithm",
+                    }
+               }
 
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/tenant``
 
-.. code-block:: json
+Tenants
+~~~~~~~
 
-                 post = {
-                            "tenant_id": "tenant_id"
-                        }
-               return = {
-                            "tenant": "tenant_id"
-                        }
+**GET     /tenants**
 
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/tenant/{tenant_id}``
-
-Perimeter
-~~~~~~~~~
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/subjects``
+    List all tenants.
 
 .. code-block:: json
 
                return = {
-                            "subjects": ["sub_uuid1", "sub_uuid2"]
-                        }
+                    "tenant_id": {
+                        "name": "name of the tenant",
+                        "description": "description of the tenant",
+                        "intra_authz_extension_id": "id of the intra extension authz",
+                        "intra_admin_extension_id": "id of the intra extension authz"
+                    }
+               }
 
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/subjects``
 
-.. code-block:: json
+**POST    /tenants**
 
-                 post = {
-                            "subject_id" : ""
-                        }
-               return = {
-                            "subjects": ["sub_uuid1", "sub_uuid2"]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/subject/{subject_id}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/objects``
+    Add a tenant.
 
 .. code-block:: json
 
+               post = {
+                    "tenant_name": "name of the tenant",
+                    "tenant_description": "description of the tenant",
+                    "tenant_intra_authz_extension_id": "id of the intra extension authz",
+                    "tenant_intra_admin_extension_id": "id of the intra extension admin"
+               }
                return = {
-                            "objects": ["obj_uuid1", "obj_uuid2"]
-                        }
+                    "tenant_id": {
+                        "name": "name of the tenant",
+                        "description": "description of the tenant",
+                        "intra_authz_extension_id": "id of the intra extension authz",
+                        "intra_admin_extension_id": "id of the intra extension authz"
+                    }
+               }
 
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/objects``
 
-.. code-block:: json
+**POST    /tenants/{tenant_id}**
 
-                 post = {
-                            "object_id" : ""
-                        }
-               return = {
-                            "objects": ["obj_uuid1", "obj_uuid2"]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/object/{object_id}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/actions``
+    Show information of one tenant.
 
 .. code-block:: json
 
                return = {
-                            "actions": ["act_uuid1", "act_uuid2"]
-                        }
+                    "tenant_id": {
+                        "name": "name of the tenant",
+                        "description": "description of the tenant",
+                        "intra_authz_extension_id": "id of the intra extension authz",
+                        "intra_admin_extension_id": "id of the intra extension authz"
+                    }
+               }
 
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/actions``
+
+**POST    /tenants/{tenant_id}**
+
+    Modify a tenant.
 
 .. code-block:: json
 
-                 post = {
-                            "action_id" : ""
-                        }
+               post = {
+                    "tenant_name": "name of the tenant",
+                    "tenant_description": "description of the tenant",
+                    "tenant_intra_authz_extension_id": "id of the intra extension authz",
+                    "tenant_intra_admin_extension_id": "id of the intra extension admin"
+               }
                return = {
-                            "actions": ["act_uuid1", "act_uuid2"]
-                        }
+                    "tenant_id": {
+                        "name": "name of the tenant",
+                        "description": "description of the tenant",
+                        "intra_authz_extension_id": "id of the intra extension authz",
+                        "intra_admin_extension_id": "id of the intra extension authz"
+                    }
+               }
 
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/actions/{action_id}``
 
-Assignment
-~~~~~~~~~~
+**DELETE  /tenants/{tenant_id}**
 
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/subject_assignments``
-
-.. code-block:: json
-
-               return = {
-                            "subject_assignments": {
-                                "subject_security_level":{
-                                    "user1": ["low"],
-                                    "user2": ["medium"],
-                                    "user3": ["high"]
-                            }
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/subject_assignments``
-
-.. code-block:: json
-
-                 post = {
-                            "subject_id" : "",
-                            "subject_category_id" : "",
-                            "subject_category_scope_id" : ""
-                        }
-               return = {
-                            "subject_assignments": {
-                                "subject_security_level":{
-                                    "user1": ["low"],
-                                    "user2": ["medium"],
-                                    "user3": ["high"]
-                            }
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/subject_assignments/{subject_category}/{subject_id}/{subject_scope}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/object_assignments``
-
-.. code-block:: json
-
-               return = {
-                            "object_assignments": {
-                                "object_security_level":{
-                                    "vm1": ["low"],
-                                    "vm2": ["medium"],
-                                    "vm3": ["high"]
-                            }
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/object_assignments``
-
-.. code-block:: json
-
-                 post = {
-                            "object_id" : "",
-                            "object_category_id" : "",
-                            "object_category_scope_id" : ""
-                        }
-               return = {
-                            "object_assignments": {
-                                "object_security_level":{
-                                    "vm1": ["low"],
-                                    "vm2": ["medium"],
-                                    "vm3": ["high"]
-                            }
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/object_assignments/{object_category}/{object_id}/{object_scope}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/action_assignments``
-
-.. code-block:: json
-
-               return = {
-                            "action_assignments": {
-                                "computing_action":{
-                                    "pause": ["vm_admin"],
-                                    "unpause": ["vm_admin"],
-                                    "start": ["vm_admin"],
-                                    "stop": ["vm_admin"]
-                            }
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/action_assignments``
-
-.. code-block:: json
-
-                 post = {
-                            "action_id" : "",
-                            "action_category_id" : "",
-                            "action_category_scope_id" : ""
-                        }
-               return = {
-                            "action_assignments": {
-                                "computing_action":{
-                                    "pause": ["vm_admin"],
-                                    "unpause": ["vm_admin"],
-                                    "start": ["vm_admin"],
-                                    "stop": ["vm_admin"]
-                            }
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/action_assignments/{action_category}/{action_id}/{action_scope}``
-
-Metadata
-~~~~~~~~
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/subject_categories``
-
-.. code-block:: json
-
-               return = {
-                            "subject_categories": [ "subject_security_level" ]
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/subject_categories``
-
-.. code-block:: json
-
-                 post = {
-                            "subject_category_id" : ""
-                        }
-               return = {
-                            "subject_categories": [ "subject_security_level" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/subject_categories/{subject_category_id}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/object_categories``
-
-.. code-block:: json
-
-               return = {
-                            "object_categories": [ "object_security_level" ]
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/object_categories``
-
-.. code-block:: json
-
-                 post = {
-                            "object_category_id" : ""
-                        }
-               return = {
-                            "object_categories": [ "object_security_level" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/object_categories/{object_category_id}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/action_categories``
-
-.. code-block:: json
-
-               return = {
-                            "action_categories": [ "computing_action" ]
-                        }
-
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/action_categories``
-
-.. code-block:: json
-
-                 post = {
-                            "action_category_id" : ""
-                        }
-               return = {
-                            "action_categories": [ "computing_action" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/action_categories/{action_category_id}``
-
-Scope
-~~~~~
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/subject_category_scope``
-
-.. code-block:: json
-
-               return = {
-                            "subject_security_level": [ "high", "medium", "low" ]
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/subject_category_scope``
-
-.. code-block:: json
-
-                 post = {
-                            "subject_category_id" : "",
-                            "subject_category_scope_id" : ""
-                        }
-               return = {
-                            "subject_security_level": [ "high", "medium", "low" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/subject_category_scope/{subject_category}/{subject_scope}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/object_category_scope``
-
-.. code-block:: json
-
-               return = {
-                            "object_security_level": [ "high", "medium", "low" ]
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/object_category_scope``
-
-.. code-block:: json
-
-                 post = {
-                            "object_category_id" : "",
-                            "object_category_scope_id" : ""
-                        }
-               return = {
-                            "object_security_level": [ "high", "medium", "low" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/object_category_scope/{object_category}/{object_scope}``
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/action_category_scope``
-
-.. code-block:: json
-
-               return = {
-                            "computing_action": [ "vm_admin", "vm_access" ]
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/action_category_scope``
-
-.. code-block:: json
-
-                 post = {
-                            "action_id" : "",
-                            "action_category_id" : "",
-                            "action_category_scope_id" : ""
-                        }
-               return = {
-                            "computing_action": [ "vm_admin", "vm_access" ]
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/action_category_scope/{action_category}/{action_scope}``
-
-Metarule
-~~~~~~~~
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/aggregation_algorithms``
-
-.. code-block:: json
-
-               return = {
-                            "aggregation_algorithms": [ "and_true_aggregation", "..."]
-                        }
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/aggregation_algorithm``
-
-.. code-block:: json
-
-               return = {
-                            "aggregation_algorithm": "and_true_aggregation"
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/aggregation_algorithm``
-
-.. code-block:: json
-
-                 post = {
-                            "aggregation": "and_true_aggregation"
-                        }
-               return = {
-                            "aggregation_algorithm": "and_true_aggregation"
-                        }
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/sub_meta_rule``
-
-.. code-block:: json
-
-               return = {
-                            "sub_meta_rule": {
-                                "subject_categories": ["role"],
-                                "action_categories": ["ie_action"],
-                                "object_categories": ["id"],
-                                "relation": "relation_super"
-                            }
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/sub_meta_rule``
-
-.. code-block:: json
-
-                 post = {
-                            "relation_super": {
-                                "subject_categories": ["role"],
-                                "action_categories": ["ie_action"],
-                                "object_categories": ["id"],
-                            }
-                        }
-               return = {
-                            "sub_meta_rule": {
-                                "subject_categories": ["role"],
-                                "action_categories": ["ie_action"],
-                                "object_categories": ["id"],
-                                "relation": "relation_super"
-                            }
-                        }
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/sub_meta_rule_relations``
-
-.. code-block:: json
-
-               return = {
-                            "sub_meta_rule_relations": ["relation_super", ]
-                        }
-
-Rules
-~~~~~
-
-* ``GET     /OS-MOON/intra_extensions/{intra_extensions_id}/sub_rules``
-
-.. code-block:: json
-
-               return = {
-                            "sub_rules": {
-                                  "relation_super": [
-                                      ["high", "vm_admin", "medium"],
-                                      ["high", "vm_admin", "low"],
-                                      ["medium", "vm_admin", "low"],
-                                      ["high", "vm_access", "high"],
-                                      ["high", "vm_access", "medium"],
-                                      ["high", "vm_access", "low"],
-                                      ["medium", "vm_access", "medium"],
-                                      ["medium", "vm_access", "low"],
-                                      ["low", "vm_access", "low"]
-                                  ]
-                            }
-                        }
-
-* ``POST    /OS-MOON/intra_extensions/{intra_extensions_id}/sub_rules``
-
-.. code-block:: json
-
-                 post = {
-                            "rules": ["admin", "vm_admin", "servers"],
-                            "relation": "relation_super"
-                        }
-
-* ``DELETE  /OS-MOON/intra_extensions/{intra_extensions_id}/sub_rules/{relation_name}/{rule}``
-
-
-Tenant mapping API
-------------------
-
-* ``GET  /OS-MOON/tenants``
-
-.. code-block:: json
-
-               return = {
-                            "tenant": {
-                                "uuid1": {
-                                    "name": "tenant1",
-                                    "authz": "intra_extension_uuid1",
-                                    "admin": "intra_extension_uuid2"
-                                },
-                                "uuid2": {
-                                    "name": "tenant2",
-                                    "authz": "intra_extension_uuid1",
-                                    "admin": "intra_extension_uuid2"
-                                }
-                            }
-                        }
-
-* ``GET  /OS-MOON/tenant/{tenant_uuid}``
-
-.. code-block:: json
-
-               return = {
-                            "tenant": {
-                                "uuid": {
-                                    "name": "tenant1",
-                                    "authz": "intra_extension_uuid1",
-                                    "admin": "intra_extension_uuid2"
-                                }
-                            }
-                        }
-
-* ``POST  /OS-MOON/tenant``
-
-.. code-block:: json
-
-                 post = {
-                            "id": "uuid",
-                            "name": "tenant1",
-                            "authz": "intra_extension_uuid1",
-                            "admin": "intra_extension_uuid2"
-                        }
-               return = {
-                            "tenant": {
-                                "uuid": {
-                                    "name": "tenant1",
-                                    "authz": "intra_extension_uuid1",
-                                    "admin": "intra_extension_uuid2"
-                                }
-                            }
-                        }
-
-* ``DELETE  /OS-MOON/tenant/{tenant_uuid}/{intra_extension_uuid}``
+    Delete a tenant.
 
 .. code-block:: json
 
                return = {}
 
-Logs API
---------
 
-* ``GET  /OS-MOON/logs``
+Intra-Extension
+~~~~~~~~~~~~~~~
 
-InterExtension API
-------------------
+**GET     /intra_extensions/init**
 
-* ``GET     /OS-MOON/inter_extensions``
+    Initialize the root Intra_Extension (if needed).
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions**
+
+    List all Intra_Extensions.
 
 .. code-block:: json
 
                return = {
-                            "inter_extensions": ["ie_uuid1", "ie_uuid2"]
-                        }
+                    "intra_extension_id": {
+                        "name": "name of the intra extension",
+                        "model": "model of the intra extension"
+                    }
+               }
 
-* ``GET     /OS-MOON/inter_extensions/{inter_extensions_id}``
+
+**POST    /intra_extensions**
+
+    Create a new Intra_Extension.
+
+.. code-block:: json
+
+               post = {
+                    "intra_extension_name": "name of the intra extension",
+                    "intra_extension_model": "model of the intra extension (taken from /configuration/templates)",
+                    "intra_extension_description": "description of the intra extension",
+
+               }
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/**
+
+    Show details about one Intra_Extension.
 
 .. code-block:: json
 
                return = {
-                            "inter_extensions": {
-                                "id": "uuid1",
-                                "description": "",
-                                "requesting_intra_extension_uuid": "uuid1",
-                                "requested_intra_extension_uuid": "uuid2",
-                                "genre": "trust_OR_coordinate",
-                                "virtual_entity_uuid": "ve_uuid1"
-                            }
-                        }
+                    "id": "intra_extension_id",
+                    "name": "name of the intra extension",
+                    "model": "model of the intra extension",
+                    "genre": "genre of the intra extension",
+                    "description": "model of the intra extension"
+               }
 
-* ``POST    /OS-MOON/inter_extensions``
+
+**DELETE  /intra_extensions/{intra_extension_id}/**
+
+    Delete an Intra_Extension.
 
 .. code-block:: json
 
-                 post = {
-                            "description": "",
-                            "requesting_intra_extension_uuid": uuid1,
-                            "requested_intra_extension_uuid": uuid2,
-                            "genre": "trust_OR_coordinate",
-                            "virtual_entity_uuid": "ve_uuid1"
-                        }
-               return = {
-                            "id": "uuid1",
-                            "description": "",
-                            "requesting_intra_extension_uuid": uuid1,
-                            "requested_intra_extension_uuid": uuid2,
-                            "genre": "trust_OR_coordinate",
-                            "virtual_entity_uuid": "ve_uuid1"
-                        }
+               return = {}
 
-* ``DELETE  /OS-MOON/inter_extensions/{inter_extensions_id}``
+
+Intra-Extension Subjects
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+**GET     /intra_extensions/{intra_extension_id}/subjects**
+
+    List all subjects.
+
+.. code-block:: json
+
+               return = {
+                    "subject_id": {
+                        "name": "name of the subject",
+                        "keystone_id": "keystone id of the subject"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/subjects**
+
+    List all subjects.
+
+.. code-block:: json
+
+               post = {
+                    "subject_name": "name of the subject",
+                    "subject_description": "description of the subject",
+                    "subject_password": "password for the subject",
+                    "subject_email": "email address of the subject"
+               }
+               return = {
+                    "subject_id": {
+                        "name": "name of the subject",
+                        "keystone_id": "keystone id of the subject"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/subjects/{subject_id}**
+
+    Delete a subject.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/subject_categories**
+
+    List all subject categories.
+
+.. code-block:: json
+
+               return = {
+                    "subject_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/subject_categories**
+
+    Add a new subject category.
+
+.. code-block:: json
+
+               post = {
+                    "subject_category_name": "name of the category",
+                    "subject_category_description": "description of the category"
+               }
+               return = {
+                    "subject_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/subject_categories/{subject_category_id}**
+
+    Delete a subject category.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
+
+    List all subject scopes for a specific subject category.
+
+.. code-block:: json
+
+               return = {
+                    "subject_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
+
+    Add a new subject scope for a specific subject category.
+
+.. code-block:: json
+
+               post = {
+                    "subject_scope_name": "name of the scope",
+                    "subject_scope_description": "description of the scope"
+               }
+               return = {
+                    "subject_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}/{subject_scope_id}**
+
+    Delete a subject scope.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}**
+
+    List all subject assignments for a subject and for a subject category.
+
+.. code-block:: json
+
+               return = [
+                    "subject_assignment_id1", "subject_assignment_id2"
+               ]
+
+
+**POST    /intra_extensions/{intra_extension_id}/subject_assignments**
+
+    Add an assignment.
+
+.. code-block:: json
+
+               post = {
+                    "subject_id": "id of the subject",
+                    "subject_category_id": "id of the category",
+                    "subject_scope_id": "id of the scope"
+               }
+               return = [
+                    "subject_assignment_id1", "subject_assignment_id2"
+               ]
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}/{subject_scope_id}**
+
+    Delete a subject assignment.
+
+.. code-block:: json
+
+               return = {}
+
+
+Intra-Extension Objects
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**GET     /intra_extensions/{intra_extension_id}/objects**
+
+    List all objects.
+
+.. code-block:: json
+
+               return = {
+                    "object_id": {
+                        "name": "name of the object",
+                        "keystone_id": "keystone id of the object"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/objects**
+
+    List all objects.
+
+.. code-block:: json
+
+               post = {
+                    "object_name": "name of the object",
+                    "object_description": "description of the object"
+               }
+               return = {
+                    "object_id": {
+                        "name": "name of the object",
+                        "keystone_id": "keystone id of the object"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/objects/{object_id}**
+
+    Delete a object.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/object_categories**
+
+    List all object categories.
+
+.. code-block:: json
+
+               return = {
+                    "object_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/object_categories**
+
+    Add a new object category.
+
+.. code-block:: json
+
+               post = {
+                    "object_category_name": "name of the category",
+                    "object_category_description": "description of the category"
+               }
+               return = {
+                    "object_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/object_categories/{object_category_id}**
+
+    Delete a object category.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
+
+    List all object scopes for a specific object category.
+
+.. code-block:: json
+
+               return = {
+                    "object_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
+
+    Add a new object scope for a specific object category.
+
+.. code-block:: json
+
+               post = {
+                    "object_scope_name": "name of the scope",
+                    "object_scope_description": "description of the scope"
+               }
+               return = {
+                    "object_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}/{object_scope_id}**
+
+    Delete a object scope.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}**
+
+    List all object assignments for a object and for a object category.
+
+.. code-block:: json
+
+               return = [
+                    "object_assignment_id1", "object_assignment_id2"
+               ]
+
+
+**POST    /intra_extensions/{intra_extension_id}/object_assignments**
+
+    Add an assignment.
+
+.. code-block:: json
+
+               post = {
+                    "object_id": "id of the object",
+                    "object_category_id": "id of the category",
+                    "object_scope_id": "id of the scope"
+               }
+               return = [
+                    "object_assignment_id1", "object_assignment_id2"
+               ]
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}/{object_scope_id}**
+
+    Delete a object assignment.
+
+.. code-block:: json
+
+               return = {}
+
+
+Intra-Extension Actions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+**GET     /intra_extensions/{intra_extension_id}/actions**
+
+    List all actions.
+
+.. code-block:: json
+
+               return = {
+                    "action_id": {
+                        "name": "name of the action",
+                        "keystone_id": "keystone id of the action"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/actions**
+
+    List all actions.
+
+.. code-block:: json
+
+               post = {
+                    "action_name": "name of the action",
+                    "action_description": "description of the action",
+                    "action_password": "password for the action",
+                    "action_email": "email address of the action"
+               }
+               return = {
+                    "action_id": {
+                        "name": "name of the action",
+                        "keystone_id": "keystone id of the action"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/actions/{action_id}**
+
+    Delete a action.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/action_categories**
+
+    List all action categories.
+
+.. code-block:: json
+
+               return = {
+                    "action_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/action_categories**
+
+    Add a new action category.
+
+.. code-block:: json
+
+               post = {
+                    "action_category_name": "name of the category",
+                    "action_category_description": "description of the category"
+               }
+               return = {
+                    "action_category_id": {
+                        "name": "name of the category",
+                        "description": "description of the category"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/action_categories/{action_category_id}**
+
+    Delete a action category.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
+
+    List all action scopes for a specific action category.
+
+.. code-block:: json
+
+               return = {
+                    "action_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
+
+    Add a new action scope for a specific action category.
+
+.. code-block:: json
+
+               post = {
+                    "action_scope_name": "name of the scope",
+                    "action_scope_description": "description of the scope"
+               }
+               return = {
+                    "action_scope_id": {
+                        "name": "name of the scope",
+                        "description": "description of the scope"
+                    }
+               }
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}/{action_scope_id}**
+
+    Delete a action scope.
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}**
+
+    List all action assignments for a action and for a action category.
+
+.. code-block:: json
+
+               return = [
+                    "action_assignment_id1", "action_assignment_id2"
+               ]
+
+
+**POST    /intra_extensions/{intra_extension_id}/action_assignments**
+
+    Add an assignment.
+
+.. code-block:: json
+
+               post = {
+                    "action_id": "id of the action",
+                    "action_category_id": "id of the category",
+                    "action_scope_id": "id of the scope"
+               }
+               return = [
+                    "action_assignment_id1", "action_assignment_id2"
+               ]
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}/{action_scope_id}**
+
+    Delete a action assignment.
+
+.. code-block:: json
+
+               return = {}
+
+
+Intra-Extension Rules
+~~~~~~~~~~~~~~~~~~~~~
+
+**GET     /intra_extensions/{intra_extension_id}/aggregation_algorithm**
+
+    List aggregation algorithm for an intra extension.
+
+.. code-block:: json
+
+               return = {
+                    "aggregation_algorithm_id": {
+                        "name": "name of the aggregation algorithm",
+                        "description": "description of the aggregation algorithm"
+                    }
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/aggregation_algorithm**
+
+    Set the current aggregation algorithm for an intra extension.
+
+.. code-block:: json
+
+               post = {
+                    "aggregation_algorithm_id": "id of the aggregation algorithm",
+                    "aggregation_algorithm_description": "description of the aggregation algorithm"
+               }
+               return = {
+                    "aggregation_algorithm_id": {
+                        "name": "name of the aggregation algorithm",
+                        "description": "description of the aggregation algorithm"
+                    }
+               }
+
+
+**GET     /intra_extensions/{intra_extension_id}/sub_meta_rules**
+
+    Show the current sub meta rules.
+
+.. code-block:: json
+
+               return = {
+                    "sub_meta_rule_id": {
+                        "name": "name of the aggregation algorithm",
+                        "algorithm": "algorithm of the aggregation algorithm",
+                        "subject_categories": ["subject_category_id1", "subject_category_id2"],
+                        "object_categories": ["object_category_id1", "object_category_id2"],
+                        "action_categories": ["action_category_id1", "action_category_id2"]
+                    }
+               }
+
+
+.. code-block:: json
+
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+
+    Set the current sub meta rule.
+
+.. code-block:: json
+
+               post = {
+                    "sub_meta_rule_name": "name of the sub meta rule",
+                    "sub_meta_rule_algorithm": "name of the sub meta rule algorithm",
+                    "sub_meta_rule_subject_categories": ["subject_category_id1", "subject_category_id2"],
+                    "sub_meta_rule_object_categories": ["object_category_id1", "object_category_id2"],
+                    "sub_meta_rule_action_categories": ["action_category_id1", "action_category_id2"]
+               }
+               return = {}
+
+
+**GET     /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+
+    List all rules.
+
+.. code-block:: json
+
+               return = {
+                    "rule_id1": ["subject_scope_id1", "object_scope_id1", "action_scope_id1"],
+                    "rule_id2": ["subject_scope_id2", "object_scope_id2", "action_scope_id2"]
+               }
+
+
+**POST    /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+
+    Add a new rule.
+
+.. code-block:: json
+
+               post = {
+                    "subject_categories": ["subject_scope_id1"],
+                    "object_categories": ["object_scope_id1"],
+                    "action_categories": ["action_scope_id1"],
+                    "enabled": True
+               }
+               return = {}
+
+
+**DELETE  /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}/{rule_id}**
+
+    Delete a rule.
+
+.. code-block:: json
+
+               return = {}
+
+
+Logs
+~~~~
+
+**GET     /logs/{options}**
+
+    List all logs.
+    Options can be:
+
+    * ``filter=<filter_characters>``
+    * ``from=<show logs from this date>``
+    * ``to=<show logs to this date>``
+    * ``event_number=<get n logs>``
+
+    Time format is '%Y-%m-%d-%H:%M:%S' (eg. "2015-04-15-13:45:20")
+
+.. code-block:: json
+
+               return = [
+                    "2015-04-15-13:45:20 ...",
+                    "2015-04-15-13:45:21 ...",
+                    "2015-04-15-13:45:22 ...",
+                    "2015-04-15-13:45:23 ..."
+               ]
 
