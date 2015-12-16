@@ -67,6 +67,20 @@
         "command_options": "-c name -c intra_authz_extension_id -f value"
       },
       {
+        "name": "select_authz_ie",
+        "command": "intraextension select $uuid_authz",
+        "result": "Select $uuid_authz IntraExtension.",
+        "description": "Select the authz IntraExtension",
+        "command_options": ""
+      },
+      {
+        "name": "check_select_authz_ie",
+        "command": "intraextension show selected",
+        "result": "$uuid_authz",
+        "description": "Check the selected authz IntraExtension",
+        "command_options": "-c id -f value"
+      },
+      {
         "name": "set_tenant_admin",
         "command": "tenant set --admin $uuid_admin $uuid",
         "result": "",
@@ -79,6 +93,28 @@
         "result": "demo $uuid_admin",
         "description": "Check that admin ie has been correctly added for tenant demo ",
         "command_options": "-c name -c intra_admin_extension_id -f value"
+      },
+
+      {
+        "name": "get aggregation algorithm",
+        "command": "aggregation algorithm list",
+        "result": "(?P<uuid_aggregation>\\w+)\\s+one_true",
+        "description": "Get aggregation algorithm.",
+        "command_options": "-c id -c name -f value"
+      },
+      {
+        "name": "set aggregation algorithm",
+        "command": "aggregation algorithm set $uuid_aggregation",
+        "result": "",
+        "description": "Set aggregation algorithm to one_true.",
+        "command_options": ""
+      },
+      {
+        "name": "get aggregation algorithm",
+        "command": "aggregation algorithm show",
+        "result": "$uuid_aggregation\\s+one_true",
+        "description": "Check aggregation algorithm.",
+        "command_options": "-c id -c name -f value"
       },
 
       {
