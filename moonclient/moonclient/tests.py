@@ -81,20 +81,24 @@ class TestsLaunch(Lister):
                 result_ok = True
                 # self.log.info(result_id)
                 # self.log.info(result_values[1])
+                log_filename = ""
                 for value in result_values[1]:
                     if "False" in value[2]:
                         result_ok = False
-                        break
+                    if "Overall results" in value[1]:
+                        log_filename = value[3]
                 if result_ok:
-                    results.append((result_id, "\033[32mTrue\033[m"))
+                    results.append((result_id, "\033[32mTrue\033[m", log_filename))
                 else:
-                    results.append((result_id, "\033[1m\033[31mFalse\033[m"))
+                    results.append((result_id, "\033[1m\033[31mFalse\033[m", log_filename))
             return (
-                ("filename", "results"),
+                ("filename", "results", "log file"),
                 results
             )
 
     def test_file(self, testfile):
+        self.logfile_name = "/tmp/moonclient_test_{}.log".format(time.strftime("%Y%m%d-%H%M%S"))
+        self.logfile = open(self.logfile_name, "w")
         stdout_back = self.app.stdout
         tests_dict = json.load(open(testfile))
         self.log.debug("tests_dict = {}".format(tests_dict))
