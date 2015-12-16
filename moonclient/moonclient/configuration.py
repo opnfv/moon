@@ -18,7 +18,7 @@ class TemplatesList(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        templates = self.app.get_url("/v3/OS-MOON/configuration/templates", authtoken=True)
+        templates = self.app.get_url(self.app.url_prefix+"/configuration/templates", authtoken=True)
         return (
             ("id", "name", "description"),
             ((template_id, templates[template_id]["name"], templates[template_id]["description"])
@@ -36,7 +36,7 @@ class AggregationAlgorithmsList(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        templates = self.app.get_url("/v3/OS-MOON/configuration/aggregation_algorithms", authtoken=True)
+        templates = self.app.get_url(self.app.url_prefix+"/configuration/aggregation_algorithms", authtoken=True)
         return (
             ("id", "name", "description"),
             ((template_id, templates[template_id]["name"], templates[template_id]["description"])
@@ -54,7 +54,7 @@ class SubMetaRuleAlgorithmsList(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        templates = self.app.get_url("/v3/OS-MOON/configuration/sub_meta_rule_algorithms", authtoken=True)
+        templates = self.app.get_url(self.app.url_prefix+"/configuration/sub_meta_rule_algorithms", authtoken=True)
         return (
             ("id", "name", "description"),
             ((template_id, templates[template_id]["name"], templates[template_id]["description"])

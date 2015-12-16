@@ -34,7 +34,7 @@ class SubjectAssignmentsList(Lister):
         return parser
 
     def __get_scope_from_id(self, intraextension_id, subject_category_id, subject_scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(
             intraextension_id, subject_category_id),
             authtoken=True)
         if subject_scope_id in data:
@@ -43,7 +43,7 @@ class SubjectAssignmentsList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments/{}/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_assignments/{}/{}".format(
             parsed_args.intraextension, parsed_args.subject_id, parsed_args.subject_category_id),
             authtoken=True)
         return (
@@ -84,7 +84,7 @@ class SubjectAssignmentsAdd(Command):
         return parser
 
     def __get_scope_from_id(self, intraextension_id, subject_category_id, subject_scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(
             intraextension_id, subject_category_id),
             authtoken=True)
         if subject_scope_id in data:
@@ -93,7 +93,7 @@ class SubjectAssignmentsAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_assignments".format(parsed_args.intraextension),
                                 post_data={
                                     "subject_id": parsed_args.subject_id,
                                     "subject_category_id": parsed_args.subject_category_id,
@@ -139,7 +139,7 @@ class SubjectAssignmentsDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_assignments/{}/{}/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_assignments/{}/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.subject_id,
             parsed_args.subject_category_id,

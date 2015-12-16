@@ -32,13 +32,14 @@ class MoonClient(App):
     log = logging.getLogger(__name__)
     x_subject_token = None
     host = "localhost"
-    port = "35357"
+    port = "35358"
     tenant = None
     _intraextension = None
     _tenant_id = None
     _tenant_name = None
     secureprotocol = False
     user_saving_file = ".moonclient"
+    url_prefix = "/moon"
     post = {
         "auth": {
             "identity": {
@@ -112,7 +113,7 @@ class MoonClient(App):
     def tenant_id(self):
         if not self._tenant_id:
             self._tenant_id = self.get_url("/v3/projects?name={}".format(self._tenant_name),
-                                           authtoken=True)["projects"][0]["id"]
+                                           authtoken=True, port=5000)["projects"][0]["id"]
         return self._tenant_id
 
     @property
@@ -129,16 +130,18 @@ class MoonClient(App):
         open(os.path.join(os.getenv('HOME'), self.user_saving_file), "w").write(value)
 
     def get_tenant_uuid(self, tenant_name):
-        return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True)["projects"][0]["id"]
+        return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True, port=5000)["projects"][0]["id"]
 
-    def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None):
+    def get_url(self, url, post_data=None, delete_data=None, method="GET", authtoken=None, port=None):
         if post_data:
             method = "POST"
         if delete_data:
             method = "DELETE"
         self.log.debug("\033[32m{} {}\033[m".format(method, url))
         # TODO: we must manage authentication and requests with secure protocol (ie. HTTPS)
-        conn = httplib.HTTPConnection(self.host, self.port)
+        if not port:
+            port = self.port
+        conn = httplib.HTTPConnection(self.host, port)
         self.log.debug("Host: {}:{}".format(self.host, self.port))
         headers = {
             "Content-type": "application/x-www-form-urlencoded",

@@ -26,7 +26,7 @@ class ObjectsList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/objects".format(parsed_args.intraextension),
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -61,7 +61,7 @@ class ObjectsAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/objects".format(parsed_args.intraextension),
                                 post_data={
                                     "object_name": parsed_args.object_name,
                                     "object_description": parsed_args.description},
@@ -94,7 +94,7 @@ class ObjectsDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/objects/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/objects/{}".format(
             parsed_args.intraextension,
             parsed_args.object_id),
             method="DELETE",

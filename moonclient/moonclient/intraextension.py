@@ -26,7 +26,7 @@ class IntraExtensionSelect(Command):
         return parser
 
     def take_action(self, parsed_args):
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
+        ie = self.app.get_url(self.app.url_prefix+"/intra_extensions", authtoken=True)
         if parsed_args.id in ie.keys():
             self.app.intraextension = parsed_args.id
             self.app.stdout.write("Select {} IntraExtension.\n".format(self.app.intraextension))
@@ -66,7 +66,7 @@ class IntraExtensionCreate(Command):
             "intra_extension_model": parsed_args.policy_model,
             "intra_extension_description": parsed_args.description
         }
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions", post_data=post_data, authtoken=True)
+        ie = self.app.get_url(self.app.url_prefix+"/intra_extensions", post_data=post_data, authtoken=True)
         if "id" not in ie:
             raise Exception("Error in command {}".format(ie))
         self.app.stdout.write("IntraExtension created: {}\n".format(ie["id"]))
@@ -83,7 +83,7 @@ class IntraExtensionList(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions", authtoken=True)
+        ie = self.app.get_url(self.app.url_prefix+"/intra_extensions", authtoken=True)
         return (
             ("id", "name", "model"),
             ((_id, ie[_id]["name"], ie[_id]["model"]) for _id in ie.keys())
@@ -105,7 +105,7 @@ class IntraExtensionDelete(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(parsed_args.uuid),
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}".format(parsed_args.uuid),
                          method="DELETE",
                          authtoken=True)
 
@@ -120,7 +120,7 @@ class IntraExtensionInit(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.app.get_url("/v3/OS-MOON/intra_extensions/init",
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/init",
                          method="GET",
                          authtoken=True)
 
@@ -145,7 +145,7 @@ class IntraExtensionShow(ShowOne):
         if parsed_args.uuid == "selected":
             intra_extension_id = self.app.intraextension
         self.log.debug("self.app.intraextension={}".format(intra_extension_id))
-        ie = self.app.get_url("/v3/OS-MOON/intra_extensions/{}".format(intra_extension_id), authtoken=True)
+        ie = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}".format(intra_extension_id), authtoken=True)
         self.log.debug("ie={}".format(ie))
         if "id" not in ie:
             self.log.error("Unknown intraextension {}".format(intra_extension_id))

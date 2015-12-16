@@ -34,7 +34,7 @@ class ObjectAssignmentsList(Lister):
         return parser
 
     def __get_scope_from_id(self, intraextension_id, object_category_id, object_scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(
             intraextension_id, object_category_id),
             authtoken=True)
         if object_scope_id in data:
@@ -43,7 +43,7 @@ class ObjectAssignmentsList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_assignments/{}/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_assignments/{}/{}".format(
             parsed_args.intraextension, parsed_args.object_id, parsed_args.object_category_id),
             authtoken=True)
         return (
@@ -84,7 +84,7 @@ class ObjectAssignmentsAdd(Command):
         return parser
 
     def __get_scope_from_id(self, intraextension_id, object_category_id, object_scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(
             intraextension_id, object_category_id),
             authtoken=True)
         if object_scope_id in data:
@@ -93,7 +93,7 @@ class ObjectAssignmentsAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_assignments".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_assignments".format(parsed_args.intraextension),
                                 post_data={
                                     "object_id": parsed_args.object_id,
                                     "object_category_id": parsed_args.object_category_id,
@@ -139,7 +139,7 @@ class ObjectAssignmentsDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_assignments/{}/{}/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_assignments/{}/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.object_id,
             parsed_args.object_category_id,

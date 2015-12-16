@@ -16,7 +16,7 @@ class AggregationAlgorithmsList(Lister):
     log = logging.getLogger(__name__)
 
     def __get_aggregation_algorithm_from_id(self, algorithm_id):
-        algorithms = self.app.get_url("/v3/OS-MOON/configuration/aggregation_algorithms", authtoken=True)
+        algorithms = self.app.get_url(self.app.url_prefix+"/configuration/aggregation_algorithms", authtoken=True)
         if algorithm_id in algorithms:
             return algorithms[algorithm_id]
         return dict()
@@ -33,7 +33,7 @@ class AggregationAlgorithmsList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/aggregation_algorithm".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/aggregation_algorithm".format(
             parsed_args.intraextension),
             authtoken=True)
         algorithm = self.__get_aggregation_algorithm_from_id(data['aggregation_algorithm'])
@@ -49,7 +49,7 @@ class AggregationAlgorithmSet(Command):
     log = logging.getLogger(__name__)
 
     def __get_aggregation_algorithm_from_id(self, algorithm_id):
-        algorithms = self.app.get_url("/v3/OS-MOON/configuration/aggregation_algorithms", authtoken=True)
+        algorithms = self.app.get_url(self.app.url_prefix+"/configuration/aggregation_algorithms", authtoken=True)
         if algorithm_id in algorithms:
             return algorithms[algorithm_id]
         return dict()
@@ -76,7 +76,7 @@ class AggregationAlgorithmSet(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/aggregation_algorithm".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/aggregation_algorithm".format(
             parsed_args.intraextension),
             post_data={
                 "aggregation_algorithm_id": parsed_args.aggregation_algorithm_id,
@@ -104,19 +104,19 @@ class SubMetaRuleShow(Lister):
         return parser
 
     def __get_subject_category_name(self, intraextension, subject_category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_categories".format(intraextension),
                                 authtoken=True)
         if subject_category_id in data:
             return data[subject_category_id]["name"]
 
     def __get_object_category_name(self, intraextension, object_category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_categories".format(intraextension),
                                 authtoken=True)
         if object_category_id in data:
             return data[object_category_id]["name"]
 
     def __get_action_category_name(self, intraextension, action_category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_categories".format(intraextension),
                                 authtoken=True)
         if action_category_id in data:
             return data[action_category_id]["name"]
@@ -124,7 +124,7 @@ class SubMetaRuleShow(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/sub_meta_rules".format(parsed_args.intraextension),
                                 authtoken=True)
         return (
             ("id", "name", "algorithm", "subject categories", "object categories", "action categories"),
@@ -205,7 +205,7 @@ class SubMetaRuleSet(Command):
         post_data["sub_meta_rule_subject_categories"] = filter(lambda x: x, subject_category_id)
         post_data["sub_meta_rule_object_categories"] = filter(lambda x: x, object_category_id)
         post_data["sub_meta_rule_action_categories"] = filter(lambda x: x, action_category_id)
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules/{}".format(parsed_args.intraextension,
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/sub_meta_rules/{}".format(parsed_args.intraextension,
                                                                                     sub_meta_rule_id),
                          post_data=post_data,
                          method="POST",

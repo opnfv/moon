@@ -31,7 +31,7 @@ class ActionScopesList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_scopes/{}".format(
             parsed_args.intraextension, parsed_args.action_category_id),
             authtoken=True)
         self.log.debug(data)
@@ -73,7 +73,7 @@ class ActionScopesAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_scopes/{}".format(
             parsed_args.intraextension, parsed_args.action_category_id),
             post_data={
                 "action_scope_name": parsed_args.action_scope_name,
@@ -113,7 +113,7 @@ class ActionScopesDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_scopes/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.action_category_id,
             parsed_args.action_scope_id
