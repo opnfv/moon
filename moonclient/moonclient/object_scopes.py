@@ -31,7 +31,7 @@ class ObjectScopesList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(
             parsed_args.intraextension, parsed_args.object_category_id),
             authtoken=True)
         self.log.debug(data)  # TODO: why log here?
@@ -73,7 +73,7 @@ class ObjectScopesAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(
             parsed_args.intraextension, parsed_args.object_category_id),
             post_data={
                 "object_scope_name": parsed_args.object_scope_name,
@@ -113,7 +113,7 @@ class ObjectScopesDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.object_category_id,
             parsed_args.object_scope_id

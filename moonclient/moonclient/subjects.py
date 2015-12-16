@@ -27,7 +27,7 @@ class SubjectsList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subjects".format(parsed_args.intraextension),
                                 authtoken=True)
         return (
             ("id", "name", "Keystone ID"),
@@ -74,7 +74,7 @@ class SubjectsAdd(Command):
             parsed_args.intraextension = self.app.intraextension
         if not parsed_args.password:
             parsed_args.password = getpass.getpass("Password for user {}:".format(parsed_args.subject_name))
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subjects".format(parsed_args.intraextension),
                                 post_data={
                                     "subject_name": parsed_args.subject_name,
                                     "subject_description": parsed_args.description,
@@ -110,7 +110,7 @@ class SubjectsDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subjects/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subjects/{}".format(
             parsed_args.intraextension,
             parsed_args.subject_id
             ),

@@ -85,9 +85,9 @@ class LogsList(Lister):
         if number:
             options.append("event_number={}".format(number))
         if len(options) > 0:
-            url = "/v3/OS-MOON/logs/{}".format(",".join(options))
+            url = self.app.url_prefix+"/logs/{}".format(",".join(options))
         else:
-            url = "/v3/OS-MOON/logs"
+            url = self.app.url_prefix+"/logs"
         data = self.app.get_url(url, authtoken=True)
         return (
             ("Time", "Message",),

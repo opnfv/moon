@@ -30,39 +30,39 @@ class RulesList(Lister):
         return parser
 
     def __get_subject_category_name(self, intraextension, category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_categories".format(intraextension),
                                 authtoken=True)
         if category_id in data:
             return data[category_id]["name"]
 
     def __get_object_category_name(self, intraextension, category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_categories".format(intraextension),
                                 authtoken=True)
         if category_id in data:
             return data[category_id]["name"]
 
     def __get_action_category_name(self, intraextension, category_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_categories".format(intraextension),
                                 authtoken=True)
         if category_id in data:
             return data[category_id]["name"]
 
     def __get_subject_scope_name(self, intraextension, category_id, scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         if scope_id in data:
             return data[scope_id]["name"]
         return scope_id
 
     def __get_object_scope_name(self, intraextension, category_id, scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         if scope_id in data:
             return data[scope_id]["name"]
         return scope_id
 
     def __get_action_scope_name(self, intraextension, category_id, scope_id):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         if scope_id in data:
             return data[scope_id]["name"]
@@ -72,7 +72,7 @@ class RulesList(Lister):
         headers = list()
         headers.append("")
         headers.append("id")
-        self.sub_meta_rules = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(intraextension),
+        self.sub_meta_rules = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/sub_meta_rules".format(intraextension),
                                                authtoken=True)
         for cat in self.sub_meta_rules[submetarule_id]["subject_categories"]:
             headers.append("s:" + self.__get_subject_category_name(intraextension, cat))
@@ -105,7 +105,7 @@ class RulesList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/rule/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/rule/{}".format(
             parsed_args.intraextension,
             parsed_args.submetarule_id,
         ),
@@ -144,7 +144,7 @@ class RuleAdd(Command):
         return parser
 
     def __get_subject_scope_id(self, intraextension, category_id, scope_name):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         self.log.debug("__get_subject_scope_id {}".format(data))
         for scope_id in data:
@@ -153,7 +153,7 @@ class RuleAdd(Command):
         return scope_name
 
     def __get_object_scope_id(self, intraextension, category_id, scope_name):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/object_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         self.log.debug("__get_action_scope_id {}".format(data))
         for scope_id in data:
@@ -162,7 +162,7 @@ class RuleAdd(Command):
         return scope_name
 
     def __get_action_scope_id(self, intraextension, category_id, scope_name):
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_scopes/{}".format(intraextension, category_id),
                                 authtoken=True)
         self.log.debug("__get_object_scope_id {}".format(data))
         for scope_id in data:
@@ -173,7 +173,7 @@ class RuleAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.sub_meta_rules = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/sub_meta_rules".format(
+        self.sub_meta_rules = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/sub_meta_rules".format(
             parsed_args.intraextension),
             authtoken=True)
         new_rule = map(lambda x: x.strip(), parsed_args.rule.split(","))
@@ -198,7 +198,7 @@ class RuleAdd(Command):
             post["object_categories"].append(self.__get_object_scope_id(
                 parsed_args.intraextension, cat, new_rule.pop(0))
             )
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/rule/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/rule/{}".format(
             parsed_args.intraextension, parsed_args.submetarule_id),
             post_data=post,
             authtoken=True)
@@ -232,7 +232,7 @@ class RuleDelete(Command):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
         self.app.get_url(
-            "/v3/OS-MOON/intra_extensions/{intra_extensions_id}/rule/{submetarule_id}/{rule_id}".format(
+            self.app.url_prefix+"/intra_extensions/{intra_extensions_id}/rule/{submetarule_id}/{rule_id}".format(
                 intra_extensions_id=parsed_args.intraextension,
                 submetarule_id=parsed_args.submetarule_id,
                 rule_id=parsed_args.rule_id

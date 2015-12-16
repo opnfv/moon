@@ -19,7 +19,7 @@ class TenantList(Lister):
         return parser
 
     def take_action(self, parsed_args):
-        tenants = self.app.get_url("/v3/OS-MOON/tenants", authtoken=True)
+        tenants = self.app.get_url(self.app.url_prefix+"/tenants", authtoken=True)
         self.log.debug(tenants)
         return (
             ("id", "name", "description", "intra_authz_extension_id", "intra_admin_extension_id"),
@@ -72,7 +72,7 @@ class TenantAdd(Command):
             post_data["tenant_intra_admin_extension_id"] = parsed_args.admin
         if parsed_args.desc:
             post_data["tenant_description"] = parsed_args.desc
-        tenants = self.app.get_url("/v3/OS-MOON/tenants",
+        tenants = self.app.get_url(self.app.url_prefix+"/tenants",
                                    post_data=post_data,
                                    authtoken=True)
         return (
@@ -103,7 +103,7 @@ class TenantShow(Command):
         return parser
 
     def take_action(self, parsed_args):
-        tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(parsed_args.tenant_name),
+        tenants = self.app.get_url(self.app.url_prefix+"/tenants/{}".format(parsed_args.tenant_name),
                                    authtoken=True)
         return (
             ("id", "name", "description", "intra_authz_extension_id", "intra_admin_extension_id"),
@@ -164,7 +164,7 @@ class TenantSet(Command):
             post_data["tenant_intra_admin_extension_id"] = parsed_args.admin
         if parsed_args.desc is not None:
             post_data["tenant_description"] = parsed_args.desc
-        tenants = self.app.get_url("/v3/OS-MOON/tenants/{}".format(post_data["tenant_id"]),
+        tenants = self.app.get_url(self.app.url_prefix+"/tenants/{}".format(post_data["tenant_id"]),
                                    post_data=post_data,
                                    authtoken=True)
         return (
@@ -195,6 +195,6 @@ class TenantDelete(Command):
         return parser
 
     def take_action(self, parsed_args):
-        self.app.get_url("/v3/OS-MOON/tenants/{}".format(parsed_args.tenant_id),
+        self.app.get_url(self.app.url_prefix+"/tenants/{}".format(parsed_args.tenant_id),
                          method="DELETE",
                          authtoken=True)

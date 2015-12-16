@@ -26,7 +26,7 @@ class ActionCategoriesList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_categories".format(parsed_args.intraextension),
                                 authtoken=True)
         return (
             ("id", "name", "description"),
@@ -61,7 +61,7 @@ class ActionCategoriesAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories".format(parsed_args.intraextension),
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_categories".format(parsed_args.intraextension),
                                 post_data={
                                     "action_category_name": parsed_args.action_category_name,
                                     "action_category_description": parsed_args.description},
@@ -94,7 +94,7 @@ class ActionCategoriesDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/action_categories/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/action_categories/{}".format(
             parsed_args.intraextension,
             parsed_args.action_category_id),
             method="DELETE",

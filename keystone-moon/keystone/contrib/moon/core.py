@@ -27,20 +27,35 @@ from keystone.contrib.moon.algorithms import *
 CONF = cfg.CONF
 LOG = log.getLogger(__name__)
 
-EXTENSION_DATA = {
-    'name': 'OpenStack Moon APIs',
-    'namespace': 'http://docs.openstack.org/identity/api/ext/'
-                 'OS-MOON',
-    'alias': 'OS-MOON',
-    'updated': '2015-09-02T12:00:0-00:00',
-    'description': 'OpenStack Authorization Providers Mechanism.',
-    'links': [{
-        'rel': 'describedby',
-        'type': 'text/html',
-        'href': 'https://git.opnfv.org/moon.git'
-    }]}
-extension.register_admin_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
-extension.register_public_extension(EXTENSION_DATA['alias'], EXTENSION_DATA)
+OPTS = [
+    cfg.StrOpt('configuration_driver',
+               default='keystone.contrib.moon.backends.memory.ConfigurationConnector',
+               help='Configuration backend driver.'),
+    cfg.StrOpt('tenant_driver',
+               default='keystone.contrib.moon.backends.sql.TenantConnector',
+               help='Tenant backend driver.'),
+    cfg.StrOpt('authz_driver',
+               default='keystone.contrib.moon.backends.flat.SuperExtensionConnector',
+               help='Authorisation backend driver.'),
+    cfg.StrOpt('intraextension_driver',
+               default='keystone.contrib.moon.backends.sql.IntraExtensionConnector',
+               help='IntraExtension backend driver.'),
+    cfg.StrOpt('interextension_driver',
+               default='keystone.contrib.moon.backends.sql.InterExtensionConnector',
+               help='InterExtension backend driver.'),
+    cfg.StrOpt('log_driver',
+               default='keystone.contrib.moon.backends.flat.LogConnector',
+               help='Logs backend driver.'),
+    cfg.StrOpt('policy_directory',
+               default='/etc/keystone/policies',
+               help='Local directory where all policies are stored.'),
+    cfg.StrOpt('root_policy_directory',
+               default='policy_root',
+               help='Local directory where Root IntraExtension configuration is stored.'),
+]
+
+for option in OPTS:
+    CONF.register_opt(option, group="moon")
 
 
 def filter_input(func_or_str):
@@ -150,7 +165,7 @@ def enforce(action_names, object_name, **extra):
                     else:
                         # id is not a known tenant ID, so we must check against the Root intra_extension
                         intra_extension_id = intra_root_extension_id
-                        LOG.warning("Cannot emanager because the intra-extension is unknown (fallback to the root intraextension)")
+                        LOG.warning("Cannot manage because the intra-extension is unknown (fallback to the root intraextension)")
                 for _tenant_id in tenants_dict:
                     if tenants_dict[_tenant_id]['intra_authz_extension_id'] == intra_extension_id or \
                                     tenants_dict[_tenant_id]['intra_admin_extension_id'] == intra_extension_id:
@@ -369,18 +384,6 @@ class TenantManager(manager.Manager):
         self.moonlog_api.debug("add_tenant_dict {}".format(tenant_dict))
         if 'intra_admin_extension_id' in tenant_dict and tenant_dict['intra_admin_extension_id']:
             if 'intra_authz_extension_id' in tenant_dict and tenant_dict['intra_authz_extension_id']:
-                # authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'])
-                # admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'])
-                # for _subject_id in authz_subjects_dict:
-                #     if _subject_id not in admin_subjects_dict:
-                #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_admin_extension_id'], authz_subjects_dict[_subject_id])
-                # for _subject_id in admin_subjects_dict:
-                #     if _subject_id not in authz_subjects_dict:
-                #         self.admin_api.add_subject_dict(self.root_api.get_root_admin_id(), tenant_dict['intra_authz_extension_id'], admin_subjects_dict[_subject_id])
-
-                # TODO (ateroide): check whether we can replace the below code by the above one
-                # NOTE (ateroide): at a first glance: no, subject_id changes depending on which intra_extesion is used
-                # we must use name which is constant.
                 authz_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_authz_extension_id'])
                 authz_subject_names_list = [authz_subjects_dict[subject_id]["name"] for subject_id in authz_subjects_dict]
                 admin_subjects_dict = self.admin_api.get_subjects_dict(self.root_api.root_admin_id, tenant_dict['intra_admin_extension_id'])
@@ -440,10 +443,8 @@ class IntraExtensionManager(manager.Manager):
 
     def __init__(self):
         super(IntraExtensionManager, self).__init__(CONF.moon.intraextension_driver)
-        # self.root_admin_id = self.__compute_admin_id_for_root_extension()
         self._root_admin_id = None
         self._root_extension_id = None
-        # self.__init_aggregation_algorithm()
 
     def __init_root(self, root_extension_id=None):
         LOG.debug("__init_root {}".format(root_extension_id))
@@ -490,12 +491,6 @@ class IntraExtensionManager(manager.Manager):
         LOG.debug("self.driver.get_intra_extensions_dict()={}".format(self.driver.get_intra_extensions_dict()))
         return {self.root_extension_id: self.driver.get_intra_extensions_dict()[self.root_extension_id]}
 
-    # def __compute_admin_id_for_root_extension(self):
-    #     for subject_id, subject_dict in self.driver.get_subjects_dict(self.root_extension_id).iteritems():
-    #         if subject_dict["name"] == "admin":
-    #             return subject_id
-    #     raise RootExtensionNotInitialized()
-
     def get_root_extension_id(self):
         extensions = self.driver.get_intra_extensions_dict()
         for extension_id, extension_dict in extensions.iteritems():
@@ -506,15 +501,6 @@ class IntraExtensionManager(manager.Manager):
             if not extension:
                 raise IntraExtensionCreationError("The root extension is not created.")
             return extension['id']
-
-    # def __init_aggregation_algorithm(self):
-    #     try:
-    #         self._root_extension_id = self.get_root_extension_id()
-    #         self.aggregation_algorithm_dict = self.configuration_api.get_aggregation_algorithms_dict(self.root_extension_id)
-    #     except AttributeError as e:
-    #         LOG.warning("Error on init_aggregation_algorithm ({})".format(e))
-    #         self._root_extension_id = None
-    #         self.aggregation_algorithm_dict = {}
 
     def __get_authz_buffer(self, intra_extension_id, subject_id, object_id, action_id):
         """
@@ -602,8 +588,6 @@ class IntraExtensionManager(manager.Manager):
                     meta_rule_dict[sub_meta_rule_id],
                     self.driver.get_rules_dict(intra_extension_id, sub_meta_rule_id).values())
 
-        # if not self.root_extension_id:
-        #     self.__init_aggregation_algorithm()
         aggregation_algorithm_id = self.driver.get_aggregation_algorithm_id(intra_extension_id)['aggregation_algorithm']
         if self.aggregation_algorithm_dict[aggregation_algorithm_id]['name'] == 'all_true':
             decision = all_true(decision_buffer)
@@ -637,32 +621,15 @@ class IntraExtensionManager(manager.Manager):
         f = open(metadata_path)
         json_perimeter = json.load(f)
 
-        # subject_categories_dict = dict()
         for _cat in json_perimeter['subject_categories']:
             self.driver.set_subject_category_dict(intra_extension_dict["id"], uuid4().hex,
                                                   {"name": _cat, "description": _cat})
-        # Initialize scope categories
-        # for _cat in subject_categories_dict.keys():
-        #     self.driver.set_subject_scope_dict(intra_extension_dict["id"], _cat, {})
-        # intra_extension_dict['subject_categories'] = subject_categories_dict
-
-        # object_categories_dict = dict()
         for _cat in json_perimeter['object_categories']:
             self.driver.set_object_category_dict(intra_extension_dict["id"], uuid4().hex,
                                                  {"name": _cat, "description": _cat})
-        # Initialize scope categories
-        # for _cat in object_categories_dict.keys():
-        #     self.driver.set_object_scope_dict(intra_extension_dict["id"], _cat, {})
-        # intra_extension_dict['object_categories'] = object_categories_dict
-
-        # action_categories_dict = dict()
         for _cat in json_perimeter['action_categories']:
             self.driver.set_action_category_dict(intra_extension_dict["id"], uuid4().hex,
                                                  {"name": _cat, "description": _cat})
-        # Initialize scope categories
-        # for _cat in action_categories_dict.keys():
-        #     self.driver.set_action_scope_dict(intra_extension_dict["id"], _cat, {})
-        # intra_extension_dict['action_categories'] = action_categories_dict
 
     def __load_perimeter_file(self, intra_extension_dict, policy_dir):
 
@@ -805,7 +772,6 @@ class IntraExtensionManager(manager.Manager):
         metadata_path = os.path.join(policy_dir, 'metarule.json')
         f = open(metadata_path)
         json_metarule = json.load(f)
-        # ie["meta_rules"] = copy.deepcopy(json_metarule)
         metarule = dict()
         categories = {
             "subject_categories": self.driver.SUBJECT_CATEGORY,
@@ -847,13 +813,10 @@ class IntraExtensionManager(manager.Manager):
             sub_rule_id = self.driver.get_uuid_from_name(intra_extension_dict["id"],
                                                          sub_rule_name,
                                                          self.driver.SUB_META_RULE)
-            # if sub_rule_name not in self.get_sub_meta_rule_relations("admin", ie["id"])["sub_meta_rule_relations"]:
-            #     raise IntraExtensionException("Bad sub_rule_name name {} in rules".format(sub_rule_name))
             rules[sub_rule_id] = list()
             for rule in json_rules[sub_rule_name]:
                 subrule = list()
                 _rule = list(rule)
-                # sub_rule_id = self.driver.get_uuid_from_name(intra_extension_dict["id"], sub_rule_name, self.driver.SUB_META_RULE)
                 for category_uuid in sub_meta_rules[sub_rule_id]["subject_categories"]:
                     scope_name = _rule.pop(0)
                     scope_uuid = self.driver.get_uuid_from_name(intra_extension_dict["id"],
@@ -881,7 +844,6 @@ class IntraExtensionManager(manager.Manager):
                 else:
                     # if value doesn't exist add a default value
                     subrule.append(True)
-                # rules[sub_rule_id].append(subrule)
                 self.driver.set_rule_dict(intra_extension_dict["id"], sub_rule_id, uuid4().hex, subrule)
 
     @enforce(("read", "write"), "intra_extensions")
@@ -914,11 +876,6 @@ class IntraExtensionManager(manager.Manager):
         # Note (asteroide): Only one root Extension is authorized
         # and this extension is created at the very beginning of the server
         # so we don't need to use enforce here
-        # if self.get_root_extension_id():
-        #     # for ext in self.driver.get_intra_extensions_dict():
-        #     # Note (asteroide): if there is at least one Intra Extension, it implies that
-        #     # the Root Intra Extension had already been created...
-        #     return
         extensions = self.driver.get_intra_extensions_dict()
         for extension_id, extension_dict in extensions.iteritems():
             if extension_dict["name"] == CONF.moon.root_policy_directory:
@@ -930,10 +887,7 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
-        # try:
         self.moonlog_api.debug("Creation of root IE: {}".format(ref))
-        # except AttributeError:
-        #     LOG.debug("Creation of root IE: {}".format(ref))
 
         # read the template given by "model" and populate default variables
         template_dir = os.path.join(CONF.moon.policy_directory, ie_dict["model"])

@@ -31,7 +31,7 @@ class SubjectScopesList(Lister):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(
             parsed_args.intraextension,
             parsed_args.subject_category_id),
             authtoken=True)
@@ -73,7 +73,7 @@ class SubjectScopesAdd(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        data = self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}".format(
+        data = self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}".format(
             parsed_args.intraextension, parsed_args.subject_category_id),
             post_data={
                 "subject_scope_name": parsed_args.subject_scope_name,
@@ -113,7 +113,7 @@ class SubjectScopesDelete(Command):
     def take_action(self, parsed_args):
         if not parsed_args.intraextension:
             parsed_args.intraextension = self.app.intraextension
-        self.app.get_url("/v3/OS-MOON/intra_extensions/{}/subject_scopes/{}/{}".format(
+        self.app.get_url(self.app.url_prefix+"/intra_extensions/{}/subject_scopes/{}/{}".format(
             parsed_args.intraextension,
             parsed_args.subject_category_id,
             parsed_args.subject_scope_id
