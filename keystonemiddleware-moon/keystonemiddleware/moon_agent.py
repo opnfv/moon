@@ -95,7 +95,7 @@ class MoonAgentKeystoneMiddleware(object):
         self.auth_host = conf.get('auth_host', "127.0.0.1")
         self.auth_port = int(conf.get('auth_port', 35357))
         auth_protocol = conf.get('auth_protocol', 'http')
-        self._request_uri = '%s://%s:%s' % (auth_protocol, self.auth_host,  # TODO: ??? for  auth or authz
+        self._conf["_request_uri"] = '%s://%s:%s' % (auth_protocol, self.auth_host,  # TODO: ??? for  auth or authz
                                             self.auth_port)
 
         # SSL
@@ -104,16 +104,18 @@ class MoonAgentKeystoneMiddleware(object):
         key_file = conf.get('keyfile')
 
         if insecure:
-            self._verify = False
+            self._conf["_verify"] = False
         elif cert_file and key_file:
-            self._verify = (cert_file, key_file)
+            self._conf["_verify"] = (cert_file, key_file)
         elif cert_file:
-            self._verify = cert_file
+            self._conf["_verify"] = cert_file
         else:
-            self._verify = None
+            self._conf["_verify"] = None
 
         # Moon registered mgrs
         self.local_registered_mgr_dict = dict()  # TODO: load from the sql backend
+        from keystonemiddleware.moon_mgrs.authz_mgr.authz_mgr import AuthzMgr
+        self.local_registered_mgr_dict["authz_mgr"] = AuthzMgr(self._conf)
 
     def __set_token(self):
         data = self.get_url("/v3/auth/tokens", post_data=self.post_data)
@@ -283,13 +285,13 @@ class MoonAgentKeystoneMiddleware(object):
 
         self.__set_token()
         for _mgr in self.local_registered_mgr_dict:  # TODO: update from the sql backend
-            self.local_registered_mgr_dict[_mgr]['response_content'] = \
+            self.local_registered_mgr_dict[_mgr].response_content = \
                 json.loads(self.local_registered_mgr_dict[_mgr].treat_request(self.x_subject_token, agent_data).content)
         self.__unset_token()
 
         aggregate_result = 1
         for _mgr in self.local_registered_mgr_dict:
-            if not self.local_registered_mgr_dict[_mgr]['response_content']:
+            if not self.local_registered_mgr_dict[_mgr].response_content:
                 aggregate_result = 0
 
         if aggregate_result:
