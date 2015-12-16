@@ -38,6 +38,8 @@ class AuthzMgr(object):
         authz_mgr_fh = logging.FileHandler(CONF.moon_authz_mgr["authz_mgr_logfile"])
         self._LOG.setLevel(logging.DEBUG)
         self._LOG.addHandler(authz_mgr_fh)
+        self._conf = conf
+        self.response_content = ""
 
     def _deny_request(self, code):
         error_table = {
@@ -57,7 +59,6 @@ class AuthzMgr(object):
         resp.body = error_msg
         return resp
 
-
     def treat_request(self, auth_token, agent_data):
         if not agent_data['resource_id']:
             agent_data['resource_id'] = "servers"
@@ -65,8 +66,8 @@ class AuthzMgr(object):
         headers = {'X-Auth-Token': auth_token}
         self._LOG.debug('X-Auth-Token={}'.format(auth_token))
         try:
-            _url ='{}/v3/OS-MOON/authz/{}/{}/{}/{}'.format(
-                                        self._request_uri,
+            _url = '{}/moon/authz/{}/{}/{}/{}'.format(
+                                        self._conf["_request_uri"],
                                         agent_data['tenant_id'],
                                         agent_data['user_id'],
                                         agent_data['resource_id'],
@@ -74,7 +75,7 @@ class AuthzMgr(object):
             self._LOG.info(_url)
             response = requests.get(_url,
                                     headers=headers,
-                                    verify=self._verify)
+                                    verify=self._conf["_verify"])
         except requests.exceptions.RequestException as e:
             self._LOG.error(_LI('HTTP connection exception: %s'), e)
             resp = self._deny_request('InvalidURI')
@@ -93,7 +94,7 @@ class AuthzMgr(object):
 
         elif response.status_code == 200:
             answer = json.loads(response.content)
-            self._LOG.debug("action_id={}/{}".format(agent_data['OS_component'] , agent_data['action_id']))
+            self._LOG.debug("action_id={}/{}".format(agent_data['OS_component'], agent_data['action_id']))
             self._LOG.debug(answer)
             if "authz" in answer and answer["authz"]:
                 return response
