@@ -44,7 +44,8 @@ class TestIntraExtensionAdminManager(tests.TestCase):
         self.resource_api.create_domain(domain['id'], domain)
         self.admin = create_user(self, username="admin")
         self.demo = create_user(self, username="demo")
-        self.root_api.load_root_intra_extension_dict()
+        ref = self.root_api.load_root_intra_extension_dict()
+        self.root_api.populate_default_data(ref)
         self.root_intra_extension = self.root_api.get_root_extension_dict()
         self.root_intra_extension_id = self.root_intra_extension.keys()[0]
         self.ADMIN_ID = self.root_api.root_admin_id
