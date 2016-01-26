@@ -26,6 +26,7 @@ def create_intra_extension(self, policy_model="policy_authz"):
     IE["genre"] = genre
     ref = self.admin_api.load_intra_extension_dict(self.root_api.root_admin_id,
                                                    intra_extension_dict=IE)
+    self.admin_api.populate_default_data(ref)
     self.assertIsInstance(ref, dict)
     return ref
 

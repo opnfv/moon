@@ -183,7 +183,8 @@ class IntraExtensions(controller.V3Controller):
         intra_extension_dict['aggregation_algorithm'] = kw.get('intra_extension_aggregation_algorithm', dict())
         intra_extension_dict['sub_meta_rules'] = kw.get('intra_extension_sub_meta_rules', dict())
         intra_extension_dict['rules'] = kw.get('intra_extension_rules', dict())
-        return self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict=intra_extension_dict)
+        ref = self.admin_api.load_intra_extension_dict(user_id, intra_extension_dict=intra_extension_dict)
+        return self.admin_api.populate_default_data(ref)
 
     @controller.protected()
     def get_intra_extension(self, context, **kw):
