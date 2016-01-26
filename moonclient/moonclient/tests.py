@@ -140,7 +140,7 @@ class TestsLaunch(Lister):
                         title += ":" + port
                     title += "\n"
                     self.logfile.write(time.strftime(self.TIME_FORMAT) + " " + title + "\n")
-                    self.log.info(title)
+                    self.log.info(title.strip())
                     data_tmp = list()
                     data_tmp.append("")
                     data_tmp.append(title.strip())
