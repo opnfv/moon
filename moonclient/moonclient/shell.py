@@ -141,7 +141,7 @@ class MoonClient(App):
         # TODO: we must manage authentication and requests with secure protocol (ie. HTTPS)
         if not port:
             port = self.port
-        conn = httplib.HTTPConnection(self.host, port)
+        conn = httplib.HTTPConnection(self.host, int(port))
         self.log.debug("Host: {}:{}".format(self.host, self.port))
         headers = {
             "Content-type": "application/x-www-form-urlencoded",
