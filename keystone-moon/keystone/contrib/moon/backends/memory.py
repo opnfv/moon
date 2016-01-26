@@ -26,8 +26,10 @@ class ConfigurationConnector(ConfigurationDriver):
         self.aggregation_algorithms_dict[hashlib.sha224("one_true").hexdigest()[:32]] = \
             {'name': 'one_true', 'description': 'only one rule has to match'}
         self.sub_meta_rule_algorithms_dict = dict()
-        self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'inclusion', 'description': 'inclusion'}
-        self.sub_meta_rule_algorithms_dict[uuid4().hex] = {'name': 'comparison', 'description': 'comparison'}
+        self.sub_meta_rule_algorithms_dict[hashlib.sha224("inclusion").hexdigest()[:32]] = \
+            {'name': 'inclusion', 'description': 'inclusion'}
+        self.sub_meta_rule_algorithms_dict[hashlib.sha224("comparison").hexdigest()[:32]] = \
+            {'name': 'comparison', 'description': 'comparison'}
 
     def get_policy_templates_dict(self):
         """
