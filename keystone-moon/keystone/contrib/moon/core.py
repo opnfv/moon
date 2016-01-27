@@ -2189,6 +2189,8 @@ class IntraExtensionAuthzManager(IntraExtensionManager):
                 self.get_data_from_master()
                 return self.__authz(tenant_id, subject_k_id, object_name, action_name, genre="authz")
             raise e
+        except TenantNoIntraExtension:
+            return {'authz': True, 'comment': "Cannot authz because Tenant is not managed by Moon {}".format(tenant_id)}
 
     def add_subject_dict(self, user_id, intra_extension_id, subject_dict):
         subject = super(IntraExtensionAuthzManager, self).add_subject_dict(user_id, intra_extension_id, subject_dict)
