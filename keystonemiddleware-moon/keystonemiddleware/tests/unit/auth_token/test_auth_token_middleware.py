@@ -21,6 +21,7 @@ import stat
 import tempfile
 import time
 import uuid
+import warnings
 
 import fixtures
 from keystoneclient import auth
@@ -312,6 +313,11 @@ class BaseAuthTokenMiddlewareTest(base.BaseAuthTokenTestCase):
         self.auth_version = auth_version
         self.response_status = None
         self.response_headers = None
+
+        # NOTE(gyee): For this test suite and for the stable liberty branch
+        # only, we will ignore deprecated calls that keystonemiddleware makes.
+        warnings.filterwarnings('ignore', category=DeprecationWarning,
+                                module='^keystonemiddleware\\.')
 
     def call_middleware(self, **kwargs):
         return self.call(self.middleware, **kwargs)
@@ -773,6 +779,33 @@ class CommonAuthTokenMiddlewareTest(object):
         resp = self.call_middleware(headers={'X-Auth-Token': token})
         self.assertEqual(401, resp.status_int)
 
+    def test_cached_revoked_error(self):
+        # When the token is cached and revocation list retrieval fails,
+        # 503 is returned
+        token = self.token_dict['uuid_token_default']
+        self.middleware._check_revocations_for_cached = True
+
+        # Token should be cached as ok after this.
+        resp = self.call_middleware(headers={'X-Auth-Token': token})
+        self.assertEqual(200, resp.status_int)
+
+        # Cause the revocation list to be fetched again next time so we can
+        # test the case where that retrieval fails
+        self.middleware._revocations._fetched_time = datetime.datetime.min
+        with mock.patch.object(self.middleware._revocations, '_fetch',
+                               side_effect=exc.RevocationListError):
+            resp = self.call_middleware(headers={'X-Auth-Token': token})
+            self.assertEqual(503, resp.status_int)
+
+    def test_unexpected_exception_in_validate_offline(self):
+        # When an unexpected exception is hit during _validate_offline,
+        # 500 is returned
+        token = self.token_dict['uuid_token_default']
+        with mock.patch.object(self.middleware, '_validate_offline',
+                               side_effect=Exception):
+            resp = self.call_middleware(headers={'X-Auth-Token': token})
+            self.assertEqual(500, resp.status_int)
+
     def test_cached_revoked_uuid(self):
         # When the UUID token is cached and revoked, 401 is returned.
         self._test_cache_revoked(self.token_dict['uuid_token_default'])
@@ -868,6 +901,30 @@ class CommonAuthTokenMiddlewareTest(object):
 
     def test_revoked_hashed_pkiz_token(self):
         self._test_revoked_hashed_token('signed_token_scoped_pkiz')
+
+    def test_revoked_pki_token_by_audit_id(self):
+        # When the audit ID is in the revocation list, the token is invalid.
+        self.set_middleware()
+        token = self.token_dict['signed_token_scoped']
+
+        # Put the token audit ID in the revocation list,
+        # the entry will have a false token ID so the token ID doesn't match.
+        fake_token_id = uuid.uuid4().hex
+        # The audit_id value is in examples/pki/cms/auth_*_token_scoped.json.
+        audit_id = 'SLIXlXQUQZWUi9VJrqdXqA'
+        revocation_list_data = {
+            'revoked': [
+                {
+                    'id': fake_token_id,
+                    'audit_id': audit_id
+                },
+            ]
+        }
+        self.middleware._revocations._list = jsonutils.dumps(
+            revocation_list_data)
+
+        resp = self.call_middleware(headers={'X-Auth-Token': token})
+        self.assertEqual(401, resp.status_int)
 
     def get_revocation_list_json(self, token_ids=None, mode=None):
         if token_ids is None:
@@ -2085,7 +2142,7 @@ class CommonCompositeAuthTests(object):
         }
         self.update_expected_env(expected_env)
 
-        token = 'invalid-user-token'
+        token = 'invalid-token'
         service_token = 'invalid-service-token'
         resp = self.call_middleware(headers={'X-Auth-Token': token,
                                              'X-Service-Token': service_token})
