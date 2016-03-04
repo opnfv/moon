@@ -98,7 +98,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add admin --password nomoresecrete",
+        "command": "subject add admin --subject_pass nomoresecrete",
         "result": "",
         "description": "",
         "command_options": ""
@@ -111,7 +111,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --password nomoresecrete",
+        "command": "subject add demo --subject_pass nomoresecrete",
         "result": "",
         "description": "",
         "command_options": ""
@@ -927,7 +927,7 @@
 
       {
         "name": "add_subject",
-        "command": "subject add admin --password nomoresecrete",
+        "command": "subject add admin --subject_pass nomoresecrete",
         "result": "",
         "description": "Add admin subject.",
         "command_options": ""
@@ -3187,7 +3187,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --password nomoresecrete",
+        "command": "subject add demo --subject_pass nomoresecrete",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3354,7 +3354,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --password nomoresecrete",
+        "command": "subject add demo --subject_pass nomoresecrete",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3374,7 +3374,7 @@
       },
       {
         "name": "demo: try to pause nova instance",
-        "external_command": "nova --os-user-name demo pause $uuid_server",
+        "external_command": "nova --os-username demo pause $uuid_server",
         "result": "^$",
         "description": "Pausing the server must be impossible due to the current rules"
       },

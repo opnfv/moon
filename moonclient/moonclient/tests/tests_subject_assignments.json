@@ -62,7 +62,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo --password nomoresecrete",
+        "command": "subject add alt_demo --subject_pass nomoresecrete",
         "result": "",
         "description": "Add the new subject category alt_demo",
         "command_options": ""
@@ -256,7 +256,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add alt_demo --password nomoresecrete",
+        "command": "subject add alt_demo --subject_pass nomoresecrete",
         "result": "",
         "description": "Add the new subject category alt_demo",
         "command_options": ""
