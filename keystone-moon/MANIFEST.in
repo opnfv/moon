@@ -10,7 +10,7 @@ include run_tests.sh
 include setup.cfg
 include setup.py
 include tox.ini
-include etc/*
+graft etc
 include httpd/*
 graft bin
 graft doc
