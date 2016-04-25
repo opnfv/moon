@@ -4,12 +4,13 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from keystone.common import controller
-from keystone.common import dependency
 from keystone import config
 from keystone.models import token_model
 from keystone.contrib.moon.exception import *
 from oslo_log import log
 from uuid import uuid4
+import requests
+
 
 CONF = config.CONF
 LOG = log.getLogger(__name__)
@@ -830,4 +831,41 @@ class Logs(controller.V3Controller):
         user_id = self._get_user_id_from_token(context.get('token_id'))
         options = kw.get('options', '')
         return self.moonlog_api.get_logs(user_id, options)
+
+
+class MoonAuth(controller.V3Controller):
+
+    def __init__(self):
+        super(MoonAuth, self).__init__()
+
+    def get_token(self, context, **kw):
+        data_auth = {
+            "auth": {
+                "identity": {
+                    "methods": [
+                        "password"
+                    ],
+                    "password": {
+                        "user": {
+                            "domain": {
+                                "id": "Default"
+                            },
+                            "name": kw['username'],
+                            "password": kw['password']
+                        }
+                    }
+                }
+            }
+        }
+
+        req = requests.post("http://localhost:5000/v3/auth/tokens",
+                            json=data_auth,
+                            headers={"Content-Type": "application/json"}
+                            )
+        if req.status_code not in (200, 201):
+            LOG.error(req.text)
+        else:
+            TOKEN = req.headers['X-Subject-Token']
+            return {"token": TOKEN, 'message': ""}
+        return {"token": None, 'message': req.text}
 

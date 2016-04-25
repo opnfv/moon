@@ -36,6 +36,7 @@ class Routers(wsgi.ComposableRouter):
         intra_ext_controller = controllers.IntraExtensions()
         tenants_controller = controllers.Tenants()
         logs_controller = controllers.Logs()
+        auth_controller = controllers.MoonAuth()
         inter_ext_controller = controllers.InterExtensions()
 
         # Configuration route
@@ -479,6 +480,13 @@ class Routers(wsgi.ComposableRouter):
             controller=logs_controller,
             action='get_logs',
             conditions=dict(method=['GET']))
+
+        # Auth route
+        mapper.connect(
+            self.PATH_PREFIX+'/auth/tokens',
+            controller=auth_controller,
+            action='get_token',
+            conditions=dict(method=['POST']))
 
         # InterExtensions route
         # mapper.connect(

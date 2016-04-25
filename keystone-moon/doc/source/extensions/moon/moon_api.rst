@@ -3,12 +3,12 @@ Moon API
 
 Here are Moon API with some examples of posted data and returned data.
 
-All requests must be prefexied by /v3/OS-MOON.
+All requests must be prefexied by /moon/v3/OS-MOON.
 
 Authz
 -----
 
-**GET     /authz/{tenant_id}/{subject_k_id}/{object_name}/{action_name}**
+**GET     /moon/authz/{tenant_id}/{subject_k_id}/{object_name}/{action_name}**
   Authorization API.
 
 .. code-block:: json
@@ -24,7 +24,7 @@ Intra-Extension API
 Configuration
 ~~~~~~~~~~~~~
 
-**GET     /configuration/templates**
+**GET     /moon/configuration/templates**
 
     List all policy templates.
 
@@ -38,7 +38,7 @@ Configuration
                }
 
 
-**GET     /configuration/aggregation_algorithms**
+**GET     /moon/configuration/aggregation_algorithms**
 
     List all aggregation algorithms.
 
@@ -52,7 +52,7 @@ Configuration
                }
 
 
-**GET     /configuration/sub_meta_rule_algorithms**
+**GET     /moon/configuration/sub_meta_rule_algorithms**
 
     List all sub meta rule algorithms.
 
@@ -69,7 +69,7 @@ Configuration
 Tenants
 ~~~~~~~
 
-**GET     /tenants**
+**GET     /moon/tenants**
 
     List all tenants.
 
@@ -85,7 +85,7 @@ Tenants
                }
 
 
-**POST    /tenants**
+**POST    /moon/tenants**
 
     Add a tenant.
 
@@ -107,7 +107,7 @@ Tenants
                }
 
 
-**POST    /tenants/{tenant_id}**
+**POST    /moon/tenants/{tenant_id}**
 
     Show information of one tenant.
 
@@ -123,7 +123,7 @@ Tenants
                }
 
 
-**POST    /tenants/{tenant_id}**
+**POST    /moon/tenants/{tenant_id}**
 
     Modify a tenant.
 
@@ -145,7 +145,7 @@ Tenants
                }
 
 
-**DELETE  /tenants/{tenant_id}**
+**DELETE  /moon/tenants/{tenant_id}**
 
     Delete a tenant.
 
@@ -157,7 +157,7 @@ Tenants
 Intra-Extension
 ~~~~~~~~~~~~~~~
 
-**GET     /intra_extensions/init**
+**GET     /moon/intra_extensions/init**
 
     Initialize the root Intra_Extension (if needed).
 
@@ -166,7 +166,7 @@ Intra-Extension
                return = {}
 
 
-**GET     /intra_extensions**
+**GET     /moon/intra_extensions**
 
     List all Intra_Extensions.
 
@@ -180,7 +180,7 @@ Intra-Extension
                }
 
 
-**POST    /intra_extensions**
+**POST    /moon/intra_extensions**
 
     Create a new Intra_Extension.
 
@@ -195,7 +195,7 @@ Intra-Extension
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/**
+**GET     /moon/intra_extensions/{intra_extension_id}/**
 
     Show details about one Intra_Extension.
 
@@ -210,7 +210,7 @@ Intra-Extension
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/**
 
     Delete an Intra_Extension.
 
@@ -222,7 +222,7 @@ Intra-Extension
 Intra-Extension Subjects
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-**GET     /intra_extensions/{intra_extension_id}/subjects**
+**GET     /moon/intra_extensions/{intra_extension_id}/subjects**
 
     List all subjects.
 
@@ -236,7 +236,7 @@ Intra-Extension Subjects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/subjects**
+**POST    /moon/intra_extensions/{intra_extension_id}/subjects**
 
     List all subjects.
 
@@ -256,7 +256,7 @@ Intra-Extension Subjects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/subjects/{subject_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/subjects/{subject_id}**
 
     Delete a subject.
 
@@ -265,7 +265,7 @@ Intra-Extension Subjects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/subject_categories**
+**GET     /moon/intra_extensions/{intra_extension_id}/subject_categories**
 
     List all subject categories.
 
@@ -279,7 +279,7 @@ Intra-Extension Subjects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/subject_categories**
+**POST    /moon/intra_extensions/{intra_extension_id}/subject_categories**
 
     Add a new subject category.
 
@@ -297,7 +297,7 @@ Intra-Extension Subjects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/subject_categories/{subject_category_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/subject_categories/{subject_category_id}**
 
     Delete a subject category.
 
@@ -306,7 +306,7 @@ Intra-Extension Subjects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
 
     List all subject scopes for a specific subject category.
 
@@ -320,7 +320,7 @@ Intra-Extension Subjects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
+**POST    /moon/intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}**
 
     Add a new subject scope for a specific subject category.
 
@@ -338,7 +338,7 @@ Intra-Extension Subjects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}/{subject_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/subject_scopes/{subject_category_id}/{subject_scope_id}**
 
     Delete a subject scope.
 
@@ -347,7 +347,7 @@ Intra-Extension Subjects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}**
 
     List all subject assignments for a subject and for a subject category.
 
@@ -358,7 +358,7 @@ Intra-Extension Subjects
                ]
 
 
-**POST    /intra_extensions/{intra_extension_id}/subject_assignments**
+**POST    /moon/intra_extensions/{intra_extension_id}/subject_assignments**
 
     Add an assignment.
 
@@ -374,7 +374,7 @@ Intra-Extension Subjects
                ]
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}/{subject_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/subject_assignments/{subject_id}/{subject_category_id}/{subject_scope_id}**
 
     Delete a subject assignment.
 
@@ -386,7 +386,7 @@ Intra-Extension Subjects
 Intra-Extension Objects
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-**GET     /intra_extensions/{intra_extension_id}/objects**
+**GET     /moon/intra_extensions/{intra_extension_id}/objects**
 
     List all objects.
 
@@ -400,7 +400,7 @@ Intra-Extension Objects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/objects**
+**POST    /moon/intra_extensions/{intra_extension_id}/objects**
 
     List all objects.
 
@@ -418,7 +418,7 @@ Intra-Extension Objects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/objects/{object_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/objects/{object_id}**
 
     Delete a object.
 
@@ -427,7 +427,7 @@ Intra-Extension Objects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/object_categories**
+**GET     /moon/intra_extensions/{intra_extension_id}/object_categories**
 
     List all object categories.
 
@@ -441,7 +441,7 @@ Intra-Extension Objects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/object_categories**
+**POST    /moon/intra_extensions/{intra_extension_id}/object_categories**
 
     Add a new object category.
 
@@ -459,7 +459,7 @@ Intra-Extension Objects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/object_categories/{object_category_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/object_categories/{object_category_id}**
 
     Delete a object category.
 
@@ -468,7 +468,7 @@ Intra-Extension Objects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
 
     List all object scopes for a specific object category.
 
@@ -482,7 +482,7 @@ Intra-Extension Objects
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
+**POST    /moon/intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}**
 
     Add a new object scope for a specific object category.
 
@@ -500,7 +500,7 @@ Intra-Extension Objects
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}/{object_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/object_scopes/{object_category_id}/{object_scope_id}**
 
     Delete a object scope.
 
@@ -509,7 +509,7 @@ Intra-Extension Objects
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}**
 
     List all object assignments for a object and for a object category.
 
@@ -520,7 +520,7 @@ Intra-Extension Objects
                ]
 
 
-**POST    /intra_extensions/{intra_extension_id}/object_assignments**
+**POST    /moon/intra_extensions/{intra_extension_id}/object_assignments**
 
     Add an assignment.
 
@@ -536,7 +536,7 @@ Intra-Extension Objects
                ]
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}/{object_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/object_assignments/{object_id}/{object_category_id}/{object_scope_id}**
 
     Delete a object assignment.
 
@@ -548,7 +548,7 @@ Intra-Extension Objects
 Intra-Extension Actions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-**GET     /intra_extensions/{intra_extension_id}/actions**
+**GET     /moon/intra_extensions/{intra_extension_id}/actions**
 
     List all actions.
 
@@ -562,7 +562,7 @@ Intra-Extension Actions
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/actions**
+**POST    /moon/intra_extensions/{intra_extension_id}/actions**
 
     List all actions.
 
@@ -582,7 +582,7 @@ Intra-Extension Actions
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/actions/{action_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/actions/{action_id}**
 
     Delete a action.
 
@@ -591,7 +591,7 @@ Intra-Extension Actions
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/action_categories**
+**GET     /moon/intra_extensions/{intra_extension_id}/action_categories**
 
     List all action categories.
 
@@ -605,7 +605,7 @@ Intra-Extension Actions
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/action_categories**
+**POST    /moon/intra_extensions/{intra_extension_id}/action_categories**
 
     Add a new action category.
 
@@ -623,7 +623,7 @@ Intra-Extension Actions
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/action_categories/{action_category_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/action_categories/{action_category_id}**
 
     Delete a action category.
 
@@ -632,7 +632,7 @@ Intra-Extension Actions
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
 
     List all action scopes for a specific action category.
 
@@ -646,7 +646,7 @@ Intra-Extension Actions
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
+**POST    /moon/intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}**
 
     Add a new action scope for a specific action category.
 
@@ -664,7 +664,7 @@ Intra-Extension Actions
                }
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}/{action_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/action_scopes/{action_category_id}/{action_scope_id}**
 
     Delete a action scope.
 
@@ -673,7 +673,7 @@ Intra-Extension Actions
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}**
 
     List all action assignments for a action and for a action category.
 
@@ -684,7 +684,7 @@ Intra-Extension Actions
                ]
 
 
-**POST    /intra_extensions/{intra_extension_id}/action_assignments**
+**POST    /moon/intra_extensions/{intra_extension_id}/action_assignments**
 
     Add an assignment.
 
@@ -700,7 +700,7 @@ Intra-Extension Actions
                ]
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}/{action_scope_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/action_assignments/{action_id}/{action_category_id}/{action_scope_id}**
 
     Delete a action assignment.
 
@@ -712,7 +712,7 @@ Intra-Extension Actions
 Intra-Extension Rules
 ~~~~~~~~~~~~~~~~~~~~~
 
-**GET     /intra_extensions/{intra_extension_id}/aggregation_algorithm**
+**GET     /moon/intra_extensions/{intra_extension_id}/aggregation_algorithm**
 
     List aggregation algorithm for an intra extension.
 
@@ -726,7 +726,7 @@ Intra-Extension Rules
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/aggregation_algorithm**
+**POST    /moon/intra_extensions/{intra_extension_id}/aggregation_algorithm**
 
     Set the current aggregation algorithm for an intra extension.
 
@@ -744,7 +744,7 @@ Intra-Extension Rules
                }
 
 
-**GET     /intra_extensions/{intra_extension_id}/sub_meta_rules**
+**GET     /moon/intra_extensions/{intra_extension_id}/sub_meta_rules**
 
     Show the current sub meta rules.
 
@@ -766,7 +766,7 @@ Intra-Extension Rules
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
 
     Set the current sub meta rule.
 
@@ -782,7 +782,7 @@ Intra-Extension Rules
                return = {}
 
 
-**GET     /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+**GET     /moon/intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
 
     List all rules.
 
@@ -794,7 +794,7 @@ Intra-Extension Rules
                }
 
 
-**POST    /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
+**POST    /moon/intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}**
 
     Add a new rule.
 
@@ -809,7 +809,7 @@ Intra-Extension Rules
                return = {}
 
 
-**DELETE  /intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}/{rule_id}**
+**DELETE  /moon/intra_extensions/{intra_extension_id}/rule/{sub_meta_rule_id}/{rule_id}**
 
     Delete a rule.
 
@@ -821,7 +821,7 @@ Intra-Extension Rules
 Logs
 ~~~~
 
-**GET     /logs/{options}**
+**GET     /moon/logs/{options}**
 
     List all logs.
     Options can be:
@@ -841,4 +841,23 @@ Logs
                     "2015-04-15-13:45:22 ...",
                     "2015-04-15-13:45:23 ..."
                ]
+
+Auth
+~~~~
+
+**POST    /moon/auth/tokens**
+
+    Add a tenant.
+
+.. code-block:: json
+
+               post = {
+                    "username": "name of the user to authenticate",
+                    "password": "password of the user to authenticate"
+               }
+               return = {
+                    "token": "NEW_TOKEN",
+                    "message": "if authentication failed..."
+               }
+
 
