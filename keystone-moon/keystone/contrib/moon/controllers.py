@@ -833,10 +833,19 @@ class Logs(controller.V3Controller):
         return self.moonlog_api.get_logs(user_id, options)
 
 
+@dependency.requires('identity_api', "token_provider_api", "resource_api")
 class MoonAuth(controller.V3Controller):
 
     def __init__(self):
         super(MoonAuth, self).__init__()
+
+    def _get_project(self, uuid="", name=""):
+        projects = self.resource_api.list_projects()
+        for project in projects:
+            if uuid and uuid == project['id']:
+                return project
+            elif name and name == project['name']:
+                return project
 
     def get_token(self, context, **kw):
         data_auth = {
@@ -858,6 +867,21 @@ class MoonAuth(controller.V3Controller):
             }
         }
 
+        message = {}
+        if "project" in kw:
+            project = self._get_project(name=kw['project'])
+            if project:
+                data_auth["auth"]["scope"] = dict()
+                data_auth["auth"]["scope"]['project'] = dict()
+                data_auth["auth"]["scope"]['project']['id'] = project['id']
+            else:
+                message = {
+                    "error": {
+                        "message": "Unable to find project {}".format(kw['project']),
+                        "code": 200,
+                        "title": "UnScopedToken"
+                    }}
+
         req = requests.post("http://localhost:5000/v3/auth/tokens",
                             json=data_auth,
                             headers={"Content-Type": "application/json"}
@@ -865,7 +889,16 @@ class MoonAuth(controller.V3Controller):
         if req.status_code not in (200, 201):
             LOG.error(req.text)
         else:
-            TOKEN = req.headers['X-Subject-Token']
-            return {"token": TOKEN, 'message': ""}
-        return {"token": None, 'message': req.text}
+            _token = req.headers['X-Subject-Token']
+            _data = req.json()
+            _result = {
+                "token": _token,
+                'message': message
+            }
+            try:
+                _result["roles"] = map(lambda x: x['name'], _data["token"]["roles"])
+            except KeyError:
+                pass
+            return _result
+        return {"token": None, 'message': req.json()}
 
