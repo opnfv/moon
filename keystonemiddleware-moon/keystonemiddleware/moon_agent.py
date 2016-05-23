@@ -21,8 +21,14 @@ _OPTS = [
     cfg.StrOpt('auth_version',
                default=None,
                help='API version of the admin Identity API endpoint.'),
-    cfg.StrOpt('keystonemiddleware_agent_logfile',  # TODO: update in the paste.ini
-               default="/tmp/moon_keystonemiddleware_agent.log",
+    cfg.StrOpt('authz_login',
+               default="admin",
+               help='Name of the administrator who will connect to the Keystone Moon backends.'),
+    cfg.StrOpt('authz_password',
+               default="nomoresecrete",
+               help='Password of the administrator who will connect to the Keystone Moon backends.'),
+    cfg.StrOpt('logfile',
+               default="/tmp/authz.log",
                help='File where logs goes.'),
     ]
 
@@ -68,14 +74,6 @@ class MoonAgentKeystoneMiddleware(object):
                         "password": "nomoresecrete"
                     }
                 }
-            },
-            "scope": {
-                "project": {
-                    "domain": {
-                        "id": "Default"
-                    },
-                    "name": "demo"
-                }
             }
         }
     }
@@ -84,7 +82,7 @@ class MoonAgentKeystoneMiddleware(object):
         self.conf = conf
         self._LOG = logging.getLogger(conf.get('log_name', __name__))
         # FIXME: events are duplicated in log file
-        moon_agent_fh = logging.FileHandler(CONF.moon_keystonemiddleware_agent["keystonemiddleware_agent_logfile"])
+        moon_agent_fh = logging.FileHandler(CONF.moon_keystonemiddleware_agent["logfile"])
         self._LOG.setLevel(logging.DEBUG)
         self._LOG.addHandler(moon_agent_fh)
         self._LOG.info(_LI('Starting Moon KeystoneMiddleware Agent'))
@@ -118,6 +116,8 @@ class MoonAgentKeystoneMiddleware(object):
         self.local_registered_mgr_dict["authz_mgr"] = AuthzMgr(self._conf)
 
     def __set_token(self):
+        self.post_data["auth"]["identity"]["password"]["user"]["name"] = self.conf.get('authz_login', "admin")
+        self.post_data["auth"]["identity"]["password"]["user"]["password"] = self.conf.get('authz_password', "nomoresecrete")
         data = self.get_url("/v3/auth/tokens", post_data=self.post_data)
         if "token" not in data:
             raise Exception("Authentication problem ({})".format(data))
