@@ -5,6 +5,7 @@
 
 from keystone.common import controller
 from keystone import config
+from keystone import exception
 from keystone.models import token_model
 from keystone.contrib.moon.exception import *
 from oslo_log import log
@@ -128,13 +129,24 @@ class Tenants(controller.V3Controller):
         self.tenant_api.set_tenant_dict(user_id, tenant_id, tenant_dict)
 
 
+def callback(self, context, prep_info, *args, **kwargs):
+    token_ref = ""
+    if context.get('token_id') is not None:
+        token_ref = token_model.KeystoneToken(
+            token_id=context['token_id'],
+            token_data=self.token_provider_api.validate_token(
+                context['token_id']))
+    if not token_ref:
+        raise exception.Unauthorized
+
+
 @dependency.requires('authz_api')
 class Authz_v3(controller.V3Controller):
 
     def __init__(self):
         super(Authz_v3, self).__init__()
 
-    @controller.protected()
+    @controller.protected(callback)
     def get_authz(self, context, tenant_id, subject_k_id, object_name, action_name):
         try:
             return self.authz_api.authz(tenant_id, subject_k_id, object_name, action_name)
