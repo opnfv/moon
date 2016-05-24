@@ -10,13 +10,13 @@ from oslo_config import cfg
 
 
 _OPTS = [
-    cfg.StrOpt('authz_mgr_login',
+    cfg.StrOpt('authz_login',
                default="admin",
                help='Name of the administrator who will connect to the Keystone Moon backends.'),
-    cfg.StrOpt('authz_mgr_password',
+    cfg.StrOpt('authz_password',
                default="nomoresecrete",
                help='Password of the administrator who will connect to the Keystone Moon backends.'),
-    cfg.StrOpt('authz_mgr_logfile',
+    cfg.StrOpt('logfile',
                default="/tmp/moon_authz_mgr.log",  # TODO: update in paste.init
                help='File where logs goes.'),
     ]
@@ -34,11 +34,11 @@ class ServiceError(Exception):
 class AuthzMgr(object):
 
     def __init__(self, conf):
+        self.conf = conf
         self._LOG = logging.getLogger(conf.get('log_name', __name__))
-        authz_mgr_fh = logging.FileHandler(CONF.moon_authz_mgr["authz_mgr_logfile"])
+        authz_mgr_fh = logging.FileHandler(self.conf.get('logfile', "/tmp/keystonemiddleware.log"))
         self._LOG.setLevel(logging.DEBUG)
         self._LOG.addHandler(authz_mgr_fh)
-        self._conf = conf
         self.response_content = ""
 
     def _deny_request(self, code):
@@ -67,7 +67,7 @@ class AuthzMgr(object):
         self._LOG.debug('X-Auth-Token={}'.format(auth_token))
         try:
             _url = '{}/moon/authz/{}/{}/{}/{}'.format(
-                                        self._conf["_request_uri"],
+                                        self.conf["_request_uri"],
                                         agent_data['tenant_id'],
                                         agent_data['user_id'],
                                         agent_data['resource_id'],
@@ -75,7 +75,7 @@ class AuthzMgr(object):
             self._LOG.info(_url)
             response = requests.get(_url,
                                     headers=headers,
-                                    verify=self._conf["_verify"])
+                                    verify=self.conf["_verify"])
         except requests.exceptions.RequestException as e:
             self._LOG.error(_LI('HTTP connection exception: %s'), e)
             resp = self._deny_request('InvalidURI')

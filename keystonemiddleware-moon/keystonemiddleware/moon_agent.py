@@ -82,7 +82,7 @@ class MoonAgentKeystoneMiddleware(object):
         self.conf = conf
         self._LOG = logging.getLogger(conf.get('log_name', __name__))
         # FIXME: events are duplicated in log file
-        moon_agent_fh = logging.FileHandler(CONF.moon_keystonemiddleware_agent["logfile"])
+        moon_agent_fh = logging.FileHandler(self.conf.get('logfile', "/tmp/keystonemiddleware.log"))
         self._LOG.setLevel(logging.DEBUG)
         self._LOG.addHandler(moon_agent_fh)
         self._LOG.info(_LI('Starting Moon KeystoneMiddleware Agent'))
