@@ -18,10 +18,11 @@
 
 This class does very little error checking, and knows nothing about ldap
 class definitions.  It implements the minimum emulation of the python ldap
-library to work with nova.
+library to work with keystone.
 
 """
 
+import random
 import re
 import shelve
 
@@ -67,7 +68,13 @@ def _internal_attr(attr_name, value_or_values):
         if dn == 'cn=Doe\\, John,ou=Users,cn=example,cn=com':
             return 'CN=Doe\\2C John,OU=Users,CN=example,CN=com'
 
-        dn = ldap.dn.str2dn(core.utf8_encode(dn))
+        try:
+            dn = ldap.dn.str2dn(core.utf8_encode(dn))
+        except ldap.DECODING_ERROR:
+            # NOTE(amakarov): In case of IDs instead of DNs in group members
+            # they must be handled as regular values.
+            return normalize_value(dn)
+
         norm = []
         for part in dn:
             name, val, i = part[0]
@@ -132,7 +139,6 @@ def _paren_groups(source):
 
 def _match(key, value, attrs):
     """Match a given key and value against an attribute list."""
-
     def match_with_wildcards(norm_val, val_list):
         # Case insensitive checking with wildcards
         if norm_val.startswith('*'):
@@ -209,6 +215,7 @@ class FakeShelve(dict):
 
 
 FakeShelves = {}
+PendingRequests = {}
 
 
 class FakeLdap(core.LDAPHandler):
@@ -534,18 +541,60 @@ class FakeLdap(core.LDAPHandler):
         self._ldap_options[option] = invalue
 
     def get_option(self, option):
-        value = self._ldap_options.get(option, None)
+        value = self._ldap_options.get(option)
         return value
 
     def search_ext(self, base, scope,
                    filterstr='(objectClass=*)', attrlist=None, attrsonly=0,
                    serverctrls=None, clientctrls=None,
                    timeout=-1, sizelimit=0):
-        raise exception.NotImplemented()
+        if clientctrls is not None or timeout != -1 or sizelimit != 0:
+            raise exception.NotImplemented()
+
+        # only passing a single server control is supported by this fake ldap
+        if len(serverctrls) > 1:
+            raise exception.NotImplemented()
+
+        # search_ext is async and returns an identifier used for
+        # retrieving the results via result3(). This will be emulated by
+        # storing the request in a variable with random integer key and
+        # performing the real lookup in result3()
+        msgid = random.randint(0, 1000)
+        PendingRequests[msgid] = (base, scope, filterstr, attrlist, attrsonly,
+                                  serverctrls)
+        return msgid
 
     def result3(self, msgid=ldap.RES_ANY, all=1, timeout=None,
                 resp_ctrl_classes=None):
-        raise exception.NotImplemented()
+        """Execute async request
+
+        Only msgid param is supported. Request info is fetched from global
+        variable `PendingRequests` by msgid, executed using search_s and
+        limited if requested.
+        """
+        if all != 1 or timeout is not None or resp_ctrl_classes is not None:
+            raise exception.NotImplemented()
+
+        params = PendingRequests[msgid]
+        # search_s accepts a subset of parameters of search_ext,
+        # that's why we use only the first 5.
+        results = self.search_s(*params[:5])
+
+        # extract limit from serverctrl
+        serverctrls = params[5]
+        ctrl = serverctrls[0]
+
+        if ctrl.size:
+            rdata = results[:ctrl.size]
+        else:
+            rdata = results
+
+        # real result3 returns various service info -- rtype, rmsgid,
+        # serverctrls. Now this info is not used, so all this info is None
+        rtype = None
+        rmsgid = None
+        serverctrls = None
+        return (rtype, rdata, rmsgid, serverctrls)
 
 
 class FakeLdapPool(FakeLdap):

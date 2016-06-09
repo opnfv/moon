@@ -27,7 +27,6 @@ import eventlet.wsgi
 import greenlet
 from oslo_config import cfg
 from oslo_log import log
-from oslo_log import loggers
 from oslo_service import service
 
 from keystone.i18n import _LE, _LI
@@ -46,15 +45,16 @@ LOG = log.getLogger(__name__)
 POOL_SIZE = 1
 
 
-class EventletFilteringLogger(loggers.WritableLogger):
+class EventletFilteringLogger(object):
     # NOTE(morganfainberg): This logger is designed to filter out specific
     # Tracebacks to limit the amount of data that eventlet can log. In the
     # case of broken sockets (EPIPE and ECONNRESET), we are seeing a huge
     # volume of data being written to the logs due to ~14 lines+ per traceback.
     # The traceback in these cases are, at best, useful for limited debugging
     # cases.
-    def __init__(self, *args, **kwargs):
-        super(EventletFilteringLogger, self).__init__(*args, **kwargs)
+    def __init__(self, logger, level=log.INFO):
+        self.logger = logger
+        self.level = level
         self.regex = re.compile(r'errno (%d|%d)' %
                                 (errno.EPIPE, errno.ECONNRESET), re.IGNORECASE)
 
@@ -73,7 +73,8 @@ class Server(service.ServiceBase):
     def __init__(self, application, host=None, port=None, keepalive=False,
                  keepidle=None):
         self.application = application
-        self.host = host or '0.0.0.0'
+        self.host = host or '0.0.0.0'  # nosec : Bind to all interfaces by
+        # default for backwards compatibility.
         self.port = port or 0
         # Pool for a green thread in which wsgi server will be running
         self.pool = eventlet.GreenPool(POOL_SIZE)
@@ -92,7 +93,6 @@ class Server(service.ServiceBase):
 
         Raises Exception if this has already been called.
         """
-
         # TODO(dims): eventlet's green dns/socket module does not actually
         # support IPv6 in getaddrinfo(). We need to get around this in the
         # future or monitor upstream for a fix.
@@ -120,7 +120,6 @@ class Server(service.ServiceBase):
 
     def start(self, key=None, backlog=128):
         """Run a WSGI server with the given application."""
-
         if self.socket is None:
             self.listen(key=key, backlog=backlog)
 
@@ -145,8 +144,13 @@ class Server(service.ServiceBase):
             dup_socket.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
             if self.keepidle is not None:
-                dup_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE,
-                                      self.keepidle)
+                if hasattr(socket, 'TCP_KEEPIDLE'):
+                    dup_socket.setsockopt(socket.IPPROTO_TCP,
+                                          socket.TCP_KEEPIDLE,
+                                          self.keepidle)
+                else:
+                    LOG.warning("System does not support TCP_KEEPIDLE but "
+                                "tcp_keepidle has been set. Ignoring.")
 
         self.greenthread = self.pool.spawn(self._run,
                                            self.application,
@@ -168,9 +172,11 @@ class Server(service.ServiceBase):
         """Wait until all servers have completed running."""
         try:
             self.pool.waitall()
-        except KeyboardInterrupt:
+        except KeyboardInterrupt:  # nosec
+            # If CTRL-C, just break out of the loop.
             pass
-        except greenlet.GreenletExit:
+        except greenlet.GreenletExit:  # nosec
+            # If exiting, break out of the loop.
             pass
 
     def reset(self):
@@ -198,7 +204,7 @@ class Server(service.ServiceBase):
                 socket, application, log=EventletFilteringLogger(logger),
                 debug=False, keepalive=CONF.eventlet_server.wsgi_keep_alive,
                 socket_timeout=socket_timeout)
-        except greenlet.GreenletExit:
+        except greenlet.GreenletExit:  # nosec
             # Wait until all servers have completed running
             pass
         except Exception:

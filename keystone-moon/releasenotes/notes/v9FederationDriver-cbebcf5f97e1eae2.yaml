@@ -1,0 +1,5 @@
+---
+deprecations:
+  - The V8 Federation driver interface is deprecated in favor of the V9
+    Federation driver interface. Support for the V8 Federation driver
+    interface is planned to be removed in the 'O' release of OpenStack.

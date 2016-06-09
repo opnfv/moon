@@ -13,13 +13,13 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import uuid
-
 from oslo_config import cfg
 from oslo_serialization import jsonutils
 from six.moves import range
 
+from keystone.tests import unit
 from keystone.tests.unit import filtering
+from keystone.tests.unit import ksfixtures
 from keystone.tests.unit.ksfixtures import temporaryfile
 from keystone.tests.unit import test_v3
 
@@ -31,14 +31,14 @@ class IdentityTestFilteredCase(filtering.FilterTests,
                                test_v3.RestfulTestCase):
     """Test filter enforcement on the v3 Identity API."""
 
+    def _policy_fixture(self):
+        return ksfixtures.Policy(self.tmpfilename, self.config_fixture)
+
     def setUp(self):
         """Setup for Identity Filter Test Cases."""
-
-        super(IdentityTestFilteredCase, self).setUp()
         self.tempfile = self.useFixture(temporaryfile.SecureTempFile())
         self.tmpfilename = self.tempfile.file_name
-        self.config_fixture.config(group='oslo_policy',
-                                   policy_file=self.tmpfilename)
+        super(IdentityTestFilteredCase, self).setUp()
 
     def load_sample_data(self):
         """Create sample data for these tests.
@@ -57,32 +57,23 @@ class IdentityTestFilteredCase(filtering.FilterTests,
         """
         # Start by creating a few domains
         self._populate_default_domain()
-        self.domainA = self.new_domain_ref()
+        self.domainA = unit.new_domain_ref()
         self.resource_api.create_domain(self.domainA['id'], self.domainA)
-        self.domainB = self.new_domain_ref()
+        self.domainB = unit.new_domain_ref()
         self.resource_api.create_domain(self.domainB['id'], self.domainB)
-        self.domainC = self.new_domain_ref()
+        self.domainC = unit.new_domain_ref()
         self.domainC['enabled'] = False
         self.resource_api.create_domain(self.domainC['id'], self.domainC)
 
         # Now create some users, one in domainA and two of them in domainB
-        self.user1 = self.new_user_ref(domain_id=self.domainA['id'])
-        password = uuid.uuid4().hex
-        self.user1['password'] = password
-        self.user1 = self.identity_api.create_user(self.user1)
-        self.user1['password'] = password
+        self.user1 = unit.create_user(self.identity_api,
+                                      domain_id=self.domainA['id'])
+        self.user2 = unit.create_user(self.identity_api,
+                                      domain_id=self.domainB['id'])
+        self.user3 = unit.create_user(self.identity_api,
+                                      domain_id=self.domainB['id'])
 
-        self.user2 = self.new_user_ref(domain_id=self.domainB['id'])
-        self.user2['password'] = password
-        self.user2 = self.identity_api.create_user(self.user2)
-        self.user2['password'] = password
-
-        self.user3 = self.new_user_ref(domain_id=self.domainB['id'])
-        self.user3['password'] = password
-        self.user3 = self.identity_api.create_user(self.user3)
-        self.user3['password'] = password
-
-        self.role = self.new_role_ref()
+        self.role = unit.new_role_ref()
         self.role_api.create_role(self.role['id'], self.role)
         self.assignment_api.create_grant(self.role['id'],
                                          user_id=self.user1['id'],
@@ -311,7 +302,7 @@ class IdentityTestFilteredCase(filtering.FilterTests,
 
         # See if we can add a SQL command...use the group table instead of the
         # user table since 'user' is reserved word for SQLAlchemy.
-        group = self.new_group_ref(domain_id=self.domainB['id'])
+        group = unit.new_group_ref(domain_id=self.domainB['id'])
         group = self.identity_api.create_group(group)
 
         url_by_name = "/users?name=x'; drop table group"
@@ -325,11 +316,11 @@ class IdentityTestFilteredCase(filtering.FilterTests,
 
 class IdentityTestListLimitCase(IdentityTestFilteredCase):
     """Test list limiting enforcement on the v3 Identity API."""
+
     content_type = 'json'
 
     def setUp(self):
         """Setup for Identity Limit Test Cases."""
-
         super(IdentityTestListLimitCase, self).setUp()
 
         # Create 10 entries for each of the entities we are going to test
@@ -343,7 +334,7 @@ class IdentityTestListLimitCase(IdentityTestFilteredCase):
         self.service_list = []
         self.addCleanup(self.clean_up_service)
         for _ in range(10):
-            new_entity = {'id': uuid.uuid4().hex, 'type': uuid.uuid4().hex}
+            new_entity = unit.new_service_ref()
             service = self.catalog_api.create_service(new_entity['id'],
                                                       new_entity)
             self.service_list.append(service)
@@ -351,26 +342,22 @@ class IdentityTestListLimitCase(IdentityTestFilteredCase):
         self.policy_list = []
         self.addCleanup(self.clean_up_policy)
         for _ in range(10):
-            new_entity = {'id': uuid.uuid4().hex, 'type': uuid.uuid4().hex,
-                          'blob': uuid.uuid4().hex}
+            new_entity = unit.new_policy_ref()
             policy = self.policy_api.create_policy(new_entity['id'],
                                                    new_entity)
             self.policy_list.append(policy)
 
     def clean_up_entity(self, entity):
         """Clean up entity test data from Identity Limit Test Cases."""
-
         self._delete_test_data(entity, self.entity_lists[entity])
 
     def clean_up_service(self):
         """Clean up service test data from Identity Limit Test Cases."""
-
         for service in self.service_list:
             self.catalog_api.delete_service(service['id'])
 
     def clean_up_policy(self):
         """Clean up policy test data from Identity Limit Test Cases."""
-
         for policy in self.policy_list:
             self.policy_api.delete_policy(policy['id'])
 
@@ -430,7 +417,6 @@ class IdentityTestListLimitCase(IdentityTestFilteredCase):
 
     def test_no_limit(self):
         """Check truncated attribute not set when list not limited."""
-
         self._set_policy({"identity:list_services": []})
         r = self.get('/services', auth=self.auth)
         self.assertEqual(10, len(r.result.get('services')))
@@ -438,7 +424,6 @@ class IdentityTestListLimitCase(IdentityTestFilteredCase):
 
     def test_at_limit(self):
         """Check truncated attribute not set when list at max size."""
-
         # Test this by overriding the general limit with a higher
         # driver-specific limit (allowing all entities to be returned
         # in the collection), which should result in a non truncated list

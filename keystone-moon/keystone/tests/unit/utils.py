@@ -17,12 +17,9 @@ import os
 import time
 import uuid
 
-from oslo_log import log
 import six
 from testtools import testcase
 
-
-LOG = log.getLogger(__name__)
 
 TZ = None
 
@@ -72,7 +69,6 @@ def wip(message):
       >>>     pass
 
     """
-
     def _wip(f):
         @six.wraps(f)
         def run_test(*args, **kwargs):

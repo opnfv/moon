@@ -14,13 +14,13 @@
 
 from keystoneclient.common import cms
 from oslo_config import cfg
+from oslo_utils import reflection
 from oslo_utils import timeutils
 import six
 
-from keystone.contrib.federation import constants as federation_constants
 from keystone import exception
+from keystone.federation import constants
 from keystone.i18n import _
-
 
 CONF = cfg.CONF
 # supported token versions
@@ -37,6 +37,7 @@ def _parse_and_normalize_time(time_data):
 
 class KeystoneToken(dict):
     """An in-memory representation that unifies v2 and v3 tokens."""
+
     # TODO(morganfainberg): Align this in-memory representation with the
     # objects in keystoneclient. This object should be eventually updated
     # to be the source of token data with the ability to emit any version
@@ -64,7 +65,9 @@ class KeystoneToken(dict):
     def __repr__(self):
         desc = ('<%(type)s (audit_id=%(audit_id)s, '
                 'audit_chain_id=%(audit_chain_id)s) at %(loc)s>')
-        return desc % {'type': self.__class__.__name__,
+        self_cls_name = reflection.get_class_name(self,
+                                                  fully_qualified=False)
+        return desc % {'type': self_cls_name,
                        'audit_id': self.audit_id,
                        'audit_chain_id': self.audit_chain_id,
                        'loc': hex(id(self))}
@@ -116,7 +119,7 @@ class KeystoneToken(dict):
                 return self['user']['domain']['name']
             elif 'user' in self:
                 return "Default"
-        except KeyError:
+        except KeyError:  # nosec
             # Do not raise KeyError, raise UnexpectedError
             pass
         raise exception.UnexpectedError()
@@ -128,7 +131,7 @@ class KeystoneToken(dict):
                 return self['user']['domain']['id']
             elif 'user' in self:
                 return CONF.identity.default_domain_id
-        except KeyError:
+        except KeyError:  # nosec
             # Do not raise KeyError, raise UnexpectedError
             pass
         raise exception.UnexpectedError()
@@ -184,7 +187,7 @@ class KeystoneToken(dict):
                 return self['project']['domain']['id']
             elif 'tenant' in self['token']:
                 return CONF.identity.default_domain_id
-        except KeyError:
+        except KeyError:  # nosec
             # Do not raise KeyError, raise UnexpectedError
             pass
 
@@ -197,7 +200,7 @@ class KeystoneToken(dict):
                 return self['project']['domain']['name']
             if 'tenant' in self['token']:
                 return 'Default'
-        except KeyError:
+        except KeyError:  # nosec
             # Do not raise KeyError, raise UnexpectedError
             pass
 
@@ -297,7 +300,7 @@ class KeystoneToken(dict):
     def is_federated_user(self):
         try:
             return (self.version is V3 and
-                    federation_constants.FEDERATION in self['user'])
+                    constants.FEDERATION in self['user'])
         except KeyError:
             raise exception.UnexpectedError()
 
@@ -306,7 +309,7 @@ class KeystoneToken(dict):
         if self.is_federated_user:
             if self.version is V3:
                 try:
-                    groups = self['user'][federation_constants.FEDERATION].get(
+                    groups = self['user'][constants.FEDERATION].get(
                         'groups', [])
                     return [g['id'] for g in groups]
                 except KeyError:
@@ -317,15 +320,12 @@ class KeystoneToken(dict):
     def federation_idp_id(self):
         if self.version is not V3 or not self.is_federated_user:
             return None
-        return (
-            self['user'][federation_constants.FEDERATION]
-            ['identity_provider']['id'])
+        return self['user'][constants.FEDERATION]['identity_provider']['id']
 
     @property
     def federation_protocol_id(self):
         if self.version is V3 and self.is_federated_user:
-            return (self['user'][federation_constants.FEDERATION]['protocol']
-                    ['id'])
+            return self['user'][constants.FEDERATION]['protocol']['id']
         return None
 
     @property

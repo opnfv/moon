@@ -31,3 +31,7 @@ keystone/tests/tmp/
 keystone/locale/*/LC_MESSAGES/*.mo
 .testrepository/
 *.db
+# Files created by releasenotes build
+releasenotes/build
+# sample config included in docs
+doc/source/_static/keystone.conf.sample

@@ -52,8 +52,8 @@ Starting and Stopping Keystone under Eventlet
 
     Running keystone under eventlet has been deprecated as of the Kilo release.
     Support for utilizing eventlet will be removed as of the M-release. The
-    recommended deployment is to run keystone in a WSGI server
-    (e.g. ``mod_wsgi`` under ``HTTPD``).
+    recommended deployment is to run keystone in a WSGI server such as Apache
+    httpd with ``mod_wsgi``.
 
 Keystone can be run using either its built-in eventlet server or it can be run
 embedded in a web server. While the eventlet server is convenient and easy to
@@ -73,7 +73,7 @@ services are configured to run in a single process.
 
 .. NOTE::
 
-    The separation into ``admin`` and ``main`` interfaces is an historical
+    The separation into ``admin`` and ``main`` interfaces is a historical
     anomaly. The new V3 API provides the same interface on both the admin and
     main interfaces (this can be configured in ``keystone-paste.ini``, but the
     default is to have both the same). The V2.0 API provides a limited public
@@ -113,8 +113,8 @@ The primary configuration file is organized into the following sections:
 * ``[cache]`` - Caching layer configuration
 * ``[catalog]`` - Service catalog driver configuration
 * ``[credential]`` - Credential system driver configuration
-* ``[endpoint_filter]`` - Endpoint filtering extension configuration
-* ``[endpoint_policy]`` - Endpoint policy extension configuration
+* ``[endpoint_filter]`` - Endpoint filtering configuration
+* ``[endpoint_policy]`` - Endpoint policy configuration
 * ``[eventlet_server]`` - Eventlet server configuration
 * ``[eventlet_server_ssl]`` - Eventlet server SSL configuration
 * ``[federation]`` - Federation driver configuration
@@ -124,7 +124,7 @@ The primary configuration file is organized into the following sections:
 * ``[ldap]`` - LDAP configuration options
 * ``[memcache]`` - Memcache configuration options
 * ``[oauth1]`` - OAuth 1.0a system driver configuration
-* ``[os_inherit]`` - Inherited role assignment extension
+* ``[os_inherit]`` - Inherited role assignment configuration
 * ``[paste_deploy]`` - Pointer to the PasteDeploy configuration file
 * ``[policy]`` - Policy system driver configuration for RBAC
 * ``[resource]`` - Resource system driver configuration
@@ -134,7 +134,7 @@ The primary configuration file is organized into the following sections:
 * ``[signing]`` - Cryptographic signatures for PKI based tokens
 * ``[ssl]`` - SSL certificate generation configuration
 * ``[token]`` - Token driver & token provider configuration
-* ``[trust]`` - Trust extension configuration
+* ``[trust]`` - Trust configuration
 
 The Keystone primary configuration file is expected to be named
 ``keystone.conf``. When starting Keystone, you can specify a different
@@ -423,7 +423,7 @@ Token Persistence Driver
 Keystone supports customizable token persistence drivers. These can be
 specified in the ``[token]`` section of the configuration file. Keystone
 provides three non-test persistence backends. These can be set with the
-``[token]\driver`` configuration option.
+``[token] driver`` configuration option.
 
 The drivers Keystone provides are:
 
@@ -438,7 +438,7 @@ The drivers Keystone provides are:
 
 * ``memcache`` - The memcached based token persistence backend. This backend
   relies on ``dogpile.cache`` and stores the token data in a set of memcached
-  servers. The servers URLs are specified in the ``[memcache]\servers``
+  servers. The servers URLs are specified in the ``[memcache] servers``
   configuration option in the Keystone config. Implemented by
   :class:`keystone.token.persistence.backends.memcache.Token`
 
@@ -446,9 +446,10 @@ The drivers Keystone provides are:
 .. WARNING::
     It is recommended you use the ``memcache_pool`` backend instead of
     ``memcache`` as the token persistence driver if you are deploying Keystone
-    under eventlet instead of Apache + mod_wsgi. This recommendation is due to
-    known issues with the use of ``thread.local`` under eventlet that can allow
-    the leaking of memcache client objects and consumption of extra sockets.
+    under eventlet instead of Apache httpd with ``mod_wsgi``. This
+    recommendation is due to known issues with the use of ``thread.local``
+    under eventlet that can allow the leaking of memcache client objects and
+    consumption of extra sockets.
 
 
 Token Provider
@@ -539,7 +540,8 @@ disabled.
         backend will need to be specified. Current functional backends are:
 
     * ``dogpile.cache.memcached`` - Memcached backend using the standard
-      `python-memcached`_ library
+      `python-memcached`_ library (recommended for use with Apache httpd with
+      ``mod_wsgi``)
     * ``dogpile.cache.pylibmc`` - Memcached backend using the `pylibmc`_
       library
     * ``dogpile.cache.bmemcached`` - Memcached using `python-binary-memcached`_
@@ -548,7 +550,7 @@ disabled.
     * ``dogpile.cache.dbm`` - local DBM file backend
     * ``dogpile.cache.memory`` - in-memory cache
     * ``keystone.cache.mongo`` - MongoDB as caching backend
-    * ``keystone.cache.memcache_pool`` - An eventlet safe implementation of
+    * ``keystone.cache.memcache_pool`` - An eventlet-safe implementation of
       ``dogpile.cache.memcached``. This implementation also provides client
       connection re-use.
 
@@ -651,7 +653,6 @@ For more information about the different backends (and configuration options):
 .. _`dogpile.cache.backends.redis`: http://dogpilecache.readthedocs.org/en/latest/api.html#redis-backends
 .. _`dogpile.cache.backends.file`: http://dogpilecache.readthedocs.org/en/latest/api.html#file-backends
 .. _`ProxyBackends`: http://dogpilecache.readthedocs.org/en/latest/api.html#proxy-backends
-.. _`PyMongo API`: http://api.mongodb.org/python/current/api/pymongo/index.html
 
 
 Certificates for PKI
@@ -897,17 +898,46 @@ Another such example is `available in devstack
 (files/default_catalog.templates)
 <https://git.openstack.org/cgit/openstack-dev/devstack/tree/files/default_catalog.templates>`_.
 
+Endpoint Filtering enables creation of ad-hoc catalogs for each project-scoped
+token request.
+
+Configure the endpoint filter catalog driver in the ``[catalog]`` section.
+For example:
+
+.. code-block:: ini
+
+    [catalog]
+    driver = catalog_sql
+
+In the ``[endpoint_filter]`` section, set ``return_all_endpoints_if_no_filter``
+to ``False`` to return an empty catalog if no associations are made.
+For example:
+
+.. code-block:: ini
+
+    [endpoint_filter]
+    return_all_endpoints_if_no_filter = False
+
+See `API Specification for Endpoint Filtering <http://specs.openstack.org/
+openstack/keystone-specs/api/v3/identity-api-v3-os-ep-filter-ext.html>`_ for
+the details of API definition.
+
+.. NOTE:: Support status for Endpoint Filtering
+
+   *Experimental* (Icehouse, Juno)
+   *Stable* (Kilo)
+
 Logging
 -------
 
 Logging is configured externally to the rest of Keystone. Configure the path to
-your logging configuration file using the ``[DEFAULT] log_config`` option of
-``keystone.conf``. If you wish to route all your logging through syslog, set
-the ``[DEFAULT] use_syslog`` option.
+your logging configuration file using the ``[DEFAULT] log_config_append``
+option of ``keystone.conf``. If you wish to route all your logging through
+syslog, set the ``[DEFAULT] use_syslog`` option.
 
-A sample ``log_config`` file is included with the project at
+A sample ``log_config_append`` file is included with the project at
 ``etc/logging.conf.sample``. Like other OpenStack projects, Keystone uses the
-`Python logging module`, which includes extensive configuration options for
+`Python logging module`_, which includes extensive configuration options for
 choosing the output levels and formats.
 
 .. _Paste: http://pythonpaste.org/
@@ -926,7 +956,7 @@ this section. Here is the description of each of them and their purpose:
     The SSL configuration options available to the eventlet server
     (``keystone-all``) described here are severely limited. A secure
     deployment should have Keystone running in a web server (such as Apache
-    HTTPd), or behind an SSL terminator. When running Keystone in a web server
+    httpd), or behind an SSL terminator. When running Keystone in a web server
     or behind an SSL terminator the options described in this section have no
     effect and SSL is configured in the web server or SSL terminator.
 
@@ -1005,28 +1035,11 @@ and is only recommended for developments environment. We do not recommend using
 ``ssl_setup`` for production environments.
 
 
-User CRUD extension for the V2.0 API
+User CRUD additions for the V2.0 API
 ------------------------------------
 
-.. NOTE::
-
-    The core V3 API includes user operations so no extension needs to be
-    enabled for the V3 API.
-
-For the V2.0 API, Keystone provides a user CRUD filter that can be added to the
-public_api pipeline. This user crud filter allows users to use a HTTP PATCH to
-change their own password. To enable this extension you should define a
-user_crud_extension filter, insert it after the ``*_body`` middleware and
-before the ``public_service`` app in the public_api WSGI pipeline in
-``keystone-paste.ini`` e.g.:
-
-.. code-block:: ini
-
-    [filter:user_crud_extension]
-    paste.filter_factory = keystone.contrib.user_crud:CrudExtension.factory
-
-    [pipeline:public_api]
-    pipeline = url_normalize token_auth admin_token_auth json_body debug ec2_extension user_crud_extension public_service
+For the V2.0 API, Keystone provides an additional capability that allows users
+to use a HTTP PATCH to change their own password.
 
 Each user can then change their own password with a HTTP PATCH :
 
@@ -1039,19 +1052,112 @@ In addition to changing their password all of the user's current tokens will be
 revoked.
 
 
-Inherited Role Assignment Extension
------------------------------------
+Inherited Role Assignments
+--------------------------
 
-Keystone provides an optional extension that adds the capability to assign
-roles on a project or domain that, rather than affect the project or domain
-itself, are instead inherited to the project subtree or to all projects owned
-by that domain. This extension is disabled by default, but can be enabled by
-including the following in ``keystone.conf``:
+Keystone provides an optional capability to assign roles on a project or domain
+that, rather than affect the project or domain itself, are instead inherited to
+the project subtree or to all projects owned by that domain. This capability is
+enabled by default, but can be disabled by including the following in
+``keystone.conf``:
 
 .. code-block:: ini
 
     [os_inherit]
-    enabled = True
+    enabled = False
+
+
+Endpoint Policy
+---------------
+
+The Endpoint Policy feature provides associations between service endpoints
+and policies that are already stored in the Identity server and referenced
+by a policy ID.
+
+Configure the endpoint policy backend driver in the ``[endpoint_policy]``
+section. For example:
+
+.. code-block:: ini
+
+    [endpoint_policy]
+    driver = sql
+
+See `API Specification for Endpoint Policy <http://specs.openstack.org/
+openstack/keystone-specs/api/v3/identity-api-v3-os-endpoint-policy.html>`_
+for the details of API definition.
+
+.. NOTE:: Support status for Endpoint Policy
+
+   *Experimental* (Juno)
+   *Stable* (Kilo)
+
+
+OAuth1 1.0a
+-----------
+
+The OAuth 1.0a feature provides the ability for Identity users to delegate
+roles to third party consumers via the OAuth 1.0a specification.
+
+To enable OAuth1:
+
+1. Add the oauth1 driver to the ``[oauth1]`` section in ``keystone.conf``. For
+   example:
+
+.. code-block:: ini
+
+    [oauth1]
+    driver = sql
+
+2. Add the ``oauth1`` authentication method to the ``[auth]`` section in
+   ``keystone.conf``:
+
+.. code-block:: ini
+
+    [auth]
+    methods = external,password,token,oauth1
+
+3. If deploying under Apache httpd with ``mod_wsgi``, set the
+   `WSGIPassAuthorization` to allow the OAuth Authorization headers to pass
+   through `mod_wsgi`. For example, add the following to the keystone virtual
+   host file:
+
+.. code-block:: ini
+
+    WSGIPassAuthorization On
+
+See `API Specification for OAuth 1.0a <http://specs.openstack.org/openstack/
+keystone-specs/api/v3/identity-api-v3-os-oauth1-ext.html>`_ for the details of
+API definition.
+
+.. NOTE:: Support status for OAuth 1.0a
+
+   *Experimental* (Havana, Icehouse)
+   *Stable* (Juno)
+
+
+Revocation Events
+-----------------
+
+The Revocation Events feature provides a list of token revocations. Each event
+expresses a set of criteria which describes a set of tokens that are
+no longer valid.
+
+Add the revoke backend driver to the ``[revoke]`` section in
+``keystone.conf``. For example:
+
+.. code-block:: ini
+
+    [revoke]
+    driver = sql
+
+See `API Specification for Revocation Events <https://specs.openstack.org/
+openstack/keystone-specs/api/v3/identity-api-v3-os-revoke-ext.html>`_ for
+the details of API definition.
+
+.. NOTE:: Support status for Revocation Events
+
+   *Experimental* (Juno)
+   *Stable* (Kilo)
 
 
 Token Binding
@@ -1114,6 +1220,39 @@ If a response to ``list_{entity}`` call has been truncated, then the response
 status code will still be 200 (OK), but the ``truncated`` attribute in the
 collection will be set to ``true``.
 
+
+URL safe naming of projects and domains
+---------------------------------------
+
+In the future, keystone may offer the ability to identify a project in a
+hierarchy via a URL style of naming from the root of the hierarchy (for example
+specifying 'projectA/projectB/projectC' as the project name in an
+authentication request). In order to prepare for this, keystone supports the
+optional ability to ensure both projects and domains are named without
+including any of the reserverd characters specified in section 2.2 of
+`rfc3986 <http://tools.ietf.org/html/rfc3986>`_.
+
+The safety of the names of projects and domains can be controlled via two
+configuration options:
+
+.. code-block:: ini
+
+    [resource]
+    project_name_url_safe = off
+    domain_name_url_safe = off
+
+When set to ``off`` (which is the default), no checking is done on the URL
+safeness of names. When set to ``new``, an attempt to create a new project or
+domain with an unsafe name (or update the name of a project or domain to be
+unsafe) will cause a status code of 400 (Bad Request) to be returned. Setting
+the configuration option to ``strict`` will, in addition to preventing the
+creation and updating of entities with unsafe names, cause an authentication
+attempt which specifies a project or domain name that is unsafe to return a
+status code of 401 (Unauthorized).
+
+It is recommended that installations take the steps necessary to where they
+can run with both options set to ``strict`` as soon as is practical.
+
 Sample Configuration Files
 --------------------------
 
@@ -1124,6 +1263,7 @@ files for each Server application.
 * ``etc/keystone-paste.ini``
 * ``etc/logging.conf.sample``
 * ``etc/default_catalog.templates``
+* ``etc/sso_callback_template.html``
 
 .. _`API protection with RBAC`:
 
@@ -1189,6 +1329,7 @@ are filtered out (e.g. user passwords).
 List of object attributes:
 
 * role:
+    * target.role.domain_id
     * target.role.id
     * target.role.name
 
@@ -1441,14 +1582,6 @@ as follows:
     $ openstack --os-username=admin --os-password=secrete --os-project-name=admin --os-auth-url=http://localhost:35357/v2.0 user list
     $ openstack --os-username=admin --os-password=secrete --os-project-name=admin --os-auth-url=http://localhost:35357/v2.0 project create demo
 
-For additional examples using ``python-keystoneclient`` refer to
-`python-keystoneclient examples`_, likewise, for additional examples using
-``python-openstackclient``, refer to `python-openstackclient examples`_.
-
-.. _`python-keystoneclient examples`: cli_examples.html#using-python-keystoneclient-v2-0
-.. _`python-openstackclient examples`: cli_examples.html#using-python-openstackclient-v3
-
-
 Removing Expired Tokens
 =======================
 
@@ -1506,12 +1639,6 @@ The corresponding entries in the Keystone configuration file are:
   user_tree_dn = ou=Users,dc=openstack,dc=org
   user_objectclass = inetOrgPerson
 
-  project_tree_dn = ou=Projects,dc=openstack,dc=org
-  project_objectclass = groupOfNames
-
-  role_tree_dn = ou=Roles,dc=openstack,dc=org
-  role_objectclass = organizationalRole
-
 The default object classes and attributes are intentionally simplistic. They
 reflect the common standard objects according to the LDAP RFCs. However, in a
 live deployment, the correct attributes can be overridden to support a
@@ -1539,14 +1666,6 @@ and you have only read access, in such case the configuration is:
   user_allow_update = False
   user_allow_delete = False
 
-  project_allow_create = True
-  project_allow_update = True
-  project_allow_delete = True
-
-  role_allow_create = True
-  role_allow_update = True
-  role_allow_delete = True
-
 There are some configuration options for filtering users, tenants and roles, if
 the backend is providing too much output, in such case the configuration will
 look like:
@@ -1555,8 +1674,6 @@ look like:
 
   [ldap]
   user_filter = (memberof=CN=openstack-users,OU=workgroups,DC=openstack,DC=org)
-  project_filter =
-  role_filter =
 
 In case that the directory server does not have an attribute enabled of type
 boolean for the user, there is several configuration parameters that can be
@@ -1588,26 +1705,15 @@ specified classes in the LDAP module so you can configure them like:
 .. code-block:: ini
 
   [ldap]
-  user_objectclass          = person
-  user_id_attribute         = cn
-  user_name_attribute       = cn
-  user_mail_attribute       = mail
-  user_enabled_attribute    = userAccountControl
-  user_enabled_mask         = 2
-  user_enabled_default      = 512
-  user_attribute_ignore     = tenant_id,tenants
-  project_objectclass       = groupOfNames
-  project_id_attribute      = cn
-  project_member_attribute  = member
-  project_name_attribute    = ou
-  project_desc_attribute    = description
-  project_enabled_attribute = extensionName
-  project_attribute_ignore  =
-  role_objectclass          = organizationalRole
-  role_id_attribute         = cn
-  role_name_attribute       = ou
-  role_member_attribute     = roleOccupant
-  role_attribute_ignore     =
+  user_objectclass           = person
+  user_id_attribute          = cn
+  user_name_attribute        = cn
+  user_description_attribute = displayName
+  user_mail_attribute        = mail
+  user_enabled_attribute     = userAccountControl
+  user_enabled_mask          = 2
+  user_enabled_default       = 512
+  user_attribute_ignore      = tenant_id,tenants
 
 Debugging LDAP
 --------------
@@ -1632,14 +1738,13 @@ Enabled Emulation
 -----------------
 
 Some directory servers do not provide any enabled attribute. For these servers,
-the ``user_enabled_emulation`` and ``project_enabled_emulation`` attributes
-have been created. They are enabled by setting their respective flags to True.
-Then the attributes ``user_enabled_emulation_dn`` and
-``project_enabled_emulation_dn`` may be set to specify how the enabled users
-and projects (tenants) are selected. These attributes work by using a
-``groupOfNames`` entry and adding whichever users or projects (tenants) that
-you want enabled to the respective group with the ``member`` attribute. For
-example, this will mark any user who is a member of ``enabled_users`` as enabled:
+the ``user_enabled_emulation`` attribute has been created. It is enabled by
+setting the respective flags to True. Then the attribute
+``user_enabled_emulation_dn`` may be set to specify how the enabled users are
+selected. This attribute works by using a ``groupOfNames`` entry and adding
+whichever users or that you want enabled to the respective group with the
+``member`` attribute. For example, this will mark any user who is a member of
+``enabled_users`` as enabled:
 
 .. code-block:: ini
 
@@ -1647,15 +1752,14 @@ example, this will mark any user who is a member of ``enabled_users`` as enabled
   user_enabled_emulation = True
   user_enabled_emulation_dn = cn=enabled_users,cn=groups,dc=openstack,dc=org
 
-The default values for user and project (tenant) enabled emulation DN is
-``cn=enabled_users,$user_tree_dn`` and ``cn=enabled_tenants,$project_tree_dn``
-respectively.
+The default values for user enabled emulation DN is
+``cn=enabled_users,$user_tree_dn``.
+
 
 If a different LDAP schema is used for group membership, it is possible to use
 the ``group_objectclass`` and ``group_member_attribute`` attributes to
 determine membership in the enabled emulation group by setting the
-``user_enabled_emulation_use_group_config`` and
-``project_enabled_emulation_use_group_config`` attributes to True.
+``user_enabled_emulation_use_group_config`` attribute to True.
 
 Secure Connection
 -----------------
@@ -1760,7 +1864,7 @@ with the user's DN and provided password. This kind of authentication bind
 can fill up the pool pretty quickly, so a separate pool is provided for end
 user authentication bind calls. If a deployment does not want to use a pool for
 those binds, then it can disable pooling selectively by setting
-``use_auth_pool`` to false. If a deployment wants to use a pool for those 
+``use_auth_pool`` to false. If a deployment wants to use a pool for those
 authentication binds, then ``use_auth_pool`` needs to be set to true. For the
 authentication pool, a different pool size (``auth_pool_size``) and connection
 lifetime (``auth_pool_connection_lifetime``) can be specified. With an enabled
@@ -1805,3 +1909,16 @@ Connection pool configuration is part of the ``[ldap]`` configuration section:
   # End user auth connection lifetime in seconds. (integer value)
   auth_pool_connection_lifetime=60
 
+Specifying Multiple LDAP servers
+--------------------------------
+
+Multiple LDAP server URLs can be provided to keystone to provide
+high-availability support for a single LDAP backend. To specify multiple LDAP
+servers, simply change the ``url`` option in the ``[ldap]`` section. The new
+option should list the different servers, each separated by a comma. For
+example:
+
+.. code-block:: ini
+
+  [ldap]
+  url = "ldap://localhost,ldap://backup.localhost"

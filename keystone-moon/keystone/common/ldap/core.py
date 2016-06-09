@@ -20,12 +20,15 @@ import re
 import sys
 import weakref
 
+import ldap.controls
 import ldap.filter
 import ldappool
 from oslo_log import log
+from oslo_utils import reflection
 import six
 from six.moves import map, zip
 
+from keystone.common import driver_hints
 from keystone import exception
 from keystone.i18n import _
 from keystone.i18n import _LW
@@ -62,15 +65,17 @@ def utf8_encode(value):
 
     :param value: A basestring
     :returns: UTF-8 encoded version of value
-    :raises: TypeError if value is not basestring
+    :raises TypeError: If value is not basestring
     """
     if isinstance(value, six.text_type):
         return _utf8_encoder(value)[0]
     elif isinstance(value, six.binary_type):
         return value
     else:
+        value_cls_name = reflection.get_class_name(
+            value, fully_qualified=False)
         raise TypeError("value must be basestring, "
-                        "not %s" % value.__class__.__name__)
+                        "not %s" % value_cls_name)
 
 _utf8_decoder = codecs.getdecoder('utf-8')
 
@@ -84,7 +89,7 @@ def utf8_decode(value):
 
     :param value: value to be returned as unicode
     :returns: value as unicode
-    :raises: UnicodeDecodeError for invalid UTF-8 encoding
+    :raises UnicodeDecodeError: for invalid UTF-8 encoding
     """
     if isinstance(value, six.binary_type):
         return _utf8_decoder(value)[0]
@@ -110,14 +115,15 @@ def py2ldap(val):
 
 def enabled2py(val):
     """Similar to ldap2py, only useful for the enabled attribute."""
-
     try:
         return LDAP_VALUES[val]
-    except KeyError:
+    except KeyError:  # nosec
+        # It wasn't a boolean value, will try as an int instead.
         pass
     try:
         return int(val)
-    except ValueError:
+    except ValueError:  # nosec
+        # It wasn't an int either, will try as utf8 instead.
         pass
     return utf8_decode(val)
 
@@ -239,7 +245,6 @@ def is_ava_value_equal(attribute_type, val1, val2):
     that function apply here.
 
     """
-
     return prep_case_insensitive(val1) == prep_case_insensitive(val2)
 
 
@@ -259,7 +264,6 @@ def is_rdn_equal(rdn1, rdn2):
     limitations of that function apply here.
 
     """
-
     if len(rdn1) != len(rdn2):
         return False
 
@@ -292,7 +296,6 @@ def is_dn_equal(dn1, dn2):
     :param dn2: Either a string DN or a DN parsed by ldap.dn.str2dn.
 
     """
-
     if not isinstance(dn1, list):
         dn1 = ldap.dn.str2dn(utf8_encode(dn1))
     if not isinstance(dn2, list):
@@ -314,7 +317,6 @@ def dn_startswith(descendant_dn, dn):
     :param dn: Either a string DN or a DN parsed by ldap.dn.str2dn.
 
     """
-
     if not isinstance(descendant_dn, list):
         descendant_dn = ldap.dn.str2dn(utf8_encode(descendant_dn))
     if not isinstance(dn, list):
@@ -419,6 +421,7 @@ class LDAPHandler(object):
     derived classes.
 
     """
+
     @abc.abstractmethod
     def __init__(self, conn=None):
         self.conn = conn
@@ -625,6 +628,7 @@ def _common_ldap_initialization(url, use_tls=False, tls_cacertfile=None,
 
 class MsgId(list):
     """Wrapper class to hold connection and msgid."""
+
     pass
 
 
@@ -665,6 +669,7 @@ class PooledLDAPHandler(LDAPHandler):
     the methods in this class.
 
     """
+
     # Added here to allow override for testing
     Connector = ldappool.StateConnector
     auth_pool_prefix = 'auth_pool_'
@@ -815,7 +820,6 @@ class PooledLDAPHandler(LDAPHandler):
         which requested msgId and used it in result3 exits.
 
         """
-
         conn, msg_id = msgid
         return conn.result3(msg_id, all, timeout)
 
@@ -957,7 +961,7 @@ class KeystoneLDAPHandler(LDAPHandler):
         if attrlist is not None:
             attrlist = [attr for attr in attrlist if attr is not None]
         LOG.debug('LDAP search_ext: base=%s scope=%s filterstr=%s '
-                  'attrs=%s attrsonly=%s'
+                  'attrs=%s attrsonly=%s '
                   'serverctrls=%s clientctrls=%s timeout=%s sizelimit=%s',
                   base, scope, filterstr, attrlist, attrsonly,
                   serverctrls, clientctrls, timeout, sizelimit)
@@ -1041,7 +1045,11 @@ class KeystoneLDAPHandler(LDAPHandler):
                   'resp_ctrl_classes=%s ldap_result=%s',
                   msgid, all, timeout, resp_ctrl_classes, ldap_result)
 
-        py_result = convert_ldap_result(ldap_result)
+        # ldap_result returned from result3 is a tuple of
+        # (rtype, rdata, rmsgid, serverctrls). We don't need use of these,
+        # except rdata.
+        rtype, rdata, rmsgid, serverctrls = ldap_result
+        py_result = convert_ldap_result(rdata)
         return py_result
 
     def modify_s(self, dn, modlist):
@@ -1221,7 +1229,7 @@ class BaseLdap(object):
             try:
                 ldap_attr, attr_map = item.split(':')
             except Exception:
-                LOG.warn(_LW(
+                LOG.warning(_LW(
                     'Invalid additional attribute mapping: "%s". '
                     'Format must be <ldap_attribute>:<keystone_attribute>'),
                     item)
@@ -1337,7 +1345,7 @@ class BaseLdap(object):
                           'as an ID. Will get the ID from DN instead') % (
                               {'id_attr': self.id_attr,
                                'dn': res[0]})
-            LOG.warn(message)
+            LOG.warning(message)
             id_val = self._dn_to_id(res[0])
         else:
             id_val = id_attrs[0]
@@ -1354,7 +1362,8 @@ class BaseLdap(object):
                     continue
 
                 v = lower_res[map_attr.lower()]
-            except KeyError:
+            except KeyError:  # nosec
+                # Didn't find the attr, so don't add it.
                 pass
             else:
                 try:
@@ -1383,7 +1392,8 @@ class BaseLdap(object):
         if values.get('name') is not None:
             try:
                 self.get_by_name(values['name'])
-            except exception.NotFound:
+            except exception.NotFound:  # nosec
+                # Didn't find it so it's unique, good.
                 pass
             else:
                 raise exception.Conflict(type=self.options_name,
@@ -1393,7 +1403,8 @@ class BaseLdap(object):
         if values.get('id') is not None:
             try:
                 self.get(values['id'])
-            except exception.NotFound:
+            except exception.NotFound:  # nosec
+                # Didn't find it, so it's unique, good.
                 pass
             else:
                 raise exception.Conflict(type=self.options_name,
@@ -1452,16 +1463,39 @@ class BaseLdap(object):
         except IndexError:
             return None
 
-    def _ldap_get_all(self, ldap_filter=None):
+    def _ldap_get_limited(self, base, scope, filterstr, attrlist, sizelimit):
+        with self.get_connection() as conn:
+            try:
+                control = ldap.controls.libldap.SimplePagedResultsControl(
+                    criticality=True,
+                    size=sizelimit,
+                    cookie='')
+                msgid = conn.search_ext(base, scope, filterstr, attrlist,
+                                        serverctrls=[control])
+                rdata = conn.result3(msgid)
+                return rdata
+            except ldap.NO_SUCH_OBJECT:
+                return []
+
+    @driver_hints.truncated
+    def _ldap_get_all(self, hints, ldap_filter=None):
         query = u'(&%s(objectClass=%s)(%s=*))' % (
             ldap_filter or self.ldap_filter or '',
             self.object_class,
             self.id_attr)
+        sizelimit = 0
+        attrs = list(set(([self.id_attr] +
+                          list(self.attribute_mapping.values()) +
+                          list(self.extra_attr_mapping.keys()))))
+        if hints.limit:
+            sizelimit = hints.limit['limit']
+            return self._ldap_get_limited(self.tree_dn,
+                                          self.LDAP_SCOPE,
+                                          query,
+                                          attrs,
+                                          sizelimit)
         with self.get_connection() as conn:
             try:
-                attrs = list(set(([self.id_attr] +
-                                  list(self.attribute_mapping.values()) +
-                                  list(self.extra_attr_mapping.keys()))))
                 return conn.search_s(self.tree_dn,
                                      self.LDAP_SCOPE,
                                      query,
@@ -1501,9 +1535,10 @@ class BaseLdap(object):
         except IndexError:
             raise self._not_found(name)
 
-    def get_all(self, ldap_filter=None):
+    def get_all(self, ldap_filter=None, hints=None):
+        hints = hints or driver_hints.Hints()
         return [self._ldap_res_to_model(x)
-                for x in self._ldap_get_all(ldap_filter)]
+                for x in self._ldap_get_all(hints, ldap_filter)]
 
     def update(self, object_id, values, old_obj=None):
         if old_obj is None:
@@ -1565,7 +1600,7 @@ class BaseLdap(object):
             except ldap.NO_SUCH_OBJECT:
                 raise self._not_found(object_id)
 
-    def deleteTree(self, object_id):
+    def delete_tree(self, object_id):
         tree_delete_control = ldap.controls.LDAPControl(CONTROL_TREEDELETE,
                                                         0,
                                                         None)
@@ -1609,8 +1644,8 @@ class BaseLdap(object):
         :param member_list_dn: DN of group to which the
                                member will be added.
 
-        :raises: exception.Conflict: If the user was already a member.
-                 self.NotFound: If the group entry didn't exist.
+        :raises keystone.exception.Conflict: If the user was already a member.
+        :raises self.NotFound: If the group entry didn't exist.
         """
         with self.get_connection() as conn:
             try:
@@ -1632,8 +1667,8 @@ class BaseLdap(object):
         :param member_list_dn: DN of group from which the
                                member will be removed.
 
-        :raises: self.NotFound: If the group entry didn't exist.
-                 ldap.NO_SUCH_ATTRIBUTE: If the user wasn't a member.
+        :raises self.NotFound: If the group entry didn't exist.
+        :raises ldap.NO_SUCH_ATTRIBUTE: If the user wasn't a member.
         """
         with self.get_connection() as conn:
             try:
@@ -1666,11 +1701,12 @@ class BaseLdap(object):
                         not_deleted_nodes.append(node_dn)
 
         if not_deleted_nodes:
-            LOG.warn(_LW("When deleting entries for %(search_base)s, could not"
-                         " delete nonexistent entries %(entries)s%(dots)s"),
-                     {'search_base': search_base,
-                      'entries': not_deleted_nodes[:3],
-                      'dots': '...' if len(not_deleted_nodes) > 3 else ''})
+            LOG.warning(_LW("When deleting entries for %(search_base)s, "
+                            "could not delete nonexistent entries "
+                            "%(entries)s%(dots)s"),
+                        {'search_base': search_base,
+                         'entries': not_deleted_nodes[:3],
+                         'dots': '...' if len(not_deleted_nodes) > 3 else ''})
 
     def filter_query(self, hints, query=None):
         """Applies filtering to a query.
@@ -1823,7 +1859,8 @@ class EnabledEmuMixIn(BaseLdap):
 
     def _get_enabled(self, object_id, conn):
         dn = self._id_to_dn(object_id)
-        query = '(%s=%s)' % (self.member_attribute, dn)
+        query = '(%s=%s)' % (self.member_attribute,
+                             ldap.filter.escape_filter_chars(dn))
         try:
             enabled_value = conn.search_s(self.enabled_emulation_dn,
                                           ldap.SCOPE_BASE,
@@ -1857,7 +1894,8 @@ class EnabledEmuMixIn(BaseLdap):
         with self.get_connection() as conn:
             try:
                 conn.modify_s(self.enabled_emulation_dn, modlist)
-            except (ldap.NO_SUCH_OBJECT, ldap.NO_SUCH_ATTRIBUTE):
+            except (ldap.NO_SUCH_OBJECT, ldap.NO_SUCH_ATTRIBUTE):  # nosec
+                # It's already gone, good.
                 pass
 
     def create(self, values):
@@ -1880,11 +1918,12 @@ class EnabledEmuMixIn(BaseLdap):
                 ref['enabled'] = self._get_enabled(object_id, conn)
             return ref
 
-    def get_all(self, ldap_filter=None):
+    def get_all(self, ldap_filter=None, hints=None):
+        hints = hints or driver_hints.Hints()
         if 'enabled' not in self.attribute_ignore and self.enabled_emulation:
             # had to copy BaseLdap.get_all here to ldap_filter by DN
             tenant_list = [self._ldap_res_to_model(x)
-                           for x in self._ldap_get_all(ldap_filter)
+                           for x in self._ldap_get_all(hints, ldap_filter)
                            if x[0] != self.enabled_emulation_dn]
             with self.get_connection() as conn:
                 for tenant_ref in tenant_list:
@@ -1892,7 +1931,7 @@ class EnabledEmuMixIn(BaseLdap):
                         tenant_ref['id'], conn)
             return tenant_list
         else:
-            return super(EnabledEmuMixIn, self).get_all(ldap_filter)
+            return super(EnabledEmuMixIn, self).get_all(ldap_filter, hints)
 
     def update(self, object_id, values, old_obj=None):
         if 'enabled' not in self.attribute_ignore and self.enabled_emulation:
@@ -1914,23 +1953,3 @@ class EnabledEmuMixIn(BaseLdap):
         if self.enabled_emulation:
             self._remove_enabled(object_id)
         super(EnabledEmuMixIn, self).delete(object_id)
-
-
-class ProjectLdapStructureMixin(object):
-    """Project LDAP Structure shared between LDAP backends.
-
-    This is shared between the resource and assignment LDAP backends.
-
-    """
-    DEFAULT_OU = 'ou=Groups'
-    DEFAULT_STRUCTURAL_CLASSES = []
-    DEFAULT_OBJECTCLASS = 'groupOfNames'
-    DEFAULT_ID_ATTR = 'cn'
-    NotFound = exception.ProjectNotFound
-    notfound_arg = 'project_id'  # NOTE(yorik-sar): while options_name = tenant
-    options_name = 'project'
-    attribute_options_names = {'name': 'name',
-                               'description': 'desc',
-                               'enabled': 'enabled',
-                               'domain_id': 'domain_id'}
-    immutable_attrs = ['name']

@@ -66,7 +66,7 @@ class TestIntraExtensionAdminManager(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAdminManager, self).config_overrides()
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')

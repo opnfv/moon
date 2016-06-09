@@ -17,7 +17,6 @@ import uuid
 
 from dogpile.cache import api
 from dogpile.cache import proxy
-from dogpile.cache import util
 import mock
 import six
 from testtools import matchers
@@ -86,9 +85,12 @@ class RegionProxy2Fixture(proxy.ProxyBackend):
 
 
 class TestMemcacheDriver(api.CacheBackend):
-    """A test dogpile.cache backend that conforms to the mixin-mechanism for
+    """A test dogpile.cache backend.
+
+    This test backend conforms to the mixin-mechanism for
     overriding set and set_multi methods on dogpile memcached drivers.
     """
+
     class test_client(object):
         # FIXME(morganfainberg): Convert this test client over to using mock
         # and/or mock.MagicMock as appropriate
@@ -203,10 +205,10 @@ class KVSTest(unit.TestCase):
         kvs = self._get_kvs_region()
         kvs.configure('openstack.kvs.Memory')
 
-        self.assertIs(kvs._region.key_mangler, util.sha1_mangle_key)
+        self.assertIs(kvs._region.key_mangler, core.sha1_mangle_key)
         # The backend should also have the keymangler set the same as the
         # region now.
-        self.assertIs(kvs._region.backend.key_mangler, util.sha1_mangle_key)
+        self.assertIs(kvs._region.backend.key_mangler, core.sha1_mangle_key)
 
     def test_kvs_key_mangler_configuration_backend(self):
         kvs = self._get_kvs_region()
@@ -217,7 +219,7 @@ class KVSTest(unit.TestCase):
     def test_kvs_key_mangler_configuration_forced_backend(self):
         kvs = self._get_kvs_region()
         kvs.configure('openstack.kvs.KVSBackendForcedKeyMangleFixture',
-                      key_mangler=util.sha1_mangle_key)
+                      key_mangler=core.sha1_mangle_key)
         expected = KVSBackendForcedKeyMangleFixture.key_mangler(self.key_foo)
         self.assertEqual(expected, kvs._region.key_mangler(self.key_foo))
 
@@ -236,7 +238,7 @@ class KVSTest(unit.TestCase):
 
         kvs = self._get_kvs_region()
         kvs.configure('openstack.kvs.Memory')
-        self.assertIs(kvs._region.backend.key_mangler, util.sha1_mangle_key)
+        self.assertIs(kvs._region.backend.key_mangler, core.sha1_mangle_key)
         kvs._set_key_mangler(test_key_mangler)
         self.assertIs(kvs._region.backend.key_mangler, test_key_mangler)
 
@@ -432,7 +434,7 @@ class KVSTest(unit.TestCase):
                       no_expiry_keys=no_expiry_keys)
         calculated_keys = set([kvs._region.key_mangler(key)
                                for key in no_expiry_keys])
-        self.assertIs(kvs._region.backend.key_mangler, util.sha1_mangle_key)
+        self.assertIs(kvs._region.backend.key_mangler, core.sha1_mangle_key)
         self.assertSetEqual(calculated_keys,
                             kvs._region.backend.no_expiry_hashed_keys)
         self.assertSetEqual(no_expiry_keys,
@@ -450,7 +452,7 @@ class KVSTest(unit.TestCase):
         kvs.configure('openstack.kvs.Memcached',
                       memcached_backend='TestDriver',
                       no_expiry_keys=no_expiry_keys)
-        self.assertIs(kvs._region.backend.key_mangler, util.sha1_mangle_key)
+        self.assertIs(kvs._region.backend.key_mangler, core.sha1_mangle_key)
         kvs._region.backend.key_mangler = None
         self.assertSetEqual(kvs._region.backend.raw_no_expiry_keys,
                             kvs._region.backend.no_expiry_hashed_keys)
@@ -492,15 +494,15 @@ class KVSTest(unit.TestCase):
 
         # Ensure the set_arguments are correct
         self.assertDictEqual(
-            kvs._region.backend._get_set_arguments_driver_attr(),
-            expected_set_args)
+            expected_set_args,
+            kvs._region.backend._get_set_arguments_driver_attr())
 
         # Set a key that would have an expiry and verify the correct result
         # occurred and that the correct set_arguments were passed.
         kvs.set(self.key_foo, self.value_foo)
         self.assertDictEqual(
-            kvs._region.backend.driver.client.set_arguments_passed,
-            expected_set_args)
+            expected_set_args,
+            kvs._region.backend.driver.client.set_arguments_passed)
         observed_foo_keys = list(kvs_driver.client.keys_values.keys())
         self.assertEqual(expected_foo_keys, observed_foo_keys)
         self.assertEqual(
@@ -511,8 +513,8 @@ class KVSTest(unit.TestCase):
         # occurred and that the correct set_arguments were passed.
         kvs.set(self.key_bar, self.value_bar)
         self.assertDictEqual(
-            kvs._region.backend.driver.client.set_arguments_passed,
-            expected_no_expiry_args)
+            expected_no_expiry_args,
+            kvs._region.backend.driver.client.set_arguments_passed)
         observed_bar_keys = list(kvs_driver.client.keys_values.keys())
         self.assertEqual(expected_bar_keys, observed_bar_keys)
         self.assertEqual(
@@ -523,8 +525,8 @@ class KVSTest(unit.TestCase):
         # result occurred and that the correct set_arguments were passed.
         kvs.set_multi(mapping_foo)
         self.assertDictEqual(
-            kvs._region.backend.driver.client.set_arguments_passed,
-            expected_set_args)
+            expected_set_args,
+            kvs._region.backend.driver.client.set_arguments_passed)
         observed_foo_keys = list(kvs_driver.client.keys_values.keys())
         self.assertEqual(expected_foo_keys, observed_foo_keys)
         self.assertEqual(
@@ -535,8 +537,8 @@ class KVSTest(unit.TestCase):
         # result occurred and that the correct set_arguments were passed.
         kvs.set_multi(mapping_bar)
         self.assertDictEqual(
-            kvs._region.backend.driver.client.set_arguments_passed,
-            expected_no_expiry_args)
+            expected_no_expiry_args,
+            kvs._region.backend.driver.client.set_arguments_passed)
         observed_bar_keys = list(kvs_driver.client.keys_values.keys())
         self.assertEqual(expected_bar_keys, observed_bar_keys)
         self.assertEqual(

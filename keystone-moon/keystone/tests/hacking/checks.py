@@ -126,14 +126,21 @@ class CheckForAssertingNoneEquality(BaseASTChecker):
         # NOTE(dstanek): I wrote this in a verbose way to make it easier to
         # read for those that have little experience with Python's AST.
 
+        def _is_None(node):
+            if six.PY3:
+                return (isinstance(node, ast.NameConstant)
+                        and node.value is None)
+            else:
+                return isinstance(node, ast.Name) and node.id == 'None'
+
         if isinstance(node.func, ast.Attribute):
             if node.func.attr == 'assertEqual':
                 for arg in node.args:
-                    if isinstance(arg, ast.Name) and arg.id == 'None':
+                    if _is_None(arg):
                         self.add_error(node, message=self.CHECK_DESC_IS)
             elif node.func.attr == 'assertNotEqual':
                 for arg in node.args:
-                    if isinstance(arg, ast.Name) and arg.id == 'None':
+                    if _is_None(arg):
                         self.add_error(node, message=self.CHECK_DESC_ISNOT)
 
         super(CheckForAssertingNoneEquality, self).generic_visit(node)
@@ -144,6 +151,7 @@ class CheckForLoggingIssues(BaseASTChecker):
     DEBUG_CHECK_DESC = 'K005 Using translated string in debug logging'
     NONDEBUG_CHECK_DESC = 'K006 Not using translating helper for logging'
     EXCESS_HELPER_CHECK_DESC = 'K007 Using hints when _ is necessary'
+    USING_DEPRECATED_WARN = 'K009 Using the deprecated Logger.warn'
     LOG_MODULES = ('logging', 'oslo_log.log')
     I18N_MODULES = (
         'keystone.i18n._',
@@ -155,7 +163,6 @@ class CheckForLoggingIssues(BaseASTChecker):
     TRANS_HELPER_MAP = {
         'debug': None,
         'info': '_LI',
-        'warn': '_LW',
         'warning': '_LW',
         'error': '_LE',
         'exception': '_LE',
@@ -186,9 +193,7 @@ class CheckForLoggingIssues(BaseASTChecker):
                 self.visit(value)
 
     def _filter_imports(self, module_name, alias):
-        """Keeps lists of logging and i18n imports
-
-        """
+        """Keeps lists of logging and i18n imports."""
         if module_name in self.LOG_MODULES:
             self.logger_module_names.append(alias.asname or alias.name)
         elif module_name in self.I18N_MODULES:
@@ -284,10 +289,7 @@ class CheckForLoggingIssues(BaseASTChecker):
         return super(CheckForLoggingIssues, self).generic_visit(node)
 
     def visit_Call(self, node):
-        """Look for the 'LOG.*' calls.
-
-        """
-
+        """Look for the 'LOG.*' calls."""
         # obj.method
         if isinstance(node.func, ast.Attribute):
             obj_name = self._find_name(node.func.value)
@@ -299,13 +301,18 @@ class CheckForLoggingIssues(BaseASTChecker):
             else:  # could be Subscript, Call or many more
                 return super(CheckForLoggingIssues, self).generic_visit(node)
 
+            # if dealing with a logger the method can't be "warn"
+            if obj_name in self.logger_names and method_name == 'warn':
+                msg = node.args[0]  # first arg to a logging method is the msg
+                self.add_error(msg, message=self.USING_DEPRECATED_WARN)
+
             # must be a logger instance and one of the support logging methods
             if (obj_name not in self.logger_names
                     or method_name not in self.TRANS_HELPER_MAP):
                 return super(CheckForLoggingIssues, self).generic_visit(node)
 
             # the call must have arguments
-            if not len(node.args):
+            if not node.args:
                 return super(CheckForLoggingIssues, self).generic_visit(node)
 
             if method_name == 'debug':
@@ -364,7 +371,7 @@ class CheckForLoggingIssues(BaseASTChecker):
             # because:
             # 1. We have code like this that we'll fix when dealing with the %:
             #       msg = _('....') % {}
-            #       LOG.warn(msg)
+            #       LOG.warning(msg)
             # 2. We also do LOG.exception(e) in several places. I'm not sure
             #    exactly what we should be doing about that.
             if msg.id not in self.assignments:
@@ -391,15 +398,19 @@ class CheckForLoggingIssues(BaseASTChecker):
         peers = find_peers(node)
         for peer in peers:
             if isinstance(peer, ast.Raise):
-                if (isinstance(peer.type, ast.Call) and
-                        len(peer.type.args) > 0 and
-                        isinstance(peer.type.args[0], ast.Name) and
-                        name in (a.id for a in peer.type.args)):
+                if six.PY3:
+                    exc = peer.exc
+                else:
+                    exc = peer.type
+                if (isinstance(exc, ast.Call) and
+                        len(exc.args) > 0 and
+                        isinstance(exc.args[0], ast.Name) and
+                        name in (a.id for a in exc.args)):
                     return True
                 else:
                     return False
             elif isinstance(peer, ast.Assign):
-                if name in (t.id for t in peer.targets):
+                if name in (t.id for t in peer.targets if hasattr(t, 'id')):
                     return False
 
 

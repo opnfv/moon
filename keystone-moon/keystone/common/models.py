@@ -21,6 +21,7 @@ Unless marked otherwise, all fields are strings.
 
 class Model(dict):
     """Base model class."""
+
     def __hash__(self):
         return self['id'].__hash__()
 
@@ -148,6 +149,18 @@ class Role(Model):
     """
 
     required_keys = ('id', 'name')
+    optional_keys = tuple()
+
+
+class ImpliedRole(Model):
+    """ImpliedRole object.
+
+    Required keys:
+        prior_role_id
+        implied_role_id
+    """
+
+    required_keys = ('prior_role_id', 'implied_role_id')
     optional_keys = tuple()
 
 

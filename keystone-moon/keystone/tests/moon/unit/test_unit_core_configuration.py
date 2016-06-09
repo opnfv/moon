@@ -57,7 +57,7 @@ class TestConfigurationManager(tests.TestCase):
         self.config_fixture.config(
             group='moon',
             tenant_driver='keystone.contrib.moon.backends.sql.TenantConnector')
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')

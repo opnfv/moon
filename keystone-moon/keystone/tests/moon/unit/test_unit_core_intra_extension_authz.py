@@ -64,7 +64,7 @@ class TestIntraExtensionAuthzManagerAuthzOK(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAuthzManagerAuthzOK, self).config_overrides()
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')
@@ -975,7 +975,7 @@ class TestIntraExtensionAuthzManagerAuthzKO(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAuthzManagerAuthzKO, self).config_overrides()
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.root_policy_directory = 'policy_root'
         self.config_fixture.config(
             group='moon',

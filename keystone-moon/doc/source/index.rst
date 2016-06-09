@@ -47,7 +47,7 @@ Getting Started
 .. toctree::
     :maxdepth: 1
 
-    setup
+    devref/development.environment
     installing
     configuration
     policy_mapping
@@ -55,6 +55,7 @@ Getting Started
     mapping_combinations
     mapping_schema
     configure_tokenless_x509
+    auth-totp
     configuringservices
     extensions
     key_terms
@@ -80,11 +81,20 @@ Developers Documentation
    middlewarearchitecture
    http-api
    api_curl_examples
-   cli_examples
    apache-httpd
    external-auth
    event_notifications
-   extension_development
+   services
+   online_schema_migration_examples
+
+
+Sample Configuration File
+=========================
+
+.. toctree::
+    :maxdepth: 1
+
+    sample_config
 
 Code Documentation
 ==================

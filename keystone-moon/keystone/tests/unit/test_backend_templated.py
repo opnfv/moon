@@ -19,16 +19,16 @@ from six.moves import zip
 
 from keystone import catalog
 from keystone.tests import unit
+from keystone.tests.unit.catalog import test_backends as catalog_tests
 from keystone.tests.unit import default_fixtures
 from keystone.tests.unit.ksfixtures import database
-from keystone.tests.unit import test_backend
 
 
 BROKEN_WRITE_FUNCTIONALITY_MSG = ("Templated backend doesn't correctly "
                                   "implement write operations")
 
 
-class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
+class TestTemplatedCatalog(unit.TestCase, catalog_tests.CatalogTests):
 
     DEFAULT_FIXTURE = {
         'RegionOne': {
@@ -64,8 +64,11 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
 
     def test_get_catalog(self):
         catalog_ref = self.catalog_api.get_catalog('foo', 'bar')
-        self.assertDictEqual(catalog_ref, self.DEFAULT_FIXTURE)
+        self.assertDictEqual(self.DEFAULT_FIXTURE, catalog_ref)
 
+    # NOTE(lbragstad): This test is skipped because the catalog is being
+    # modified within the test and not through the API.
+    @unit.skip_if_cache_is_enabled('catalog')
     def test_catalog_ignored_malformed_urls(self):
         # both endpoints are in the catalog
         catalog_ref = self.catalog_api.get_catalog('foo', 'bar')
@@ -85,7 +88,9 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
         self.skipTest("Templated backend doesn't have disabled endpoints")
 
     def assert_catalogs_equal(self, expected, observed):
-        for e, o in zip(sorted(expected), sorted(observed)):
+        sort_key = lambda d: d['id']
+        for e, o in zip(sorted(expected, key=sort_key),
+                        sorted(observed, key=sort_key)):
             expected_endpoints = e.pop('endpoints')
             observed_endpoints = o.pop('endpoints')
             self.assertDictEqual(e, o)
@@ -126,9 +131,10 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
 
     def test_get_catalog_ignores_endpoints_with_invalid_urls(self):
         user_id = uuid.uuid4().hex
+        tenant_id = None
         # If the URL has no 'tenant_id' to substitute, we will skip the
         # endpoint which contains this kind of URL.
-        catalog_ref = self.catalog_api.get_v3_catalog(user_id, tenant_id=None)
+        catalog_ref = self.catalog_api.get_v3_catalog(user_id, tenant_id)
         exp_catalog = [
             {'endpoints': [],
              'type': 'compute',
@@ -155,8 +161,24 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
     def test_service_filtering(self):
         self.skipTest("Templated backend doesn't support filtering")
 
+    def test_list_services_with_hints(self):
+        hints = {}
+        services = self.catalog_api.list_services(hints=hints)
+        exp_services = [
+            {'type': 'compute',
+             'description': '',
+             'enabled': True,
+             'name': "'Compute Service'",
+             'id': 'compute'},
+            {'type': 'identity',
+             'description': '',
+             'enabled': True,
+             'name': "'Identity Service'",
+             'id': 'identity'}]
+        self.assertItemsEqual(exp_services, services)
+
     # NOTE(dstanek): the following methods have been overridden
-    # from test_backend.CatalogTests
+    # from unit.catalog.test_backends.CatalogTests.
 
     def test_region_crud(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
@@ -172,10 +194,10 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
     def test_create_region_with_duplicate_id(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
-    def test_delete_region_404(self):
+    def test_delete_region_returns_not_found(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
-    def test_create_region_invalid_parent_region_404(self):
+    def test_create_region_invalid_parent_region_returns_not_found(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
     def test_avoid_creating_circular_references_in_regions_update(self):
@@ -203,7 +225,7 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
     def test_cache_layer_delete_service_with_endpoint(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
-    def test_delete_service_404(self):
+    def test_delete_service_returns_not_found(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
     def test_update_endpoint_nonexistent_service(self):
@@ -215,10 +237,10 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
     def test_update_endpoint_nonexistent_region(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
-    def test_get_endpoint_404(self):
+    def test_get_endpoint_returns_not_found(self):
         self.skipTest("Templated backend doesn't use IDs for endpoints.")
 
-    def test_delete_endpoint_404(self):
+    def test_delete_endpoint_returns_not_found(self):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
     def test_create_endpoint(self):
@@ -228,11 +250,11 @@ class TestTemplatedCatalog(unit.TestCase, test_backend.CatalogTests):
         self.skipTest(BROKEN_WRITE_FUNCTIONALITY_MSG)
 
     def test_list_endpoints(self):
-        # NOTE(dstanek): a future commit will fix this functionality and
-        # this test
-        expected_ids = set()
+        expected_urls = set(['http://localhost:$(public_port)s/v2.0',
+                             'http://localhost:$(admin_port)s/v2.0',
+                             'http://localhost:8774/v1.1/$(tenant_id)s'])
         endpoints = self.catalog_api.list_endpoints()
-        self.assertEqual(expected_ids, set(e['id'] for e in endpoints))
+        self.assertEqual(expected_urls, set(e['url'] for e in endpoints))
 
     @unit.skip_if_cache_disabled('catalog')
     def test_invalidate_cache_when_updating_endpoint(self):

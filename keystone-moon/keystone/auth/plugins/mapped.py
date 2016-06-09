@@ -12,22 +12,19 @@
 
 import functools
 
-from oslo_log import log
 from pycadf import cadftaxonomy as taxonomy
 from six.moves.urllib import parse
 
 from keystone import auth
 from keystone.auth import plugins as auth_plugins
 from keystone.common import dependency
-from keystone.contrib.federation import constants as federation_constants
-from keystone.contrib.federation import utils
 from keystone import exception
+from keystone.federation import constants as federation_constants
+from keystone.federation import utils
 from keystone.i18n import _
 from keystone.models import token_model
 from keystone import notifications
 
-
-LOG = log.getLogger(__name__)
 
 METHOD_NAME = 'mapped'
 
@@ -56,7 +53,6 @@ class Mapped(auth.AuthMethodHandler):
         ``OS-FEDERATION:protocol``
 
         """
-
         if 'id' in auth_payload:
             token_ref = self._get_token_ref(auth_payload)
             handle_scoped_token(context, auth_payload, auth_context, token_ref,
@@ -139,12 +135,22 @@ def handle_unscoped_token(context, auth_payload, auth_context,
     user_id = None
 
     try:
-        mapped_properties, mapping_id = apply_mapping_filter(
-            identity_provider, protocol, assertion, resource_api,
-            federation_api, identity_api)
+        try:
+            mapped_properties, mapping_id = apply_mapping_filter(
+                identity_provider, protocol, assertion, resource_api,
+                federation_api, identity_api)
+        except exception.ValidationError as e:
+            # if mapping is either invalid or yield no valid identity,
+            # it is considered a failed authentication
+            raise exception.Unauthorized(e)
 
         if is_ephemeral_user(mapped_properties):
-            user = setup_username(context, mapped_properties)
+            unique_id, display_name = (
+                get_user_unique_id_and_display_name(context, mapped_properties)
+            )
+            user = identity_api.shadow_federated_user(identity_provider,
+                                                      protocol, unique_id,
+                                                      display_name)
             user_id = user['id']
             group_ids = mapped_properties['group_ids']
             utils.validate_groups_cardinality(group_ids, mapping_id)
@@ -205,7 +211,7 @@ def apply_mapping_filter(identity_provider, protocol, assertion,
     return mapped_properties, mapping_id
 
 
-def setup_username(context, mapped_properties):
+def get_user_unique_id_and_display_name(context, mapped_properties):
     """Setup federated username.
 
     Function covers all the cases for properly setting user id, a primary
@@ -225,9 +231,10 @@ def setup_username(context, mapped_properties):
     :param mapped_properties: Properties issued by a RuleProcessor.
     :type: dictionary
 
-    :raises: exception.Unauthorized
-    :returns: dictionary with user identification
-    :rtype: dict
+    :raises keystone.exception.Unauthorized: If neither `user_name` nor
+        `user_id` is set.
+    :returns: tuple with user identification
+    :rtype: tuple
 
     """
     user = mapped_properties['user']
@@ -248,5 +255,4 @@ def setup_username(context, mapped_properties):
         user_id = user_name
 
     user['id'] = parse.quote(user_id)
-
-    return user
+    return (user['id'], user['name'])

@@ -17,6 +17,7 @@ import os
 import shutil
 
 import mock
+from six.moves import http_client
 from testtools import matchers
 
 from keystone.common import environment
@@ -29,7 +30,6 @@ from keystone import token
 
 SSLDIR = unit.dirs.tmp('ssl')
 CONF = unit.CONF
-DEFAULT_DOMAIN_ID = CONF.identity.default_domain_id
 
 
 CERTDIR = os.path.join(SSLDIR, 'certs')
@@ -74,17 +74,12 @@ class CertSetupTestCase(rest.RestfulTestCase):
         controller = token.controllers.Auth()
 
         self.config_fixture.config(group='signing', certfile='invalid')
-        password = 'fake1'
-        user = {
-            'name': 'fake1',
-            'password': password,
-            'domain_id': DEFAULT_DOMAIN_ID
-        }
-        user = self.identity_api.create_user(user)
+        user = unit.create_user(self.identity_api,
+                                domain_id=CONF.identity.default_domain_id)
         body_dict = {
             'passwordCredentials': {
                 'userId': user['id'],
-                'password': password,
+                'password': user['password'],
             },
         }
         self.assertRaises(exception.UnexpectedError,
@@ -113,11 +108,13 @@ class CertSetupTestCase(rest.RestfulTestCase):
         # requests don't have some of the normal information
         signing_resp = self.request(self.public_app,
                                     '/v2.0/certificates/signing',
-                                    method='GET', expected_status=200)
+                                    method='GET',
+                                    expected_status=http_client.OK)
 
         cacert_resp = self.request(self.public_app,
                                    '/v2.0/certificates/ca',
-                                   method='GET', expected_status=200)
+                                   method='GET',
+                                   expected_status=http_client.OK)
 
         with open(CONF.signing.certfile) as f:
             self.assertEqual(f.read(), signing_resp.text)
@@ -133,7 +130,7 @@ class CertSetupTestCase(rest.RestfulTestCase):
             for accept in [None, 'text/html', 'application/json', 'text/xml']:
                 headers = {'Accept': accept} if accept else {}
                 resp = self.request(self.public_app, path, method='GET',
-                                    expected_status=200,
+                                    expected_status=http_client.OK,
                                     headers=headers)
 
                 self.assertEqual('text/html', resp.content_type)
@@ -146,7 +143,7 @@ class CertSetupTestCase(rest.RestfulTestCase):
     def test_failure(self):
         for path in ['/v2.0/certificates/signing', '/v2.0/certificates/ca']:
             self.request(self.public_app, path, method='GET',
-                         expected_status=500)
+                         expected_status=http_client.INTERNAL_SERVER_ERROR)
 
     def test_pki_certs_rebuild(self):
         self.test_create_pki_certs()
@@ -228,15 +225,17 @@ class TestExecCommand(unit.TestCase):
         ssl = openssl.ConfigureSSL('keystone_user', 'keystone_group')
         ssl.exec_command(['ls'])
 
-    @mock.patch.object(environment.subprocess.Popen, 'communicate')
-    @mock.patch.object(environment.subprocess.Popen, 'poll')
-    def test_running_an_invalid_command(self, mock_poll, mock_communicate):
+    @mock.patch.object(environment.subprocess, 'check_output')
+    def test_running_an_invalid_command(self, mock_check_output):
+        cmd = ['ls']
+
         output = 'this is the output string'
 
-        mock_communicate.return_value = (output, '')
-        mock_poll.return_value = 1
+        error = environment.subprocess.CalledProcessError(returncode=1,
+                                                          cmd=cmd,
+                                                          output=output)
+        mock_check_output.side_effect = error
 
-        cmd = ['ls']
         ssl = openssl.ConfigureSSL('keystone_user', 'keystone_group')
         e = self.assertRaises(environment.subprocess.CalledProcessError,
                               ssl.exec_command,
