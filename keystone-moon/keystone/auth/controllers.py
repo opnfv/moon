@@ -23,13 +23,13 @@ from oslo_utils import importutils
 import six
 import stevedore
 
+from keystone.common import config
 from keystone.common import controller
 from keystone.common import dependency
 from keystone.common import utils
 from keystone.common import wsgi
-from keystone import config
-from keystone.contrib.federation import constants as federation_constants
 from keystone import exception
+from keystone.federation import constants
 from keystone.i18n import _, _LI, _LW
 from keystone.resource import controllers as resource_controllers
 
@@ -45,8 +45,8 @@ AUTH_PLUGINS_LOADED = False
 
 def load_auth_method(method):
     plugin_name = CONF.auth.get(method) or 'default'
+    namespace = 'keystone.auth.%s' % method
     try:
-        namespace = 'keystone.auth.%s' % method
         driver_manager = stevedore.DriverManager(namespace, plugin_name,
                                                  invoke_on_load=True)
         return driver_manager.driver
@@ -55,13 +55,16 @@ def load_auth_method(method):
                   'attempt to load using import_object instead.',
                   method, plugin_name)
 
-    @versionutils.deprecated(as_of=versionutils.deprecated.LIBERTY,
-                             in_favor_of='entrypoints',
-                             what='direct import of driver')
-    def _load_using_import(plugin_name):
-        return importutils.import_object(plugin_name)
+    driver = importutils.import_object(plugin_name)
 
-    return _load_using_import(plugin_name)
+    msg = (_(
+        'Direct import of auth plugin %(name)r is deprecated as of Liberty in '
+        'favor of its entrypoint from %(namespace)r and may be removed in '
+        'N.') %
+        {'name': plugin_name, 'namespace': namespace})
+    versionutils.report_deprecated_feature(LOG, msg)
+
+    return driver
 
 
 def load_auth_methods():
@@ -174,6 +177,10 @@ class AuthInfo(object):
                                             target='domain')
         try:
             if domain_name:
+                if (CONF.resource.domain_name_url_safe == 'strict' and
+                        utils.is_not_url_safe(domain_name)):
+                    msg = _('Domain name cannot contain reserved characters.')
+                    raise exception.Unauthorized(message=msg)
                 domain_ref = self.resource_api.get_domain_by_name(
                     domain_name)
             else:
@@ -193,6 +200,10 @@ class AuthInfo(object):
                                             target='project')
         try:
             if project_name:
+                if (CONF.resource.project_name_url_safe == 'strict' and
+                        utils.is_not_url_safe(project_name)):
+                    msg = _('Project name cannot contain reserved characters.')
+                    raise exception.Unauthorized(message=msg)
                 if 'domain' not in project_info:
                     raise exception.ValidationError(attribute='domain',
                                                     target='project')
@@ -423,7 +434,7 @@ class Auth(controller.V3Controller):
             return
 
         # Skip scoping when unscoped federated token is being issued
-        if federation_constants.IDENTITY_PROVIDER in auth_context:
+        if constants.IDENTITY_PROVIDER in auth_context:
             return
 
         # Do not scope if request is for explicitly unscoped token
@@ -479,7 +490,6 @@ class Auth(controller.V3Controller):
 
     def authenticate(self, context, auth_info, auth_context):
         """Authenticate user."""
-
         # The 'external' method allows any 'REMOTE_USER' based authentication
         # In some cases the server can set REMOTE_USER as '' instead of
         # dropping it, so this must be filtered out
@@ -549,13 +559,23 @@ class Auth(controller.V3Controller):
     def revocation_list(self, context, auth=None):
         if not CONF.token.revoke_by_id:
             raise exception.Gone()
+
+        audit_id_only = ('audit_id_only' in context['query_string'])
+
         tokens = self.token_provider_api.list_revoked_tokens()
 
         for t in tokens:
             expires = t['expires']
             if not (expires and isinstance(expires, six.text_type)):
                 t['expires'] = utils.isotime(expires)
+            if audit_id_only:
+                t.pop('id', None)
         data = {'revoked': tokens}
+
+        if audit_id_only:
+            # No need to obfuscate if no token IDs.
+            return data
+
         json_data = jsonutils.dumps(data)
         signed_text = cms.cms_sign_text(json_data,
                                         CONF.signing.certfile,
@@ -580,7 +600,7 @@ class Auth(controller.V3Controller):
         if user_id:
             try:
                 user_refs = self.assignment_api.list_projects_for_user(user_id)
-            except exception.UserNotFound:
+            except exception.UserNotFound:  # nosec
                 # federated users have an id but they don't link to anything
                 pass
 
@@ -601,7 +621,7 @@ class Auth(controller.V3Controller):
         if user_id:
             try:
                 user_refs = self.assignment_api.list_domains_for_user(user_id)
-            except exception.UserNotFound:
+            except exception.UserNotFound:  # nosec
                 # federated users have an id but they don't link to anything
                 pass
 

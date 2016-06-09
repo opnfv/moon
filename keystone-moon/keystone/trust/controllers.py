@@ -14,9 +14,6 @@
 
 import uuid
 
-from oslo_config import cfg
-from oslo_log import log
-from oslo_log import versionutils
 from oslo_utils import timeutils
 import six
 
@@ -31,11 +28,6 @@ from keystone import notifications
 from keystone.trust import schema
 
 
-CONF = cfg.CONF
-
-LOG = log.getLogger(__name__)
-
-
 def _trustor_trustee_only(trust, user_id):
     if (user_id != trust.get('trustee_user_id') and
             user_id != trust.get('trustor_user_id')):
@@ -47,8 +39,8 @@ def _admin_trustor_only(context, trust, user_id):
         raise exception.Forbidden()
 
 
-@dependency.requires('assignment_api', 'identity_api', 'role_api',
-                     'token_provider_api', 'trust_api')
+@dependency.requires('assignment_api', 'identity_api', 'resource_api',
+                     'role_api', 'token_provider_api', 'trust_api')
 class TrustV3(controller.V3Controller):
     collection_name = "trusts"
     member_name = "trust"
@@ -56,7 +48,6 @@ class TrustV3(controller.V3Controller):
     @classmethod
     def base_url(cls, context, path=None):
         """Construct a path and pass it to V3Controller.base_url method."""
-
         # NOTE(stevemar): Overriding path to /OS-TRUST/trusts so that
         # V3Controller.base_url handles setting the self link correctly.
         path = '/OS-TRUST/' + cls.collection_name
@@ -113,7 +104,7 @@ class TrustV3(controller.V3Controller):
                     trust_roles.append({'id':
                                         all_role_names[rolename]['id']})
                 else:
-                    raise exception.RoleNotFound("role %s is not defined" %
+                    raise exception.RoleNotFound(_("role %s is not defined") %
                                                  rolename)
             else:
                 raise exception.ValidationError(attribute='id or name',
@@ -128,7 +119,6 @@ class TrustV3(controller.V3Controller):
         The user creating the trust must be the trustor.
 
         """
-
         auth_context = context.get('environment',
                                    {}).get('KEYSTONE_AUTH_CONTEXT', {})
 
@@ -178,17 +168,27 @@ class TrustV3(controller.V3Controller):
             raise exception.Forbidden(
                 _('At least one role should be specified.'))
 
-    def _get_user_role(self, trust):
+    def _get_trustor_roles(self, trust):
+        original_trust = trust.copy()
+        while original_trust.get('redelegated_trust_id'):
+            original_trust = self.trust_api.get_trust(
+                original_trust['redelegated_trust_id'])
+
         if not self._attribute_is_empty(trust, 'project_id'):
-            return self.assignment_api.get_roles_for_user_and_project(
-                trust['trustor_user_id'], trust['project_id'])
+            self.resource_api.get_project(original_trust['project_id'])
+            # Get a list of roles including any domain specific roles
+            assignment_list = self.assignment_api.list_role_assignments(
+                user_id=original_trust['trustor_user_id'],
+                project_id=original_trust['project_id'],
+                effective=True, strip_domain_roles=False)
+            return list(set([x['role_id'] for x in assignment_list]))
         else:
             return []
 
     def _require_trustor_has_role_in_project(self, trust):
-        user_roles = self._get_user_role(trust)
+        trustor_roles = self._get_trustor_roles(trust)
         for trust_role in trust['roles']:
-            matching_roles = [x for x in user_roles
+            matching_roles = [x for x in trustor_roles
                               if x == trust_role['id']]
             if not matching_roles:
                 raise exception.RoleNotFound(role_id=trust_role['id'])
@@ -261,12 +261,6 @@ class TrustV3(controller.V3Controller):
         _trustor_trustee_only(trust, user_id)
         return {'roles': trust['roles'],
                 'links': trust['roles_links']}
-
-    @versionutils.deprecated(
-        versionutils.deprecated.KILO,
-        remove_in=+2)
-    def check_role_for_trust(self, context, trust_id, role_id):
-        return self._check_role_for_trust(self, context, trust_id, role_id)
 
     @controller.protected()
     def get_role_for_trust(self, context, trust_id, role_id):

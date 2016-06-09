@@ -24,7 +24,7 @@ class TestCreateLegacyDriver(unit.BaseTestCase):
         Driver = manager.create_legacy_driver(catalog.CatalogDriverV8)
 
         # NOTE(dstanek): I want to subvert the requirement for this
-        # class to implement all of the abstractmethods.
+        # class to implement all of the abstract methods.
         Driver.__abstractmethods__ = set()
         impl = Driver()
 
@@ -32,8 +32,9 @@ class TestCreateLegacyDriver(unit.BaseTestCase):
             'as_of': 'Liberty',
             'what': 'keystone.catalog.core.Driver',
             'in_favor_of': 'keystone.catalog.core.CatalogDriverV8',
-            'remove_in': 'N',
+            'remove_in': mock.ANY,
         }
         mock_reporter.assert_called_with(mock.ANY, mock.ANY, details)
+        self.assertEqual('N', mock_reporter.call_args[0][2]['remove_in'][0])
 
         self.assertIsInstance(impl, catalog.CatalogDriverV8)

@@ -15,9 +15,9 @@
 from oslo_config import cfg
 from oslo_log import log
 
+from keystone.common import config
 from keystone.common import dependency
 from keystone.common import sql
-from keystone import config
 from keystone.i18n import _LW
 from keystone.server import backends
 
@@ -30,7 +30,7 @@ def configure(version=None, config_files=None,
               pre_setup_logging_fn=lambda: None):
     config.configure()
     sql.initialize()
-    config.set_default_for_default_log_levels()
+    config.set_config_defaults()
 
     CONF(project='keystone', version=version,
          default_config_files=config_files)
@@ -38,9 +38,9 @@ def configure(version=None, config_files=None,
     pre_setup_logging_fn()
     config.setup_logging()
 
-    if CONF.debug:
-        LOG.warn(_LW(
-            'debug is enabled so responses may include sensitive '
+    if CONF.insecure_debug:
+        LOG.warning(_LW(
+            'insecure_debug is enabled so responses may include sensitive '
             'information.'))
 
 

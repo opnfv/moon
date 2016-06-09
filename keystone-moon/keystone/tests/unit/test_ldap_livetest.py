@@ -69,9 +69,6 @@ class LiveLDAPIdentity(test_backend_ldap.LDAPIdentity):
         create_object(CONF.ldap.role_tree_dn,
                       {'objectclass': 'organizationalUnit',
                        'ou': 'Roles'})
-        create_object(CONF.ldap.project_tree_dn,
-                      {'objectclass': 'organizationalUnit',
-                       'ou': 'Projects'})
         create_object(CONF.ldap.group_tree_dn,
                       {'objectclass': 'organizationalUnit',
                        'ou': 'UserGroups'})
@@ -82,8 +79,7 @@ class LiveLDAPIdentity(test_backend_ldap.LDAPIdentity):
         return config_files
 
     def test_build_tree(self):
-        """Regression test for building the tree names
-        """
+        """Regression test for building the tree names."""
         # logic is different from the fake backend.
         user_api = identity_ldap.UserApi(CONF)
         self.assertTrue(user_api)
@@ -134,6 +130,7 @@ class LiveLDAPIdentity(test_backend_ldap.LDAPIdentity):
         USER_COUNT = 2
 
         for x in range(0, USER_COUNT):
+            # TODO(shaleh): use unit.new_user_ref()
             new_user = {'name': uuid.uuid4().hex, 'password': uuid.uuid4().hex,
                         'enabled': True, 'domain_id': domain['id']}
             new_user = self.identity_api.create_user(new_user)
@@ -147,8 +144,7 @@ class LiveLDAPIdentity(test_backend_ldap.LDAPIdentity):
             self.assertEqual(0, len(group_refs))
 
         for x in range(0, GROUP_COUNT):
-            new_group = {'domain_id': domain['id'],
-                         'name': uuid.uuid4().hex}
+            new_group = unit.new_group_ref(domain_id=domain['id'])
             new_group = self.identity_api.create_group(new_group)
             test_groups.append(new_group)
 

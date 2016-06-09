@@ -21,10 +21,9 @@ Developing with Keystone
 Setup
 -----
 
-Get your development environment set up according to :doc:`setup`. The
-instructions from here will assume that you have installed Keystone into a
-virtualenv. If you chose not to, simply exclude "tools/with_venv.sh" from the
-example commands below.
+Get your development environment set up according to
+:doc:`devref/development.environment`. It is recommended that you install
+Keystone into a virtualenv.
 
 
 Configuring Keystone
@@ -48,7 +47,7 @@ To run the Keystone Admin and API server instances, use:
 
 .. code-block:: bash
 
-    $ tools/with_venv.sh keystone-all
+    $ keystone-all
 
 This runs Keystone with the configuration the etc/ directory of the project.
 See :doc:`configuration` for details on how Keystone is configured. By default,
@@ -72,7 +71,7 @@ place:
 
 .. code-block:: bash
 
-    $ bin/keystone-manage db_sync
+    $ keystone-manage db_sync
 
 .. _`python-keystoneclient`: https://git.openstack.org/cgit/openstack/python-keystoneclient
 .. _`openstackclient`: https://git.openstack.org/cgit/openstack/python-openstackclient
@@ -100,15 +99,7 @@ the script, the version is the number before the underline.
 For example, if the script is named ``001_add_X_table.py`` then the
 version of the SQL migration is ``1``.
 
-.. _SQLAlchemy-migrate: http://code.google.com/p/sqlalchemy-migrate/
-
-Extensions should be created as directories under ``keystone/contrib``. An
-extension that requires SQL migrations should not change the common repository,
-but should instead have its own repository. This repository must be in the
-extension's directory in ``keystone/contrib/<extension>/migrate_repo``. In
-addition, it needs a subdirectory named ``versions``. For example, if the
-extension name is ``my_extension`` then the directory structure would be
-``keystone/contrib/my_extension/migrate_repo/versions/``.
+.. _SQLAlchemy-migrate: https://git.openstack.org/cgit/openstack/sqlalchemy-migrate
 
 For the migration to work, both the ``migrate_repo`` and ``versions``
 subdirectories must have ``__init__.py`` files. SQLAlchemy-migrate will look
@@ -121,10 +112,7 @@ the minimal set of values is::
     version_table=migrate_version
     required_dbs=[]
 
-The directory ``keystone/contrib/example`` contains a sample extension
-migration.
-
-For core components, to run a migration for upgrade, simply run:
+To run a migration for upgrade, simply run:
 
 .. code-block:: bash
 
@@ -134,22 +122,73 @@ For core components, to run a migration for upgrade, simply run:
 
    If no version is specified, then the most recent migration will be used.
 
-For extensions, migrations must be explicitly run for each extension individually.
-To run a migration for a specific extension, simply run:
-
-.. code-block:: bash
-
-    $ keystone-manage db_sync --extension <name>
-
 .. NOTE::
 
-   The meaning of "extension" here has been changed since all of the
-   "extension" are loaded and the migrations are run by default, but
-   the source is maintained in a separate directory.
+   Schema downgrades are not supported.
 
-.. NOTE::
+.. _online-migration:
 
-   Schema downgrades are not supported for both core components and extensions.
+From Mitaka release, we are starting to write the migration scripts in a
+backward compatible way to support `online schema migration`_. The following
+guidelines for schema and data migrations should be followed:
+
+* Additive schema migrations - In general, almost all schema migrations should
+  be additive. Put simply, they should only create elements like columns,
+  indices, and tables.
+
+* Subtractive schema migrations - To remove an element like a column or table:
+
+  #. Expand phase: The element must be deprecated and retained for backward
+     compatibility. This allows for graceful upgrade from X release to X+1.
+
+  #. Migrate phase: Data migration must completely migrate data from the old
+     version of the schema to the new version. Data migrations should have the
+     ability to run online, while the service is operating normally, so the
+     keystone service implementation (typically the SQLAlchemy model) has to
+     be aware that data should be retrieved and/or written from/to more than
+     one place and format, to maintain consistency (see examples below).
+
+  #. Contract phase: The column can then be removed with a schema migration at
+     the start of X+2. Contract phase can't happen if the data migration isn't
+     finished (see last point in this section).
+
+* Release notes - There should be a release note in case an operation is
+  "blocking", "expensive", or both. You can find information on which DDL
+  operations are expensive in `MySQL docs`_. Other supported SQL DBs support
+  `transactional DDL`_, and experienced DBA's know to take advantage of this
+  feature.
+
+* Constraints - When adding a foreign or unique key constraint, the schema
+  migration code needs to handle possible problems with data before applying
+  the constraint. For example, a unique constraint must clean up duplicate
+  records before applying said constraint.
+
+* Data migrations - should be done in an online fashion by custom code in the
+  SQLAlchemy layer that handles moving data between the old and new portions
+  of the schema. In addition, for each type of data migration performed,
+  a keystone-manage command can be added for the operator to manually request
+  that rows be migrated (see examples below, like the nova flavor migration).
+
+* All schema migrations should be idempotent. For example, a migration
+  should check if an element exists in the schema before attempting to add
+  it. This logic comes for free in the autogenerated workflow of
+  the online migrations.
+
+* Before running `contract` in the expand/migrate/contract schema migration
+  workflow, the remaining data migrations should be performed by the contract
+  script. Alternatively, running a relevant keystone-manage migration should
+  be enforced, to ensure that all remaining data migrations are completed.
+  It is a good practice to move data out of the old columns, and ensure they
+  are filled with null values before removing them.
+
+A good example of an online schema migration is documented in a `cinder spec`_.
+See more examples in :doc:`online_schema_migration_examples`.
+
+.. _`online schema migration`: https://specs.openstack.org/openstack/keystone-specs/specs/mitaka/online-schema-migration.html
+.. _`MySQL docs`: https://dev.mysql.com/doc/refman/5.7/en/innodb-create-index-overview.html
+.. _`transactional DDL`: https://wiki.postgresql.org/wiki/Transactional_DDL_in_PostgreSQL:_A_Competitive_Analysis
+.. _`cinder spec`: https://specs.openstack.org/openstack/cinder-specs/specs/mitaka/online-schema-upgrades.html
+
 
 Initial Sample Data
 -------------------
@@ -159,7 +198,7 @@ data for use with keystone:
 
 .. code-block:: bash
 
-    $ OS_TOKEN=ADMIN tools/with_venv.sh tools/sample_data.sh
+    $ OS_TOKEN=ADMIN tools/sample_data.sh
 
 Notice it requires a service token read from an environment variable for
 authentication.  The default value "ADMIN" is from the ``admin_token``
@@ -170,13 +209,13 @@ Once run, you can see the sample data that has been created by using the
 
 .. code-block:: bash
 
-    $ tools/with_venv.sh openstack --os-token ADMIN --os-url http://127.0.0.1:35357/v2.0/ user list
+    $ openstack --os-token ADMIN --os-url http://127.0.0.1:35357/v2.0/ user list
 
 The `openstackclient`_ can be installed using the following:
 
 .. code-block:: bash
 
-    $ tools/with_venv.sh pip install python-openstackclient
+    $ pip install python-openstackclient
 
 Filtering responsibilities between controllers and drivers
 ----------------------------------------------------------
@@ -247,7 +286,8 @@ Running Tests
 =============
 
 Before running tests, you should have ``tox`` installed and available in your
-environment (in addition to the other external dependencies in :doc:`setup`):
+environment (in addition to the other external dependencies in
+:doc:`devref/development.environment`):
 
 .. code-block:: bash
 
@@ -328,7 +368,7 @@ Not all of the tests in the keystone/tests/unit directory are strictly unit
 tests. Keystone intentionally includes tests that run the service locally and
 drives the entire configuration to achieve basic functional testing.
 
-For the functional tests, an in-memory key-value store or in-memory sqlite
+For the functional tests, an in-memory key-value store or in-memory SQLite
 database is used to keep the tests fast.
 
 Within the tests directory, the general structure of the backend tests is a
@@ -819,3 +859,44 @@ The documentation is generated with Sphinx using the tox command.  To create HTM
     $ tox -e docs
 
 The results are in the doc/build/html and doc/build/man directories respectively.
+
+
+Release Notes
+-------------
+
+The release notes for a patch should be included in the patch. If not, the
+release notes should be in a follow-on review.
+
+If the following applies to the patch, a release note is required:
+
+* The deployer needs to take an action when upgrading
+* The backend driver interface changes
+* A new feature is implemented
+* Function was removed (hopefully it was deprecated)
+* Current behavior is changed
+* A new config option is added that the deployer should consider changing from
+  the default
+* A security bug is fixed
+
+A release note is suggested if a long-standing or important bug is fixed.
+Otherwise, a release note is not required.
+
+Keystone uses `reno <http://docs.openstack.org/developer/reno/usage.html>`_ to
+generate release notes. Please read the docs for details. In summary, use
+
+.. code-block:: bash
+
+  $ tox -e venv -- reno new <bug-,bp-,whatever>
+
+Then edit the sample file that was created and push it with your change.
+
+To see the results:
+
+.. code-block:: bash
+
+  $ git commit  # Commit the change because reno scans git log.
+
+  $ tox -e releasenotes
+
+Then look at the generated release notes files in releasenotes/build/html in
+your favorite browser.

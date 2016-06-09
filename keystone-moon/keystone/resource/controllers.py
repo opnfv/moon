@@ -18,7 +18,6 @@
 import uuid
 
 from oslo_config import cfg
-from oslo_log import log
 
 from keystone.common import controller
 from keystone.common import dependency
@@ -31,7 +30,6 @@ from keystone.resource import schema
 
 
 CONF = cfg.CONF
-LOG = log.getLogger(__name__)
 
 
 @dependency.requires('resource_api')
@@ -40,13 +38,18 @@ class Tenant(controller.V2Controller):
     @controller.v2_deprecated
     def get_all_projects(self, context, **kw):
         """Gets a list of all tenants for an admin user."""
-        if 'name' in context['query_string']:
-            return self.get_project_by_name(
-                context, context['query_string'].get('name'))
-
         self.assert_admin(context)
-        tenant_refs = self.resource_api.list_projects_in_domain(
-            CONF.identity.default_domain_id)
+
+        if 'name' in context['query_string']:
+            return self._get_project_by_name(context['query_string']['name'])
+
+        try:
+            tenant_refs = self.resource_api.list_projects_in_domain(
+                CONF.identity.default_domain_id)
+        except exception.DomainNotFound:
+            # If the default domain doesn't exist then there are no V2
+            # projects.
+            tenant_refs = []
         tenant_refs = [self.v3_to_v2_project(tenant_ref)
                        for tenant_ref in tenant_refs
                        if not tenant_ref.get('is_domain')]
@@ -71,12 +74,11 @@ class Tenant(controller.V2Controller):
         self._assert_not_is_domain_project(tenant_id, ref)
         return {'tenant': self.v3_to_v2_project(ref)}
 
-    @controller.v2_deprecated
-    def get_project_by_name(self, context, tenant_name):
-        self.assert_admin(context)
+    def _get_project_by_name(self, tenant_name):
         # Projects acting as a domain should not be visible via v2
         ref = self.resource_api.get_project_by_name(
             tenant_name, CONF.identity.default_domain_id)
+        self._assert_not_is_domain_project(ref['id'], ref)
         return {'tenant': self.v3_to_v2_project(ref)}
 
     # CRUD Extension
@@ -88,7 +90,15 @@ class Tenant(controller.V2Controller):
             msg = _('Name field is required and cannot be empty')
             raise exception.ValidationError(message=msg)
 
+        if 'is_domain' in tenant_ref:
+            msg = _('The creation of projects acting as domains is not '
+                    'allowed in v2.')
+            raise exception.ValidationError(message=msg)
+
         self.assert_admin(context)
+
+        self.resource_api.ensure_default_domain_exists()
+
         tenant_ref['id'] = tenant_ref.get('id', uuid.uuid4().hex)
         initiator = notifications._get_request_audit_info(context)
         tenant = self.resource_api.create_project(
@@ -162,11 +172,13 @@ class DomainV3(controller.V3Controller):
 
 
 @dependency.requires('domain_config_api')
+@dependency.requires('resource_api')
 class DomainConfigV3(controller.V3Controller):
     member_name = 'config'
 
     @controller.protected()
     def create_domain_config(self, context, domain_id, config):
+        self.resource_api.get_domain(domain_id)
         original_config = (
             self.domain_config_api.get_config_with_sensitive_info(domain_id))
         ref = self.domain_config_api.create_config(domain_id, config)
@@ -179,28 +191,38 @@ class DomainConfigV3(controller.V3Controller):
 
     @controller.protected()
     def get_domain_config(self, context, domain_id, group=None, option=None):
+        self.resource_api.get_domain(domain_id)
         ref = self.domain_config_api.get_config(domain_id, group, option)
         return {self.member_name: ref}
 
     @controller.protected()
     def update_domain_config(
             self, context, domain_id, config, group, option):
+        self.resource_api.get_domain(domain_id)
         ref = self.domain_config_api.update_config(
             domain_id, config, group, option)
         return wsgi.render_response(body={self.member_name: ref})
 
     def update_domain_config_group(self, context, domain_id, group, config):
+        self.resource_api.get_domain(domain_id)
         return self.update_domain_config(
             context, domain_id, config, group, option=None)
 
     def update_domain_config_only(self, context, domain_id, config):
+        self.resource_api.get_domain(domain_id)
         return self.update_domain_config(
             context, domain_id, config, group=None, option=None)
 
     @controller.protected()
     def delete_domain_config(
             self, context, domain_id, group=None, option=None):
+        self.resource_api.get_domain(domain_id)
         self.domain_config_api.delete_config(domain_id, group, option)
+
+    @controller.protected()
+    def get_domain_config_default(self, context, group=None, option=None):
+        ref = self.domain_config_api.get_config_default(group, option)
+        return {self.member_name: ref}
 
 
 @dependency.requires('resource_api')
@@ -216,25 +238,31 @@ class ProjectV3(controller.V3Controller):
     @validation.validated(schema.project_create, 'project')
     def create_project(self, context, project):
         ref = self._assign_unique_id(self._normalize_dict(project))
-        ref = self._normalize_domain_id(context, ref)
 
-        if ref.get('is_domain'):
-            msg = _('The creation of projects acting as domains is not '
-                    'allowed yet.')
-            raise exception.NotImplemented(msg)
+        if not ref.get('is_domain'):
+            ref = self._normalize_domain_id(context, ref)
+        # Our API requires that you specify the location in the hierarchy
+        # unambiguously. This could be by parent_id or, if it is a top level
+        # project, just by providing a domain_id.
+        if not ref.get('parent_id'):
+            ref['parent_id'] = ref.get('domain_id')
 
         initiator = notifications._get_request_audit_info(context)
         try:
             ref = self.resource_api.create_project(ref['id'], ref,
                                                    initiator=initiator)
-        except exception.DomainNotFound as e:
+        except (exception.DomainNotFound, exception.ProjectNotFound) as e:
             raise exception.ValidationError(e)
         return ProjectV3.wrap_member(context, ref)
 
     @controller.filterprotected('domain_id', 'enabled', 'name',
-                                'parent_id')
+                                'parent_id', 'is_domain')
     def list_projects(self, context, filters):
         hints = ProjectV3.build_driver_hints(context, filters)
+        # If 'is_domain' has not been included as a query, we default it to
+        # False (which in query terms means '0'
+        if 'is_domain' not in context['query_string']:
+            hints.add_filter('is_domain', '0')
         refs = self.resource_api.list_projects(hints=hints)
         return ProjectV3.wrap_collection(context, refs, hints=hints)
 

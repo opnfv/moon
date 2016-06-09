@@ -24,8 +24,7 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import os
-
+import subprocess
 
 # NOTE(dstanek): adds _ to the builtins so keystone modules can be imported
 __builtins__['_'] = str
@@ -42,8 +41,12 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
               'sphinx.ext.viewcode',
+              'oslo_config.sphinxconfiggen',
               'oslosphinx',
               ]
+
+config_generator_config_file = '../../config-generator/keystone.conf'
+sample_config_basename = '_static/keystone'
 
 todo_include_todos = True
 
@@ -148,13 +151,15 @@ man_pages = [
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-#html_static_path = ['images']
+html_static_path = ['_static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
 #html_last_updated_fmt = '%b %d, %Y'
-git_cmd = "git log --pretty=format:'%ad, commit %h' --date=local -n1"
-html_last_updated_fmt = os.popen(git_cmd).read()
+git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
+    "-n1"]
+html_last_updated_fmt = subprocess.Popen(
+    git_cmd, stdout=subprocess.PIPE).communicate()[0]
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.

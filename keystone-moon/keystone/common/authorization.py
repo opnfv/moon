@@ -31,8 +31,12 @@ It is a dictionary with the following attributes:
 
 * ``token``: Token from the request
 * ``user_id``: user ID of the principal
+* ``user_domain_id`` (optional): Domain ID of the principal if the principal
+                                 has a domain.
 * ``project_id`` (optional): project ID of the scoped project if auth is
                              project-scoped
+* ``project_domain_id`` (optional): Domain ID of the scoped project if auth is
+                                    project-scoped.
 * ``domain_id`` (optional): domain ID of the scoped domain if auth is
                             domain-scoped
 * ``domain_name`` (optional): domain name of the scoped domain if auth is
@@ -64,9 +68,11 @@ def token_to_auth_context(token):
     except KeyError:
         LOG.warning(_LW('RBAC: Invalid user data in token'))
         raise exception.Unauthorized()
+    auth_context['user_domain_id'] = token.user_domain_id
 
     if token.project_scoped:
         auth_context['project_id'] = token.project_id
+        auth_context['project_domain_id'] = token.project_domain_id
     elif token.domain_scoped:
         auth_context['domain_id'] = token.domain_id
         auth_context['domain_name'] = token.domain_name
@@ -79,6 +85,8 @@ def token_to_auth_context(token):
         auth_context['trustor_id'] = token.trustor_user_id
         auth_context['trustee_id'] = token.trustee_user_id
     else:
+        # NOTE(lbragstad): These variables will already be set to None but we
+        # add the else statement here for readability.
         auth_context['trust_id'] = None
         auth_context['trustor_id'] = None
         auth_context['trustee_id'] = None
@@ -89,8 +97,13 @@ def token_to_auth_context(token):
 
     if token.oauth_scoped:
         auth_context['is_delegated_auth'] = True
-    auth_context['consumer_id'] = token.oauth_consumer_id
-    auth_context['access_token_id'] = token.oauth_access_token_id
+        auth_context['consumer_id'] = token.oauth_consumer_id
+        auth_context['access_token_id'] = token.oauth_access_token_id
+    else:
+        # NOTE(lbragstad): These variables will already be set to None but we
+        # add the else statement here for readability.
+        auth_context['consumer_id'] = None
+        auth_context['access_token_id'] = None
 
     if token.is_federated_user:
         auth_context['group_ids'] = token.federation_group_ids

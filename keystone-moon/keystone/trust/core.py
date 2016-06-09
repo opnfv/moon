@@ -17,7 +17,6 @@
 import abc
 
 from oslo_config import cfg
-from oslo_log import log
 import six
 from six.moves import zip
 
@@ -29,8 +28,6 @@ from keystone import notifications
 
 
 CONF = cfg.CONF
-
-LOG = log.getLogger(__name__)
 
 
 @dependency.requires('identity_api')
@@ -93,14 +90,9 @@ class Manager(manager.Manager):
     def get_trust_pedigree(self, trust_id):
         trust = self.driver.get_trust(trust_id)
         trust_chain = [trust]
-        if trust and trust.get('redelegated_trust_id'):
-            trusts = self.driver.list_trusts_for_trustor(
-                trust['trustor_user_id'])
-            while trust_chain[-1].get('redelegated_trust_id'):
-                for t in trusts:
-                    if t['id'] == trust_chain[-1]['redelegated_trust_id']:
-                        trust_chain.append(t)
-                        break
+        while trust and trust.get('redelegated_trust_id'):
+            trust = self.driver.get_trust(trust['redelegated_trust_id'])
+            trust_chain.append(trust)
 
         return trust_chain
 
@@ -179,7 +171,7 @@ class Manager(manager.Manager):
     def delete_trust(self, trust_id, initiator=None):
         """Remove a trust.
 
-        :raises: keystone.exception.TrustNotFound
+        :raises keystone.exception.TrustNotFound: If the trust doesn't exist.
 
         Recursively remove given and redelegated trusts
         """
@@ -192,7 +184,7 @@ class Manager(manager.Manager):
                 # recursive call to make sure all notifications are sent
                 try:
                     self.delete_trust(t['id'])
-                except exception.TrustNotFound:
+                except exception.TrustNotFound:  # nosec
                     # if trust was deleted by concurrent process
                     # consistency must not suffer
                     pass
@@ -244,11 +236,14 @@ class TrustDriverV8(object):
 
     @abc.abstractmethod
     def consume_use(self, trust_id):
-        """Consume one use when a trust was created with a limitation on its
-        uses, provided there are still uses available.
+        """Consume one use of a trust.
 
-        :raises: keystone.exception.TrustUseLimitReached,
-                 keystone.exception.TrustNotFound
+        One use of a trust is consumed when the trust was created with a
+        limitation on its uses, provided there are still uses available.
+
+        :raises keystone.exception.TrustUseLimitReached: If no remaining uses
+            for trust.
+        :raises keystone.exception.TrustNotFound: If the trust doesn't exist.
         """
         raise exception.NotImplemented()  # pragma: no cover
 

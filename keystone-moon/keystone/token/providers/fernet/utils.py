@@ -25,29 +25,33 @@ LOG = log.getLogger(__name__)
 CONF = cfg.CONF
 
 
-def validate_key_repository():
+def validate_key_repository(requires_write=False):
     """Validate permissions on the key repository directory."""
     # NOTE(lbragstad): We shouldn't need to check if the directory was passed
     # in as None because we don't set allow_no_values to True.
 
-    # ensure current user has full access to the key repository
-    if (not os.access(CONF.fernet_tokens.key_repository, os.R_OK) or not
-            os.access(CONF.fernet_tokens.key_repository, os.W_OK) or not
-            os.access(CONF.fernet_tokens.key_repository, os.X_OK)):
+    # ensure current user has sufficient access to the key repository
+    is_valid = (os.access(CONF.fernet_tokens.key_repository, os.R_OK) and
+                os.access(CONF.fernet_tokens.key_repository, os.X_OK))
+    if requires_write:
+        is_valid = (is_valid and
+                    os.access(CONF.fernet_tokens.key_repository, os.W_OK))
+
+    if not is_valid:
         LOG.error(
             _LE('Either [fernet_tokens] key_repository does not exist or '
                 'Keystone does not have sufficient permission to access it: '
                 '%s'), CONF.fernet_tokens.key_repository)
-        return False
+    else:
+        # ensure the key repository isn't world-readable
+        stat_info = os.stat(CONF.fernet_tokens.key_repository)
+        if(stat_info.st_mode & stat.S_IROTH or
+           stat_info.st_mode & stat.S_IXOTH):
+            LOG.warning(_LW(
+                '[fernet_tokens] key_repository is world readable: %s'),
+                CONF.fernet_tokens.key_repository)
 
-    # ensure the key repository isn't world-readable
-    stat_info = os.stat(CONF.fernet_tokens.key_repository)
-    if stat_info.st_mode & stat.S_IROTH or stat_info.st_mode & stat.S_IXOTH:
-        LOG.warning(_LW(
-            '[fernet_tokens] key_repository is world readable: %s'),
-            CONF.fernet_tokens.key_repository)
-
-    return True
+    return is_valid
 
 
 def _convert_to_integers(id_value):
@@ -99,7 +103,7 @@ def _create_new_key(keystone_user_id, keystone_group_id):
 
     Create a new key that is readable by the Keystone group and Keystone user.
     """
-    key = fernet.Fernet.generate_key()
+    key = fernet.Fernet.generate_key()  # key is bytes
 
     # This ensures the key created is not world-readable
     old_umask = os.umask(0o177)
@@ -117,7 +121,7 @@ def _create_new_key(keystone_user_id, keystone_group_id):
     key_file = os.path.join(CONF.fernet_tokens.key_repository, '0')
     try:
         with open(key_file, 'w') as f:
-            f.write(key)
+            f.write(key.decode('utf-8'))  # convert key to str for the file.
     finally:
         # After writing the key, set the umask back to it's original value. Do
         # the same with group and user identifiers if a Keystone group or user
@@ -176,7 +180,7 @@ def rotate_keys(keystone_user_id=None, keystone_group_id=None):
         if os.path.isfile(path):
             try:
                 key_id = int(filename)
-            except ValueError:
+            except ValueError:  # nosec : name isn't a number, ignore the file.
                 pass
             else:
                 key_files[key_id] = path
@@ -243,7 +247,8 @@ def load_keys():
             with open(path, 'r') as key_file:
                 try:
                     key_id = int(filename)
-                except ValueError:
+                except ValueError:  # nosec : filename isn't a number, ignore
+                    # this file since it's not a key.
                     pass
                 else:
                     keys[key_id] = key_file.read()

@@ -85,7 +85,7 @@ class ApplicationTest(BaseWSGITest):
     def test_response_content_type(self):
         req = self._make_request()
         resp = req.get_response(self.app)
-        self.assertEqual(resp.content_type, 'application/json')
+        self.assertEqual('application/json', resp.content_type)
 
     def test_query_string_available(self):
         class FakeApp(wsgi.Application):
@@ -93,7 +93,7 @@ class ApplicationTest(BaseWSGITest):
                 return context['query_string']
         req = self._make_request(url='/?1=2')
         resp = req.get_response(FakeApp())
-        self.assertEqual(jsonutils.loads(resp.body), {'1': '2'})
+        self.assertEqual({'1': '2'}, jsonutils.loads(resp.body))
 
     def test_headers_available(self):
         class FakeApp(wsgi.Application):
@@ -112,15 +112,16 @@ class ApplicationTest(BaseWSGITest):
 
         resp = wsgi.render_response(body=data)
         self.assertEqual('200 OK', resp.status)
-        self.assertEqual(200, resp.status_int)
+        self.assertEqual(http_client.OK, resp.status_int)
         self.assertEqual(body, resp.body)
         self.assertEqual('X-Auth-Token', resp.headers.get('Vary'))
         self.assertEqual(str(len(body)), resp.headers.get('Content-Length'))
 
     def test_render_response_custom_status(self):
-        resp = wsgi.render_response(status=(501, 'Not Implemented'))
+        resp = wsgi.render_response(
+            status=(http_client.NOT_IMPLEMENTED, 'Not Implemented'))
         self.assertEqual('501 Not Implemented', resp.status)
-        self.assertEqual(501, resp.status_int)
+        self.assertEqual(http_client.NOT_IMPLEMENTED, resp.status_int)
 
     def test_successful_require_attribute(self):
         app = FakeAttributeCheckerApp()
@@ -169,19 +170,31 @@ class ApplicationTest(BaseWSGITest):
         self.assertEqual('Some-Value', resp.headers.get('Custom-Header'))
         self.assertEqual('X-Auth-Token', resp.headers.get('Vary'))
 
+    def test_render_response_non_str_headers_converted(self):
+        resp = wsgi.render_response(
+            headers=[('Byte-Header', 'Byte-Value'),
+                     (u'Unicode-Header', u'Unicode-Value')])
+        # assert that all headers are identified.
+        self.assertThat(resp.headers, matchers.HasLength(4))
+        self.assertEqual('Unicode-Value', resp.headers.get('Unicode-Header'))
+        # assert that unicode value is converted, the expected type is str
+        # on both python2 and python3.
+        self.assertEqual(str,
+                         type(resp.headers.get('Unicode-Header')))
+
     def test_render_response_no_body(self):
         resp = wsgi.render_response()
         self.assertEqual('204 No Content', resp.status)
-        self.assertEqual(204, resp.status_int)
+        self.assertEqual(http_client.NO_CONTENT, resp.status_int)
         self.assertEqual(b'', resp.body)
         self.assertEqual('0', resp.headers.get('Content-Length'))
         self.assertIsNone(resp.headers.get('Content-Type'))
 
     def test_render_response_head_with_body(self):
         resp = wsgi.render_response({'id': uuid.uuid4().hex}, method='HEAD')
-        self.assertEqual(200, resp.status_int)
+        self.assertEqual(http_client.OK, resp.status_int)
         self.assertEqual(b'', resp.body)
-        self.assertNotEqual(resp.headers.get('Content-Length'), '0')
+        self.assertNotEqual('0', resp.headers.get('Content-Length'))
         self.assertEqual('application/json', resp.headers.get('Content-Type'))
 
     def test_application_local_config(self):
@@ -200,7 +213,9 @@ class ApplicationTest(BaseWSGITest):
 
     def test_render_exception_host(self):
         e = exception.Unauthorized(message=u'\u7f51\u7edc')
-        context = {'host_url': 'http://%s:5000' % uuid.uuid4().hex}
+        req = self._make_request(url='/')
+        context = {'host_url': 'http://%s:5000' % uuid.uuid4().hex,
+                   'environment': req.environ}
         resp = wsgi.render_exception(e, context=context)
 
         self.assertEqual(http_client.UNAUTHORIZED, resp.status_int)
@@ -224,6 +239,77 @@ class ApplicationTest(BaseWSGITest):
         resp = req.get_response(FakeApp())
         self.assertEqual({'name': u'nonexit\xe8nt'},
                          jsonutils.loads(resp.body))
+
+    def test_base_url(self):
+        class FakeApp(wsgi.Application):
+            def index(self, context):
+                return self.base_url(context, 'public')
+        req = self._make_request(url='/')
+        # NOTE(gyee): according to wsgiref, if HTTP_HOST is present in the
+        # request environment, it will be used to construct the base url.
+        # SERVER_NAME and SERVER_PORT will be ignored. These are standard
+        # WSGI environment variables populated by the webserver.
+        req.environ.update({
+            'SCRIPT_NAME': '/identity',
+            'SERVER_NAME': '1.2.3.4',
+            'wsgi.url_scheme': 'http',
+            'SERVER_PORT': '80',
+            'HTTP_HOST': '1.2.3.4',
+        })
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://1.2.3.4/identity", resp.body)
+
+        # if HTTP_HOST is absent, SERVER_NAME and SERVER_PORT will be used
+        req = self._make_request(url='/')
+        del req.environ['HTTP_HOST']
+        req.environ.update({
+            'SCRIPT_NAME': '/identity',
+            'SERVER_NAME': '1.1.1.1',
+            'wsgi.url_scheme': 'http',
+            'SERVER_PORT': '1234',
+        })
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://1.1.1.1:1234/identity", resp.body)
+
+        # make sure keystone normalize the standard HTTP port 80 by stripping
+        # it
+        req = self._make_request(url='/')
+        req.environ.update({'HTTP_HOST': 'foo:80',
+                            'SCRIPT_NAME': '/identity'})
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://foo/identity", resp.body)
+
+        # make sure keystone normalize the standard HTTPS port 443 by stripping
+        # it
+        req = self._make_request(url='/')
+        req.environ.update({'HTTP_HOST': 'foo:443',
+                            'SCRIPT_NAME': '/identity',
+                            'wsgi.url_scheme': 'https'})
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"https://foo/identity", resp.body)
+
+        # make sure non-standard port is preserved
+        req = self._make_request(url='/')
+        req.environ.update({'HTTP_HOST': 'foo:1234',
+                            'SCRIPT_NAME': '/identity'})
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://foo:1234/identity", resp.body)
+
+        # make sure version portion of the SCRIPT_NAME, '/v2.0',  is stripped
+        # from base url
+        req = self._make_request(url='/')
+        req.environ.update({'HTTP_HOST': 'foo:80',
+                            'SCRIPT_NAME': '/bar/identity/v2.0'})
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://foo/bar/identity", resp.body)
+
+        # make sure version portion of the SCRIPT_NAME, '/v3' is stripped from
+        # base url
+        req = self._make_request(url='/')
+        req.environ.update({'HTTP_HOST': 'foo:80',
+                            'SCRIPT_NAME': '/identity/v3'})
+        resp = req.get_response(FakeApp())
+        self.assertEqual(b"http://foo/identity", resp.body)
 
 
 class ExtensionRouterTest(BaseWSGITest):
@@ -293,23 +379,14 @@ class MiddlewareTest(BaseWSGITest):
             self.assertEqual(exception.UnexpectedError.code, resp.status_int)
             return resp
 
-        # Exception data should not be in the message when debug is False
-        self.config_fixture.config(debug=False)
+        # Exception data should not be in the message when insecure_debug is
+        # False
+        self.config_fixture.config(debug=False, insecure_debug=False)
         self.assertNotIn(exception_str, do_request().body)
 
-        # Exception data should be in the message when debug is True
-        self.config_fixture.config(debug=True)
+        # Exception data should be in the message when insecure_debug is True
+        self.config_fixture.config(debug=True, insecure_debug=True)
         self.assertIn(exception_str, do_request().body)
-
-    def test_middleware_local_config(self):
-        class FakeMiddleware(wsgi.Middleware):
-            def __init__(self, *args, **kwargs):
-                self.kwargs = kwargs
-
-        factory = FakeMiddleware.factory({}, testkey="test")
-        app = factory(self.app)
-        self.assertIn("testkey", app.kwargs)
-        self.assertEqual("test", app.kwargs["testkey"])
 
 
 class LocalizedResponseTest(unit.TestCase):
@@ -345,8 +422,8 @@ class LocalizedResponseTest(unit.TestCase):
     def test_static_translated_string_is_lazy_translatable(self):
         # Statically created message strings are an object that can get
         # lazy-translated rather than a regular string.
-        self.assertNotEqual(type(exception.Unauthorized.message_format),
-                            six.text_type)
+        self.assertNotEqual(six.text_type,
+                            type(exception.Unauthorized.message_format))
 
     @mock.patch.object(oslo_i18n, 'get_available_languages')
     def test_get_localized_response(self, mock_gal):
@@ -457,12 +534,14 @@ class ServerTest(unit.TestCase):
         server.start()
         self.addCleanup(server.stop)
 
-        self.assertEqual(2, mock_sock_dup.setsockopt.call_count)
-
-        # Test the last set of call args i.e. for the keepidle
-        mock_sock_dup.setsockopt.assert_called_with(socket.IPPROTO_TCP,
-                                                    socket.TCP_KEEPIDLE,
-                                                    1)
+        if hasattr(socket, 'TCP_KEEPIDLE'):
+            self.assertEqual(2, mock_sock_dup.setsockopt.call_count)
+            # Test the last set of call args i.e. for the keepidle
+            mock_sock_dup.setsockopt.assert_called_with(socket.IPPROTO_TCP,
+                                                        socket.TCP_KEEPIDLE,
+                                                        1)
+        else:
+            self.assertEqual(1, mock_sock_dup.setsockopt.call_count)
 
         self.assertTrue(mock_listen.called)
 

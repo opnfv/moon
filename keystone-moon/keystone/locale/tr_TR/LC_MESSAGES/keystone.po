@@ -1,4 +1,4 @@
-# Turkish (Turkey) translations for keystone.
+# Translations template for keystone.
 # Copyright (C) 2015 OpenStack Foundation
 # This file is distributed under the same license as the keystone project.
 #
@@ -6,21 +6,23 @@
 # Alper Çiftçi <alprciftci@gmail.com>, 2015
 # Andreas Jaeger <jaegerandi@gmail.com>, 2015
 # catborise <muhammetalisag@gmail.com>, 2013
+# catborise <muhammetalisag@gmail.com>, 2013
 # OpenStack Infra <zanata@openstack.org>, 2015. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: keystone 8.0.1.dev11\n"
-"Report-Msgid-Bugs-To: https://bugs.launchpad.net/keystone\n"
-"POT-Creation-Date: 2015-11-05 06:13+0000\n"
+"Project-Id-Version: keystone 9.0.1.dev10\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-05-03 20:05+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
 "PO-Revision-Date: 2015-09-03 12:54+0000\n"
 "Last-Translator: openstackjenkins <jenkins@openstack.org>\n"
-"Language: tr_TR\n"
+"Language: tr-TR\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"Generated-By: Babel 2.0\n"
+"X-Generator: Zanata 3.7.3\n"
 "Language-Team: Turkish (Turkey)\n"
-"Plural-Forms: nplurals=1; plural=0\n"
-"MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=utf-8\n"
-"Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
 
 #, python-format
 msgid "%(detail)s"
@@ -76,9 +78,6 @@ msgstr "%s alanı gerekli ve boş olamaz"
 #, python-format
 msgid "%s field(s) cannot be empty"
 msgstr "%s alan(lar)ı boş olamaz"
-
-msgid "(Disable debug mode to suppress these details.)"
-msgstr "(Bu detayları gizlemek için hata ayıklama kipini kapatın.)"
 
 msgid "--all option cannot be mixed with other options"
 msgstr "--all seçeneği diğer seçeneklerle birleştirilemez"
@@ -156,9 +155,6 @@ msgstr "%(option_name)s %(attr)s değiştirilemiyor"
 msgid "Cannot change Domain ID"
 msgstr "Alan ID'si değiştirilemez"
 
-msgid "Cannot change consumer secret"
-msgstr "Tüketici sırrı değiştirilemez"
-
 msgid "Cannot change user ID"
 msgstr "Kullanıcı ID'si değiştirilemiyor"
 
@@ -172,10 +168,6 @@ msgstr "%(url)s geçersiz URL' si ile bir bitiş noktası yaratılamıyor"
 #, python-format
 msgid "Cannot create project with parent: %(project_id)s"
 msgstr "Üst proje %(project_id)s ye sahip proje oluşturulamıyor"
-
-#, python-format
-msgid "Cannot duplicate name %s"
-msgstr "%s ismi kopyalanamaz"
 
 msgid "Cannot list request tokens with a token issued via delegation."
 msgstr "Vekalet ile sağlanan bir jeton ile istek jetonları listelenemez."
@@ -301,9 +293,6 @@ msgstr "Proje bulunamadı: %(project_id)s"
 msgid "Could not find region: %(region_id)s"
 msgstr "Bölge bulunamadı: %(region_id)s"
 
-msgid "Could not find role"
-msgstr "Rol bulunamadı"
-
 #, python-format
 msgid ""
 "Could not find role assignment with role: %(role_id)s, user or group: "
@@ -346,10 +335,6 @@ msgstr "Erişim jetonu doğrulanamadı"
 msgid "Credential belongs to another user"
 msgstr "Kimlik bilgisi başka bir kullanıcıya ait"
 
-#, python-format
-msgid "Database at /domains/%s/config"
-msgstr "/domains/%s/config konumundaki veri tabanı"
-
 msgid ""
 "Disabling an entity where the 'enable' attribute is ignored by configuration."
 msgstr ""
@@ -372,9 +357,6 @@ msgstr "Alan %s ID'sine sahip olamaz"
 msgid "Domain is disabled: %s"
 msgstr "Alan kapalı: %s"
 
-msgid "Domain metadata not supported by LDAP"
-msgstr "Alan metadata'sı LDAP tarafından desteklenmiyor"
-
 msgid "Domain scoped token is not supported"
 msgstr "Alan kapsamlı jeton desteklenmiyor"
 
@@ -385,12 +367,6 @@ msgid ""
 msgstr ""
 "Alan: %(domain)s zaten tanımlanmış bir yapılandırmaya sahip - dosya "
 "atlanıyor: %(file)s."
-
-msgid "Domains are not supported by the v2 API. Please use the v3 API instead."
-msgstr "v2 API alanları desteklemiyor. Bunun yerine lütfen v3 API kullanın"
-
-msgid "Domains are read-only against LDAP"
-msgstr "Alanlar LDAP'a karşı yalnızca-okunur"
 
 msgid "Duplicate Entry"
 msgstr "Kopya Girdi"
@@ -592,14 +568,6 @@ msgstr ""
 msgid "Invalid signature"
 msgstr "Geçersiz imza"
 
-#, python-format
-msgid ""
-"Invalid ssl_cert_reqs value of %s, must be one of \"NONE\", \"OPTIONAL\", "
-"\"REQUIRED\""
-msgstr ""
-"%s değerinde geçersiz ssl_cert_reqs, \"HİÇBİRİ\", \"İSTEĞE BAĞLI\", \"GEREKLİ"
-"\" den biri olmalı"
-
 msgid "Invalid user / password"
 msgstr "Geçersiz kullanıcı / parola"
 
@@ -790,10 +758,6 @@ msgstr ""
 "%(requested_count)d istenen tekrar yetki verme derinliği izin verilen "
 "%(max_count)d den fazla"
 
-#, python-format
-msgid "Role %s not found"
-msgstr "%s rolü bulunamadı"
-
 msgid ""
 "Running keystone via eventlet is deprecated as of Kilo in favor of running "
 "in a WSGI server (e.g. mod_wsgi). Support for keystone under eventlet will "
@@ -924,13 +888,6 @@ msgid "This is not a recognized Fernet payload version: %s"
 msgstr "Bu bilinen bir Fernet faydalı yük sürümü değil: %s"
 
 msgid ""
-"This is not a v2.0 Fernet token. Use v3 for trust, domain, or federated "
-"tokens."
-msgstr ""
-"Bu v2.0 Fernet jetonu değil. Güven, alan, veya federasyon jetonları için v3 "
-"kullanın."
-
-msgid ""
 "Timestamp not in expected format. The server could not comply with the "
 "request since it is either malformed or otherwise incorrect. The client is "
 "assumed to be in error."
@@ -1009,11 +966,6 @@ msgid "Unable to find valid groups while using mapping %(mapping_id)s"
 msgstr "Eşleştirme %(mapping_id)s kullanırken geçerli gruplar bulunamadı"
 
 #, python-format
-msgid ""
-"Unable to get a connection from pool id %(id)s after %(seconds)s seconds."
-msgstr "%(seconds)s saniye sonra havuz %(id)s'den bağlantı alınamadı."
-
-#, python-format
 msgid "Unable to locate domain config directory: %s"
 msgstr "Alan yapılandırma dizini bulunamıyor: %s"
 
@@ -1084,12 +1036,6 @@ msgid "User %(u_id)s is unauthorized for tenant %(t_id)s"
 msgstr "%(u_id)s kullanıcısı %(t_id)s kiracısı için yetkilendirilmemiş"
 
 #, python-format
-msgid "User %(user_id)s already has role %(role_id)s in tenant %(tenant_id)s"
-msgstr ""
-"Kullanıcı %(user_id)s zaten %(tenant_id)s kiracısı içinde bir %(role_id)s "
-"rolüne sahip"
-
-#, python-format
 msgid "User %(user_id)s has no access to domain %(domain_id)s"
 msgstr "%(user_id)s kullanıcısının %(domain_id)s alanına erişimi yok"
 
@@ -1150,39 +1096,9 @@ msgstr "auth_type Negotiate değil"
 msgid "authorizing user does not have role required"
 msgstr "yetkilendiren kullanıcı gerekli role sahip değil"
 
-msgid "cache_collection name is required"
-msgstr "cache_collection ismi gerekli"
-
 #, python-format
 msgid "cannot create a project in a branch containing a disabled project: %s"
 msgstr "kapalı bir proje içeren bir alt grupta proje oluşturulamaz: %s"
-
-msgid "cannot create a project within a different domain than its parents."
-msgstr "üst projelerinden farklı alanda bir proje oluşturulamaz."
-
-msgid "cannot delete a domain that is enabled, please disable it first."
-msgstr "etkin alan silinemez, lütfen önce kapatın."
-
-#, python-format
-msgid "cannot delete the project %s since it is not a leaf in the hierarchy."
-msgstr "%s projesi silinemiyor çünkü sıradüzen içindeki bir yaprak değil."
-
-#, python-format
-msgid "cannot disable project %s since its subtree contains enabled projects"
-msgstr "proje %s kapatılamıyor çünkü alt ağacında etkin projeler var"
-
-#, python-format
-msgid "cannot enable project %s since it has disabled parents"
-msgstr "proje %s etkinleştirilemiyor çünkü üstleri kapatılmış"
-
-msgid "database db_name is required"
-msgstr "veri tabanı db_name gerekli"
-
-msgid "db_hosts value is required"
-msgstr "db_hosts değeri gerekli"
-
-msgid "delete the default domain"
-msgstr "varsayılan alanı sil"
 
 #, python-format
 msgid "group %(group)s"
@@ -1195,32 +1111,13 @@ msgstr ""
 "idp_contact_type şunlardan biri olmalı: [teknik, diğer, destek, idari veya "
 "faturalama."
 
-msgid "integer value expected for mongo_ttl_seconds"
-msgstr "mongo_ttl_seconds için tam sayı değer bekleniyor"
-
-msgid "integer value expected for w (write concern attribute)"
-msgstr "w için tam sayı değer bekleniyor (yazma ilgisi özniteliği)"
-
 #, python-format
 msgid "invalid date format %s"
 msgstr "geçersiz tarih biçimi %s"
 
 #, python-format
-msgid "max hierarchy depth reached for %s branch."
-msgstr "%s alt grubu için azami sıralı dizi derinliğine ulaşıldı."
-
-msgid "no ssl support available"
-msgstr "ssl desteği yok"
-
-#, python-format
 msgid "option %(option)s in group %(group)s"
 msgstr "%(group)s grubundaki %(option)s seçeneği"
-
-msgid "pad must be single character"
-msgstr "dolgu tek bir karakter olmalı"
-
-msgid "padded base64url text must be multiple of 4 characters"
-msgstr "dolgulanmış base64url metni 4 karakterin katı olmalı"
 
 msgid "provided consumer key does not match stored consumer key"
 msgstr "sağlanan tüketici anahtarı depolanan tüketici anahtarıyla eşleşmiyor"
@@ -1231,17 +1128,11 @@ msgstr "sağlanan istek anahtarı depolanan istek anahtarıyla eşleşmiyor"
 msgid "provided verifier does not match stored verifier"
 msgstr "sağlanan doğrulayıcı depolanan doğrulayıcı ile eşleşmiyor"
 
-msgid "region not type dogpile.cache.CacheRegion"
-msgstr "bölge dogpile.cache.CacheRegion türünde değil"
-
 msgid "remaining_uses must be a positive integer or null."
 msgstr "remaining_uses pozitif bir değer ya da null olmalı."
 
 msgid "remaining_uses must not be set if redelegation is allowed"
 msgstr "tekrar yetkilendirmeye izin veriliyorsa remaining_uses ayarlanmamalı"
-
-msgid "replicaset_name required when use_replica is True"
-msgstr "use_replica True olduğunda replicaset_name gereklidir"
 
 #, python-format
 msgid ""
@@ -1253,20 +1144,6 @@ msgstr ""
 
 msgid "rescope a scoped token"
 msgstr "kapsamlı bir jeton tekrar kapsamlandı"
-
-#, python-format
-msgid "text is multiple of 4, but pad \"%s\" occurs before 2nd to last char"
-msgstr "metin 4'ün katı, ama dolgu \"%s\" son karaktere 2 önceden önce"
-
-#, python-format
-msgid "text is multiple of 4, but pad \"%s\" occurs before non-pad last char"
-msgstr ""
-"metin 4'ün katı, ama doldurma \"%s\" doldurma karakteri olmayan son "
-"karakterden önce"
-
-#, python-format
-msgid "text is not a multiple of 4, but contains pad \"%s\""
-msgstr "metin 4'ün katı değil, ama \"%s\" dolgusu içeriyor"
 
 #, python-format
 msgid "tls_cacertdir %s not found or is not a directory"

@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from keystone.common import driver_hints
 from keystone.common import sql
 from keystone import credential
 from keystone import exception
@@ -35,25 +36,27 @@ class Credential(credential.CredentialDriverV8):
 
     @sql.handle_conflicts(conflict_type='credential')
     def create_credential(self, credential_id, credential):
-        session = sql.get_session()
-        with session.begin():
+        with sql.session_for_write() as session:
             ref = CredentialModel.from_dict(credential)
             session.add(ref)
-        return ref.to_dict()
+            return ref.to_dict()
 
-    @sql.truncated
+    @driver_hints.truncated
     def list_credentials(self, hints):
-        session = sql.get_session()
-        credentials = session.query(CredentialModel)
-        credentials = sql.filter_limit_query(CredentialModel,
-                                             credentials, hints)
-        return [s.to_dict() for s in credentials]
+        with sql.session_for_read() as session:
+            credentials = session.query(CredentialModel)
+            credentials = sql.filter_limit_query(CredentialModel,
+                                                 credentials, hints)
+            return [s.to_dict() for s in credentials]
 
-    def list_credentials_for_user(self, user_id):
-        session = sql.get_session()
-        query = session.query(CredentialModel)
-        refs = query.filter_by(user_id=user_id).all()
-        return [ref.to_dict() for ref in refs]
+    def list_credentials_for_user(self, user_id, type=None):
+        with sql.session_for_read() as session:
+            query = session.query(CredentialModel)
+            query = query.filter_by(user_id=user_id)
+            if type:
+                query = query.filter_by(type=type)
+            refs = query.all()
+            return [ref.to_dict() for ref in refs]
 
     def _get_credential(self, session, credential_id):
         ref = session.query(CredentialModel).get(credential_id)
@@ -62,13 +65,12 @@ class Credential(credential.CredentialDriverV8):
         return ref
 
     def get_credential(self, credential_id):
-        session = sql.get_session()
-        return self._get_credential(session, credential_id).to_dict()
+        with sql.session_for_read() as session:
+            return self._get_credential(session, credential_id).to_dict()
 
     @sql.handle_conflicts(conflict_type='credential')
     def update_credential(self, credential_id, credential):
-        session = sql.get_session()
-        with session.begin():
+        with sql.session_for_write() as session:
             ref = self._get_credential(session, credential_id)
             old_dict = ref.to_dict()
             for k in credential:
@@ -78,27 +80,21 @@ class Credential(credential.CredentialDriverV8):
                 if attr != 'id':
                     setattr(ref, attr, getattr(new_credential, attr))
             ref.extra = new_credential.extra
-        return ref.to_dict()
+            return ref.to_dict()
 
     def delete_credential(self, credential_id):
-        session = sql.get_session()
-
-        with session.begin():
+        with sql.session_for_write() as session:
             ref = self._get_credential(session, credential_id)
             session.delete(ref)
 
     def delete_credentials_for_project(self, project_id):
-        session = sql.get_session()
-
-        with session.begin():
+        with sql.session_for_write() as session:
             query = session.query(CredentialModel)
             query = query.filter_by(project_id=project_id)
             query.delete()
 
     def delete_credentials_for_user(self, user_id):
-        session = sql.get_session()
-
-        with session.begin():
+        with sql.session_for_write() as session:
             query = session.query(CredentialModel)
             query = query.filter_by(user_id=user_id)
             query.delete()

@@ -12,12 +12,12 @@
 
 import uuid
 
+from six.moves import http_client
+
 from keystone.tests.unit import test_v3
 
 
 class BaseTestCase(test_v3.RestfulTestCase):
-
-    EXTENSION_TO_ADD = 'simple_cert_extension'
 
     CA_PATH = '/v3/OS-SIMPLE-CERT/ca'
     CERT_PATH = '/v3/OS-SIMPLE-CERT/certificates'
@@ -31,10 +31,10 @@ class TestSimpleCert(BaseTestCase):
                                 method='GET',
                                 path=path,
                                 headers={'Accept': content_type},
-                                expected_status=200)
+                                expected_status=http_client.OK)
 
         self.assertEqual(content_type, response.content_type.lower())
-        self.assertIn('---BEGIN', response.body)
+        self.assertIn(b'---BEGIN', response.body)
 
         return response
 
@@ -54,4 +54,4 @@ class TestSimpleCert(BaseTestCase):
             self.request(app=self.public_app,
                          method='GET',
                          path=path,
-                         expected_status=500)
+                         expected_status=http_client.INTERNAL_SERVER_ERROR)

@@ -38,6 +38,7 @@ LOG = log.getLogger(__name__)
 
 class ExternalAuthNotApplicable(Exception):
     """External authentication is not applicable."""
+
     pass
 
 
@@ -48,19 +49,17 @@ class Auth(controller.V2Controller):
 
     @controller.v2_deprecated
     def ca_cert(self, context, auth=None):
-        ca_file = open(CONF.signing.ca_certs, 'r')
-        data = ca_file.read()
-        ca_file.close()
+        with open(CONF.signing.ca_certs, 'r') as ca_file:
+            data = ca_file.read()
         return data
 
     @controller.v2_deprecated
     def signing_cert(self, context, auth=None):
-        cert_file = open(CONF.signing.certfile, 'r')
-        data = cert_file.read()
-        cert_file.close()
+        with open(CONF.signing.certfile, 'r') as cert_file:
+            data = cert_file.read()
         return data
 
-    @controller.v2_deprecated
+    @controller.v2_auth_deprecated
     def authenticate(self, context, auth=None):
         """Authenticate credentials and return a token.
 
@@ -82,7 +81,6 @@ class Auth(controller.V2Controller):
         Alternatively, this call accepts auth with only a token and tenant
         that will return a token that is scoped to that tenant.
         """
-
         if auth is None:
             raise exception.ValidationError(attribute='auth',
                                             target='request body')
@@ -182,7 +180,8 @@ class Auth(controller.V2Controller):
         try:
             token_model_ref = token_model.KeystoneToken(
                 token_id=old_token,
-                token_data=self.token_provider_api.validate_token(old_token))
+                token_data=self.token_provider_api.validate_v2_token(old_token)
+            )
         except exception.NotFound as e:
             raise exception.Unauthorized(e)
 
@@ -369,6 +368,10 @@ class Auth(controller.V2Controller):
                                                 size=CONF.max_param_size)
 
         if tenant_name:
+            if (CONF.resource.project_name_url_safe == 'strict' and
+                    utils.is_not_url_safe(tenant_name)):
+                msg = _('Tenant name cannot contain reserved characters.')
+                raise exception.Unauthorized(message=msg)
             try:
                 tenant_ref = self.resource_api.get_project_by_name(
                     tenant_name, CONF.identity.default_domain_id)
@@ -379,7 +382,6 @@ class Auth(controller.V2Controller):
 
     def _get_project_roles_and_ref(self, user_id, tenant_id):
         """Returns the project roles for this user, and the project ref."""
-
         tenant_ref = None
         role_list = []
         if tenant_id:

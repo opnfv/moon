@@ -10,17 +10,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from oslo_log import versionutils
+
 from keystone.auth.plugins import mapped
 
-""" Provide an entry point to authenticate with SAML2
 
-This plugin subclasses mapped.Mapped, and may be specified in keystone.conf:
-
-  [auth]
-  methods = external,password,token,saml2
-  saml2 = keystone.auth.plugins.mapped.Mapped
-"""
-
-
+@versionutils.deprecated(
+    versionutils.deprecated.MITAKA,
+    what='keystone.auth.plugins.saml2.Saml2',
+    in_favor_of='keystone.auth.plugins.mapped.Mapped',
+    remove_in=+2)
 class Saml2(mapped.Mapped):
+    """Provide an entry point to authenticate with SAML2.
+
+    This plugin subclasses ``mapped.Mapped``, and may be specified in
+    keystone.conf::
+
+        [auth]
+        methods = external,password,token,saml2
+        saml2 = keystone.auth.plugins.mapped.Mapped
+
+    """
+
     pass

@@ -12,9 +12,17 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import logging
+import os
+
+from oslo_cache import core as cache
 from oslo_config import cfg
+from oslo_log import log
 import oslo_messaging
+from oslo_middleware import cors
 import passlib.utils
+
+from keystone import exception
 
 
 _DEFAULT_AUTH_METHODS = ['external', 'password', 'token', 'oauth1']
@@ -22,13 +30,30 @@ _CERTFILE = '/etc/keystone/ssl/certs/signing_cert.pem'
 _KEYFILE = '/etc/keystone/ssl/private/signing_key.pem'
 _SSO_CALLBACK = '/etc/keystone/sso_callback_template.html'
 
+_DEPRECATE_PKI_MSG = ('PKI token support has been deprecated in the M '
+                      'release and will be removed in the O release. Fernet '
+                      'or UUID tokens are recommended.')
+
+_DEPRECATE_INHERIT_MSG = ('The option to enable the OS-INHERIT extension has '
+                          'been deprecated in the M release and will be '
+                          'removed in the O release. The OS-INHERIT extension '
+                          'will be enabled by default.')
+
+_DEPRECATE_EP_MSG = ('The option to enable the OS-ENDPOINT-POLICY extension '
+                     'has been deprecated in the M release and will be '
+                     'removed in the O release. The OS-ENDPOINT-POLICY '
+                     'extension will be enabled by default.')
+
 
 FILE_OPTIONS = {
     None: [
-        cfg.StrOpt('admin_token', secret=True, default='ADMIN',
+        cfg.StrOpt('admin_token', secret=True, default=None,
                    help='A "shared secret" that can be used to bootstrap '
                         'Keystone. This "token" does not represent a user, '
-                        'and carries no explicit authorization. To disable '
+                        'and carries no explicit authorization. If set '
+                        'to `None`, the value is ignored and the '
+                        '`admin_token` log in mechanism is effectively '
+                        'disabled. To completely disable `admin_token` '
                         'in production (highly recommended), remove '
                         'AdminTokenAuthMiddleware from your paste '
                         'application pipelines (for example, in '
@@ -54,9 +79,10 @@ FILE_OPTIONS = {
                         '(e.g. /prefix/v3) or the endpoint should be found '
                         'on a different server.'),
         cfg.IntOpt('max_project_tree_depth', default=5,
-                   help='Maximum depth of the project hierarchy. WARNING: '
-                        'setting it to a large value may adversely impact '
-                        'performance.'),
+                   help='Maximum depth of the project hierarchy, excluding '
+                        'the project acting as a domain at the top of the '
+                        'hierarchy. WARNING: setting it to a large value may '
+                        'adversely impact  performance.'),
         cfg.IntOpt('max_param_size', default=64,
                    help='Limit the sizes of user & project ID/names.'),
         # we allow tokens to be a bit larger to accommodate PKI
@@ -96,7 +122,10 @@ FILE_OPTIONS = {
                          'domain_id. Allowing such movement is not '
                          'recommended if the scope of a domain admin is being '
                          'restricted by use of an appropriate policy file '
-                         '(see policy.v3cloudsample as an example).'),
+                         '(see policy.v3cloudsample as an example). This '
+                         'ability is deprecated and will be removed in a '
+                         'future release.',
+                    deprecated_for_removal=True),
         cfg.BoolOpt('strict_password_check', default=False,
                     help='If set to true, strict password length checking is '
                          'performed for password manipulation. If a password '
@@ -104,11 +133,16 @@ FILE_OPTIONS = {
                          'with an HTTP 403 Forbidden error. If set to false, '
                          'passwords are automatically truncated to the '
                          'maximum length.'),
-        cfg.StrOpt('secure_proxy_ssl_header',
+        cfg.StrOpt('secure_proxy_ssl_header', default='HTTP_X_FORWARDED_PROTO',
                    help='The HTTP header used to determine the scheme for the '
                         'original request, even if it was removed by an SSL '
-                        'terminating proxy. Typical value is '
-                        '"HTTP_X_FORWARDED_PROTO".'),
+                        'terminating proxy.'),
+        cfg.BoolOpt('insecure_debug', default=False,
+                    help='If set to true the server will return information '
+                         'in the response that may allow an unauthenticated '
+                         'or authenticated user to get more information than '
+                         'normal, such as why authentication failed. This may '
+                         'be useful for debugging but is insecure.'),
     ],
     'identity': [
         cfg.StrOpt('default_domain_id', default='default',
@@ -197,10 +231,16 @@ FILE_OPTIONS = {
                          'already have assignments for users and '
                          'groups from the default LDAP domain, and it is '
                          'acceptable for Keystone to provide the different '
-                         'IDs to clients than it did previously.  Typically '
+                         'IDs to clients than it did previously. Typically '
                          'this means that the only time you can set this '
                          'value to False is when configuring a fresh '
                          'installation.'),
+    ],
+    'shadow_users': [
+        cfg.StrOpt('driver',
+                   default='sql',
+                   help='Entrypoint for the shadow users backend driver '
+                        'in the keystone.identity.shadow_users namespace.'),
     ],
     'trust': [
         cfg.BoolOpt('enabled', default=True,
@@ -215,10 +255,14 @@ FILE_OPTIONS = {
                    help='Entrypoint for the trust backend driver in the '
                         'keystone.trust namespace.')],
     'os_inherit': [
-        cfg.BoolOpt('enabled', default=False,
+        cfg.BoolOpt('enabled', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason=_DEPRECATE_INHERIT_MSG,
                     help='role-assignment inheritance to projects from '
                          'owning domain or from projects higher in the '
-                         'hierarchy can be optionally enabled.'),
+                         'hierarchy can be optionally disabled. In the '
+                         'future, this option will be removed and the '
+                         'hierarchy will be always enabled.'),
     ],
     'fernet_tokens': [
         cfg.StrOpt('key_repository',
@@ -279,12 +323,17 @@ FILE_OPTIONS = {
                     'allow_rescoped_scoped_token to false prevents a user '
                     'from exchanging a scoped token for any other token.'),
         cfg.StrOpt('hash_algorithm', default='md5',
-                   help="The hash algorithm to use for PKI tokens. This can "
-                        "be set to any algorithm that hashlib supports. "
-                        "WARNING: Before changing this value, the auth_token "
-                        "middleware must be configured with the "
-                        "hash_algorithms, otherwise token revocation will "
-                        "not be processed correctly."),
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
+                   help='The hash algorithm to use for PKI tokens. This can '
+                        'be set to any algorithm that hashlib supports. '
+                        'WARNING: Before changing this value, the auth_token '
+                        'middleware must be configured with the '
+                        'hash_algorithms, otherwise token revocation will '
+                        'not be processed correctly.'),
+        cfg.BoolOpt('infer_roles', default=True,
+                    help='Add roles to token that are not explicitly added, '
+                         'but that are linked implicitly to other roles.'),
     ],
     'revoke': [
         cfg.StrOpt('driver',
@@ -306,82 +355,6 @@ FILE_OPTIONS = {
                    deprecated_opts=[cfg.DeprecatedOpt(
                        'revocation_cache_time', group='token')]),
     ],
-    'cache': [
-        cfg.StrOpt('config_prefix', default='cache.keystone',
-                   help='Prefix for building the configuration dictionary '
-                        'for the cache region. This should not need to be '
-                        'changed unless there is another dogpile.cache '
-                        'region with the same configuration name.'),
-        cfg.IntOpt('expiration_time', default=600,
-                   help='Default TTL, in seconds, for any cached item in '
-                        'the dogpile.cache region. This applies to any '
-                        'cached method that doesn\'t have an explicit '
-                        'cache expiration time defined for it.'),
-        # NOTE(morganfainberg): the dogpile.cache.memory acceptable in devstack
-        # and other such single-process/thread deployments. Running
-        # dogpile.cache.memory in any other configuration has the same pitfalls
-        # as the KVS token backend. It is recommended that either Redis or
-        # Memcached are used as the dogpile backend for real workloads. To
-        # prevent issues with the memory cache ending up in "production"
-        # unintentionally, we register a no-op as the keystone default caching
-        # backend.
-        cfg.StrOpt('backend', default='keystone.common.cache.noop',
-                   help='Dogpile.cache backend module. It is recommended '
-                        'that Memcache with pooling '
-                        '(keystone.cache.memcache_pool) or Redis '
-                        '(dogpile.cache.redis) be used in production '
-                        'deployments.  Small workloads (single process) '
-                        'like devstack can use the dogpile.cache.memory '
-                        'backend.'),
-        cfg.MultiStrOpt('backend_argument', default=[], secret=True,
-                        help='Arguments supplied to the backend module. '
-                             'Specify this option once per argument to be '
-                             'passed to the dogpile.cache backend. Example '
-                             'format: "<argname>:<value>".'),
-        cfg.ListOpt('proxies', default=[],
-                    help='Proxy classes to import that will affect the way '
-                         'the dogpile.cache backend functions. See the '
-                         'dogpile.cache documentation on '
-                         'changing-backend-behavior.'),
-        cfg.BoolOpt('enabled', default=False,
-                    help='Global toggle for all caching using the '
-                         'should_cache_fn mechanism.'),
-        cfg.BoolOpt('debug_cache_backend', default=False,
-                    help='Extra debugging from the cache backend (cache '
-                         'keys, get/set/delete/etc calls). This is only '
-                         'really useful if you need to see the specific '
-                         'cache-backend get/set/delete calls with the '
-                         'keys/values.  Typically this should be left set '
-                         'to false.'),
-        cfg.ListOpt('memcache_servers', default=['localhost:11211'],
-                    help='Memcache servers in the format of "host:port".'
-                    ' (dogpile.cache.memcache and keystone.cache.memcache_pool'
-                    ' backends only).'),
-        cfg.IntOpt('memcache_dead_retry',
-                   default=5 * 60,
-                   help='Number of seconds memcached server is considered dead'
-                   ' before it is tried again. (dogpile.cache.memcache and'
-                   ' keystone.cache.memcache_pool backends only).'),
-        cfg.IntOpt('memcache_socket_timeout',
-                   default=3,
-                   help='Timeout in seconds for every call to a server.'
-                   ' (dogpile.cache.memcache and keystone.cache.memcache_pool'
-                   ' backends only).'),
-        cfg.IntOpt('memcache_pool_maxsize',
-                   default=10,
-                   help='Max total number of open connections to every'
-                   ' memcached server. (keystone.cache.memcache_pool backend'
-                   ' only).'),
-        cfg.IntOpt('memcache_pool_unused_timeout',
-                   default=60,
-                   help='Number of seconds a connection to memcached is held'
-                   ' unused in the pool before it is closed.'
-                   ' (keystone.cache.memcache_pool backend only).'),
-        cfg.IntOpt('memcache_pool_connection_get_timeout',
-                   default=10,
-                   help='Number of seconds that an operation will wait to get '
-                        'a memcache client connection.'),
-    ],
     'ssl': [
         cfg.StrOpt('ca_key',
                    default='/etc/keystone/ssl/private/cakey.pem',
@@ -400,26 +373,40 @@ FILE_OPTIONS = {
     'signing': [
         cfg.StrOpt('certfile',
                    default=_CERTFILE,
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    help='Path of the certfile for token signing. For '
                         'non-production environments, you may be interested '
                         'in using `keystone-manage pki_setup` to generate '
                         'self-signed certificates.'),
         cfg.StrOpt('keyfile',
                    default=_KEYFILE,
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    help='Path of the keyfile for token signing.'),
         cfg.StrOpt('ca_certs',
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    default='/etc/keystone/ssl/certs/ca.pem',
                    help='Path of the CA for token signing.'),
         cfg.StrOpt('ca_key',
                    default='/etc/keystone/ssl/private/cakey.pem',
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    help='Path of the CA key for token signing.'),
         cfg.IntOpt('key_size', default=2048, min=1024,
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    help='Key size (in bits) for token signing cert '
                         '(auto generated certificate).'),
         cfg.IntOpt('valid_days', default=3650,
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    help='Days the token signing cert is valid for '
                         '(auto generated certificate).'),
         cfg.StrOpt('cert_subject',
+                   deprecated_for_removal=True,
+                   deprecated_reason=_DEPRECATE_PKI_MSG,
                    default=('/C=US/ST=Unset/L=Unset/O=Unset/'
                             'CN=www.example.com'),
                    help='Certificate subject (auto generated certificate) for '
@@ -428,16 +415,21 @@ FILE_OPTIONS = {
     'assignment': [
         cfg.StrOpt('driver',
                    help='Entrypoint for the assignment backend driver in the '
-                        'keystone.assignment namespace. Supplied drivers are '
-                        'ldap and sql. If an assignment driver is not '
+                        'keystone.assignment namespace. Only an SQL driver is '
+                        'supplied. If an assignment driver is not '
                         'specified, the identity driver will choose the '
-                        'assignment driver.'),
+                        'assignment driver (driver selection based on '
+                        '`[identity]/driver` option is deprecated and will be '
+                        'removed in the "O" release).'),
+        cfg.ListOpt('prohibited_implied_role', default=['admin'],
+                    help='A list of role names which are prohibited from '
+                         'being an implied role.'),
     ],
     'resource': [
         cfg.StrOpt('driver',
                    help='Entrypoint for the resource backend driver in the '
-                        'keystone.resource namespace. Supplied drivers are '
-                        'ldap and sql. If a resource driver is not specified, '
+                        'keystone.resource namespace. Only an SQL driver is '
+                        'supplied. If a resource driver is not specified, '
                         'the assignment driver will choose the resource '
                         'driver.'),
         cfg.BoolOpt('caching', default=True,
@@ -455,6 +447,30 @@ FILE_OPTIONS = {
                                                       group='assignment')],
                    help='Maximum number of entities that will be returned '
                         'in a resource collection.'),
+        cfg.StrOpt('admin_project_domain_name',
+                   help='Name of the domain that owns the '
+                        '`admin_project_name`. Defaults to None.'),
+        cfg.StrOpt('admin_project_name',
+                   help='Special project for performing administrative '
+                   'operations on remote services. Tokens scoped to '
+                   'this project will contain the key/value '
+                   '`is_admin_project=true`. Defaults to None.'),
+        cfg.StrOpt('project_name_url_safe',
+                   choices=['off', 'new', 'strict'], default='off',
+                   help='Whether the names of projects are restricted from '
+                        'containing url reserved characters. If set to new, '
+                        'attempts to create or update a project with a url '
+                        'unsafe name will return an error. In addition, if '
+                        'set to strict, attempts to scope a token using '
+                        'an unsafe project name will return an error.'),
+        cfg.StrOpt('domain_name_url_safe',
+                   choices=['off', 'new', 'strict'], default='off',
+                   help='Whether the names of domains are restricted from '
+                        'containing url reserved characters. If set to new, '
+                        'attempts to create or update a domain with a url '
+                        'unsafe name will return an error. In addition, if '
+                        'set to strict, attempts to scope a token using a '
+                        'domain name which is unsafe will return an error.'),
     ],
     'domain_config': [
         cfg.StrOpt('driver',
@@ -496,7 +512,7 @@ FILE_OPTIONS = {
     'oauth1': [
         cfg.StrOpt('driver',
                    default='sql',
-                   help='Entrypoint for hte OAuth backend driver in the '
+                   help='Entrypoint for the OAuth backend driver in the '
                         'keystone.oauth1 namespace.'),
         cfg.IntOpt('request_token_duration', default=28800,
                    help='Duration (in seconds) for the OAuth Request Token.'),
@@ -558,6 +574,8 @@ FILE_OPTIONS = {
     'endpoint_policy': [
         cfg.BoolOpt('enabled',
                     default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason=_DEPRECATE_EP_MSG,
                     help='Enable endpoint_policy functionality.'),
         cfg.StrOpt('driver',
                    default='sql',
@@ -566,7 +584,10 @@ FILE_OPTIONS = {
     ],
     'ldap': [
         cfg.StrOpt('url', default='ldap://localhost',
-                   help='URL for connecting to the LDAP server.'),
+                   help='URL(s) for connecting to the LDAP server. Multiple '
+                        'LDAP URLs may be specified as a comma separated '
+                        'string. The first URL to successfully bind is used '
+                        'for the connection.'),
         cfg.StrOpt('user',
                    help='User BindDN to query the LDAP server.'),
         cfg.StrOpt('password', secret=True,
@@ -618,6 +639,8 @@ FILE_OPTIONS = {
                         'WARNING: must not be a multivalued attribute.'),
         cfg.StrOpt('user_name_attribute', default='sn',
                    help='LDAP attribute mapped to user name.'),
+        cfg.StrOpt('user_description_attribute', default='description',
+                   help='LDAP attribute mapped to user description.'),
         cfg.StrOpt('user_mail_attribute', default='mail',
                    help='LDAP attribute mapped to user email.'),
         cfg.StrOpt('user_pass_attribute', default='userPassword',
@@ -655,10 +678,25 @@ FILE_OPTIONS = {
                    help='LDAP attribute mapped to default_project_id for '
                         'users.'),
         cfg.BoolOpt('user_allow_create', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow user creation in LDAP backend.'),
         cfg.BoolOpt('user_allow_update', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow user updates in LDAP backend.'),
         cfg.BoolOpt('user_allow_delete', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow user deletion in LDAP backend.'),
         cfg.BoolOpt('user_enabled_emulation', default=False,
                     help='If true, Keystone uses an alternative method to '
@@ -679,146 +717,6 @@ FILE_OPTIONS = {
                          'mapping format is <ldap_attr>:<user_attr>, where '
                          'ldap_attr is the attribute in the LDAP entry and '
                          'user_attr is the Identity API attribute.'),
-
-        cfg.StrOpt('project_tree_dn',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_tree_dn', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='Search base for projects. '
-                        'Defaults to the suffix value.'),
-        cfg.StrOpt('project_filter',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_filter', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP search filter for projects.'),
-        cfg.StrOpt('project_objectclass', default='groupOfNames',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_objectclass', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP objectclass for projects.'),
-        cfg.StrOpt('project_id_attribute', default='cn',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_id_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to project id.'),
-        cfg.StrOpt('project_member_attribute', default='member',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_member_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to project membership for '
-                        'user.'),
-        cfg.StrOpt('project_name_attribute', default='ou',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_name_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to project name.'),
-        cfg.StrOpt('project_desc_attribute', default='description',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_desc_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to project description.'),
-        cfg.StrOpt('project_enabled_attribute', default='enabled',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_enabled_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to project enabled.'),
-        cfg.StrOpt('project_domain_id_attribute',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_domain_id_attribute', group='ldap')],
-                   deprecated_for_removal=True,
-                   default='businessCategory',
-                   help='LDAP attribute mapped to project domain_id.'),
-        cfg.ListOpt('project_attribute_ignore', default=[],
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_attribute_ignore', group='ldap')],
-                    deprecated_for_removal=True,
-                    help='List of attributes stripped off the project on '
-                         'update.'),
-        cfg.BoolOpt('project_allow_create', default=True,
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_allow_create', group='ldap')],
-                    deprecated_for_removal=True,
-                    help='Allow project creation in LDAP backend.'),
-        cfg.BoolOpt('project_allow_update', default=True,
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_allow_update', group='ldap')],
-                    deprecated_for_removal=True,
-                    help='Allow project update in LDAP backend.'),
-        cfg.BoolOpt('project_allow_delete', default=True,
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_allow_delete', group='ldap')],
-                    deprecated_for_removal=True,
-                    help='Allow project deletion in LDAP backend.'),
-        cfg.BoolOpt('project_enabled_emulation', default=False,
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_enabled_emulation', group='ldap')],
-                    deprecated_for_removal=True,
-                    help='If true, Keystone uses an alternative method to '
-                         'determine if a project is enabled or not by '
-                         'checking if they are a member of the '
-                         '"project_enabled_emulation_dn" group.'),
-        cfg.StrOpt('project_enabled_emulation_dn',
-                   deprecated_opts=[cfg.DeprecatedOpt(
-                       'tenant_enabled_emulation_dn', group='ldap')],
-                   deprecated_for_removal=True,
-                   help='DN of the group entry to hold enabled projects when '
-                        'using enabled emulation.'),
-        cfg.BoolOpt('project_enabled_emulation_use_group_config',
-                    default=False,
-                    help='Use the "group_member_attribute" and '
-                         '"group_objectclass" settings to determine '
-                         'membership in the emulated enabled group.'),
-        cfg.ListOpt('project_additional_attribute_mapping',
-                    deprecated_opts=[cfg.DeprecatedOpt(
-                        'tenant_additional_attribute_mapping', group='ldap')],
-                    deprecated_for_removal=True,
-                    default=[],
-                    help='Additional attribute mappings for projects. '
-                         'Attribute mapping format is '
-                         '<ldap_attr>:<user_attr>, where ldap_attr is the '
-                         'attribute in the LDAP entry and user_attr is the '
-                         'Identity API attribute.'),
-
-        cfg.StrOpt('role_tree_dn',
-                   deprecated_for_removal=True,
-                   help='Search base for roles. '
-                        'Defaults to the suffix value.'),
-        cfg.StrOpt('role_filter',
-                   deprecated_for_removal=True,
-                   help='LDAP search filter for roles.'),
-        cfg.StrOpt('role_objectclass', default='organizationalRole',
-                   deprecated_for_removal=True,
-                   help='LDAP objectclass for roles.'),
-        cfg.StrOpt('role_id_attribute', default='cn',
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to role id.'),
-        cfg.StrOpt('role_name_attribute', default='ou',
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to role name.'),
-        cfg.StrOpt('role_member_attribute', default='roleOccupant',
-                   deprecated_for_removal=True,
-                   help='LDAP attribute mapped to role membership.'),
-        cfg.ListOpt('role_attribute_ignore', default=[],
-                    deprecated_for_removal=True,
-                    help='List of attributes stripped off the role on '
-                         'update.'),
-        cfg.BoolOpt('role_allow_create', default=True,
-                    deprecated_for_removal=True,
-                    help='Allow role creation in LDAP backend.'),
-        cfg.BoolOpt('role_allow_update', default=True,
-                    deprecated_for_removal=True,
-                    help='Allow role update in LDAP backend.'),
-        cfg.BoolOpt('role_allow_delete', default=True,
-                    deprecated_for_removal=True,
-                    help='Allow role deletion in LDAP backend.'),
-        cfg.ListOpt('role_additional_attribute_mapping',
-                    deprecated_for_removal=True,
-                    default=[],
-                    help='Additional attribute mappings for roles. Attribute '
-                         'mapping format is <ldap_attr>:<user_attr>, where '
-                         'ldap_attr is the attribute in the LDAP entry and '
-                         'user_attr is the Identity API attribute.'),
-
         cfg.StrOpt('group_tree_dn',
                    help='Search base for groups. '
                         'Defaults to the suffix value.'),
@@ -838,10 +736,25 @@ FILE_OPTIONS = {
                     help='List of attributes stripped off the group on '
                          'update.'),
         cfg.BoolOpt('group_allow_create', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow group creation in LDAP backend.'),
         cfg.BoolOpt('group_allow_update', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow group update in LDAP backend.'),
         cfg.BoolOpt('group_allow_delete', default=True,
+                    deprecated_for_removal=True,
+                    deprecated_reason="Write support for Identity LDAP "
+                                      "backends has been deprecated in the M "
+                                      "release and will be removed in the O "
+                                      "release.",
                     help='Allow group deletion in LDAP backend.'),
         cfg.ListOpt('group_additional_attribute_mapping',
                     default=[],
@@ -862,7 +775,7 @@ FILE_OPTIONS = {
                    choices=['demand', 'never', 'allow'],
                    help='Specifies what checks to perform on client '
                         'certificates in an incoming TLS session.'),
-        cfg.BoolOpt('use_pool', default=False,
+        cfg.BoolOpt('use_pool', default=True,
                     help='Enable LDAP connection pooling.'),
         cfg.IntOpt('pool_size', default=10,
                    help='Connection pool size.'),
@@ -876,7 +789,7 @@ FILE_OPTIONS = {
                         'indefinite wait for response.'),
         cfg.IntOpt('pool_connection_lifetime', default=600,
                    help='Connection lifetime in seconds.'),
-        cfg.BoolOpt('use_auth_pool', default=False,
+        cfg.BoolOpt('use_auth_pool', default=True,
                     help='Enable LDAP connection pooling for end user '
                          'authentication. If use_pool is disabled, then this '
                          'setting is meaningless and is not used at all.'),
@@ -884,11 +797,17 @@ FILE_OPTIONS = {
                    help='End user auth connection pool size.'),
         cfg.IntOpt('auth_pool_connection_lifetime', default=60,
                    help='End user auth connection lifetime in seconds.'),
+        cfg.BoolOpt('group_members_are_ids', default=False,
+                    help='If the members of the group objectclass are user '
+                         'IDs rather than DNs, set this to true. This is the '
+                         'case when using posixGroup as the group '
+                         'objectclass and OpenDirectory.'),
     ],
     'auth': [
         cfg.ListOpt('methods', default=_DEFAULT_AUTH_METHODS,
                     help='Allowed authentication methods.'),
-        cfg.StrOpt('password',
+        cfg.StrOpt('password',  # nosec : This is the name of the plugin, not
+                   # a password that needs to be protected.
                    help='Entrypoint for the password auth plugin module in '
                         'the keystone.auth.password namespace.'),
         cfg.StrOpt('token',
@@ -1090,7 +1009,8 @@ FILE_OPTIONS = {
                         'eventlet application. Defaults to number of CPUs '
                         '(minimum of 2).'),
         cfg.StrOpt('public_bind_host',
-                   default='0.0.0.0',
+                   default='0.0.0.0',  # nosec : Bind to all interfaces by
+                   # default for backwards compatibility.
                    deprecated_opts=[cfg.DeprecatedOpt('bind_host',
                                                       group='DEFAULT'),
                                     cfg.DeprecatedOpt('public_bind_host',
@@ -1098,14 +1018,15 @@ FILE_OPTIONS = {
                    deprecated_for_removal=True,
                    help='The IP address of the network interface for the '
                         'public service to listen on.'),
-        cfg.IntOpt('public_port', default=5000, min=1, max=65535,
-                   deprecated_name='public_port',
-                   deprecated_group='DEFAULT',
-                   deprecated_for_removal=True,
-                   help='The port number which the public service listens '
-                        'on.'),
+        cfg.PortOpt('public_port', default=5000,
+                    deprecated_name='public_port',
+                    deprecated_group='DEFAULT',
+                    deprecated_for_removal=True,
+                    help='The port number which the public service listens '
+                         'on.'),
         cfg.StrOpt('admin_bind_host',
-                   default='0.0.0.0',
+                   default='0.0.0.0',  # nosec : Bind to all interfaces by
+                   # default for backwards compatibility.
                    deprecated_opts=[cfg.DeprecatedOpt('bind_host',
                                                       group='DEFAULT'),
                                     cfg.DeprecatedOpt('admin_bind_host',
@@ -1113,21 +1034,21 @@ FILE_OPTIONS = {
                    deprecated_for_removal=True,
                    help='The IP address of the network interface for the '
                         'admin service to listen on.'),
-        cfg.IntOpt('admin_port', default=35357, min=1, max=65535,
-                   deprecated_name='admin_port',
-                   deprecated_group='DEFAULT',
-                   deprecated_for_removal=True,
-                   help='The port number which the admin service listens '
-                        'on.'),
+        cfg.PortOpt('admin_port', default=35357,
+                    deprecated_name='admin_port',
+                    deprecated_group='DEFAULT',
+                    deprecated_for_removal=True,
+                    help='The port number which the admin service listens '
+                         'on.'),
         cfg.BoolOpt('wsgi_keep_alive', default=True,
-                    help="If set to false, disables keepalives on the server; "
-                         "all connections will be closed after serving one "
-                         "request."),
+                    help='If set to false, disables keepalives on the server; '
+                         'all connections will be closed after serving one '
+                         'request.'),
         cfg.IntOpt('client_socket_timeout', default=900,
-                   help="Timeout for socket operations on a client "
-                        "connection. If an incoming connection is idle for "
-                        "this number of seconds it will be closed. A value "
-                        "of '0' means wait forever."),
+                   help='Timeout for socket operations on a client '
+                        'connection. If an incoming connection is idle for '
+                        'this number of seconds it will be closed. A value '
+                        'of "0" means wait forever.'),
         cfg.BoolOpt('tcp_keepalive', default=False,
                     deprecated_name='tcp_keepalive',
                     deprecated_group='DEFAULT',
@@ -1143,7 +1064,7 @@ FILE_OPTIONS = {
                    deprecated_for_removal=True,
                    help='Sets the value of TCP_KEEPIDLE in seconds for each '
                         'server socket. Only applies if tcp_keepalive is '
-                        'true.'),
+                        'true. Ignored if system does not support it.'),
     ],
     'eventlet_server_ssl': [
         cfg.BoolOpt('enable', default=False, deprecated_name='enable',
@@ -1152,7 +1073,7 @@ FILE_OPTIONS = {
                     help='Toggle for SSL support on the Keystone '
                          'eventlet servers.'),
         cfg.StrOpt('certfile',
-                   default="/etc/keystone/ssl/certs/keystone.pem",
+                   default='/etc/keystone/ssl/certs/keystone.pem',
                    deprecated_name='certfile', deprecated_group='ssl',
                    deprecated_for_removal=True,
                    help='Path of the certfile for SSL. For non-production '
@@ -1173,7 +1094,7 @@ FILE_OPTIONS = {
                     deprecated_name='cert_required', deprecated_group='ssl',
                     deprecated_for_removal=True,
                     help='Require client certificate.'),
-    ]
+    ],
 }
 
 
@@ -1195,6 +1116,67 @@ def setup_authentication(conf=None):
             _register_auth_plugin_opt(conf, option)
 
 
+def set_default_for_default_log_levels():
+    """Set the default for the default_log_levels option for keystone.
+
+    Keystone uses some packages that other OpenStack services don't use that do
+    logging. This will set the default_log_levels default level for those
+    packages.
+
+    This function needs to be called before CONF().
+
+    """
+    extra_log_level_defaults = [
+        'dogpile=INFO',
+        'routes=INFO',
+    ]
+
+    log.register_options(CONF)
+    log.set_defaults(default_log_levels=log.get_default_log_levels() +
+                     extra_log_level_defaults)
+
+
+def setup_logging():
+    """Sets up logging for the keystone package."""
+    log.setup(CONF, 'keystone')
+    logging.captureWarnings(True)
+
+
+def find_paste_config():
+    """Find Keystone's paste.deploy configuration file.
+
+    Keystone's paste.deploy configuration file is specified in the
+    ``[paste_deploy]`` section of the main Keystone configuration file,
+    ``keystone.conf``.
+
+    For example::
+
+        [paste_deploy]
+        config_file = keystone-paste.ini
+
+    :returns: The selected configuration filename
+    :raises: exception.ConfigFileNotFound
+
+    """
+    if CONF.paste_deploy.config_file:
+        paste_config = CONF.paste_deploy.config_file
+        paste_config_value = paste_config
+        if not os.path.isabs(paste_config):
+            paste_config = CONF.find_file(paste_config)
+    elif CONF.config_file:
+        paste_config = CONF.config_file[0]
+        paste_config_value = paste_config
+    else:
+        # this provides backwards compatibility for keystone.conf files that
+        # still have the entire paste configuration included, rather than just
+        # a [paste_deploy] configuration section referring to an external file
+        paste_config = CONF.find_file('keystone.conf')
+        paste_config_value = 'keystone.conf'
+    if not paste_config or not os.path.exists(paste_config):
+        raise exception.ConfigFileNotFound(config_file=paste_config_value)
+    return paste_config
+
+
 def configure(conf=None):
     if conf is None:
         conf = CONF
@@ -1206,8 +1188,8 @@ def configure(conf=None):
         cfg.StrOpt('pydev-debug-host',
                    help='Host to connect to for remote debugger.'))
     conf.register_cli_opt(
-        cfg.IntOpt('pydev-debug-port', min=1, max=65535,
-                   help='Port to connect to for remote debugger.'))
+        cfg.PortOpt('pydev-debug-port',
+                    help='Port to connect to for remote debugger.'))
 
     for section in FILE_OPTIONS:
         for option in FILE_OPTIONS[section]:
@@ -1218,6 +1200,8 @@ def configure(conf=None):
 
     # register any non-default auth methods here (used by extensions, etc)
     setup_authentication(conf)
+    # add oslo.cache related config options
+    cache.configure(conf)
 
 
 def list_opts():
@@ -1242,3 +1226,34 @@ def list_opts():
     :returns: a list of (group_name, opts) tuples
     """
     return list(FILE_OPTIONS.items())
+
+
+def set_middleware_defaults():
+    """Update default configuration options for oslo.middleware."""
+    # CORS Defaults
+    # TODO(krotscheck): Update with https://review.openstack.org/#/c/285368/
+    cfg.set_defaults(cors.CORS_OPTS,
+                     allow_headers=['X-Auth-Token',
+                                    'X-Openstack-Request-Id',
+                                    'X-Subject-Token',
+                                    'X-Project-Id',
+                                    'X-Project-Name',
+                                    'X-Project-Domain-Id',
+                                    'X-Project-Domain-Name',
+                                    'X-Domain-Id',
+                                    'X-Domain-Name'],
+                     expose_headers=['X-Auth-Token',
+                                     'X-Openstack-Request-Id',
+                                     'X-Subject-Token'],
+                     allow_methods=['GET',
+                                    'PUT',
+                                    'POST',
+                                    'DELETE',
+                                    'PATCH']
+                     )
+
+
+def set_config_defaults():
+    """Override all configuration default values for keystone."""
+    set_default_for_default_log_levels()
+    set_middleware_defaults()

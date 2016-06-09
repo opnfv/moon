@@ -17,7 +17,7 @@
 This service allows the creation of access/secret credentials used for
 the ec2 interop layer of OpenStack.
 
-A user can create as many access/secret pairs, each of which map to a
+A user can create as many access/secret pairs, each of which is mapped to a
 specific project.  This is required because OpenStack supports a user
 belonging to multiple projects, whereas the signatures created on ec2-style
 requests don't allow specification of which project the user wishes to act
@@ -47,6 +47,8 @@ from keystone.common import wsgi
 from keystone import exception
 from keystone.i18n import _
 
+CRED_TYPE_EC2 = 'ec2'
+
 
 @dependency.requires('assignment_api', 'catalog_api', 'credential_api',
                      'identity_api', 'resource_api', 'role_api',
@@ -75,13 +77,14 @@ class Ec2ControllerCommon(object):
                                         signature):
                     return True
                 raise exception.Unauthorized(
-                    message='Invalid EC2 signature.')
+                    message=_('Invalid EC2 signature.'))
             else:
                 raise exception.Unauthorized(
-                    message='EC2 signature not supplied.')
+                    message=_('EC2 signature not supplied.'))
         # Raise the exception when credentials.get('signature') is None
         else:
-            raise exception.Unauthorized(message='EC2 signature not supplied.')
+            raise exception.Unauthorized(
+                message=_('EC2 signature not supplied.'))
 
     @abc.abstractmethod
     def authenticate(self, context, credentials=None, ec2Credentials=None):
@@ -111,7 +114,6 @@ class Ec2ControllerCommon(object):
 
         :returns: user_ref, tenant_ref, metadata_ref, roles_ref, catalog_ref
         """
-
         # FIXME(ja): validate that a service token was used!
 
         # NOTE(termie): backwards compat hack
@@ -119,7 +121,8 @@ class Ec2ControllerCommon(object):
             credentials = ec2credentials
 
         if 'access' not in credentials:
-            raise exception.Unauthorized(message='EC2 signature not supplied.')
+            raise exception.Unauthorized(
+                message=_('EC2 signature not supplied.'))
 
         creds_ref = self._get_credentials(credentials['access'])
         self.check_signature(creds_ref, credentials)
@@ -152,7 +155,8 @@ class Ec2ControllerCommon(object):
 
         roles = metadata_ref.get('roles', [])
         if not roles:
-            raise exception.Unauthorized(message='User not valid for tenant.')
+            raise exception.Unauthorized(
+                message=_('User not valid for tenant.'))
         roles_ref = [self.role_api.get_role(role_id) for role_id in roles]
 
         catalog_ref = self.catalog_api.get_catalog(
@@ -171,7 +175,6 @@ class Ec2ControllerCommon(object):
         :param tenant_id: id of tenant
         :returns: credential: dict of ec2 credential
         """
-
         self.identity_api.get_user(user_id)
         self.resource_api.get_project(tenant_id)
         trust_id = self._get_trust_id_for_request(context)
@@ -183,7 +186,7 @@ class Ec2ControllerCommon(object):
                     'project_id': tenant_id,
                     'blob': jsonutils.dumps(blob),
                     'id': credential_id,
-                    'type': 'ec2'}
+                    'type': CRED_TYPE_EC2}
         self.credential_api.create_credential(credential_id, cred_ref)
         return {'credential': self._convert_v3_to_ec2_credential(cred_ref)}
 
@@ -193,10 +196,9 @@ class Ec2ControllerCommon(object):
         :param user_id: id of user
         :returns: credentials: list of ec2 credential dicts
         """
-
         self.identity_api.get_user(user_id)
         credential_refs = self.credential_api.list_credentials_for_user(
-            user_id)
+            user_id, type=CRED_TYPE_EC2)
         return {'credentials':
                 [self._convert_v3_to_ec2_credential(credential)
                     for credential in credential_refs]}
@@ -210,7 +212,6 @@ class Ec2ControllerCommon(object):
         :param credential_id: access key for credentials
         :returns: credential: dict of ec2 credential
         """
-
         self.identity_api.get_user(user_id)
         return {'credential': self._get_credentials(credential_id)}
 
@@ -223,7 +224,6 @@ class Ec2ControllerCommon(object):
         :param credential_id: access key for credentials
         :returns: bool: success
         """
-
         self.identity_api.get_user(user_id)
         self._get_credentials(credential_id)
         ec2_credential_id = utils.hash_access_key(credential_id)
@@ -249,20 +249,22 @@ class Ec2ControllerCommon(object):
         """Return credentials from an ID.
 
         :param credential_id: id of credential
-        :raises exception.Unauthorized: when credential id is invalid
+        :raises keystone.exception.Unauthorized: when credential id is invalid
+            or when the credential type is not ec2
         :returns: credential: dict of ec2 credential.
         """
         ec2_credential_id = utils.hash_access_key(credential_id)
-        creds = self.credential_api.get_credential(ec2_credential_id)
-        if not creds:
-            raise exception.Unauthorized(message='EC2 access key not found.')
-        return self._convert_v3_to_ec2_credential(creds)
+        cred = self.credential_api.get_credential(ec2_credential_id)
+        if not cred or cred['type'] != CRED_TYPE_EC2:
+            raise exception.Unauthorized(
+                message=_('EC2 access key not found.'))
+        return self._convert_v3_to_ec2_credential(cred)
 
 
 @dependency.requires('policy_api', 'token_provider_api')
 class Ec2Controller(Ec2ControllerCommon, controller.V2Controller):
 
-    @controller.v2_deprecated
+    @controller.v2_ec2_deprecated
     def authenticate(self, context, credentials=None, ec2Credentials=None):
         (user_ref, tenant_ref, metadata_ref, roles_ref,
          catalog_ref) = self._authenticate(credentials=credentials,
@@ -282,27 +284,27 @@ class Ec2Controller(Ec2ControllerCommon, controller.V2Controller):
             auth_token_data, roles_ref, catalog_ref)
         return token_data
 
-    @controller.v2_deprecated
+    @controller.v2_ec2_deprecated
     def get_credential(self, context, user_id, credential_id):
         if not self._is_admin(context):
             self._assert_identity(context, user_id)
         return super(Ec2Controller, self).get_credential(user_id,
                                                          credential_id)
 
-    @controller.v2_deprecated
+    @controller.v2_ec2_deprecated
     def get_credentials(self, context, user_id):
         if not self._is_admin(context):
             self._assert_identity(context, user_id)
         return super(Ec2Controller, self).get_credentials(user_id)
 
-    @controller.v2_deprecated
+    @controller.v2_ec2_deprecated
     def create_credential(self, context, user_id, tenant_id):
         if not self._is_admin(context):
             self._assert_identity(context, user_id)
         return super(Ec2Controller, self).create_credential(context, user_id,
                                                             tenant_id)
 
-    @controller.v2_deprecated
+    @controller.v2_ec2_deprecated
     def delete_credential(self, context, user_id, credential_id):
         if not self._is_admin(context):
             self._assert_identity(context, user_id)
@@ -315,7 +317,7 @@ class Ec2Controller(Ec2ControllerCommon, controller.V2Controller):
 
         :param context: standard context
         :param user_id: id of user
-        :raises exception.Forbidden: when token is invalid
+        :raises keystone.exception.Forbidden: when token is invalid
 
         """
         token_ref = utils.get_token_ref(context)
@@ -343,7 +345,7 @@ class Ec2Controller(Ec2ControllerCommon, controller.V2Controller):
 
         :param user_id: expected credential owner
         :param credential_id: id of credential object
-        :raises exception.Forbidden: on failure
+        :raises keystone.exception.Forbidden: on failure
 
         """
         ec2_credential_id = utils.hash_access_key(credential_id)

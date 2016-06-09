@@ -325,7 +325,7 @@ class ConfigurationManager(manager.Manager):
 
     @enforce("read", "sub_meta_rule_algorithms")
     def get_sub_meta_rule_algorithm_id_from_name(self, sub_meta_rule_algorithm_name):
-        sub_meta_rule_algorithms_dict = self.driver.get_sub_meta_rule_algorithms_dict()
+        sub_meta_rule_algorithms_dict = self.configuration_api.get_sub_meta_rule_algorithms_dict()
         for sub_meta_rule_algorithm_id in sub_meta_rule_algorithms_dict:
             if sub_meta_rule_algorithms_dict[sub_meta_rule_algorithm_id]['name'] == sub_meta_rule_algorithm_name:
                 return sub_meta_rule_algorithm_id
@@ -1218,6 +1218,7 @@ class IntraExtensionManager(manager.Manager):
         ie_dict["genre"] = "admin"
         ie_dict["description"] = "policy_root"
         ref = self.driver.set_intra_extension_dict(ie_dict['id'], ie_dict)
+        logging.debug("Creation of root IE: {}".format(ref))
         self.moonlog_api.debug("Creation of root IE: {}".format(ref))
 
         # read the template given by "model" and populate default variables
@@ -2025,6 +2026,8 @@ class IntraExtensionManager(manager.Manager):
     @enforce(("read", "write"), "sub_meta_rules")
     @enforce("write", "rules")
     def add_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_dict):
+        LOG.info("add_sub_meta_rule_dict = {}".format(self.driver.get_sub_meta_rules_dict(intra_extension_id)))
+        LOG.info("add_sub_meta_rule_dict = {}".format(sub_meta_rule_dict))
         sub_meta_rules_dict = self.driver.get_sub_meta_rules_dict(intra_extension_id)
         for _sub_meta_rule_id in sub_meta_rules_dict:
             if sub_meta_rule_dict['name'] == sub_meta_rules_dict[_sub_meta_rule_id]["name"]:
@@ -2065,6 +2068,8 @@ class IntraExtensionManager(manager.Manager):
     @enforce(("read", "write"), "sub_meta_rules")
     @enforce("write", "rules")
     def set_sub_meta_rule_dict(self, user_id, intra_extension_id, sub_meta_rule_id, sub_meta_rule_dict):
+        LOG.info("set_sub_meta_rule_dict = {}".format(self.driver.get_sub_meta_rules_dict(intra_extension_id)))
+        LOG.info("set_sub_meta_rule_dict = {} {}".format(sub_meta_rule_id, sub_meta_rule_dict))
         if sub_meta_rule_id not in self.driver.get_sub_meta_rules_dict(intra_extension_id):
             raise SubMetaRuleUnknown()
         for attribute in sub_meta_rule_dict.keys():

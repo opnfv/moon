@@ -90,14 +90,19 @@ configure ``federation``.
 Configure authentication drivers in ``keystone.conf``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. NOTE::
+    ``saml2`` has been deprecated as of the Mitaka release. Support for the
+    ``saml2`` wrapper will be removed as of the "O" release. The recommended authentication method
+    is ``mapped``, which supports ``saml2``.
+
 Add the authentication methods to the ``[auth]`` section in ``keystone.conf``.
 Names should be equal to protocol names added via Identity API v3. Here we use
-examples ``saml2`` and ``openid``.
+examples ``mapped`` and ``openid``.
 
 .. code-block:: bash
 
        [auth]
-       methods = external,password,token,saml2,openid
+       methods = external,password,token,mapped,openid
 
 Create keystone groups and assign roles
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,7 +187,7 @@ issue an HTTP POST request with authentication data in the request body. To
 start federated authentication a user must access the dedicated URL with
 Identity Provider's and Protocol's identifiers stored within a protected URL.
 The URL has a format of:
-``/v3/OS-FEDERATION/identity_providers/{identity_provider}/protocols/{protocol}/auth``.
+``/v3/OS-FEDERATION/identity_providers/{idp_id}/protocols/{protocol_id}/auth``.
 
 In this instance we follow a standard SAML2 authentication procedure, that is,
 the user will be redirected to the Identity Provider's authentication webpage
@@ -207,7 +212,7 @@ SAML authentication procedure.
 
 .. code-block:: bash
 
-    $ curl -X GET -D - http://localhost:5000/v3/OS-FEDERATION/identity_providers/{identity_provider}/protocols/{protocol}/auth
+    $ curl -X GET -D - http://localhost:5000/v3/OS-FEDERATION/identity_providers/{idp_id}/protocols/{protocol_id}/auth
 
 Determine accessible resources
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,7 +256,7 @@ Example cURL
 
 .. code-block:: bash
 
-    $ curl -X POST -H "Content-Type: application/json" -d '{"auth":{"identity":{"methods":["saml2"],"saml2":{"id":"<unscoped_token_id>"}},"scope":{"project":{"domain": {"name": "Default"},"name":"service"}}}}' -D - http://localhost:5000/v3/auth/tokens
+    $ curl -X POST -H "Content-Type: application/json" -d '{"auth":{"identity":{"methods":["mapped"],"saml2":{"id":"<unscoped_token_id>"}},"scope":{"project":{"domain": {"name": "Default"},"name":"service"}}}}' -D - http://localhost:5000/v3/auth/tokens
 
 --------------------------------------
 Keystone as an Identity Provider (IdP)
@@ -332,7 +337,7 @@ Create a Service Provider (SP)
 ------------------------------
 
 In this example we are creating a new Service Provider with an ID of ``BETA``,
-a ``sp_url`` of ``http://beta.example.com/Shibboleth.sso/POST/ECP`` and a
+a ``sp_url`` of ``http://beta.example.com/Shibboleth.sso/SAML2/ECP`` and a
 ``auth_url`` of ``http://beta.example.com:5000/v3/OS-FEDERATION/identity_providers/beta/protocols/saml2/auth``
 . The ``sp_url`` will be used when creating a SAML assertion for ``BETA`` and
 signed by the current keystone IdP. The ``auth_url`` is used to retrieve the
@@ -345,8 +350,8 @@ field is optional we are passing it set to ``true`` otherwise it will be set to
     $ curl -s -X PUT \
       -H "X-Auth-Token: $OS_TOKEN" \
       -H "Content-Type: application/json" \
-      -d '{"service_provider": {"auth_url": "http://beta.example.com:5000/v3/OS-FEDERATION/identity_providers/beta/protocols/saml2/auth", "sp_url": "https://example.com:5000/Shibboleth.sso/SAML2/ECP", "enabled": true}' \
-      http://localhost:5000/v3/service_providers/BETA | python -mjson.tool
+      -d '{"service_provider": {"auth_url": "http://beta.example.com:5000/v3/OS-FEDERATION/identity_providers/beta/protocols/saml2/auth", "sp_url": "https://example.com:5000/Shibboleth.sso/SAML2/ECP", "enabled": true}}' \
+      http://localhost:5000/v3/OS-FEDERATION/service_providers/BETA | python -mjson.tool
 
 Testing it all out
 ------------------

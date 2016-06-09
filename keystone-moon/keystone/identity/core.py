@@ -17,18 +17,21 @@
 import abc
 import functools
 import os
+import threading
 import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 import six
 
+from keystone import assignment  # TODO(lbragstad): Decouple this dependency
 from keystone.common import cache
 from keystone.common import clean
+from keystone.common import config
 from keystone.common import dependency
 from keystone.common import driver_hints
 from keystone.common import manager
-from keystone import config
 from keystone import exception
 from keystone.i18n import _, _LW
 from keystone.identity.mapping_backends import mapping
@@ -39,7 +42,7 @@ CONF = cfg.CONF
 
 LOG = log.getLogger(__name__)
 
-MEMOIZE = cache.get_memoization_decorator(section='identity')
+MEMOIZE = cache.get_memoization_decorator(group='identity')
 
 DOMAIN_CONF_FHEAD = 'keystone.'
 DOMAIN_CONF_FTAIL = '.conf'
@@ -70,7 +73,8 @@ def filter_user(user_ref):
         try:
             user_ref['extra'].pop('password', None)
             user_ref['extra'].pop('tenants', None)
-        except KeyError:
+        except KeyError:  # nosec
+            # ok to not have extra in the user_ref.
             pass
     return user_ref
 
@@ -92,43 +96,33 @@ class DomainConfigs(dict):
     the identity manager and driver can use.
 
     """
+
     configured = False
     driver = None
     _any_sql = False
+    lock = threading.Lock()
 
     def _load_driver(self, domain_config):
         return manager.load_driver(Manager.driver_namespace,
                                    domain_config['cfg'].identity.driver,
                                    domain_config['cfg'])
 
-    def _assert_no_more_than_one_sql_driver(self, domain_id, new_config,
-                                            config_file=None):
-        """Ensure there is no more than one sql driver.
-
-        Check to see if the addition of the driver in this new config
-        would cause there to now be more than one sql driver.
-
-        If we are loading from configuration files, the config_file will hold
-        the name of the file we have just loaded.
-
-        """
-        if (new_config['driver'].is_sql and
-                (self.driver.is_sql or self._any_sql)):
-            # The addition of this driver would cause us to have more than
-            # one sql driver, so raise an exception.
-
-            # TODO(henry-nash): This method is only used in the file-based
-            # case, so has no need to worry about the database/API case. The
-            # code that overrides config_file below is therefore never used
-            # and should be removed, and this method perhaps moved inside
-            # _load_config_from_file(). This is raised as bug #1466772.
-
-            if not config_file:
-                config_file = _('Database at /domains/%s/config') % domain_id
-            raise exception.MultipleSQLDriversInConfig(source=config_file)
-        self._any_sql = self._any_sql or new_config['driver'].is_sql
-
     def _load_config_from_file(self, resource_api, file_list, domain_name):
+
+        def _assert_no_more_than_one_sql_driver(domain_id, new_config,
+                                                config_file):
+            """Ensure there is no more than one sql driver.
+
+            Check to see if the addition of the driver in this new config
+            would cause there to be more than one sql driver.
+
+            """
+            if (new_config['driver'].is_sql and
+                    (self.driver.is_sql or self._any_sql)):
+                # The addition of this driver would cause us to have more than
+                # one sql driver, so raise an exception.
+                raise exception.MultipleSQLDriversInConfig(source=config_file)
+            self._any_sql = self._any_sql or new_config['driver'].is_sql
 
         try:
             domain_ref = resource_api.get_domain_by_name(domain_name)
@@ -149,9 +143,9 @@ class DomainConfigs(dict):
         domain_config['cfg'](args=[], project='keystone',
                              default_config_files=file_list)
         domain_config['driver'] = self._load_driver(domain_config)
-        self._assert_no_more_than_one_sql_driver(domain_ref['id'],
-                                                 domain_config,
-                                                 config_file=file_list)
+        _assert_no_more_than_one_sql_driver(domain_ref['id'],
+                                            domain_config,
+                                            file_list)
         self[domain_ref['id']] = domain_config
 
     def _setup_domain_drivers_from_files(self, standard_driver, resource_api):
@@ -275,7 +269,7 @@ class DomainConfigs(dict):
             # being able to find who has it...either we were very very very
             # unlucky or something is awry.
             msg = _('Exceeded attempts to register domain %(domain)s to use '
-                    'the SQL driver, the last  domain that appears to have '
+                    'the SQL driver, the last domain that appears to have '
                     'had it is %(last_domain)s, giving up') % {
                         'domain': domain_id, 'last_domain': domain_registered}
             raise exception.UnexpectedError(msg)
@@ -322,7 +316,6 @@ class DomainConfigs(dict):
 
     def setup_domain_drivers(self, standard_driver, resource_api):
         # This is called by the api call wrapper
-        self.configured = True
         self.driver = standard_driver
 
         if CONF.identity.domain_configurations_from_database:
@@ -331,6 +324,7 @@ class DomainConfigs(dict):
         else:
             self._setup_domain_drivers_from_files(standard_driver,
                                                   resource_api)
+        self.configured = True
 
     def get_domain_driver(self, domain_id):
         self.check_config_and_reload_domain_driver_if_required(domain_id)
@@ -404,7 +398,7 @@ class DomainConfigs(dict):
             # specific driver for this domain.
             try:
                 del self[domain_id]
-            except KeyError:
+            except KeyError:  # nosec
                 # Allow this error in case we are unlucky and in a
                 # multi-threaded situation, two threads happen to be running
                 # in lock step.
@@ -428,15 +422,20 @@ def domains_configured(f):
     def wrapper(self, *args, **kwargs):
         if (not self.domain_configs.configured and
                 CONF.identity.domain_specific_drivers_enabled):
-            self.domain_configs.setup_domain_drivers(
-                self.driver, self.resource_api)
+            # If domain specific driver has not been configured, acquire the
+            # lock and proceed with loading the driver.
+            with self.domain_configs.lock:
+                # Check again just in case some other thread has already
+                # completed domain config.
+                if not self.domain_configs.configured:
+                    self.domain_configs.setup_domain_drivers(
+                        self.driver, self.resource_api)
         return f(self, *args, **kwargs)
     return wrapper
 
 
 def exception_translated(exception_type):
     """Wraps API calls to map to correct exception."""
-
     def _exception_translated(f):
         @functools.wraps(f)
         def wrapper(self, *args, **kwargs):
@@ -458,7 +457,7 @@ def exception_translated(exception_type):
 @notifications.listener
 @dependency.provider('identity_api')
 @dependency.requires('assignment_api', 'credential_api', 'id_mapping_api',
-                     'resource_api', 'revoke_api')
+                     'resource_api', 'revoke_api', 'shadow_users_api')
 class Manager(manager.Manager):
     """Default pivot point for the Identity backend.
 
@@ -710,7 +709,7 @@ class Manager(manager.Manager):
 
         Use the mapping table to look up the domain, driver and local entity
         that is represented by the provided public ID.  Handle the situations
-        were we do not use the mapping (e.g. single driver that understands
+        where we do not use the mapping (e.g. single driver that understands
         UUIDs etc.)
 
         """
@@ -799,6 +798,41 @@ class Manager(manager.Manager):
                 not hints.get_exact_filter_by_name('domain_id')):
             hints.add_filter('domain_id', domain_id)
 
+    def _set_list_limit_in_hints(self, hints, driver):
+        """Set list limit in hints from driver
+
+        If a hints list is provided, the wrapper will insert the relevant
+        limit into the hints so that the underlying driver call can try and
+        honor it. If the driver does truncate the response, it will update the
+        'truncated' attribute in the 'limit' entry in the hints list, which
+        enables the caller of this function to know if truncation has taken
+        place. If, however, the driver layer is unable to perform truncation,
+        the 'limit' entry is simply left in the hints list for the caller to
+        handle.
+
+        A _get_list_limit() method is required to be present in the object
+        class hierarchy, which returns the limit for this backend to which
+        we will truncate.
+
+        If a hints list is not provided in the arguments of the wrapped call
+        then any limits set in the config file are ignored.  This allows
+        internal use of such wrapped methods where the entire data set is
+        needed as input for the calculations of some other API (e.g. get role
+        assignments for a given project).
+
+        This method, specific to identity manager, is used instead of more
+        general response_truncated, because the limit for identity entities
+        can be overriden in domain-specific config files. The driver to use
+        is determined during processing of the passed parameters and
+        response_truncated is designed to set the limit before any processing.
+        """
+        if hints is None:
+            return
+
+        list_limit = driver._get_list_limit()
+        if list_limit:
+            hints.set_limit(list_limit)
+
     # The actual driver calls - these are pre/post processed here as
     # part of the Manager layer to make sure we:
     #
@@ -869,11 +903,11 @@ class Manager(manager.Manager):
         return self._set_domain_id_and_mapping(
             ref, domain_id, driver, mapping.EntityType.USER)
 
-    @manager.response_truncated
     @domains_configured
     @exception_translated('user')
     def list_users(self, domain_scope=None, hints=None):
         driver = self._select_identity_driver(domain_scope)
+        self._set_list_limit_in_hints(hints, driver)
         hints = hints or driver_hints.Hints()
         if driver.is_domain_aware():
             # Force the domain_scope into the hint to ensure that we only get
@@ -887,6 +921,14 @@ class Manager(manager.Manager):
         return self._set_domain_id_and_mapping(
             ref_list, domain_scope, driver, mapping.EntityType.USER)
 
+    def _check_update_of_domain_id(self, new_domain, old_domain):
+        if new_domain != old_domain:
+            versionutils.report_deprecated_feature(
+                LOG,
+                _('update of domain_id is deprecated as of Mitaka '
+                    'and will be removed in O.')
+            )
+
     @domains_configured
     @exception_translated('user')
     def update_user(self, user_id, user_ref, initiator=None):
@@ -897,6 +939,8 @@ class Manager(manager.Manager):
         if 'enabled' in user:
             user['enabled'] = clean.user_enabled(user['enabled'])
         if 'domain_id' in user:
+            self._check_update_of_domain_id(user['domain_id'],
+                                            old_user_ref['domain_id'])
             self.resource_api.get_domain(user['domain_id'])
         if 'id' in user:
             if user_id != user['id']:
@@ -940,6 +984,10 @@ class Manager(manager.Manager):
         self.credential_api.delete_credentials_for_user(user_id)
         self.id_mapping_api.delete_id_mapping(user_id)
         notifications.Audit.deleted(self._USER, user_id, initiator)
+
+        # Invalidate user role assignments cache region, as it may be caching
+        # role assignments where the actor is the specified user
+        assignment.COMPUTED_ASSIGNMENTS_REGION.invalidate()
 
     @domains_configured
     @exception_translated('group')
@@ -986,6 +1034,9 @@ class Manager(manager.Manager):
     @exception_translated('group')
     def update_group(self, group_id, group, initiator=None):
         if 'domain_id' in group:
+            old_group_ref = self.get_group(group_id)
+            self._check_update_of_domain_id(group['domain_id'],
+                                            old_group_ref['domain_id'])
             self.resource_api.get_domain(group['domain_id'])
         domain_id, driver, entity_id = (
             self._get_domain_driver_and_entity_id(group_id))
@@ -1012,9 +1063,13 @@ class Manager(manager.Manager):
         for uid in user_ids:
             self.emit_invalidate_user_token_persistence(uid)
 
+        # Invalidate user role assignments cache region, as it may be caching
+        # role assignments expanded from the specified group to its users
+        assignment.COMPUTED_ASSIGNMENTS_REGION.invalidate()
+
     @domains_configured
     @exception_translated('group')
-    def add_user_to_group(self, user_id, group_id):
+    def add_user_to_group(self, user_id, group_id, initiator=None):
         @exception_translated('user')
         def get_entity_info_for_user(public_id):
             return self._get_domain_driver_and_entity_id(public_id)
@@ -1031,9 +1086,15 @@ class Manager(manager.Manager):
 
         group_driver.add_user_to_group(user_entity_id, group_entity_id)
 
+        # Invalidate user role assignments cache region, as it may now need to
+        # include role assignments from the specified group to its users
+        assignment.COMPUTED_ASSIGNMENTS_REGION.invalidate()
+        notifications.Audit.added_to(self._GROUP, group_id, self._USER,
+                                     user_id, initiator)
+
     @domains_configured
     @exception_translated('group')
-    def remove_user_from_group(self, user_id, group_id):
+    def remove_user_from_group(self, user_id, group_id, initiator=None):
         @exception_translated('user')
         def get_entity_info_for_user(public_id):
             return self._get_domain_driver_and_entity_id(public_id)
@@ -1051,7 +1112,12 @@ class Manager(manager.Manager):
         group_driver.remove_user_from_group(user_entity_id, group_entity_id)
         self.emit_invalidate_user_token_persistence(user_id)
 
-    @notifications.internal(notifications.INVALIDATE_USER_TOKEN_PERSISTENCE)
+        # Invalidate user role assignments cache region, as it may be caching
+        # role assignments expanded from this group to this user
+        assignment.COMPUTED_ASSIGNMENTS_REGION.invalidate()
+        notifications.Audit.removed_from(self._GROUP, group_id, self._USER,
+                                         user_id, initiator)
+
     def emit_invalidate_user_token_persistence(self, user_id):
         """Emit a notification to the callback system to revoke user tokens.
 
@@ -1061,10 +1127,10 @@ class Manager(manager.Manager):
         :param user_id: user identifier
         :type user_id: string
         """
-        pass
+        notifications.Audit.internal(
+            notifications.INVALIDATE_USER_TOKEN_PERSISTENCE, user_id
+        )
 
-    @notifications.internal(
-        notifications.INVALIDATE_USER_PROJECT_TOKEN_PERSISTENCE)
     def emit_invalidate_grant_token_persistence(self, user_project):
         """Emit a notification to the callback system to revoke grant tokens.
 
@@ -1074,14 +1140,17 @@ class Manager(manager.Manager):
         :param user_project: {'user_id': user_id, 'project_id': project_id}
         :type user_project: dict
         """
-        pass
+        notifications.Audit.internal(
+            notifications.INVALIDATE_USER_PROJECT_TOKEN_PERSISTENCE,
+            user_project
+        )
 
-    @manager.response_truncated
     @domains_configured
     @exception_translated('user')
     def list_groups_for_user(self, user_id, hints=None):
         domain_id, driver, entity_id = (
             self._get_domain_driver_and_entity_id(user_id))
+        self._set_list_limit_in_hints(hints, driver)
         hints = hints or driver_hints.Hints()
         if not driver.is_domain_aware():
             # We are effectively satisfying any domain_id filter by the above
@@ -1091,11 +1160,11 @@ class Manager(manager.Manager):
         return self._set_domain_id_and_mapping(
             ref_list, domain_id, driver, mapping.EntityType.GROUP)
 
-    @manager.response_truncated
     @domains_configured
     @exception_translated('group')
     def list_groups(self, domain_scope=None, hints=None):
         driver = self._select_identity_driver(domain_scope)
+        self._set_list_limit_in_hints(hints, driver)
         hints = hints or driver_hints.Hints()
         if driver.is_domain_aware():
             # Force the domain_scope into the hint to ensure that we only get
@@ -1109,12 +1178,12 @@ class Manager(manager.Manager):
         return self._set_domain_id_and_mapping(
             ref_list, domain_scope, driver, mapping.EntityType.GROUP)
 
-    @manager.response_truncated
     @domains_configured
     @exception_translated('group')
     def list_users_in_group(self, group_id, hints=None):
         domain_id, driver, entity_id = (
             self._get_domain_driver_and_entity_id(group_id))
+        self._set_list_limit_in_hints(hints, driver)
         hints = hints or driver_hints.Hints()
         if not driver.is_domain_aware():
             # We are effectively satisfying any domain_id filter by the above
@@ -1154,17 +1223,61 @@ class Manager(manager.Manager):
         update_dict = {'password': new_password}
         self.update_user(user_id, update_dict)
 
+    @MEMOIZE
+    def shadow_federated_user(self, idp_id, protocol_id, unique_id,
+                              display_name):
+        """Shadows a federated user by mapping to a user.
+
+        :param idp_id: identity provider id
+        :param protocol_id: protocol id
+        :param unique_id: unique id for the user within the IdP
+        :param display_name: user's display name
+
+        :returns: dictionary of the mapped User entity
+        """
+        user_dict = {}
+        try:
+            self.shadow_users_api.update_federated_user_display_name(
+                idp_id, protocol_id, unique_id, display_name)
+            user_dict = self.shadow_users_api.get_federated_user(
+                idp_id, protocol_id, unique_id)
+        except exception.UserNotFound:
+            federated_dict = {
+                'idp_id': idp_id,
+                'protocol_id': protocol_id,
+                'unique_id': unique_id,
+                'display_name': display_name
+            }
+            user_dict = self.shadow_users_api.create_federated_user(
+                federated_dict)
+        return user_dict
+
 
 @six.add_metaclass(abc.ABCMeta)
 class IdentityDriverV8(object):
     """Interface description for an Identity driver."""
 
+    def _get_conf(self):
+        try:
+            return self.conf or CONF
+        except AttributeError:
+            return CONF
+
     def _get_list_limit(self):
-        return CONF.identity.list_limit or CONF.list_limit
+        conf = self._get_conf()
+        # use list_limit from domain-specific config. If list_limit in
+        # domain-specific config is not set, look it up in the default config
+        return (conf.identity.list_limit or conf.list_limit or
+                CONF.identity.list_limit or CONF.list_limit)
 
     def is_domain_aware(self):
         """Indicates if Driver supports domains."""
         return True
+
+    def default_assignment_driver(self):
+        # TODO(morganfainberg): To be removed when assignment driver based
+        # upon [identity]/driver option is removed in the "O" release.
+        return 'sql'
 
     @property
     def is_sql(self):
@@ -1183,8 +1296,9 @@ class IdentityDriverV8(object):
     @abc.abstractmethod
     def authenticate(self, user_id, password):
         """Authenticate a given user and password.
+
         :returns: user_ref
-        :raises: AssertionError
+        :raises AssertionError: If user or password is invalid.
         """
         raise exception.NotImplemented()  # pragma: no cover
 
@@ -1194,7 +1308,7 @@ class IdentityDriverV8(object):
     def create_user(self, user_id, user):
         """Creates a new user.
 
-        :raises: keystone.exception.Conflict
+        :raises keystone.exception.Conflict: If a duplicate user exists.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1229,7 +1343,7 @@ class IdentityDriverV8(object):
         """Get a user by ID.
 
         :returns: user_ref
-        :raises: keystone.exception.UserNotFound
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1238,8 +1352,8 @@ class IdentityDriverV8(object):
     def update_user(self, user_id, user):
         """Updates an existing user.
 
-        :raises: keystone.exception.UserNotFound,
-                 keystone.exception.Conflict
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
+        :raises keystone.exception.Conflict: If a duplicate user exists.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1248,8 +1362,8 @@ class IdentityDriverV8(object):
     def add_user_to_group(self, user_id, group_id):
         """Adds a user to a group.
 
-        :raises: keystone.exception.UserNotFound,
-                 keystone.exception.GroupNotFound
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1258,8 +1372,8 @@ class IdentityDriverV8(object):
     def check_user_in_group(self, user_id, group_id):
         """Checks if a user is a member of a group.
 
-        :raises: keystone.exception.UserNotFound,
-                 keystone.exception.GroupNotFound
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1268,7 +1382,7 @@ class IdentityDriverV8(object):
     def remove_user_from_group(self, user_id, group_id):
         """Removes a user from a group.
 
-        :raises: keystone.exception.NotFound
+        :raises keystone.exception.NotFound: If the entity not found.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1277,7 +1391,7 @@ class IdentityDriverV8(object):
     def delete_user(self, user_id):
         """Deletes an existing user.
 
-        :raises: keystone.exception.UserNotFound
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1287,7 +1401,7 @@ class IdentityDriverV8(object):
         """Get a user by name.
 
         :returns: user_ref
-        :raises: keystone.exception.UserNotFound
+        :raises keystone.exception.UserNotFound: If the user doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1298,7 +1412,7 @@ class IdentityDriverV8(object):
     def create_group(self, group_id, group):
         """Creates a new group.
 
-        :raises: keystone.exception.Conflict
+        :raises keystone.exception.Conflict: If a duplicate group exists.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1333,7 +1447,7 @@ class IdentityDriverV8(object):
         """Get a group by ID.
 
         :returns: group_ref
-        :raises: keystone.exception.GroupNotFound
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1343,7 +1457,7 @@ class IdentityDriverV8(object):
         """Get a group by name.
 
         :returns: group_ref
-        :raises: keystone.exception.GroupNotFound
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1352,8 +1466,8 @@ class IdentityDriverV8(object):
     def update_group(self, group_id, group):
         """Updates an existing group.
 
-        :raises: keystone.exceptionGroupNotFound,
-                 keystone.exception.Conflict
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
+        :raises keystone.exception.Conflict: If a duplicate group exists.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1362,7 +1476,7 @@ class IdentityDriverV8(object):
     def delete_group(self, group_id):
         """Deletes an existing group.
 
-        :raises: keystone.exception.GroupNotFound
+        :raises keystone.exception.GroupNotFound: If the group doesn't exist.
 
         """
         raise exception.NotImplemented()  # pragma: no cover
@@ -1446,3 +1560,54 @@ class MappingDriverV8(object):
 
 
 MappingDriver = manager.create_legacy_driver(MappingDriverV8)
+
+
+@dependency.provider('shadow_users_api')
+class ShadowUsersManager(manager.Manager):
+    """Default pivot point for the Shadow Users backend."""
+
+    driver_namespace = 'keystone.identity.shadow_users'
+
+    def __init__(self):
+        super(ShadowUsersManager, self).__init__(CONF.shadow_users.driver)
+
+
+@six.add_metaclass(abc.ABCMeta)
+class ShadowUsersDriverV9(object):
+    """Interface description for an Shadow Users driver."""
+
+    @abc.abstractmethod
+    def create_federated_user(self, federated_dict):
+        """Create a new user with the federated identity
+
+        :param dict federated_dict: Reference to the federated user
+        :param user_id: user ID for linking to the federated identity
+        :returns dict: Containing the user reference
+
+        """
+        raise exception.NotImplemented()
+
+    @abc.abstractmethod
+    def get_federated_user(self, idp_id, protocol_id, unique_id):
+        """Returns the found user for the federated identity
+
+        :param idp_id: The identity provider ID
+        :param protocol_id: The federation protocol ID
+        :param unique_id: The unique ID for the user
+        :returns dict: Containing the user reference
+
+        """
+        raise exception.NotImplemented()
+
+    @abc.abstractmethod
+    def update_federated_user_display_name(self, idp_id, protocol_id,
+                                           unique_id, display_name):
+        """Updates federated user's display name if changed
+
+        :param idp_id: The identity provider ID
+        :param protocol_id: The federation protocol ID
+        :param unique_id: The unique ID for the user
+        :param display_name: The user's display name
+
+        """
+        raise exception.NotImplemented()

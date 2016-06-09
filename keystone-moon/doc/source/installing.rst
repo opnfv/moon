@@ -21,7 +21,7 @@ Installing Keystone
 
 This document describes how to install Keystone in order to use it. If you are
 intending to develop on or with Keystone, please read :doc:`developing` and
-:doc:`setup`.
+:doc:`devref/development.environment`.
 
 Installing from Source
 ----------------------
@@ -49,7 +49,14 @@ Install the Keystone web service:
 
 .. code-block:: bash
 
-    $ python setup.py install
+    $ pip install .
+
+.. NOTE::
+
+    This step is guaranteed to fail if you do not have the proper binary
+    dependencies already installed on your development system. Maintaining a
+    list of platform-specific dependencies is outside the scope of this
+    documentation, but is within scope of DEVSTACK_.
 
 You should have all the pieces you need to run Keystone installed on your
 system. The following commands should be available on the command-line path:
@@ -92,8 +99,7 @@ bash script called `lib/keystone`_
 Installing from packages: Ubuntu
 --------------------------------
 
-Ubuntu is providing packages for Keystone for Precise. To install keystone
-on Ubuntu:
+To install keystone on Ubuntu:
 
 .. code-block:: bash
 
@@ -101,9 +107,8 @@ on Ubuntu:
 
 In using Ubuntu's packages, the packages will set up a user account for
 the Keystone service (`keystone`), and place default configurations in
-``/etc/keystone``. The Debian installer will also ask you about configuration
-options for setting up and running Keystone. As of this writing, the defaults
-for Keystone backends are all SQL based, stored locally in a SQLite.
+``/etc/keystone``. As of this writing, the defaults for Keystone backends are
+all SQL based, stored locally in SQLite.
 
 Once installed, you still need to initialize data in Keystone, which you can
 find described in :doc:`configuringservices`.
@@ -123,4 +128,4 @@ To install the packages:
 Once installed, you still need to initialize data in Keystone, which you can
 find described in :doc:`configuringservices`.
 
-.. _`OpenStack Install Guide`: http://docs.openstack.org/juno/install-guide/install/yum/content/keystone-install.html
+.. _`OpenStack Install Guide`: http://docs.openstack.org/liberty/install-guide-rdo/keystone-install.html

@@ -20,6 +20,7 @@
 
 import copy
 import itertools
+import re
 import wsgiref.util
 
 from oslo_config import cfg
@@ -71,9 +72,6 @@ def validate_token_bind(context, token_ref):
     # permissive and strict modes don't require there to be a bind
     permissive = bind_mode in ('permissive', 'strict')
 
-    # get the named mode if bind_mode is not one of the known
-    name = None if permissive or bind_mode == 'required' else bind_mode
-
     if not bind:
         if permissive:
             # no bind provided and none required
@@ -81,6 +79,9 @@ def validate_token_bind(context, token_ref):
         else:
             LOG.info(_LI("No bind information present in token"))
             raise exception.Unauthorized()
+
+    # get the named mode if bind_mode is not one of the known
+    name = None if permissive or bind_mode == 'required' else bind_mode
 
     if name and name not in bind:
         LOG.info(_LI("Named bind mode %s not in bind information"), name)
@@ -112,10 +113,11 @@ def validate_token_bind(context, token_ref):
 
 
 def best_match_language(req):
-    """Determines the best available locale from the Accept-Language
-    HTTP header passed in the request.
-    """
+    """Determines the best available locale.
 
+    This returns best available locale based on the Accept-Language HTTP
+    header passed in the request.
+    """
     if not req.accept_language:
         return None
     return req.accept_language.best_match(
@@ -208,8 +210,7 @@ class Application(BaseApplication):
 
         context['headers'] = dict(req.headers.items())
         context['path'] = req.environ['PATH_INFO']
-        scheme = (None if not CONF.secure_proxy_ssl_header
-                  else req.environ.get(CONF.secure_proxy_ssl_header))
+        scheme = req.environ.get(CONF.secure_proxy_ssl_header)
         if scheme:
             # NOTE(andrey-mp): "wsgi.url_scheme" contains the protocol used
             # before the proxy removed it ('https' usually). So if
@@ -305,7 +306,6 @@ class Application(BaseApplication):
             does not have the admin role
 
         """
-
         if not context['is_admin']:
             user_token_ref = utils.get_token_ref(context)
 
@@ -329,9 +329,7 @@ class Application(BaseApplication):
             self.policy_api.enforce(creds, 'admin_required', {})
 
     def _attribute_is_empty(self, ref, attribute):
-        """Returns true if the attribute in the given ref (which is a
-        dict) is empty or None.
-        """
+        """Determine if the attribute in ref is empty or None."""
         return ref.get(attribute) is None or ref.get(attribute) == ''
 
     def _require_attribute(self, ref, attribute):
@@ -378,13 +376,19 @@ class Application(BaseApplication):
                 itertools.chain(CONF.items(), CONF.eventlet_server.items()))
 
             url = url % substitutions
+        elif 'environment' in context:
+            url = wsgiref.util.application_uri(context['environment'])
+            # remove version from the URL as it may be part of SCRIPT_NAME but
+            # it should not be part of base URL
+            url = re.sub(r'/v(3|(2\.0))/*$', '', url)
+
+            # now remove the standard port
+            url = utils.remove_standard_port(url)
         else:
-            # NOTE(jamielennox): if url is not set via the config file we
-            # should set it relative to the url that the user used to get here
-            # so as not to mess with version discovery. This is not perfect.
-            # host_url omits the path prefix, but there isn't another good
-            # solution that will work for all urls.
-            url = context['host_url']
+            # if we don't have enough information to come up with a base URL,
+            # then fall back to localhost. This should never happen in
+            # production environment.
+            url = 'http://localhost:%d' % CONF.eventlet_server.public_port
 
         return url.rstrip('/')
 
@@ -400,32 +404,10 @@ class Middleware(Application):
     """
 
     @classmethod
-    def factory(cls, global_config, **local_config):
-        """Used for paste app factories in paste.deploy config files.
-
-        Any local configuration (that is, values under the [filter:APPNAME]
-        section of the paste config) will be passed into the `__init__` method
-        as kwargs.
-
-        A hypothetical configuration would look like:
-
-            [filter:analytics]
-            redis_host = 127.0.0.1
-            paste.filter_factory = keystone.analytics:Analytics.factory
-
-        which would result in a call to the `Analytics` class as
-
-            import keystone.analytics
-            keystone.analytics.Analytics(app, redis_host='127.0.0.1')
-
-        You could of course re-implement the `factory` method in subclasses,
-        but using the kwarg passing it shouldn't be necessary.
-
-        """
+    def factory(cls, global_config):
+        """Used for paste app factories in paste.deploy config files."""
         def _factory(app):
-            conf = global_config.copy()
-            conf.update(local_config)
-            return cls(app, **local_config)
+            return cls(app)
         return _factory
 
     def __init__(self, application):
@@ -601,6 +583,7 @@ class ExtensionRouter(Router):
 
     Expects to be subclassed.
     """
+
     def __init__(self, application, mapper=None):
         if mapper is None:
             mapper = routes.Mapper()
@@ -737,8 +720,8 @@ class V3ExtensionRouter(ExtensionRouter, RoutersBase):
 
         response_data = jsonutils.loads(response.body)
         self._update_version_response(response_data)
-        response.body = jsonutils.dumps(response_data,
-                                        cls=utils.SmarterEncoder)
+        response.body = jsonutils.dump_as_bytes(response_data,
+                                                cls=utils.SmarterEncoder)
         return response
 
 
@@ -751,7 +734,7 @@ def render_response(body=None, status=None, headers=None, method=None):
     headers.append(('Vary', 'X-Auth-Token'))
 
     if body is None:
-        body = ''
+        body = b''
         status = status or (204, 'No Content')
     else:
         content_types = [v for h, v in headers if h == 'Content-Type']
@@ -761,10 +744,40 @@ def render_response(body=None, status=None, headers=None, method=None):
             content_type = None
 
         if content_type is None or content_type in JSON_ENCODE_CONTENT_TYPES:
-            body = jsonutils.dumps(body, cls=utils.SmarterEncoder)
+            body = jsonutils.dump_as_bytes(body, cls=utils.SmarterEncoder)
             if content_type is None:
                 headers.append(('Content-Type', 'application/json'))
         status = status or (200, 'OK')
+
+    # NOTE(davechen): `mod_wsgi` follows the standards from pep-3333 and
+    # requires the value in response header to be binary type(str) on python2,
+    # unicode based string(str) on python3, or else keystone will not work
+    # under apache with `mod_wsgi`.
+    # keystone needs to check the data type of each header and convert the
+    # type if needed.
+    # see bug:
+    # https://bugs.launchpad.net/keystone/+bug/1528981
+    # see pep-3333:
+    # https://www.python.org/dev/peps/pep-3333/#a-note-on-string-types
+    # see source from mod_wsgi:
+    # https://github.com/GrahamDumpleton/mod_wsgi(methods:
+    # wsgi_convert_headers_to_bytes(...), wsgi_convert_string_to_bytes(...)
+    # and wsgi_validate_header_value(...)).
+    def _convert_to_str(headers):
+        str_headers = []
+        for header in headers:
+            str_header = []
+            for value in header:
+                if not isinstance(value, str):
+                    str_header.append(str(value))
+                else:
+                    str_header.append(value)
+            # convert the list to the immutable tuple to build the headers.
+            # header's key/value will be guaranteed to be str type.
+            str_headers.append(tuple(str_header))
+        return str_headers
+
+    headers = _convert_to_str(headers)
 
     resp = webob.Response(body=body,
                           status='%s %s' % status,
@@ -789,7 +802,6 @@ def render_response(body=None, status=None, headers=None, method=None):
 
 def render_exception(error, context=None, request=None, user_locale=None):
     """Forms a WSGI response based on the current error."""
-
     error_message = error.args[0]
     message = oslo_i18n.translate(error_message, desired_locale=user_locale)
     if message is error_message:
@@ -806,18 +818,15 @@ def render_exception(error, context=None, request=None, user_locale=None):
     if isinstance(error, exception.AuthPluginException):
         body['error']['identity'] = error.authentication
     elif isinstance(error, exception.Unauthorized):
-        url = CONF.public_endpoint
-        if not url:
-            if request:
-                context = {'host_url': request.host_url}
-            if context:
-                url = Application.base_url(context, 'public')
-            else:
-                url = 'http://localhost:%d' % CONF.eventlet_server.public_port
-        else:
-            substitutions = dict(
-                itertools.chain(CONF.items(), CONF.eventlet_server.items()))
-            url = url % substitutions
+        # NOTE(gyee): we only care about the request environment in the
+        # context. Also, its OK to pass the environemt as it is read-only in
+        # Application.base_url()
+        local_context = {}
+        if request:
+            local_context = {'environment': request.environ}
+        elif context and 'environment' in context:
+            local_context = {'environment': context['environment']}
+        url = Application.base_url(local_context, 'public')
 
         headers.append(('WWW-Authenticate', 'Keystone uri="%s"' % url))
     return render_response(status=(error.code, error.title),

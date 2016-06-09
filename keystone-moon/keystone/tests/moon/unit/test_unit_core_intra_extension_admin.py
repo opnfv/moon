@@ -65,7 +65,7 @@ class TestIntraExtensionAdminManagerOK(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAdminManagerOK, self).config_overrides()
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')
@@ -989,7 +989,7 @@ class TestIntraExtensionAdminManagerKO(tests.TestCase):
 
     def config_overrides(self):
         super(TestIntraExtensionAdminManagerKO, self).config_overrides()
-        self.policy_directory = 'examples/moon/policies'
+        self.policy_directory = '/etc/keystone/policies'
         self.config_fixture.config(
             group='moon',
             intraextension_driver='keystone.contrib.moon.backends.sql.IntraExtensionConnector')

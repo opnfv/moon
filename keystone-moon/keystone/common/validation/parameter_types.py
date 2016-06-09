@@ -43,6 +43,13 @@ id_string = {
     'pattern': '^[a-zA-Z0-9-]+$'
 }
 
+mapping_id_string = {
+    'type': 'string',
+    'minLength': 1,
+    'maxLength': 64,
+    'pattern': '^[a-zA-Z0-9-_]+$'
+}
+
 description = {
     'type': 'string'
 }
@@ -54,7 +61,7 @@ url = {
     # NOTE(edmondsw): we could do more to validate per various RFCs, but
     # decision was made to err on the side of leniency. The following is based
     # on rfc1738 section 2.1
-    'pattern': '[a-zA-Z0-9+.-]+:.+'
+    'pattern': '^[a-zA-Z0-9+.-]+:.+'
 }
 
 email = {

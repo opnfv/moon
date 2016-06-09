@@ -12,26 +12,21 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from oslo_log import log
 from oslo_utils import timeutils
 
 from keystone import auth
 from keystone.common import controller
 from keystone.common import dependency
-from keystone.contrib.oauth1 import core as oauth
-from keystone.contrib.oauth1 import validator
 from keystone import exception
 from keystone.i18n import _
-
-
-LOG = log.getLogger(__name__)
+from keystone.oauth1 import core as oauth
+from keystone.oauth1 import validator
 
 
 @dependency.requires('oauth_api')
 class OAuth(auth.AuthMethodHandler):
     def authenticate(self, context, auth_info, auth_context):
         """Turn a signed request with an access key into a keystone token."""
-
         headers = context['headers']
         oauth_headers = oauth.get_oauth_headers(headers)
         access_token_id = oauth_headers.get('oauth_token')

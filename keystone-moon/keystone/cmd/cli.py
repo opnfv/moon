@@ -16,20 +16,25 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import os
+import sys
+import uuid
 
 from oslo_config import cfg
 from oslo_log import log
+from oslo_log import versionutils
 from oslo_serialization import jsonutils
 import pbr.version
 
+from keystone.common import config
 from keystone.common import driver_hints
 from keystone.common import openssl
 from keystone.common import sql
 from keystone.common.sql import migration_helpers
 from keystone.common import utils
-from keystone import config
 from keystone import exception
-from keystone.i18n import _, _LW
+from keystone.federation import idp
+from keystone.federation import utils as mapping_engine
+from keystone.i18n import _, _LW, _LI
 from keystone.server import backends
 from keystone import token
 
@@ -47,6 +52,295 @@ class BaseApp(object):
         parser = subparsers.add_parser(cls.name, help=cls.__doc__)
         parser.set_defaults(cmd_class=cls)
         return parser
+
+
+class BootStrap(BaseApp):
+    """Perform the basic bootstrap process"""
+
+    name = "bootstrap"
+
+    def __init__(self):
+        self.load_backends()
+        self.project_id = uuid.uuid4().hex
+        self.role_id = uuid.uuid4().hex
+        self.service_id = None
+        self.service_name = None
+        self.username = None
+        self.project_name = None
+        self.role_name = None
+        self.password = None
+        self.public_url = None
+        self.internal_url = None
+        self.admin_url = None
+        self.region_id = None
+        self.endpoints = {}
+
+    @classmethod
+    def add_argument_parser(cls, subparsers):
+        parser = super(BootStrap, cls).add_argument_parser(subparsers)
+        parser.add_argument('--bootstrap-username', default='admin',
+                            metavar='OS_BOOTSTRAP_USERNAME',
+                            help=('The username of the initial keystone '
+                                  'user during bootstrap process.'))
+        # NOTE(morganfainberg): See below for ENV Variable that can be used
+        # in lieu of the command-line arguments.
+        parser.add_argument('--bootstrap-password', default=None,
+                            metavar='OS_BOOTSTRAP_PASSWORD',
+                            help='The bootstrap user password')
+        parser.add_argument('--bootstrap-project-name', default='admin',
+                            metavar='OS_BOOTSTRAP_PROJECT_NAME',
+                            help=('The initial project created during the '
+                                  'keystone bootstrap process.'))
+        parser.add_argument('--bootstrap-role-name', default='admin',
+                            metavar='OS_BOOTSTRAP_ROLE_NAME',
+                            help=('The initial role-name created during the '
+                                  'keystone bootstrap process.'))
+        parser.add_argument('--bootstrap-service-name', default='keystone',
+                            metavar='OS_BOOTSTRAP_SERVICE_NAME',
+                            help=('The initial name for the initial identity '
+                                  'service created during the keystone '
+                                  'bootstrap process.'))
+        parser.add_argument('--bootstrap-admin-url',
+                            metavar='OS_BOOTSTRAP_ADMIN_URL',
+                            help=('The initial identity admin url created '
+                                  'during the keystone bootstrap process. '
+                                  'e.g. http://127.0.0.1:35357/v2.0'))
+        parser.add_argument('--bootstrap-public-url',
+                            metavar='OS_BOOTSTRAP_PUBLIC_URL',
+                            help=('The initial identity public url created '
+                                  'during the keystone bootstrap process. '
+                                  'e.g. http://127.0.0.1:5000/v2.0'))
+        parser.add_argument('--bootstrap-internal-url',
+                            metavar='OS_BOOTSTRAP_INTERNAL_URL',
+                            help=('The initial identity internal url created '
+                                  'during the keystone bootstrap process. '
+                                  'e.g. http://127.0.0.1:5000/v2.0'))
+        parser.add_argument('--bootstrap-region-id',
+                            metavar='OS_BOOTSTRAP_REGION_ID',
+                            help=('The initial region_id endpoints will be '
+                                  'placed in during the keystone bootstrap '
+                                  'process.'))
+        return parser
+
+    def load_backends(self):
+        drivers = backends.load_backends()
+        self.resource_manager = drivers['resource_api']
+        self.identity_manager = drivers['identity_api']
+        self.assignment_manager = drivers['assignment_api']
+        self.catalog_manager = drivers['catalog_api']
+        self.role_manager = drivers['role_api']
+
+    def _get_config(self):
+        self.username = (
+            os.environ.get('OS_BOOTSTRAP_USERNAME') or
+            CONF.command.bootstrap_username)
+        self.project_name = (
+            os.environ.get('OS_BOOTSTRAP_PROJECT_NAME') or
+            CONF.command.bootstrap_project_name)
+        self.role_name = (
+            os.environ.get('OS_BOOTSTRAP_ROLE_NAME') or
+            CONF.command.bootstrap_role_name)
+        self.password = (
+            os.environ.get('OS_BOOTSTRAP_PASSWORD') or
+            CONF.command.bootstrap_password)
+        self.service_name = (
+            os.environ.get('OS_BOOTSTRAP_SERVICE_NAME') or
+            CONF.command.bootstrap_service_name)
+        self.admin_url = (
+            os.environ.get('OS_BOOTSTRAP_ADMIN_URL') or
+            CONF.command.bootstrap_admin_url)
+        self.public_url = (
+            os.environ.get('OS_BOOTSTRAP_PUBLIC_URL') or
+            CONF.command.bootstrap_public_url)
+        self.internal_url = (
+            os.environ.get('OS_BOOTSTRAP_INTERNAL_URL') or
+            CONF.command.bootstrap_internal_url)
+        self.region_id = (
+            os.environ.get('OS_BOOTSTRAP_REGION_ID') or
+            CONF.command.bootstrap_region_id)
+
+    def do_bootstrap(self):
+        """Perform the bootstrap actions.
+
+        Create bootstrap user, project, and role so that CMS, humans, or
+        scripts can continue to perform initial setup (domains, projects,
+        services, endpoints, etc) of Keystone when standing up a new
+        deployment.
+        """
+        self._get_config()
+
+        if self.password is None:
+            print(_('Either --bootstrap-password argument or '
+                    'OS_BOOTSTRAP_PASSWORD must be set.'))
+            raise ValueError
+
+        # NOTE(morganfainberg): Ensure the default domain is in-fact created
+        default_domain = {
+            'id': CONF.identity.default_domain_id,
+            'name': 'Default',
+            'enabled': True,
+            'description': 'The default domain'
+        }
+        try:
+            self.resource_manager.create_domain(
+                domain_id=default_domain['id'],
+                domain=default_domain)
+            LOG.info(_LI('Created domain %s'), default_domain['id'])
+        except exception.Conflict:
+            # NOTE(morganfainberg): Domain already exists, continue on.
+            LOG.info(_LI('Domain %s already exists, skipping creation.'),
+                     default_domain['id'])
+
+        try:
+            self.resource_manager.create_project(
+                project_id=self.project_id,
+                project={'enabled': True,
+                         'id': self.project_id,
+                         'domain_id': default_domain['id'],
+                         'description': 'Bootstrap project for initializing '
+                                        'the cloud.',
+                         'name': self.project_name}
+            )
+            LOG.info(_LI('Created project %s'), self.project_name)
+        except exception.Conflict:
+            LOG.info(_LI('Project %s already exists, skipping creation.'),
+                     self.project_name)
+            project = self.resource_manager.get_project_by_name(
+                self.project_name, default_domain['id'])
+            self.project_id = project['id']
+
+        # NOTE(morganfainberg): Do not create the user if it already exists.
+        try:
+            user = self.identity_manager.get_user_by_name(self.username,
+                                                          default_domain['id'])
+            LOG.info(_LI('User %s already exists, skipping creation.'),
+                     self.username)
+        except exception.UserNotFound:
+            user = self.identity_manager.create_user(
+                user_ref={'name': self.username,
+                          'enabled': True,
+                          'domain_id': default_domain['id'],
+                          'password': self.password
+                          }
+            )
+            LOG.info(_LI('Created user %s'), self.username)
+
+        # NOTE(morganfainberg): Do not create the role if it already exists.
+        try:
+            self.role_manager.create_role(
+                role_id=self.role_id,
+                role={'name': self.role_name,
+                      'id': self.role_id},
+            )
+            LOG.info(_LI('Created Role %s'), self.role_name)
+        except exception.Conflict:
+            LOG.info(_LI('Role %s exists, skipping creation.'), self.role_name)
+            # NOTE(davechen): There is no backend method to get the role
+            # by name, so build the hints to list the roles and filter by
+            # name instead.
+            hints = driver_hints.Hints()
+            hints.add_filter('name', self.role_name)
+            role = self.role_manager.list_roles(hints)
+            self.role_id = role[0]['id']
+
+        # NOTE(morganfainberg): Handle the case that the role assignment has
+        # already occurred.
+        try:
+            self.assignment_manager.add_role_to_user_and_project(
+                user_id=user['id'],
+                tenant_id=self.project_id,
+                role_id=self.role_id
+            )
+            LOG.info(_LI('Granted %(role)s on %(project)s to user'
+                         ' %(username)s.'),
+                     {'role': self.role_name,
+                      'project': self.project_name,
+                      'username': self.username})
+        except exception.Conflict:
+            LOG.info(_LI('User %(username)s already has %(role)s on '
+                         '%(project)s.'),
+                     {'username': self.username,
+                      'role': self.role_name,
+                      'project': self.project_name})
+
+        if self.region_id:
+            try:
+                self.catalog_manager.create_region(
+                    region_ref={'id': self.region_id}
+                )
+                LOG.info(_LI('Created Region %s'), self.region_id)
+            except exception.Conflict:
+                LOG.info(_LI('Region %s exists, skipping creation.'),
+                         self.region_id)
+
+        if self.public_url or self.admin_url or self.internal_url:
+            hints = driver_hints.Hints()
+            hints.add_filter('type', 'identity')
+            services = self.catalog_manager.list_services(hints)
+
+            if services:
+                service_ref = services[0]
+
+                hints = driver_hints.Hints()
+                hints.add_filter('service_id', service_ref['id'])
+                if self.region_id:
+                    hints.add_filter('region_id', self.region_id)
+
+                endpoints = self.catalog_manager.list_endpoints(hints)
+            else:
+                service_ref = {'id': uuid.uuid4().hex,
+                               'name': self.service_name,
+                               'type': 'identity',
+                               'enabled': True}
+
+                self.catalog_manager.create_service(
+                    service_id=service_ref['id'],
+                    service_ref=service_ref)
+
+                endpoints = []
+
+            self.service_id = service_ref['id']
+
+            available_interfaces = {e['interface']: e for e in endpoints}
+            expected_endpoints = {'public': self.public_url,
+                                  'internal': self.internal_url,
+                                  'admin': self.admin_url}
+
+            for interface, url in expected_endpoints.items():
+                if not url:
+                    # not specified to bootstrap command
+                    continue
+
+                try:
+                    endpoint_ref = available_interfaces[interface]
+                except KeyError:
+                    endpoint_ref = {'id': uuid.uuid4().hex,
+                                    'interface': interface,
+                                    'url': url,
+                                    'service_id': self.service_id,
+                                    'enabled': True}
+
+                    if self.region_id:
+                        endpoint_ref['region_id'] = self.region_id
+
+                    self.catalog_manager.create_endpoint(
+                        endpoint_id=endpoint_ref['id'],
+                        endpoint_ref=endpoint_ref)
+
+                    LOG.info(_LI('Created %(interface)s endpoint %(url)s'),
+                             {'interface': interface, 'url': url})
+                else:
+                    # NOTE(jamielennox): electing not to update existing
+                    # endpoints here. There may be call to do so in future.
+                    LOG.info(_LI('Skipping %s endpoint as already created'),
+                             interface)
+
+                self.endpoints[interface] = endpoint_ref['id']
+
+    @classmethod
+    def main(cls):
+        klass = cls()
+        klass.do_bootstrap()
 
 
 class DbSync(BaseApp):
@@ -148,15 +442,21 @@ class PKISetup(BaseCertificateSetup):
     """Set up Key pairs and certificates for token signing and verification.
 
     This is NOT intended for production use, see Keystone Configuration
-    documentation for details.
+    documentation for details. As of the Mitaka release, this command has
+    been DEPRECATED and may be removed in the 'O' release.
     """
 
     name = 'pki_setup'
 
     @classmethod
     def main(cls):
-        LOG.warn(_LW('keystone-manage pki_setup is not recommended for '
-                     'production use.'))
+        versionutils.report_deprecated_feature(
+            LOG,
+            _LW("keystone-manage pki_setup is deprecated as of Mitaka in "
+                "favor of not using PKI tokens and may be removed in 'O' "
+                "release."))
+        LOG.warning(_LW('keystone-manage pki_setup is not recommended for '
+                        'production use.'))
         keystone_user_id, keystone_group_id = cls.get_user_group()
         conf_pki = openssl.ConfigurePKI(keystone_user_id, keystone_group_id,
                                         rebuild=CONF.command.rebuild)
@@ -174,8 +474,8 @@ class SSLSetup(BaseCertificateSetup):
 
     @classmethod
     def main(cls):
-        LOG.warn(_LW('keystone-manage ssl_setup is not recommended for '
-                     'production use.'))
+        LOG.warning(_LW('keystone-manage ssl_setup is not recommended for '
+                        'production use.'))
         keystone_user_id, keystone_group_id = cls.get_user_group()
         conf_ssl = openssl.ConfigureSSL(keystone_user_id, keystone_group_id,
                                         rebuild=CONF.command.rebuild)
@@ -199,7 +499,7 @@ class FernetSetup(BasePermissionsSetup):
 
         keystone_user_id, keystone_group_id = cls.get_user_group()
         fernet.create_key_directory(keystone_user_id, keystone_group_id)
-        if fernet.validate_key_repository():
+        if fernet.validate_key_repository(requires_write=True):
             fernet.initialize_key_repository(
                 keystone_user_id, keystone_group_id)
 
@@ -229,7 +529,7 @@ class FernetRotate(BasePermissionsSetup):
         from keystone.token.providers.fernet import utils as fernet
 
         keystone_user_id, keystone_group_id = cls.get_user_group()
-        if fernet.validate_key_repository():
+        if fernet.validate_key_repository(requires_write=True):
             fernet.rotate_keys(keystone_user_id, keystone_group_id)
 
 
@@ -271,7 +571,7 @@ class MappingPurge(BaseApp):
     @staticmethod
     def main():
         def validate_options():
-            # NOTE(henry-nash); It would be nice to use the argparse automated
+            # NOTE(henry-nash): It would be nice to use the argparse automated
             # checking for this validation, but the only way I can see doing
             # that is to make the default (i.e. if no optional parameters
             # are specified) to purge all mappings - and that sounds too
@@ -328,11 +628,35 @@ DOMAIN_CONF_FHEAD = 'keystone.'
 DOMAIN_CONF_FTAIL = '.conf'
 
 
+def _domain_config_finder(conf_dir):
+    """Return a generator of all domain config files found in a directory.
+
+    Donmain configs match the filename pattern of
+    'keystone.<domain_name>.conf'.
+
+    :returns: generator yeilding (filename, domain_name) tuples
+    """
+    LOG.info(_LI('Scanning %r for domain config files'), conf_dir)
+    for r, d, f in os.walk(conf_dir):
+        for fname in f:
+            if (fname.startswith(DOMAIN_CONF_FHEAD) and
+                    fname.endswith(DOMAIN_CONF_FTAIL)):
+                if fname.count('.') >= 2:
+                    domain_name = fname[len(DOMAIN_CONF_FHEAD):
+                                        -len(DOMAIN_CONF_FTAIL)]
+                    yield (os.path.join(r, fname), domain_name)
+                    continue
+
+            LOG.warning(_LW('Ignoring file (%s) while scanning '
+                            'domain config directory'), fname)
+
+
 class DomainConfigUploadFiles(object):
 
-    def __init__(self):
+    def __init__(self, domain_config_finder=_domain_config_finder):
         super(DomainConfigUploadFiles, self).__init__()
         self.load_backends()
+        self._domain_config_finder = domain_config_finder
 
     def load_backends(self):
         drivers = backends.load_backends()
@@ -368,11 +692,10 @@ class DomainConfigUploadFiles(object):
         :param file_name: the file containing the config options
         :param domain_name: the domain name
 
-        :raises: ValueError: the domain does not exist or already has domain
-                             specific configurations defined
-        :raises: Exceptions from oslo config: there is an issue with options
-                                              defined in the config file or its
-                                              format
+        :raises ValueError: the domain does not exist or already has domain
+            specific configurations defined.
+        :raises Exceptions from oslo config: there is an issue with options
+            defined in the config file or its format.
 
         The caller of this method should catch the errors raised and handle
         appropriately in order that the best UX experience can be provided for
@@ -428,7 +751,7 @@ class DomainConfigUploadFiles(object):
         """
         try:
             self.upload_config_to_database(file_name, domain_name)
-        except ValueError:
+        except ValueError:  # nosec
             # We've already given all the info we can in a message, so carry
             # on to the next one
             pass
@@ -467,21 +790,8 @@ class DomainConfigUploadFiles(object):
                 os.path.join(conf_dir, fname), domain_name)
             return
 
-        # Request is to transfer all config files, so let's read all the
-        # files in the config directory, and transfer those that match the
-        # filename pattern of 'keystone.<domain_name>.conf'
-        for r, d, f in os.walk(conf_dir):
-            for fname in f:
-                if (fname.startswith(DOMAIN_CONF_FHEAD) and
-                        fname.endswith(DOMAIN_CONF_FTAIL)):
-                    if fname.count('.') >= 2:
-                        self.upload_configs_to_database(
-                            os.path.join(r, fname),
-                            fname[len(DOMAIN_CONF_FHEAD):
-                                  -len(DOMAIN_CONF_FTAIL)])
-                    else:
-                        LOG.warn(_LW('Ignoring file (%s) while scanning '
-                                     'domain config directory'), fname)
+        for filename, domain_name in self._domain_config_finder(conf_dir):
+            self.upload_configs_to_database(filename, domain_name)
 
     def run(self):
         # First off, let's just check we can talk to the domain database
@@ -528,7 +838,7 @@ class DomainConfigUpload(BaseApp):
         dcu = DomainConfigUploadFiles()
         status = dcu.run()
         if status is not None:
-            exit(status)
+            sys.exit(status)
 
 
 class SamlIdentityProviderMetadata(BaseApp):
@@ -538,9 +848,6 @@ class SamlIdentityProviderMetadata(BaseApp):
 
     @staticmethod
     def main():
-        # NOTE(marek-denis): Since federation is currently an extension import
-        # corresponding modules only when they are really going to be used.
-        from keystone.contrib.federation import idp
         metadata = idp.MetadataGenerator().generate_metadata()
         print(metadata.to_string())
 
@@ -598,7 +905,6 @@ class MappingEngineTester(BaseApp):
 
     @classmethod
     def main(cls):
-        from keystone.contrib.federation import utils as mapping_engine
         if not CONF.command.engine_debug:
             mapping_engine.LOG.logger.setLevel('WARN')
 
@@ -644,6 +950,7 @@ class MappingEngineTester(BaseApp):
 
 
 CMDS = [
+    BootStrap,
     DbSync,
     DbVersion,
     DomainConfigUpload,

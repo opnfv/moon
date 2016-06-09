@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
 # a copy of the License at
@@ -463,6 +465,30 @@ MAPPING_TESTER_REGEX = {
     ]
 }
 
+
+MAPPING_DIRECT_MAPPING_THROUGH_KEYWORD = {
+    "rules": [
+        {
+            "local": [
+                {
+                    "user": "{0}"
+                },
+                {
+                    "group": TESTER_GROUP_ID
+                }
+            ],
+            "remote": [
+                {
+                    "type": "UserName",
+                    "any_one_of": [
+                        "bwilliams"
+                    ]
+                }
+            ]
+        }
+    ]
+}
+
 MAPPING_DEVELOPER_REGEX = {
     "rules": [
         {
@@ -760,7 +786,7 @@ MAPPING_GROUPS_BLACKLIST = {
     ]
 }
 
-# Excercise all possibilities of user identitfication. Values are hardcoded on
+# Exercise all possibilities of user identification. Values are hardcoded on
 # purpose.
 MAPPING_USER_IDS = {
     "rules": [
@@ -1036,6 +1062,78 @@ MAPPING_WITH_DOMAINID_ONLY = {
     ]
 }
 
+MAPPING_GROUPS_IDS_WHITELIST = {
+    "rules": [
+        {
+            "local": [
+                {
+                    "user": {
+                        "name": "{0}"
+                    }
+                },
+                {
+                    "group_ids": "{1}"
+                },
+                {
+                    "group": {
+                        "id": "{2}"
+                    }
+                }
+            ],
+            "remote": [
+                {
+                    "type": "name"
+                },
+                {
+                    "type": "group_ids",
+                    "whitelist": [
+                        "abc123", "ghi789", "321cba"
+                    ]
+                },
+                {
+                    "type": "group"
+                }
+            ]
+        }
+    ]
+}
+
+MAPPING_GROUPS_IDS_BLACKLIST = {
+    "rules": [
+        {
+            "local": [
+                {
+                    "user": {
+                        "name": "{0}"
+                    }
+                },
+                {
+                    "group_ids": "{1}"
+                },
+                {
+                    "group": {
+                        "id": "{2}"
+                    }
+                }
+            ],
+            "remote": [
+                {
+                    "type": "name"
+                },
+                {
+                    "type": "group_ids",
+                    "blacklist": [
+                        "def456"
+                    ]
+                },
+                {
+                    "type": "group"
+                }
+            ]
+        }
+    ]
+}
+
 # Mapping used by tokenless test cases, it maps the domain_name only.
 MAPPING_WITH_DOMAINNAME_ONLY = {
     'rules': [
@@ -1184,6 +1282,26 @@ MAPPING_GROUPS_WHITELIST_PASS_THROUGH = {
     ]
 }
 
+MAPPING_BAD_LOCAL_SETUP = {
+    "rules": [
+        {
+            "local": [
+                {
+                    "user": {
+                        "name": "{0}",
+                        "domain": {"id": "default"}
+                    },
+                    "whatisthis": "local"
+                }
+            ],
+            "remote": [
+                {
+                    "type": "UserName"
+                }
+            ]
+        }
+    ]
+}
 
 EMPLOYEE_ASSERTION = {
     'Email': 'tim@example.com',
@@ -1309,4 +1427,60 @@ ANOTHER_LOCAL_USER_ASSERTION = {
 UNMATCHED_GROUP_ASSERTION = {
     'REMOTE_USER': 'Any Momoose',
     'REMOTE_USER_GROUPS': 'EXISTS;NO_EXISTS'
+}
+
+GROUP_IDS_ASSERTION = {
+    'name': 'opilotte',
+    'group_ids': 'abc123;def456;ghi789',
+    'group': 'klm012'
+}
+
+GROUP_IDS_ASSERTION_ONLY_ONE_GROUP = {
+    'name': 'opilotte',
+    'group_ids': '321cba',
+    'group': '210mlk'
+}
+
+UNICODE_NAME_ASSERTION = {
+    'PFX_Email': 'jon@example.com',
+    'PFX_UserName': 'jonkare',
+    'PFX_FirstName': 'Jon Kåre',
+    'PFX_LastName': 'Hellån',
+    'PFX_orgPersonType': 'Admin;Chief'
+}
+
+MAPPING_UNICODE = {
+    "rules": [
+        {
+            "local": [
+                {
+                    "user": {
+                        "name": "{0} {1}",
+                        "email": "{2}"
+                    },
+                    "group": {
+                        "id": EMPLOYEE_GROUP_ID
+                    }
+                }
+            ],
+            "remote": [
+                {
+                    "type": "PFX_FirstName"
+                },
+                {
+                    "type": "PFX_LastName"
+                },
+                {
+                    "type": "PFX_Email"
+                },
+                {
+                    "type": "PFX_orgPersonType",
+                    "any_one_of": [
+                        "Admin",
+                        "Big Cheese"
+                    ]
+                }
+            ]
+        },
+    ],
 }

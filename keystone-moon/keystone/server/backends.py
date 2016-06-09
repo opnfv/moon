@@ -14,15 +14,14 @@ from keystone import assignment
 from keystone import auth
 from keystone import catalog
 from keystone.common import cache
-from keystone.contrib import endpoint_filter
-from keystone.contrib import federation
-from keystone.contrib import oauth1
-from keystone.contrib import revoke
 from keystone import credential
 from keystone import endpoint_policy
+from keystone import federation
 from keystone import identity
+from keystone import oauth1
 from keystone import policy
 from keystone import resource
+from keystone import revoke
 from keystone import token
 from keystone import trust
 
@@ -30,12 +29,23 @@ from keystone import trust
 def load_backends():
 
     # Configure and build the cache
-    cache.configure_cache_region(cache.REGION)
+    cache.configure_cache()
+    cache.configure_cache(region=catalog.COMPUTED_CATALOG_REGION)
+    cache.apply_invalidation_patch(
+        region=catalog.COMPUTED_CATALOG_REGION,
+        region_name=catalog.COMPUTED_CATALOG_REGION.name)
+    cache.configure_cache(region=assignment.COMPUTED_ASSIGNMENTS_REGION)
+    cache.apply_invalidation_patch(
+        region=assignment.COMPUTED_ASSIGNMENTS_REGION,
+        region_name=assignment.COMPUTED_ASSIGNMENTS_REGION.name)
 
     # Ensure that the identity driver is created before the assignment manager
     # and that the assignment driver is created before the resource manager.
     # The default resource driver depends on assignment, which in turn
     # depends on identity - hence we need to ensure the chain is available.
+    # TODO(morganfainberg): In "O" release move _IDENTITY_API to be directly
+    # instantiated in the DRIVERS dict once assignment driver being selected
+    # based upon [identity]/driver is removed.
     _IDENTITY_API = identity.Manager()
     _ASSIGNMENT_API = assignment.Manager()
 
@@ -44,12 +54,12 @@ def load_backends():
         catalog_api=catalog.Manager(),
         credential_api=credential.Manager(),
         domain_config_api=resource.DomainConfigManager(),
-        endpoint_filter_api=endpoint_filter.Manager(),
         endpoint_policy_api=endpoint_policy.Manager(),
         federation_api=federation.Manager(),
         id_generator_api=identity.generator.Manager(),
         id_mapping_api=identity.MappingManager(),
         identity_api=_IDENTITY_API,
+        shadow_users_api=identity.ShadowUsersManager(),
         oauth_api=oauth1.Manager(),
         policy_api=policy.Manager(),
         resource_api=resource.Manager(),

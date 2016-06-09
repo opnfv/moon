@@ -38,7 +38,7 @@ class LdapPoolCommonTestMixin(object):
         # by default use_pool and use_auth_pool is enabled in test pool config
         user_ref = self.identity_api.get_user(self.user_foo['id'])
         self.user_foo.pop('password')
-        self.assertDictEqual(user_ref, self.user_foo)
+        self.assertDictEqual(self.user_foo, user_ref)
 
         handler = ldap_core._get_connection(CONF.ldap.url, use_pool=True)
         self.assertIsInstance(handler, ldap_core.PooledLDAPHandler)
@@ -151,22 +151,22 @@ class LdapPoolCommonTestMixin(object):
 
         # Open 3 connections first
         with _get_conn() as _:  # conn1
-            self.assertEqual(len(ldappool_cm), 1)
+            self.assertEqual(1, len(ldappool_cm))
             with _get_conn() as _:  # conn2
-                self.assertEqual(len(ldappool_cm), 2)
+                self.assertEqual(2, len(ldappool_cm))
                 with _get_conn() as _:  # conn2
                     _.unbind_ext_s()
-                    self.assertEqual(len(ldappool_cm), 3)
+                    self.assertEqual(3, len(ldappool_cm))
 
         # Then open 3 connections again and make sure size does not grow
         # over 3
         with _get_conn() as _:  # conn1
-            self.assertEqual(len(ldappool_cm), 1)
+            self.assertEqual(1, len(ldappool_cm))
             with _get_conn() as _:  # conn2
-                self.assertEqual(len(ldappool_cm), 2)
+                self.assertEqual(2, len(ldappool_cm))
                 with _get_conn() as _:  # conn3
                     _.unbind_ext_s()
-                    self.assertEqual(len(ldappool_cm), 3)
+                    self.assertEqual(3, len(ldappool_cm))
 
     def test_password_change_with_pool(self):
         old_password = self.user_sna['password']
@@ -181,14 +181,14 @@ class LdapPoolCommonTestMixin(object):
 
         self.user_sna.pop('password')
         self.user_sna['enabled'] = True
-        self.assertDictEqual(user_ref, self.user_sna)
+        self.assertDictEqual(self.user_sna, user_ref)
 
         new_password = 'new_password'
         user_ref['password'] = new_password
         self.identity_api.update_user(user_ref['id'], user_ref)
 
         # now authenticate again to make sure new password works with
-        # conneciton pool
+        # connection pool
         user_ref2 = self.identity_api.authenticate(
             context={},
             user_id=self.user_sna['id'],
@@ -207,14 +207,15 @@ class LdapPoolCommonTestMixin(object):
                           password=old_password)
 
 
-class LdapIdentitySqlAssignment(LdapPoolCommonTestMixin,
-                                test_backend_ldap.LdapIdentitySqlAssignment,
-                                unit.TestCase):
+class LDAPIdentity(LdapPoolCommonTestMixin,
+                   test_backend_ldap.LDAPIdentity,
+                   unit.TestCase):
     """Executes tests in existing base class with pooled LDAP handler."""
+
     def setUp(self):
         self.useFixture(mockpatch.PatchObject(
             ldap_core.PooledLDAPHandler, 'Connector', fakeldap.FakeLdapPool))
-        super(LdapIdentitySqlAssignment, self).setUp()
+        super(LDAPIdentity, self).setUp()
 
         self.addCleanup(self.cleanup_pools)
         # storing to local variable to avoid long references
@@ -225,7 +226,7 @@ class LdapIdentitySqlAssignment(LdapPoolCommonTestMixin,
         self.identity_api.get_user(self.user_foo['id'])
 
     def config_files(self):
-        config_files = super(LdapIdentitySqlAssignment, self).config_files()
+        config_files = super(LDAPIdentity, self).config_files()
         config_files.append(unit.dirs.tests_conf('backend_ldap_pool.conf'))
         return config_files
 

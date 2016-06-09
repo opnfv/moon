@@ -138,7 +138,7 @@ class TestDatabaseDomainConfigs(unit.TestCase):
     def test_loading_config_from_database(self):
         self.config_fixture.config(domain_configurations_from_database=True,
                                    group='identity')
-        domain = {'id': uuid.uuid4().hex, 'name': uuid.uuid4().hex}
+        domain = unit.new_domain_ref()
         self.resource_api.create_domain(domain['id'], domain)
         # Override two config options for our domain
         conf = {'ldap': {'url': uuid.uuid4().hex,
@@ -165,7 +165,7 @@ class TestDatabaseDomainConfigs(unit.TestCase):
         # Now turn off using database domain configuration and check that the
         # default config file values are now seen instead of the overrides.
         CONF.set_override('domain_configurations_from_database', False,
-                          'identity')
+                          'identity', enforce_type=True)
         domain_config = identity.DomainConfigs()
         domain_config.setup_domain_drivers(fake_standard_driver,
                                            self.resource_api)
