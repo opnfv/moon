@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>org.opendaylight.aaa</groupId>
+    <artifactId>aaa-parent</artifactId>
+    <version>0.3.2-Beryllium-SR2</version>
+    <relativePath>parent</relativePath>
+  </parent>
+
+  <groupId>org.opendaylight.aaa</groupId>
+  <artifactId>aaa.project</artifactId>
+  <version>0.3.2-Beryllium-SR2</version>
+  <packaging>pom</packaging>
+  <name>aaa</name> <!-- Used by Sonar to set project name -->
+  <prerequisites>
+    <maven>3.0</maven>
+  </prerequisites>
+
+  <modules>
+    <module>aaa-authn-api</module>
+    <module>aaa-authn</module>
+    <module>aaa-idp-mapping</module>
+    <module>aaa-authn-sts</module>
+    <module>aaa-authn-store</module>
+    <module>aaa-authn-federation</module>
+    <module>aaa-authn-sssd</module>
+    <module>aaa-authn-keystone</module>
+    <module>aaa-authn-basic</module>
+    <module>aaa-idmlight</module>
+    <module>aaa-authn-mdsal-store</module>
+    <module>aaa-authz</module>
+    <module>aaa-credential-store-api</module>
+    <module>artifacts</module>
+    <module>features</module>
+    <module>distribution-karaf</module>
+    <module>parent</module>
+    <module>aaa-shiro</module>
+    <module>aaa-shiro-act</module>
+    <module>aaa-h2-store</module>
+  </modules>
+
+  <scm>
+    <connection>scm:git:ssh://git.opendaylight.org:29418/aaa.git</connection>
+    <developerConnection>scm:git:ssh://git.opendaylight.org:29418/aaa.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://wiki.opendaylight.org/view/AAA:Main</url>
+  </scm>
+
+</project>
