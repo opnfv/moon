@@ -188,7 +188,7 @@ class MoonClient(App):
         finally:
             self.log.debug(str(content))
 
-    def auth_keystone(self, username=None, password=None, host=None, port=None):
+    def auth_keystone(self, username=None, password=None, host=None, port=None, tenant=None):
         """Send a new authentication request to Keystone
 
         :param username: user identification name
@@ -198,6 +198,8 @@ class MoonClient(App):
             self.post["auth"]["identity"]["password"]["user"]["name"] = username
         if password:
             self.post["auth"]["identity"]["password"]["user"]["password"] = password
+        if tenant:
+            self.post["auth"]["scope"]["project"]["name"] = tenant
         if host:
             self.host = host
         if port:

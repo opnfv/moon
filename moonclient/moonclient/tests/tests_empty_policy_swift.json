@@ -93,7 +93,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add admin --password nomoresecrete",
+        "command": "subject add admin --subject_pass password",
         "result": "",
         "description": "",
         "command_options": ""
@@ -106,7 +106,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --password nomoresecrete",
+        "command": "subject add demo --subject_pass password",
         "result": "",
         "description": "",
         "command_options": ""
