@@ -117,6 +117,7 @@ class TestsLaunch(Lister):
                 if "auth_name" in test or "auth_password" in test or "auth_url" in test:
                     username = None
                     password = None
+                    tenant = None
                     host = None
                     port = None
                     description = ""
@@ -124,13 +125,15 @@ class TestsLaunch(Lister):
                         username = test["auth_name"]
                     if "auth_password" in test:
                         password = test["auth_password"]
+                    if "auth_tenant" in test:
+                        tenant = test["auth_tenant"]
                     if "auth_host" in test:
                         host = test["auth_host"]
                     if "auth_port" in test:
                         port = test["auth_port"]
                     if "description" in test:
                         description = test["description"]
-                    self.app.auth_keystone(username, password, host, port)
+                    self.app.auth_keystone(username, password, host, port, tenant)
                     title = "Change auth to "
                     if username:
                         title += username

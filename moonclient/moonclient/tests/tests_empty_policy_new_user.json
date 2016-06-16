@@ -4,18 +4,32 @@
     "authz": [
       {
         "auth_name": "admin",
+        "auth_password": "password",
+        "auth_tenant": "admin",
         "description": "Change user to admin (just in case...)"
       },
 
       {
         "name": "nova image-list",
         "external_command": "nova image-list",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3",
         "description": "Get an Image ID"
       },
       {
+        "name": "create teannt test",
+        "external_command": "openstack project create test_moonclient",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3",
+        "description": "Get an Image ID"
+      },
+      {
+        "name": "add role admin to demo",
+        "external_command": "openstack role add --project admin --user demo admin",
+        "result": "",
+        "description": "Force the admin role for the user demo on the project admin (for testing purpose)."
+      },
+      {
         "name": "nova boot new server",
-        "external_command": "nova boot  --flavor m1.micro --image $uuid_image test_moonclient",
+        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image test_moonclient",
         "result": "\\| OS-EXT-STS\\:vm_state\\s+\\| building",
         "description": "Boot a new nova server."
       },
@@ -111,7 +125,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass nomoresecrete",
+        "command": "subject add demo --subject_pass password",
         "result": "",
         "description": "",
         "command_options": ""
@@ -3187,7 +3201,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass nomoresecrete",
+        "command": "subject add demo --subject_pass password",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3354,7 +3368,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass nomoresecrete",
+        "command": "subject add demo --subject_pass password",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3368,21 +3382,27 @@
 
       {
         "name": "demo: check nova command",
-        "external_command": "nova --os-user-name demo list",
+        "external_command": "nova --os-user-name demo --os-project-name admin list",
         "result": "test_moonclient",
-        "description": "Check demo cant list nova servers due to the current rules"
+        "description": "Check demo can list nova servers due to the current rules"
       },
       {
         "name": "demo: try to pause nova instance",
-        "external_command": "nova --os-username demo pause $uuid_server",
+        "external_command": "nova --os-username demo --os-project-name admin pause $uuid_server",
         "result": "^$",
         "description": "Pausing the server must be impossible due to the current rules"
       },
       {
         "name": "check nova command",
-        "external_command": "nova --os-user-name demo list",
+        "external_command": "nova --os-user-name demo  --os-project-name admin list",
         "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
         "description": "Check that nova server is still in running state."
+      },
+      {
+        "name": "pause",
+        "external_command": "read",
+        "result": "",
+        "description": "Pause"
       },
 
       {
@@ -3409,6 +3429,8 @@
 
       {
         "auth_name": "demo",
+        "auth_password": "password",
+        "auth_tenant": "admin",
         "description": "Change user to demo"
       },
 
@@ -3509,6 +3531,7 @@
 
       {
         "auth_name": "admin",
+        "auth_tenant": "admin",
         "description": "Change user to admin"
       },
 
