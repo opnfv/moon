@@ -41,18 +41,21 @@ if _run.returncode != 0:
 
 os.chdir(TMP_DIR)
 
+src_path = os.path.join(TMP_DIR, "python-keystonemiddleware", "debian")
+dst_path = os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon")
+print("\033[32mCopying from {} to {}\033[m".format(src_path, dst_path))
 _run = subprocess.run(["cp",
-                       "-r",
-                       os.path.join(TMP_DIR, "python-keystonemiddleware", "debian"),
-                       os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon")])
+                       "-rv",
+                       src_path,
+                       dst_path])
 
 print("\033[32mBuilding Moon project\033[m")
 os.chdir(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon"))
 
-mandatory_deb_pkg = """dh-apparmor 
-dh-systemd 
-openstack-pkg-tools 
-python-all python-pbr 
+mandatory_deb_pkg = """dh-apparmor
+dh-systemd
+openstack-pkg-tools
+python-all python-pbr
 python-sphinx
 python-bashate
 python-keystonemiddleware
@@ -138,7 +141,41 @@ _command = ["sudo", "apt-get", "install", "-y"]
 _command.extend(mandatory_deb_pkg.split())
 _run = subprocess.run(_command)
 
+print("\033[32mremove a Debian patch as it inserts a bug in Moon\033[m")
+series_filename = os.path.join(TMP_DIR,
+                               "moon", "keystonemiddleware-moon",
+                               "debian", "patches", "series")
+series_lines = open(series_filename).readlines()
+
+output = open(series_filename, "w")
+for line in series_lines:
+    if "re-add-missing-auth-options.patch" not in line:
+        output.write(line)
+        output.write("\n")
+output.close()
+os.remove(os.path.join(TMP_DIR,
+                       "moon", "keystonemiddleware-moon",
+                       "debian", "patches", "re-add-missing-auth-options.patch"))
+
 os.putenv("DEB_BUILD_OPTIONS", "nocheck")
+
+changelog = open(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon", "debian", "changelog"), "rt")
+changelog_str = changelog.read()
+# print(changelog_str.splitlines()[0])
+current_version = changelog_str.splitlines()[0].split("(")[1].split(")")[0]
+changelog.close()
+changelog = open(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon", "debian", "changelog"), "wt")
+changelog.write("""python-keystonemiddleware ({version}) UNRELEASED; urgency=medium
+
+  * integration of the Moon platform.
+
+ -- Thomas Duval <thomas.duval@orange.com>  {date}
+
+""".format(
+    version=current_version+"-moon",
+    date=subprocess.Popen(["date"], stdin=None, stdout=subprocess.PIPE).communicate()[0].decode("utf-8").strip()))
+changelog.write(changelog_str)
+changelog.close()
 
 _run = subprocess.run(["dpkg-buildpackage", "-b", "-us"])
 
