@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a7ca5a3_2d15f3f0",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 459
+      },
+      "writtenOn": "2016-07-08T13:58:49Z",
+      "side": 1,
+      "message": "For the next time, it would be nice to have a clearer commit message together with the associated JIRA issue",
+      "revId": "0708096613938fad3b0692a3451cf61dc5c73f22",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
