@@ -4,9 +4,16 @@ import os
 import sys
 import subprocess
 import glob
+import argparse
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--src', help='Do not clone Moon repository, use SRC as source directory', dest="src")
+args = parser.parse_args()
 
 
 TMP_DIR = "/tmp/debian-moon"
+MOON_DIR = os.path.join(TMP_DIR, "moon")
 INIT_dir = os.path.split(os.path.abspath(sys.argv[0]))[0]
 
 print("init dir: {}".format(INIT_dir))
@@ -21,36 +28,40 @@ _run = subprocess.run(["sudo", "apt-get", "install", "-y", "git"])
 if _run.returncode != 0:
     exit("\033[31mCannot install Git\033[m")
 
-print("\033[32mCloning Debian version\033[m")
-_run = subprocess.run(["git", "clone", "https://anonscm.debian.org/git/openstack/python-keystonemiddleware.git"])
-if _run.returncode != 0:
-    os.chdir(os.path.join(TMP_DIR, "python-keystonemiddleware"))
-    _run = subprocess.run(["git", "pull"])
-    if _run.returncode != 0:
-        print("\033[31mCannot clone ou pull debian version\033[m")
+# print("\033[32mCloning Debian version\033[m")
+# _run = subprocess.run(["git", "clone", "https://anonscm.debian.org/git/openstack/python-keystonemiddleware.git"])
+# if _run.returncode != 0:
+#     os.chdir(os.path.join(TMP_DIR, "python-keystonemiddleware"))
+#     _run = subprocess.run(["git", "pull"])
+#     if _run.returncode != 0:
+#         print("\033[31mCannot clone ou pull debian version\033[m")
 
 os.chdir(TMP_DIR)
 
-print("\033[32mCloning Moon project\033[m")
-_run = subprocess.run(["git", "clone", "https://git.opnfv.org/moon"])
-if _run.returncode != 0:
-    os.chdir(os.path.join(TMP_DIR, "moon"))
-    _run = subprocess.run(["git", "pull"])
+if args.src:
+    print("\033[32mUsing {} as source directory\033[m".format(args.src))
+    MOON_DIR = args.src
+else:
+    print("\033[32mCloning Moon project\033[m")
+    _run = subprocess.run(["git", "clone", "https://git.opnfv.org/moon"])
     if _run.returncode != 0:
-        print("\033[31mCannot clone Moon project\033[m")
+        os.chdir(os.path.join(TMP_DIR, "moon"))
+        _run = subprocess.run(["git", "pull"])
+        if _run.returncode != 0:
+            print("\033[31mCannot clone Moon project\033[m")
 
 os.chdir(TMP_DIR)
 
-src_path = os.path.join(TMP_DIR, "python-keystonemiddleware", "debian")
-dst_path = os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon")
-print("\033[32mCopying from {} to {}\033[m".format(src_path, dst_path))
-_run = subprocess.run(["cp",
-                       "-rv",
-                       src_path,
-                       dst_path])
+# src_path = os.path.join(TMP_DIR, "python-keystonemiddleware", "debian")
+# dst_path = os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon")
+# print("\033[32mCopying from {} to {}\033[m".format(src_path, dst_path))
+# _run = subprocess.run(["cp",
+#                        "-rv",
+#                        src_path,
+#                        dst_path])
 
 print("\033[32mBuilding Moon project\033[m")
-os.chdir(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon"))
+os.chdir(os.path.join(MOON_DIR, "keystonemiddleware-moon"))
 
 mandatory_deb_pkg = """dh-apparmor
 dh-systemd
@@ -142,8 +153,7 @@ _command.extend(mandatory_deb_pkg.split())
 _run = subprocess.run(_command)
 
 print("\033[32mremove a Debian patch as it inserts a bug in Moon\033[m")
-series_filename = os.path.join(TMP_DIR,
-                               "moon", "keystonemiddleware-moon",
+series_filename = os.path.join(MOON_DIR, "keystonemiddleware-moon",
                                "debian", "patches", "series")
 series_lines = open(series_filename).readlines()
 
@@ -153,18 +163,17 @@ for line in series_lines:
         output.write(line)
         output.write("\n")
 output.close()
-os.remove(os.path.join(TMP_DIR,
-                       "moon", "keystonemiddleware-moon",
+os.remove(os.path.join(MOON_DIR, "keystonemiddleware-moon",
                        "debian", "patches", "re-add-missing-auth-options.patch"))
 
 os.putenv("DEB_BUILD_OPTIONS", "nocheck")
 
-changelog = open(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon", "debian", "changelog"), "rt")
+changelog = open(os.path.join(MOON_DIR, "keystonemiddleware-moon", "debian", "changelog"), "rt")
 changelog_str = changelog.read()
 # print(changelog_str.splitlines()[0])
 current_version = changelog_str.splitlines()[0].split("(")[1].split(")")[0]
 changelog.close()
-changelog = open(os.path.join(TMP_DIR, "moon", "keystonemiddleware-moon", "debian", "changelog"), "wt")
+changelog = open(os.path.join(MOON_DIR, "keystonemiddleware-moon", "debian", "changelog"), "wt")
 changelog.write("""python-keystonemiddleware ({version}) UNRELEASED; urgency=medium
 
   * integration of the Moon platform.
@@ -182,6 +191,6 @@ _run = subprocess.run(["dpkg-buildpackage", "-b", "-us"])
 print("\033[32mResults:\033[m")
 subprocess.run(["mkdir", "-p", "/tmp/deb"])
 
-files = glob.glob(os.path.join(TMP_DIR, "moon", "*.deb"))
+files = glob.glob(os.path.join(MOON_DIR, "*.deb"))
 for _file in files:
     subprocess.run(["mv", "-v", _file, "/tmp/deb/"])
