@@ -1,0 +1,292 @@
+# Translation of keystone debconf templates to french.
+# Copyright (C) 2013, French l10n team <debian-l10n-french@lists.debian.org>
+# This file is distributed under the same license as the keystone package.
+# Julien Patriarca <leatherface@debian.org>, 2013.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: keystone\n"
+"Report-Msgid-Bugs-To: keystone@packages.debian.org\n"
+"POT-Creation-Date: 2013-07-10 23:09+0800\n"
+"PO-Revision-Date: 2013-08-28 14:19+0100\n"
+"Last-Translator: Julien Patriarca <leatherface@debian.org>\n"
+"Language-Team: FRENCH <debian-l10n-french@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 1.5.4\n"
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:2001
+msgid "Set up a database for Keystone?"
+msgstr "Faut-il configurer une base de données pour Keystone ?"
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:2001
+#| msgid ""
+#| "No database has been set up for Keystone to use. If you want to set one "
+#| "up now, please make sure you have all needed information:"
+msgid ""
+"No database has been set up for Keystone to use. Before continuing, you "
+"should make sure you have the following information:"
+msgstr ""
+"Aucune base de données n'a été configurée pour Keystone. Avant de continuer, "
+"veuillez vous assurer de disposer de toutes les informations nécessaires."
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:2001
+#| msgid ""
+#| " * the host name of the database server (which must allow TCP\n"
+#| "   connections from this machine);\n"
+#| " * a username and password to access the database;\n"
+#| " * the type of database management software you want to use."
+msgid ""
+" * the type of database that you want to use;\n"
+" * the database server host name (that server must allow TCP connections "
+"from this\n"
+"   machine);\n"
+" * a username and password to access the database."
+msgstr ""
+" * le type de base de données que vous souhaitez utiliser ;\n"
+" * le nom d'hôte du serveur de bases de données (qui doit autoriser\n"
+"   les connexions TCP depuis cette machine) ;\n"
+" * un identifiant et un mot de passe pour accéder à la base de données."
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:2001
+msgid ""
+"If some of these requirements are missing, do not choose this option and run "
+"with regular SQLite support."
+msgstr ""
+"Si certains de ces prérequis sont manquants, ne choisissez pas cette option "
+"et lancez l'application avec le support SQLite normal."
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:2001
+msgid ""
+"You can change this setting later on by running \"dpkg-reconfigure -plow "
+"keystone\"."
+msgstr ""
+"Vous pouvez changer ce réglage plus tard en exécutant « dpkg-reconfigure -"
+"plow keystone »."
+
+#. Type: password
+#. Description
+#: ../keystone.templates:3001
+msgid "Authentication server administration token:"
+msgstr "Jeton d'authentification pour le serveur d'administration :"
+
+#. Type: password
+#. Description
+#: ../keystone.templates:3001
+msgid "Please enter the token to use with the authentication server."
+msgstr ""
+"Veuillez indiquer le jeton à utiliser pour le serveur d'authentification."
+
+#. Type: boolean
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../keystone.templates:4001
+#| msgid "Authentication server administration token:"
+msgid "Register administration tenants?"
+msgstr "Enregistrer les clients administrateurs ?"
+
+#. Type: boolean
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../keystone.templates:4001
+msgid ""
+"For OpenStack to work, you need a basic tenant configuration. The creation "
+"of these administration tenants can be done automatically."
+msgstr ""
+"Pour qu'OpenStack fonctionne, vous avez besoin d'une configuration client "
+"basique. La création de ces clients administrateurs peut être faite "
+"automatiquement."
+
+#. Type: string
+#. Description
+#: ../keystone.templates:5001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Username of the administrative user:"
+msgstr "Nom d'utilisateur de l'administrateur :"
+
+#. Type: string
+#. Description
+#: ../keystone.templates:5001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Please enter a username for the administrative user."
+msgstr "Veuillez indiquer le nom d'utilisateur de l'administrateur :"
+
+#. Type: string
+#. Description
+#: ../keystone.templates:6001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Email address of the administrative user:"
+msgstr "Adresse email de l'administrateur : "
+
+#. Type: string
+#. Description
+#: ../keystone.templates:6001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Please enter the email address of the administrative user."
+msgstr "Veuillez indiquer l'adresse email de l'administrateur : "
+
+#. Type: password
+#. Description
+#: ../keystone.templates:7001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Password of the administrative user:"
+msgstr "Mot de passe de l'administrateur : "
+
+#. Type: password
+#. Description
+#: ../keystone.templates:7001
+msgid "Please enter a password for the administrative user."
+msgstr "Veuillez indiquer un mot de passe pour l'utilisateur administrateur."
+
+#. Type: password
+#. Description
+#: ../keystone.templates:8001
+msgid "Re-enter password to verify:"
+msgstr "Entrez le mot de passe à nouveau pour vérifier : "
+
+#. Type: password
+#. Description
+#: ../keystone.templates:8001
+#| msgid "Please enter the token to use with the authentication server."
+msgid ""
+"Please enter the same administrative password again to verify that you have "
+"typed it correctly."
+msgstr ""
+"Veuillez indiquer le même mot de passe à nouveau pour vérifier que vous "
+"l'avez tapé correctement."
+
+#. Type: error
+#. Description
+#: ../keystone.templates:9001
+msgid "Password input error"
+msgstr "Erreur lors de l'entrée du mot de passe"
+
+#. Type: error
+#. Description
+#: ../keystone.templates:9001
+msgid "The two passwords you entered were not the same. Please try again."
+msgstr ""
+"Les deux mots de passe que vous avez entrés ne correspondent pas. Veuillez "
+"essayer à nouveau."
+
+#. Type: string
+#. Description
+#: ../keystone.templates:10001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Name of the administrative role:"
+msgstr "Nom du rôle d'administration : "
+
+#. Type: string
+#. Description
+#: ../keystone.templates:10001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Please enter the name of the administrative role."
+msgstr "Veuillez indiquer le nom du rôle d'administration : "
+
+#. Type: string
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../keystone.templates:11001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Name of the administrative tenant:"
+msgstr "Nom du client administrateur : "
+
+#. Type: string
+#. Description
+#. Translators: a "tenant" in OpenStack world is
+#. an entity that contains one or more username/password couples.
+#. It's typically the tenant that will be used for billing. Having more than one
+#. username/password is very helpful in larger organization.
+#. You're advised to either keep "tenant" without translating it
+#. or keep it parenthezised. Example for French:
+#. locataire ("tenant")
+#: ../keystone.templates:11001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Please enter the name of the administrative tenant."
+msgstr "Veuillez indiquer le nom du client administrateur :"
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:12001
+msgid "Register Keystone endpoint?"
+msgstr "Enregistrer le point d'accès Keystone ?"
+
+#. Type: boolean
+#. Description
+#: ../keystone.templates:12001
+msgid ""
+"Each OpenStack service (each API) should be registered in order to be "
+"accessible. This is done using \"keystone service-create\" and \"keystone "
+"endpoint-create\". This can be done automatically now."
+msgstr ""
+"Chaque service OpenStack (chaque API) doit être enregistré pour être "
+"accessible. Ceci peut être fait en utilisant « keystone service-create » et "
+"« keystone endpoint-create ». Cela peut être fait automatiquement maintenant."
+
+#. Type: string
+#. Description
+#: ../keystone.templates:13001
+msgid "Keystone endpoint IP address:"
+msgstr "Adresse IP du point d'accès Keystone :"
+
+#. Type: string
+#. Description
+#: ../keystone.templates:13001
+#| msgid "Please enter the token to use with the authentication server."
+msgid "Please enter the IP address that will be used to contact Keystone."
+msgstr ""
+"Veuillez indiquer l'adresse IP qui sera utilisée pour contacter Keystone."
+
+#. Type: string
+#. Description
+#: ../keystone.templates:14001
+msgid "Name of the region to register:"
+msgstr "Nom de la région à enregistrer : "
+
+#. Type: string
+#. Description
+#: ../keystone.templates:14001
+msgid ""
+"OpenStack supports using availability zones, with each region representing a "
+"location. Please enter the zone that you wish to use when registering the "
+"endpoint."
+msgstr ""
+"OpenStack supporte l'utilisation de zones disponibles, avec chaque région "
+"représentant un lieu. Veuillez entrer une zone que vous souhaitez utiliser "
+"lors de l'enregistrement d'un point d'accès."
+
+#~ msgid ""
+#~ "If you don't choose this option, no database will be set up and Keystone "
+#~ "will use regular SQLite support."
+#~ msgstr ""
+#~ "Si vous ne choisissez pas cette option, aucune base de données ne sera "
+#~ "configurée et Keystone utilisera la gestion SQLite de base."
