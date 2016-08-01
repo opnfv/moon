@@ -1,0 +1,762 @@
+keystone (2:9.0.2-2) unstable; urgency=medium
+
+  * Make the cron.hourly work also with a commented provider= directive
+    (Closes: #828912).
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 29 Jun 2016 21:47:02 +0200
+
+keystone (2:9.0.2-1) unstable; urgency=medium
+
+  [ Ondřej Nový ]
+  * d/copyright: Changed source URL to https protocol
+
+  [ Thomas Goirand ]
+  * New upstream release.
+  * Removed CVE-2016-4911 patch applied upstream.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 21 Jun 2016 11:00:27 +0200
+
+keystone (2:9.0.0-2) unstable; urgency=high
+
+  [ Ondřej Nový ]
+  * Use /bin/sh as su shell in postinst script explicitly
+  * Standards-Version is 3.9.8 now (no change)
+  * Use /bin/sh instead of /bin/bash as default shell for "keystone" user
+
+  [ Thomas Goirand ]
+  * Fix the cron job to not run if we're not using UUID tokens, as it otherwise
+    fail and fill-up the log file (LP: #1520321).
+  * CVE-2016-4911: Incorrect Audit IDs in Keystone Fernet Tokens can result in
+    revocation bypass. Add upstream patch: "Fix fernet audit ids for v2.0".
+    (Closes: #824683).
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 19 May 2016 07:22:58 +0000
+
+keystone (2:9.0.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 07 Apr 2016 17:53:48 +0200
+
+keystone (2:9.0.0~rc2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Uploading to unstable.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 04 Apr 2016 22:56:57 +0200
+
+keystone (2:9.0.0~rc1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Require version >= 0.10.0 of python-migrate to make sure we have the
+    python-decorator package installed.
+  * Fixed (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 21 Mar 2016 16:12:36 +0100
+
+keystone (2:9.0.0~b3-2) experimental; urgency=medium
+
+  * Using "keystone-manage bootstrap" to create the initial admin, and then
+    using it to further create users and endpoints. Note that through using
+    environment variables, no passwords are leaking in /proc.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 09 Mar 2016 21:31:44 +0000
+
+keystone (2:9.0.0~b3-1) experimental; urgency=medium
+
+  [ Ondřej Nový ]
+  * Fixed VCS URLs (https).
+
+  [ Thomas Goirand ]
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+  * Standards-Version: 3.9.7 (no change).
+  * Rebased / refresh all patches.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 03 Mar 2016 20:00:57 +0800
+
+keystone (2:9.0.0~b2-3) experimental; urgency=medium
+
+  * Added auto-creation of the Member and ResellerAdmin roles as this is
+    needed for Swift auto-account-creation to work.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 08 Feb 2016 08:11:14 +0000
+
+keystone (2:9.0.0~b2-2) experimental; urgency=medium
+
+  * Added git as build-depends.
+  * Bump EPOCH to align with Ubuntu.
+  * Remove version of init-system-helpers in keystone depends, as 1.18 is not
+    available in Trusty.
+  * By default, add a heat_stack_owner role.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 25 Jan 2016 16:09:28 +0800
+
+keystone (1:9.0.0~b2-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+  * Fixed debian/copyright ordering.
+  * Standards-Version is now 3.9.6 (no change).
+  * Fix syntax error on an old debian/changelog entry.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 07 Dec 2015 12:32:48 +0100
+
+keystone (1:8.0.0-4) unstable; urgency=medium
+
+  * If the debconf prompt for creating Keystone endpoint was yes, check first
+    if there's no service already registered.
+  * Also create a service project when creating users and tenants.
+  * Setting-up /v2.0 as endpoint URL for Keystone to avoid compatibility issues
+    with some services, even though we're using API v3.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 04 Nov 2015 09:06:22 +0000
+
+keystone (1:8.0.0-3) unstable; urgency=medium
+
+  * Switching Keystone to use and configure API v3 by default.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 02 Nov 2015 13:04:02 +0000
+
+keystone (1:8.0.0-2) unstable; urgency=medium
+
+  * Uploading to unstable.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 16 Oct 2015 13:11:24 +0000
+
+keystone (1:8.0.0-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Now depends on pymysql.
+  * Added a /etc/apache2/sites-available/wsgi-keystone.conf.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 13 Oct 2015 14:56:01 +0200
+
+keystone (1:8.0.0~rc1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+  * Rebased fixes-jsonschema-requirements.txt.patch.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 23 Sep 2015 14:11:47 +0200
+
+keystone (1:8.0.0~b3-4) experimental; urgency=medium
+
+  * Doing the db_sync using the --noverbose option.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 21 Sep 2015 12:40:13 +0000
+
+keystone (1:8.0.0~b3-3) experimental; urgency=medium
+
+  * Re-enabled KeystoneAdmin and KeystoneServiceAdmin roles, and using
+    openstackclient instead of keystoneclient which is deprecated.
+  * Stop doing pki_setup (it's not recommended upstream anymore).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 21 Sep 2015 09:36:02 +0000
+
+keystone (1:8.0.0~b3-2) experimental; urgency=medium
+
+  * Fixed some (build-)depends versions.
+  * Added patch to fix requiremnts.txt regarding python-jsonschema version.
+  * Fixed admin user, role and tenant creation.
+  * Back to /v2.0/ endpoints.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 11 Sep 2015 08:45:50 +0000
+
+keystone (1:8.0.0~b3-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Now setting-up /v3 endpoint, not /v2.0.
+  * Added AppArmor confinement for keystone-all.
+  * Upstream removed run_tests.sh, now using testr directly.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 11 Aug 2015 14:36:02 +0200
+
+keystone (1:8.0.0~b2-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Fixed (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 01 Jul 2015 12:29:17 +0200
+
+keystone (2015.1.0-2) unstable; urgency=medium
+
+  * Accepting SQLA 1.0.6.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 01 Jul 2015 02:47:07 +0000
+
+keystone (2015.1.0-1) unstable; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 30 Apr 2015 20:55:28 +0000
+
+keystone (2015.1~rc2-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Uploading to unstable.
+  * Review (build-)depends.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 22 Dec 2014 12:18:01 +0800
+
+keystone (2014.2.1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Added oslo.serialization as (build-)depends.
+  * Added depends: init-system-helpers (>= 1.18~), and deb-systemd-helper
+    manual calls to activate the keystone.service.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 12 Dec 2014 17:29:27 +0800
+
+keystone (2014.2-1) experimental; urgency=medium
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 16 Oct 2014 15:33:30 +0000
+
+keystone (2014.2~rc2-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Mangling upstream rc and beta versions in watch file.
+  * Updated nl.po thanks to Frans Spiesschaert (Closes: #764205).
+  * Using templated init script from openstack-pkg-tools >= 13.
+  * Removed silly python-support build-depends.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 13 Oct 2014 00:47:25 +0800
+
+keystone (2014.2~rc1-1) experimental; urgency=medium
+
+  * New upstream release.
+  * Updated (build-)depends for this release.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 30 Sep 2014 22:21:49 +0800
+
+keystone (2014.2~b3-2) experimental; urgency=medium
+
+  * Adds patch to avoid "git clone" when running the unit tests
+    keystone.tests.test_keystoneclient.KcMasterTestCase.*. See
+    https://review.openstack.org/122768/ for details.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 19 Sep 2014 14:36:23 +0800
+
+keystone (2014.2~b3-1) experimental; urgency=medium
+
+  * New upstream release.
+  * New (build-)depends for this release.
+  * Ship a systemd service file using dh-systemd.
+
+  [ gustavo panizzo]
+  * Support to run keystone as user keystone.
+  * Support to run keystone under systemd.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 30 Jun 2014 23:07:59 +0800
+
+keystone (2014.1.1-2) unstable; urgency=medium
+
+  * CVE-2014-3476: privilege escalation through trust chained delegation.
+    Applied upstream patch. (Closes: #751454).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 13 Jun 2014 17:30:08 +0800
+
+keystone (2014.1.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Remove cve-2014-0204-stable-icehouse.patch applied upstream.
+  * Removed sql_migration_ensure_using_innodb_utf8_for_assignment_table.patch
+    applied upstream.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 09 Jun 2014 23:22:20 +0800
+
+keystone (2014.1-6) unstable; urgency=medium
+
+  * Now build-depends on openstack-pkg-tools >= 12~.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 05 Jun 2014 09:09:54 +0000
+
+keystone (2014.1-5) unstable; urgency=medium
+
+  * Updates cve-2014-0204-stable-icehouse.patch with latest version from
+    upstream (Closes: #749026).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 30 May 2014 23:09:45 +0800
+
+keystone (2014.1-4) unstable; urgency=medium
+
+  * Switched from restarting keystone to copytruncate in logrotate.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 29 May 2014 14:19:42 +0800
+
+keystone (2014.1-3) unstable; urgency=medium
+
+  * Added sql migration: ensure using innodb utf8 for assignment table which
+    fixes upgrade path from Havana.
+  * Fixed cs.po.
+  * Added cve-2014-0204-stable-icehouse.patch.
+  * Standards-Version: is now 3.9.5
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 20 May 2014 23:26:00 +0800
+
+keystone (2014.1-2) unstable; urgency=medium
+
+  * Fixed debian/watch to use github tags.
+  * Now using "service X restart" to restart keystone after logrotate, and stop
+    using dpkg-dev (Closes: #747890).
+
+ -- Thomas Goirand <zigo@debian.org>  Sat, 17 May 2014 01:54:29 +0800
+
+keystone (2014.1-1) unstable; urgency=medium
+
+  * New upstream release.
+  * Uploading to unstable.
+  * Fixed config file handling (DEFAULT/connection vs database/connection).
+    (Closes: #744761).
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 15 Apr 2014 15:30:07 +0800
+
+keystone (2014.1~rc2-1) experimental; urgency=low
+
+  * New upstream pre-release.
+  * Removed broken patch: defines-gettext-function-to-avoid-ftbfs.patch
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 09 Apr 2014 23:17:06 +0800
+
+keystone (2014.1~rc1-1) experimental; urgency=low
+
+  * New upstream release.
+  * Fixed new upsteram (build-)dependencies.
+  * Drops now useless fix-sqla-version-in-requirements patch.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 28 Mar 2014 14:39:11 +0800
+
+keystone (2014.1~b3-1) experimental; urgency=low
+
+  * New upstream release (Icehouse beta 3).
+  * Refresh patches.
+  * Reviewed (build-)dependencies.
+  * Fixed sphinx build for docs and man pages.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 17 Feb 2014 15:27:56 +0800
+
+keystone (2013.2.2-1) unstable; urgency=medium
+
+  * New upstream point release.
+  * Refreshed patches.
+  * Remove patches applied upstream:
+    Limit_calls_to_memcache_backend_as_user_token_index_increases_in_size.patch
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 14 Feb 2014 09:57:43 +0800
+
+keystone (2013.2.1-2) unstable; urgency=medium
+
+  * Adds a cut -d" " -f1 when detecting the local interface connected to the
+    default gateway, so that it works with more than one default gateway.
+  * Updated es.po debconf translation thanks to Matias A. Bellone
+    <matiasbellone+debian@gmail.com> (Closes: #732538).
+  * Backported patch to replace oauth2 by oauthlib.
+  * Changed dependency from oauth2 to oauthlib.
+
+  [gustavo panizzo]
+  * Patch to improve performance (lp: #1251123).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 20 Dec 2013 22:00:34 +0800
+
+keystone (2013.2.1-1) unstable; urgency=high
+
+  * New upstream release (Closes: #731981) This fixes CVE-2013-6391.
+  * Refreshed sql_conn.patch.
+  * Removed CVE-2013-4477-havana.patch now applied upstream.
+  * (build-)depends on python-iso8601 >= 0.1.8 instead of 0.1.4.
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 16 Dec 2013 16:46:48 +0800
+
+keystone (2013.2-4) unstable; urgency=low
+
+  * Fixes restart of keystone in logrotate script. (Closes: #731495).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 06 Dec 2013 15:18:07 +0800
+
+keystone (2013.2-3) unstable; urgency=medium
+
+  * Updated German debconf templates, thanks: Chris Leick <c.leick@vollbio.de>
+    (Closes: #730454).
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 04 Dec 2013 16:32:51 +0800
+
+keystone (2013.2-2) unstable; urgency=low
+
+  * Moved python-memcache to Depends: instead of Recommends:.
+  * Added missing python-babel depends.
+  * Fixes a failed install if the target computer doesn't have a default route
+    (lp: #1247342).
+  * CVE-2013-4477: remove role assignment adds role using LDAP assignment
+    (Closes: #728233).
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 03 Nov 2013 16:02:42 +0800
+
+keystone (2013.2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Uploading to unstable.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 18 Oct 2013 00:18:57 +0800
+
+keystone (2013.2~rc3-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Sat, 29 Jun 2013 22:31:32 +0800
+
+keystone (2013.1.2-1) unstable; urgency=low
+
+  [ Thomas Goirand ]
+  * Ran wrap-and-sort.
+  * New upstream release.
+
+  [ gustavo panizzo <gfa@zumbi.com.ar> ]
+  * Add support for TLS when using LDAP.
+  * CVE-2013-2157: Authentication bypass when using LDAP backend. 
+    [OSSA 2013-015]
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 30 May 2013 11:25:11 +0800
+
+keystone (2013.1.1-2) unstable; urgency=low
+
+  * Uploading to unstable.
+  * New upstream release:
+    - Fixes CVE-2013-2059: Keystone tokens not immediately invalidated when
+    user is deleted [OSSA 2013-011] (Closes: #707598).
+  * Also installs httpd/keystone.py.
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 10 May 2013 10:22:18 +0800
+
+keystone (2013.1-1) experimental; urgency=low
+
+  * New upstream release.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 30 Jan 2013 20:12:55 +0800
+
+keystone (2012.2.3-2) experimental; urgency=low
+
+  * CVE-2013-1865: Online validation of Keystone PKI tokens bypasses
+    revocation check.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 21 Mar 2013 00:52:02 +0800
+
+keystone (2012.2.3-1) experimental; urgency=low
+
+  * New upstream release.
+  * CVE-2013-0247: Keystone denial of service through invalid token requests.
+  * CVE-2013-0282 Keystone EC2-style authentication accepts disabled
+    user/tenants (Closes: #700947).
+  * CVE-2013-1664 & CVE-2013-1665: Information leak and Denial of Service using XML entities
+    (Closes: #700948)
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 03 Feb 2013 11:05:36 +0800
+
+keystone (2012.2.1-1) experimental; urgency=low
+
+  * New upstream version. 
+  * Rewrite of the maintainer scripts using the pkgos scripts.
+  * Fixes etc/default_catalog.templates to include Quantum config and
+  to use regionOne and not RegionOne by default.
+  * Increased compat level to 9 (and debhelper build-dep).
+  * Fixes build-dep git-core -> git.
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 02 Dec 2012 13:08:38 +0000
+
+keystone (2012.2~rc1-1) experimental; urgency=low
+
+  * New snapshot release
+  * Refresh patches
+  * Remove CVE-2012-3542 incorporated upstream
+
+ -- Mehdi Abaakouk <sileht@sileht.net>  Mon, 24 Sep 2012 10:37:31 +0200
+
+keystone (2012.2~e3-1) experimental; urgency=low
+
+  [ Mehdi Abaakouk ]
+  * New upstream version.
+
+  [ Thomas Goirand ]
+  * Fixed build-dependencies correctly.
+  * Made the package compatible with Ubuntu.
+  * Now using xz level 9 compression.
+
+ -- Mehdi Abaakouk <sileht@sileht.net>  Mon, 10 Sep 2012 17:56:09 +0200
+
+keystone (2012.1.1-13+wheezy1) wheezy-proposed-updates; urgency=low
+
+  * CVE-2013-2059: Keystone tokens not immediately invalidated when user is
+    deleted [OSSA 2013-011]. Added backported to Essex patch which I picked-up
+    from Launchpad. Thanks to the Canonical security team (Closes: #707598).
+
+ -- Thomas Goirand <zigo@debian.org>  Fri, 10 May 2013 10:09:14 +0800
+
+keystone (2012.1.1-13) unstable; urgency=high
+
+  * CVE-2013-0282: Ensure EC2 users and tenant are enabled (Closes: #700947).
+  * CVE-2013-1664 & CVE-2013-1665: Information leak and Denial of Service using
+    XML entities (Closes: #700948).
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 19 Feb 2013 12:56:42 +0800
+
+keystone (2012.1.1-12) unstable; urgency=low
+
+  * CVE-2013-0247: Keystone denial of service through invalid token requests
+    (Closes: #699835).
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 06 Feb 2013 09:52:07 +0800
+
+keystone (2012.1.1-11) unstable; urgency=high
+
+  * Applies security patch from upstream: Ensures User is member of tenant in
+  ec2 validation (Closes: #694433).
+  * Added Japanese debconf template translation, thanks to victory
+  <victory.deb@gmail.com> (Closes: #693056).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 26 Nov 2012 14:05:33 +0000
+
+keystone (2012.1.1-10) unstable; urgency=low
+
+  * Fixes keystone.config which wasn't starting dbconfig-common at first
+  setup.
+  * Do not use override_dh_fixperms:, sets the permissions of keystone.conf in
+  the postinst using "install -m" instead of cp -auxf.
+  * The default db is now sqlite:///var/lib/keystone/keystonedb, since that's
+  what we run with Folsom, and that it might cause problems as
+  "keystone.sqlite" isn't a valid MySQL db name. Changed debian/keystone.config
+  accordingly.
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 10 Oct 2012 15:46:14 +0000
+
+keystone (2012.1.1-9) unstable; urgency=high
+
+  * Fixes sometimes failing keystone.postrm (db_get in some conditions can
+  return false), and fixed non-consistant indenting.
+  * Uses /usr/share/keystone/keystone.conf instead of /usr/share/doc/keystone
+  /keystone.conf.sample for temporary storing the conf file (this was a policy
+  violation, as the doc folder should never be required).
+  * Fixes CVE-2012-4457: fails to raise Unauthorized user error for disabled,
+  CVE-2012-4456: fails to validate tokens in Admin API (Closes: #689210).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 01 Oct 2012 05:52:23 +0000
+
+keystone (2012.1.1-8) unstable; urgency=low
+
+  * Fixes parsing of the SQL connection in keystone.config.
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 30 Sep 2012 01:48:50 +0000
+
+keystone (2012.1.1-7) unstable; urgency=low
+
+  * Fixes band handling (eg: policy violation) of keystone.conf which was
+  conffiles, but changed in the posinst (Closes: #687311).
+
+ -- Thomas Goirand <zigo@debian.org>  Wed, 12 Sep 2012 17:09:47 +0000
+
+keystone (2012.1.1-6) unstable; urgency=high
+
+  * CVE-2012-4413: Revoking a role does not affect existing tokens
+  (Closes: #687428).
+
+ -- Thomas Goirand <zigo@debian.org>  Sun, 09 Sep 2012 02:21:11 +0000
+
+keystone (2012.1.1-5) unstable; urgency=low
+
+  * CVE-2012-3542: Fixes lack of authorization for adding users to tenants
+  (Closes: #686265)
+  * Added Chinese debconf translation thanks to ben <duyujie.dyj@gmail.com>.
+  * Really adds the nl debconf translation this time (Closes: #685671).
+
+ -- Thomas Goirand <zigo@debian.org>  Mon, 27 Aug 2012 11:45:44 +0000
+
+keystone (2012.1.1-4) unstable; urgency=low
+
+  * Updated debian/keystone.templates, debian/control after review from
+  the internationalization team (Closes: #683414, #679295).
+  * Updated debconf translations with thanks to:
+  - de: Pfannenstein Erik <epfannenstein@gmx.de> (Closes: #684877)
+  - cs: Michal Šimůnek <michal.simunek@gmail.com> (Closes: #685434)
+  - pl: Michał Kułach <michalkulach@gmail.com> (Closes: #685431)
+  - fr: David Prévot <taffit@debian.org> (Closes: #685325)
+  - sv: Martin Bagge <brother@bsnet.se> (Closes: #684942)
+  - sk: helix84 <helix84@centrum.sk> (Closes: #684606)
+  - ru: Yuri Kozlov <yuray@komyakino.ru> (Closes: #684590)
+  - da: Joe Dalton <joedalton2@yahoo.dk> (Closes: #684565)
+  - pt: Pedro Ribeiro <p.m42.ribeiro@gmail.com> (Closes: #682438)
+  - es: SM Baby Siabef <siabef.debian@gmail.com> (Closes: #685435)
+  - it: Beatrice Torracca <beatricet@libero.it> (Closes: #685623)
+  * Added debconf translations with thanks to:
+  - pt_BR: Adriano Rafael Gomes <adrianorg@gmail.com> (Closes: #685405)
+  - nl: Jeroen Schot <schot@A-Eskwadraat.nl> (Closes: #685671)
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 21 Aug 2012 08:06:07 +0000
+
+keystone (2012.1.1-3) unstable; urgency=low
+
+  * Re-added Debconf template which has been removed by the patch of 2012.1.1-2
+  from Bubulle (Closes: #683337).
+  * Removed one occurence of a dependency declared twice: python-sqlalchemy.
+
+ -- Thomas Goirand <zigo@debian.org>  Tue, 31 Jul 2012 12:37:24 +0000
+
+keystone (2012.1.1-2) unstable; urgency=low
+
+  * Debconf templates and debian/control reviewed by the debian-l10n-
+    english team as part of the Smith review project. Closes: #679295
+  * [Debconf translation updates]
+  * Recycle translations from nova for several languages. Additionnally:
+  * Danish (Joe Hansen).  Closes: #680082
+  * Swedish (Martin Bagge / brother).  Closes: #680847
+  * Spanish; (SM Baby Siabef).  Closes: #681003
+  * Italian (Beatrice Torracca).  Closes: #681249
+  * Slovak (Ivan Masár). Closes: #682784
+  * Fixed the get-vcs-source target in debian/rules.
+
+ -- Thomas Goirand <zigo@debian.org>  Thu, 19 Jul 2012 06:21:30 +0000
+
+keystone (2012.1.1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ghe Rivero <ghe.rivero@stackops.com>  Fri, 22 Jun 2012 09:41:24 +0200
+
+keystone (2012.1-3) unstable; urgency=low
+
+  * Add logrotate for keystone.log. Closes: #663717
+
+ -- Mehdi Abaakouk <sileht@sileht.net>  Tue, 22 May 2012 14:48:56 +0200
+
+keystone (2012.1-2) unstable; urgency=low
+
+  * Fixed python version requisites on webob and pam. Closes: #665804
+
+ -- Ghe Rivero <ghe.rivero@stackops.com>  Wed, 02 May 2012 10:17:35 +0200
+
+keystone (2012.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Ghe Rivero <ghe.rivero@stackops.com>  Mon, 09 Apr 2012 09:06:22 +0200
+
+keystone (2012.1~rc2-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ghe Rivero <ghe.rivero@stackops.com>  Wed, 04 Apr 2012 10:09:36 +0200
+
+keystone (2012.1~rc1-2) unstable; urgency=low
+
+  * Removed check timeout from keystone.postinst. Closes: #665739
+
+ -- Ghe Rivero <ghe@debian.org>  Tue, 27 Mar 2012 13:12:01 +0200
+
+keystone (2012.1~rc1-1) unstable; urgency=low
+
+  * New upstream release.
+
+ -- Ghe Rivero <ghe.rivero@stackops.com>  Sat, 24 Mar 2012 09:14:50 +0100
+
+keystone (2012.1~e4+git35-g4e4f793-1) UNRELEASED; urgency=low
+
+  [ Julien Danjou ]
+  * Install egg-info
+  This is needed at least for Swift.
+
+  [ Ghe Rivero ]
+  * Added keystone/auth-token question. Closes: #662458
+
+ -- Julien Danjou <acid@debian.org>  Fri, 02 Mar 2012 10:34:30 +0100
+
+keystone (2012.1~e4-1) unstable; urgency=low
+
+  *  New upstream release
+
+ -- Ghe Rivero <ghe@debian.org>  Fri, 02 Mar 2012 08:38:43 +0100
+
+keystone (2012.1~e3+git772-g6919b05-1) UNRELEASED; urgency=low
+
+  [ Julien Danjou ]
+  * Fix permissions /etc/keystone
+  * Add projectmanager role on initial database creation
+  * Do not run dbconfig by default
+    That fixes LP#931236 until #607171 is fixed in dbconfig-common.
+    Patch based on:
+    http://bazaar.launchpad.net/~ubuntu-server-dev/keystone/essex/revision/83
+
+ -- Julien Danjou <acid@debian.org>  Mon, 06 Feb 2012 10:35:52 +0100
+  
+keystone (2012.1~e3-4) unstable; urgency=low
+
+  * Add missing python-migrate, python-prettytable, python-mox in
+    build deps (Closes: #658592)
+  * Deactivate tests because they fails (upstream problem)
+
+ -- Julien Danjou <acid@debian.org>  Mon, 06 Feb 2012 10:35:52 +0100
+
+keystone (2012.1~e3-3) unstable; urgency=low
+
+  * Add missing dependency on python-dateutil
+
+ -- Julien Danjou <acid@debian.org>  Tue, 31 Jan 2012 12:37:35 +0100
+
+keystone (2012.1~e3-2) unstable; urgency=low
+
+  * Add dbconfig prerm
+
+ -- Julien Danjou <acid@debian.org>  Fri, 27 Jan 2012 16:13:48 +0100
+
+keystone (2012.1~e3-1) unstable; urgency=low
+
+  * New upstream release.
+  * Use dbconfig to configure database
+
+ -- Julien Danjou <acid@debian.org>  Thu, 26 Jan 2012 17:03:10 +0100
+
+keystone (2012.1~e2-4) unstable; urgency=low
+
+  * Fix default location of keystone db file
+
+ -- Ghe Rivero <ghe@debian.org>  Tue, 24 Jan 2012 09:43:15 +0100
+
+keystone (2012.1~e2-3) unstable; urgency=low
+
+  * Add missing build depends on python-nose (Closes: #652805)
+  * Remove useless python fields in control
+
+ -- Julien Danjou <acid@debian.org>  Tue, 27 Dec 2011 11:40:18 +0100
+
+keystone (2012.1~e2-2) unstable; urgency=low
+
+  * Fix init script
+
+ -- Julien Danjou <acid@debian.org>  Mon, 19 Dec 2011 17:16:48 +0100
+
+keystone (2012.1~e2-1) unstable; urgency=low
+
+  * New upstream release.
+  * Disable doc building because it's currently failing.
+
+ -- Julien Danjou <acid@debian.org>  Fri, 16 Dec 2011 11:12:44 +0100
+
+keystone (2012.1~e1-2) unstable; urgency=low
+
+  * Fix python-keystone installation file by including only keystone lib
+    (Closes: #649907).
+  * Add missing manpages.
+
+ -- Julien Danjou <acid@debian.org>  Fri, 25 Nov 2011 10:43:59 +0100
+
+keystone (2012.1~e1-1) unstable; urgency=low
+
+  * New upstream release.
+  * Cherry-pick 33c1c9390331b3bacd3791b537b6a1147715925c from upstream to
+    fix documentation building.
+
+ -- Julien Danjou <acid@debian.org>  Thu, 24 Nov 2011 16:21:50 +0100
+
+keystone (2011.3-1) unstable; urgency=low
+
+  * Initial release (Closes: #647611)
+
+ -- Julien Danjou <acid@debian.org>  Tue, 15 Nov 2011 11:29:13 +0100

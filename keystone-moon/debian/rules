@@ -1,0 +1,92 @@
+#!/usr/bin/make -f
+
+#export DH_VERBOSE=1
+
+# auth_token middleware now requires access to HOME, otherwise
+# test suite cause FTBFS.  See (LP: #1031022)
+export HOME="$(CURDIR)/debian/tests/"
+
+# This is to avoid git clone of keystoneclient when running unit tests.
+# See https://review.openstack.org/122768/
+export KSCTEST_PATH=/usr/lib/python2.7/dist-packages/keystoneclient
+
+include /usr/share/openstack-pkg-tools/pkgos.make
+
+export OSLO_PACKAGE_VERSION=$(shell dpkg-parsechangelog | grep Version: | cut -d' ' -f2 | sed -e 's/^[[:digit:]]*://' -e 's/[-].*//' -e 's/~/.0/' | head -n 1)
+
+%:
+	dh $@ --buildsystem=python_distutils --with python2,sphinxdoc,systemd
+
+override_dh_auto_test:
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+	@echo "===> Running tests"
+	mkdir -p $(CURDIR)/keystone/tests/tmp
+	patch -p1 -R <debian/patches/fixes-default-connection.patch
+	set -e ; set -x ; for i in 2.7 ; do \
+		PYMAJOR=`echo $$i | cut -d'.' -f1` ; \
+		echo "===> Testing with python$$i (python$$PYMAJOR)" ; \
+		rm -rf .testrepository ; \
+		testr-python$$PYMAJOR init ; \
+		TEMP_REZ=`mktemp -t` ; \
+		PYTHONPATH=$(CURDIR) PYTHON=python$$i testr-python$$PYMAJOR run --subunit 'keystone\.tests\.unit.*' | tee $$TEMP_REZ | subunit2pyunit ; \
+		cat $$TEMP_REZ | subunit-filter -s --no-passthrough | subunit-stats ; \
+		rm -f $$TEMP_REZ ; \
+		testr-python$$PYMAJOR slowest ; \
+	done
+	patch -p1 <debian/patches/fixes-default-connection.patch
+endif
+
+
+
+override_dh_auto_build:
+	dh_auto_build
+
+	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func keystone.config
+	/usr/share/openstack-pkg-tools/pkgos_insert_include pkgos_func keystone.postinst
+
+override_dh_sphinxdoc:
+ifeq (,$(findstring nodocs, $(DEB_BUILD_OPTIONS)))
+	PYTHONPATH=. sphinx-build -b html doc/source $(CURDIR)/debian/keystone-doc/usr/share/doc/keystone-doc/html
+	dh_sphinxdoc -O--buildsystem=python_distutils
+endif
+
+override_dh_installman:
+ifeq (,$(findstring nodocs, $(DEB_BUILD_OPTIONS)))
+	PYTHONPATH=. sphinx-build -b man doc/source doc/build/man
+	dh_installman -O--buildsystem=python_distutils
+endif
+
+override_dh_install:
+	dh_install --fail-missing
+	rm -rf debian/python-keystone/usr/lib/python*/*/doc
+	rm -rf debian/python-keystone/usr/lib/python*/*/tools
+	rm -rf debian/python-keystone/usr/lib/python*/*/examples
+	install -D -m 0600 $(CURDIR)/debian/logging.conf $(CURDIR)/debian/keystone/etc/keystone/logging.conf
+	install -D -m 0640 etc/keystone.conf.sample $(CURDIR)/debian/keystone/usr/share/keystone/keystone.conf
+	sed -i -e "s|^[ \t#]*template_file[ \t#]*=.*|template_file = /etc/keystone/default_catalog.templates|" $(CURDIR)/debian/keystone/usr/share/keystone/keystone.conf
+	sed -i -e "s|^[ \t#]*log_dir[ \t#]*=.*|log_dir = /var/log/keystone|" $(CURDIR)/debian/keystone/usr/share/keystone/keystone.conf
+	sed -i -e "s|^[ \t#]*log_file[ \t#]*=.*|log_file = keystone.log|" $(CURDIR)/debian/keystone/usr/share/keystone/keystone.conf
+	cp -f etc/keystone.conf.sample debian/keystone/usr/share/doc/keystone/keystone.conf.sample
+
+	install -D -m 0644 httpd/keystone.py $(CURDIR)/debian/python-keystone/usr/share/keystone/wsgi.py
+	dh_python2 /usr/share/keystone
+
+	install -D -m 0644 debian/keystone.apparmor $(CURDIR)/debian/keystone/etc/apparmor.d/usr.bin.keystone-all
+	dh_apparmor --profile-name=usr.bin.keystone-all
+
+override_dh_clean:
+	rm -rf $(CURDIR)/build $(CURDIR)/keystone.egg-info $(CURDIR)/.cache
+	rm -rf $(CURDIR)/keystone/test/keystone.sql.log $(CURDIR)/keystone/test/keystone.ldap.log
+	rm -rf $(CURDIR)/doc/build
+	# NOTE(adam_g) The following stuff is built in /doc/source.  Safe for now, but
+	# should be fixed upstream or updated here post-essex
+	rm -rf $(CURDIR)/doc/source/keystone*.rst
+	rm -rf $(CURDIR)/doc/source/modules.rst
+	rm -rf $(CURDIR)/doc/source/sourcecode $(CURDIR)/doc/source/api
+	rm -rf $(CURDIR)/admin.log $(CURDIR)/keystone-legacy-auth.log
+	rm -f $(CURDIR)/debian/keystone.config $(CURDIR)/debian/keystone.postinst
+	find $(CURDIR)/keystone/tests -name '*.db' -delete
+	rm -rf $(CURDIR)/vendor
+	rm -f $(CURDIR)/debian/tests/testing.db
+	rm -f $(CURDIR)/debian/keystone.init $(CURDIR)/debian/keystone.service $(CURDIR)/debian/keystone.upstart
+	dh_clean

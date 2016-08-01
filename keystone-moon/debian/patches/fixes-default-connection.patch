@@ -1,0 +1,19 @@
+Description: Fixes default db config
+ Sets SQLite by default, so that db_sync can work in a non-interactive mode.
+Author: Thomas Goirand <zigo@debian.org>
+Forwarded: no
+Last-Update: 2014-03-28
+
+Index: keystone/etc/keystone.conf.sample
+===================================================================
+--- keystone.orig/etc/keystone.conf.sample
++++ keystone/etc/keystone.conf.sample
+@@ -546,7 +546,7 @@
+ # Deprecated group/name - [DEFAULT]/sql_connection
+ # Deprecated group/name - [DATABASE]/sql_connection
+ # Deprecated group/name - [sql]/connection
+-#connection = <None>
++connection=sqlite:////var/lib/keystone/keystone.sqlite
+ 
+ # The SQLAlchemy connection string to use to connect to the slave database.
+ # (string value)
