@@ -860,6 +860,7 @@ class MoonAuth(controller.V3Controller):
                 return project
 
     def get_token(self, context, **kw):
+        master_url = CONF.moon.master
         data_auth = {
             "auth": {
                 "identity": {
@@ -894,7 +895,7 @@ class MoonAuth(controller.V3Controller):
                         "title": "UnScopedToken"
                     }}
 
-        req = requests.post("http://localhost:5000/v3/auth/tokens",
+        req = requests.post("{}/v3/auth/tokens".format(master_url),
                             json=data_auth,
                             headers={"Content-Type": "application/json"}
                             )
