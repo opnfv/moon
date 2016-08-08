@@ -2089,3 +2089,39 @@
 # Entrypoint for the trust backend driver in the keystone.trust namespace.
 # (string value)
 #driver = sql
+
+
+[moon]
+
+# Configuration backend driver
+configuration_driver = keystone.contrib.moon.backends.memory.ConfigurationConnector
+
+# Tenant backend driver
+tenant_driver = keystone.contrib.moon.backends.sql.TenantConnector
+
+# Authorisation backend driver
+authz_driver = keystone.contrib.moon.backends.flat.SuperExtensionConnector
+
+# IntraExtension backend driver
+intraextension_driver = keystone.contrib.moon.backends.sql.IntraExtensionConnector
+
+# InterExtension backend driver
+interextension_driver = keystone.contrib.moon.backends.sql.InterExtensionConnector
+
+# Logs backend driver
+log_driver = keystone.contrib.moon.backends.flat.LogConnector
+
+# Local directory where all policies are stored
+policy_directory = /etc/keystone/policies
+
+# Local directory where Root IntraExtension configuration is stored
+root_policy_directory = policy_root
+
+# URL of the Moon master
+master = 'http://localhost:35357/'
+
+# Login of the Moon master
+master_login = 'admin'
+
+# Password of the Moon master
+master_password = 'nomoresecrete'
