@@ -28,25 +28,27 @@ Moon is a contribute backend so you have to enable it by modifying /etc/keystone
 
 .. code-block:: ini
 
-    [filter:moon]
-    paste.filter_factory = keystone.contrib.moon.routers:Admin.factory
+    [pipeline:moon_pipeline]
+    pipeline = sizelimit url_normalize request_id build_auth_context token_auth admin_token_auth json_body ec2_extension_v3 s3_extension moon_service
+
+    [app:moon_service]
+    use = egg:keystone#moon_service
 
     ...
 
-    [pipeline:public_api]
-    # The last item in this pipeline must be public_service or an equivalent
-    # application. It cannot be a filter.
-    pipeline = sizelimit url_normalize build_auth_context token_auth admin_token_auth json_body ec2_extension user_crud_extension moon public_service
+    [composite:main]
+    use = egg:Paste#urlmap
+    /moon = moon_pipeline
+    /v2.0 = public_api
+    /v3 = api_v3
+    / = public_version_api
 
-    [pipeline:admin_api]
-    # The last item in this pipeline must be admin_service or an equivalent
-    # application. It cannot be a filter.
-    pipeline = sizelimit url_normalize build_auth_context token_auth admin_token_auth json_body ec2_extension s3_extension crud_extension moon admin_service
-
-    [pipeline:api_v3]
-    # The last item in this pipeline must be service_v3 or an equivalent
-    # application. It cannot be a filter.
-    pipeline = sizelimit url_normalize build_auth_context token_auth admin_token_auth json_body ec2_extension_v3 s3_extension simple_cert_extension revoke_extension moon service_v3
+    [composite:admin]
+    use = egg:Paste#urlmap
+    /moon = moon_pipeline
+    /v2.0 = admin_api
+    /v3 = api_v3
+    / = admin_version_api
 
     ...
 

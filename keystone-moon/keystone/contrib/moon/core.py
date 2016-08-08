@@ -54,13 +54,13 @@ OPTS = [
                default='policy_root',
                help='Local directory where Root IntraExtension configuration is stored.'),
     cfg.StrOpt('master',
-               default='',
+               default='http://localhost:35357/',
                help='Address of the Moon master (if empty, the current Moon is the master).'),
     cfg.StrOpt('master_login',
-               default='',
+               default='admin',
                help='Login of the Moon master.'),
     cfg.StrOpt('master_password',
-               default='',
+               default='nomoresecrete',
                help='Password of the Moon master.'),
 ]
 
