@@ -3,8 +3,7 @@
 # ==========================================================
 # test for OpenStack/Moon API through moonclient cli
 
-moon test --self
-
+python run_tests.py
 
 # ==========================================================
 # test for OpenStack OpenDaylight identity federation
