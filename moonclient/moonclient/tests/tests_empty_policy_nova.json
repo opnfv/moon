@@ -10,13 +10,19 @@
       {
         "name": "nova image-list",
         "external_command": "nova image-list",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.*",
         "description": "Get an Image ID"
       },
       {
+        "name": "neutron net-list",
+        "external_command": "neutron net-list",
+        "result": "(?P<uuid_net>[\\w-]+)\\s+\\| public",
+        "description": "Get an Net ID"
+      },
+      {
         "name": "nova boot new server",
-        "external_command": "nova boot  --flavor m1.micro --image $uuid_image test_moonclient",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.3.4-x86_64-uec",
+        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image --nic net-id=$uuid_net test_moonclient",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.",
         "description": "Get an Image ID"
       },
       {

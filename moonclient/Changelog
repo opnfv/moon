@@ -7,6 +7,12 @@
 CHANGES
 =======
 
+0.2.0
+-----
+
+* Update tests command by adding a "--self" attribute
+
+
 0.1.0
 -----
 

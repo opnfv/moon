@@ -11,6 +11,42 @@ import os
 
 from cliff.app import App
 from cliff.commandmanager import CommandManager
+from cliff.formatters.base import ListFormatter, SingleFormatter
+
+
+class _JSONFormatter(ListFormatter, SingleFormatter):
+
+    def add_argument_group(self, parser):
+        group = parser.add_argument_group(title='json formatter')
+        group.add_argument(
+            '--noindent',
+            action='store_true',
+            dest='noindent',
+            help='whether to disable indenting the JSON'
+        )
+        group.add_argument(
+            '--projectname',
+            help='Set the project name'
+        )
+
+    def emit_list(self, column_names, data, stdout, parsed_args):
+        items = []
+        import time
+        for item in data:
+            element = dict(zip(column_names, item))
+            element["project_name"] = parsed_args.projectname
+            element["name"] = element.pop("test_name")
+            element["url"] = ""
+            element["_id"] = ""
+            element["creation_date"] = time.strftime("%Y-%m-%d %H:%M:%S")
+            items.append(element)
+        indent = None if parsed_args.noindent else 2
+        json.dump({"testcases": items}, stdout, indent=indent)
+
+    def emit_one(self, column_names, data, stdout, parsed_args):
+        one = dict(zip(column_names, data))
+        indent = None if parsed_args.noindent else 2
+        json.dump(one, stdout, indent=indent)
 
 
 def get_env_creds(admin_token=False):
@@ -70,7 +106,7 @@ class MoonClient(App):
     def __init__(self):
         super(MoonClient, self).__init__(
             description='Moon Python Client',
-            version='0.1',
+            version='0.2.0',
             command_manager=CommandManager('moon.client'),
             )
         creds = get_env_creds()
@@ -230,6 +266,8 @@ class MoonClient(App):
         data = self.get_url("/v3/auth/tokens", post_data=self.post)
         if "token" not in data:
             raise Exception("Authentication problem ({})".format(data))
+        from cliff.formatters.json_format import JSONFormatter
+        JSONFormatter = _JSONFormatter
 
     def prepare_to_run_command(self, cmd):
         self.log.debug('prepare_to_run_command %s', cmd.__class__.__name__)
@@ -238,6 +276,7 @@ class MoonClient(App):
         self.log.debug('clean_up %s', cmd.__class__.__name__)
         if err:
             self.log.debug('got an error: %s', err)
+        self.log.debug("result: {}".format(result))
 
 
 def main(argv=sys.argv[1:]):

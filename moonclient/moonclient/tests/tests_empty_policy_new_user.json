@@ -28,10 +28,16 @@
         "description": "Force the admin role for the user demo on the project admin (for testing purpose)."
       },
       {
+        "name": "neutron net-list",
+        "external_command": "neutron net-list",
+        "result": "(?P<uuid_net>[\\w-]+)\\s+\\| public",
+        "description": "Get an Net ID"
+      },
+      {
         "name": "nova boot new server",
-        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image test_moonclient",
-        "result": "\\| OS-EXT-STS\\:vm_state\\s+\\| building",
-        "description": "Boot a new nova server."
+        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image --nic net-id=$uuid_net test_moonclient",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.",
+        "description": "Get an Image ID"
       },
       {
         "name": "sleep",
@@ -3397,12 +3403,6 @@
         "external_command": "nova --os-user-name demo  --os-project-name admin list",
         "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
         "description": "Check that nova server is still in running state."
-      },
-      {
-        "name": "pause",
-        "external_command": "read",
-        "result": "",
-        "description": "Pause"
       },
 
       {
