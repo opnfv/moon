@@ -28,12 +28,17 @@ class TestsLaunch(Lister):
     def get_parser(self, prog_name):
         parser = super(TestsLaunch, self).get_parser(prog_name)
         parser.add_argument(
-            '--stop-on-error',
+            '--stop-on-error', action="store_true",
             help='Stop the test on the first error',
+        )
+        parser.add_argument(
+            '--self', action="store_true",
+            help='Execute all internal tests',
         )
         parser.add_argument(
             'testfile',
             metavar='<filename(s)>',
+            nargs='?',
             help='Filenames that contains tests to run '
                  '(examples: /path/to/test.json, /path/to/directory/, '
                  '"/path/to/*-file.json" -- don\'t forget the quote)',
@@ -58,11 +63,12 @@ class TestsLaunch(Lister):
 
     def take_action(self, parsed_args):
         self.log.info("Write tests output to {}".format(self.logfile_name))
-        if not parsed_args.testfile:
-            self.log.error("You don't give a test filename.")
-            raise Exception("Cannot execute tests.")
-        if os.path.isfile(parsed_args.testfile):
-            return self.test_file(parsed_args.testfile)
+        if parsed_args.self:
+            import sys
+            import moonclient  # noqa
+            parsed_args.testfile = os.path.join(sys.modules['moonclient'].__path__[0], "tests")
+        if parsed_args.testfile and os.path.isfile(parsed_args.testfile):
+                    return self.test_file(parsed_args.testfile)
         else:
             cpt = 1
             filenames = []
