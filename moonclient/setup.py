@@ -5,13 +5,13 @@
 # This software is distributed under the terms and conditions of the 'Apache-2.0'
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+from setuptools import setup, find_packages
+from moonclient import __version__
 
 PROJECT = 'python-moonclient'
 
 # Change docs/sphinx/conf.py too!
-VERSION = '0.1'
-
-from setuptools import setup, find_packages
+VERSION = __version__
 
 try:
     long_description = open('README.rst', 'rt').read()

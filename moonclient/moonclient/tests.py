@@ -203,6 +203,7 @@ class TestsLaunch(Lister):
                         overall_result = overall_result and True
                     else:
                         compare = "\033[1m\033[31mFalse\033[m"
+                        self.app.incr_error()
                         overall_result = overall_result and False
                 else:
                     overall_result = overall_result and compare
@@ -213,6 +214,7 @@ class TestsLaunch(Lister):
                             compare = "\033[mTrue\033[m"
                     else:
                         compare = "\033[1m\033[31mFalse\033[m"
+                        self.app.incr_error()
                 data_tmp.append(compare)
                 data_tmp.append(test["description"])
                 data.append(data_tmp)

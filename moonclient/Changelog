@@ -7,6 +7,11 @@
 CHANGES
 =======
 
+0.3.0
+-----
+
+* Return code matches now the number of error occurred during tests
+
 0.2.0
 -----
 
