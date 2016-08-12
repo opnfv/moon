@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+if [ $# -eq 1 ]; then cd $1; fi
+
 # ==========================================================
 # test for OpenStack/Moon API through moonclient cli
 
