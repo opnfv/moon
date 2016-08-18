@@ -4,7 +4,7 @@
     "authz": [
       {
         "auth_name": "admin",
-        "auth_password": "password",
+        "auth_password": "console",
         "auth_tenant": "admin",
         "description": "Change user to admin (just in case...)"
       },
@@ -72,7 +72,7 @@
       },
       {
         "name": "add role admin to demo",
-        "external_command": "keystone user-role-add --user demo --role admin --tenant demo",
+        "external_command": "openstack role add --project demo --user demo admin ",
         "result": "",
         "description": "Add role admin to user demo (an error may occurred)"
       },
