@@ -1,18 +1,25 @@
 #!/usr/bin/python
 
 # Copyright 2015 Open Platform for NFV Project, Inc. and its contributors
-# This software is distributed under the terms and conditions of the 'Apache-2.0'
-# license which can be found in the file 'LICENSE' in this package distribution
+# This software is distributed under the terms and conditions of the
+# 'Apache-2.0'license which can be found in the file 'LICENSE' in this
+# package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-
+import argparse
+import functest.utils.functest_logger as ft_logger
+import functest.utils.functest_utils as functest_utils
 import os
 import sys
 import time
-import functest.utils.functest_logger as ft_logger
-import functest.utils.functest_utils as functest_utils
 import yaml
 
+parser = argparse.ArgumentParser()
+
+parser.add_argument("-r", "--report",
+                    help="Create json result file",
+                    action="store_true")
+args = parser.parse_args()
 
 with open(os.environ["CONFIG_FUNCTEST_YAML"]) as f:
     functest_yaml = yaml.safe_load(f)
@@ -46,28 +53,20 @@ def main():
         'duration': duration,
         'status': test_status,
     }
-    pod_name = functest_utils.get_pod_name(logger)
-    scenario = functest_utils.get_scenario(logger)
-    version = functest_utils.get_version(logger)
-    build_tag = functest_utils.get_build_tag(logger)
 
-    logger.info("Pushing MOON results: TEST_DB_URL=%(db)s pod_name=%(pod)s "
-                "version=%(v)s scenario=%(s)s criteria=%(c)s details=%(d)s" % {
-                    'db': TEST_DB_URL,
-                    'pod': pod_name,
-                    'v': version,
-                    's': scenario,
-                    'c': details['status'],
-                    'b': build_tag,
-                    'd': details,
-                })
-    functest_utils.push_results_to_db("MOON",
-                                      "MOON-notification",
-                                      logger,
-                                      start_time,
-                                      stop_time,
-                                      details['status'],
-                                      details)
+    functest_utils.logger_test_results(logger, "moon",
+                                       "moon_authentication",
+                                       test_status, details)
+    if args.report:
+        functest_utils.push_results_to_db("moon",
+                                          "moon_authentication",
+                                          logger,
+                                          start_time,
+                                          stop_time,
+                                          test_status,
+                                          details)
+        logger.info("Moon results pushed to DB")
+
     if ret_val != 0:
         sys.exit(-1)
 
