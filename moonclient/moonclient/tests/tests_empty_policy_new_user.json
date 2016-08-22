@@ -131,7 +131,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass password",
+        "command": "subject add demo --subject_pass console",
         "result": "",
         "description": "",
         "command_options": ""
