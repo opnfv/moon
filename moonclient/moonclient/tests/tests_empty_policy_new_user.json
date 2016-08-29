@@ -4,7 +4,7 @@
     "authz": [
       {
         "auth_name": "admin",
-        "auth_password": "password",
+        "auth_password": "console",
         "auth_tenant": "admin",
         "description": "Change user to admin (just in case...)"
       },
@@ -131,7 +131,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass password",
+        "command": "subject add demo --subject_pass console",
         "result": "",
         "description": "",
         "command_options": ""
@@ -3207,7 +3207,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass password",
+        "command": "subject add demo --subject_pass console",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3374,7 +3374,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add demo --subject_pass password",
+        "command": "subject add demo --subject_pass console",
         "result": "",
         "description": "Add demo subject.",
         "command_options": ""
@@ -3429,7 +3429,7 @@
 
       {
         "auth_name": "demo",
-        "auth_password": "password",
+        "auth_password": "console",
         "auth_tenant": "admin",
         "description": "Change user to demo"
       },

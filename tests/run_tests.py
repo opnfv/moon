@@ -26,7 +26,7 @@ logger = ft_logger.Logger("moon").getLogger()
 
 
 def main():
-    cmd = "moon test --self"
+    cmd = "moon test --password console --self"
 
     start_time = time.time()
 
