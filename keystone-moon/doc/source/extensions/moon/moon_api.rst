@@ -3,7 +3,7 @@ Moon API
 
 Here are Moon API with some examples of posted data and returned data.
 
-All requests must be prefexied by /moon/v3/OS-MOON.
+All requests must be prefixed with the host and port, for example: http://localhost:35357/moon/authz/123456789/123456789/servers/list
 
 Authz
 -----
