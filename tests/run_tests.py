@@ -30,22 +30,59 @@ COPPER_REPO = dirs.get('dir_repo_moon')
 TEST_DB_URL = functest_yaml.get('results').get('test_db_url')
 
 logger = ft_logger.Logger("moon").getLogger()
+try:
+    # Python3 version
+    from urllib.request import urlopen, HTTPBasicAuthHandler, build_opener, install_opener
+except ImportError:
+    # Python2 version
+    from urllib import urlopen
+    from urllib2 import HTTPBasicAuthHandler, build_opener, install_opener
 
 
-def main():
+def test_federation():
+    # Retrieve Moon token
+    url = urlopen('http://localhost:8080/moon/token',
+                  data='grant_type=password&username=admin&password=console'.encode('utf-8'))
+    code = url.getcode()
+    if code not in (200, 201, 202, 204):
+        return False, "Not able to retrieve Moon token."
+
+    # Retrieve ODL token
+    auth_handler = HTTPBasicAuthHandler()
+    auth_handler.add_password(realm='Moon',
+                              uri='http://localhost:8080/auth/v1/domains',
+                              user='admin',
+                              passwd='console')
+    opener = build_opener(auth_handler)
+    install_opener(opener)
+    url = urlopen('http://www.example.com/login.html')
+    code = url.getcode()
+    if code not in (200, 201, 202, 204):
+        return False, "Not able to retrieve ODL token."
+    return True, ""
+
+
+def test_moon_openstack():
     cmd = "moon test --password console --self"
-
-    start_time = time.time()
 
     ret_val = functest_utils.execute_command(cmd, logger, exit_on_error=False)
 
+    return ret_val
+
+
+def main():
+    start_time = time.time()
+
+    result_os = test_moon_openstack()
+    result_odl = test_federation()
+
     stop_time = time.time()
     duration = round(stop_time - start_time, 1)
-    if ret_val == 0:
-        logger.info("MOON PASSED")
+    if result_os == 0 and result_odl[0]:
+        logger.info("OS MOON PASSED")
         test_status = 'PASS'
     else:
-        logger.info("MOON")
+        logger.info("OS MOON ERROR")
         test_status = 'FAIL'
 
     details = {
@@ -67,10 +104,13 @@ def main():
                                           details)
         logger.info("Moon results pushed to DB")
 
-    if ret_val != 0:
-        sys.exit(-1)
+    if result_os != 0 or not result_odl[0]:
+        return False
+    return True
 
-    sys.exit(0)
 
 if __name__ == '__main__':
-    main()
+    ret = main()
+    if ret:
+        sys.exit(0)
+    sys.exit(1)
