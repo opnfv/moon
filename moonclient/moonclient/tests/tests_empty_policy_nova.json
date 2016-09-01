@@ -8,21 +8,33 @@
       },
 
       {
+        "name": "get cirros image",
+        "external_command": "wget http://download.cirros-cloud.net/0.3.4/cirros-0.3.4-x86_64-disk.img -o /tmp/cirros.img",
+        "result": "",
+        "description": "Download a Cirros image"
+      },
+      {
+        "name": "install cirros image",
+        "external_command": "glance image-create --name \"cirros\"  --disk-format qcow2 --file /tmp/cirros.img --container-format bare",
+        "result": "",
+        "description": "Upload the Cirros image in glance"
+      },
+      {
         "name": "nova image-list",
         "external_command": "nova image-list",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.*",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros",
         "description": "Get an Image ID"
       },
       {
         "name": "neutron net-list",
         "external_command": "neutron net-list",
-        "result": "(?P<uuid_net>[\\w-]+)\\s+\\| public",
+        "result": "(?P<uuid_net>[\\w-]+)\\s+\\| ext-net",
         "description": "Get an Net ID"
       },
       {
         "name": "nova boot new server",
         "external_command": "nova boot  --flavor m1.tiny --image $uuid_image --nic net-id=$uuid_net test_moonclient",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros-0.",
+        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros",
         "description": "Get an Image ID"
       },
       {
