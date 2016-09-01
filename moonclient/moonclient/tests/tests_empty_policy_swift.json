@@ -35,20 +35,20 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "no_result": "demo",
+        "no_result": "admin",
         "description": "Check if tenant demo is used."
       },
       {
-        "name": "add tenant demo",
-        "command": "tenant add demo",
+        "name": "add tenant admin",
+        "command": "tenant add admin",
         "result": "^$",
         "description": "Add a new tenant",
         "command_options": ""
       },
       {
-        "name": "check tenant demo",
+        "name": "check tenant admin",
         "command": "tenant list",
-        "result": "(?P<uuid>\\w+)\\s+demo",
+        "result": "(?P<uuid>\\w+)\\s+admin",
         "description": "Check that tenant demo has been correctly added"
       },
       {
@@ -74,8 +74,8 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "demo",
-        "description": "Check if tenant demo is used."
+        "result": "admin",
+        "description": "Check if tenant admin is used."
       },
       {
         "name": "select_authz_ie",
@@ -889,8 +889,8 @@
       {
         "name": "list tenant",
         "command": "tenant list",
-        "result": "demo",
-        "description": "Check if tenant demo is used."
+        "result": "admin",
+        "description": "Check if tenant admin is used."
       },
 
       {
@@ -1159,7 +1159,7 @@
         "name": "delete_tenant",
         "command": "tenant delete $uuid",
         "result": "",
-        "description": "Delete the tenant demo",
+        "description": "Delete the tenant admin",
         "command_options": ""
       },
       {

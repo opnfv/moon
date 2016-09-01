@@ -14,6 +14,10 @@ import sys
 import time
 import yaml
 
+
+PORT_ODL = 8181
+HOST_ODL = "localhost"
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument("-r", "--report",
@@ -41,31 +45,31 @@ except ImportError:
 
 def test_federation():
     # Retrieve Moon token
-    url = urlopen('http://localhost:8080/moon/token',
+    url = urlopen('http://{host}:{port}/moon/token'.format(host=HOST_ODL, port=PORT_ODL),
                   data='grant_type=password&username=admin&password=console'.encode('utf-8'))
     code = url.getcode()
     if code not in (200, 201, 202, 204):
-        return False, "Not able to retrieve Moon token."
+        return False, "Not able to retrieve Moon token (error code: {}).".format(code)
 
     # Retrieve ODL token
     auth_handler = HTTPBasicAuthHandler()
     auth_handler.add_password(realm='Moon',
-                              uri='http://localhost:8080/auth/v1/domains',
+                              uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
                               user='admin',
                               passwd='console')
     opener = build_opener(auth_handler)
     install_opener(opener)
-    url = urlopen('http://www.example.com/login.html')
+    url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL))
     code = url.getcode()
     if code not in (200, 201, 202, 204):
-        return False, "Not able to retrieve ODL token."
+        return False, "Not able to retrieve ODL token (error code: {}).".format(code)
     return True, ""
 
 
 def test_moon_openstack():
     cmd = "moon test --password console --self"
 
-    ret_val = functest_utils.execute_command(cmd, logger, exit_on_error=False)
+    ret_val = functest_utils.execute_command(cmd, logger)
 
     return ret_val
 
@@ -89,6 +93,10 @@ def main():
         'timestart': start_time,
         'duration': duration,
         'status': test_status,
+        'results': {
+            'openstack': result_os,
+            'opendaylight': result_odl
+        }
     }
 
     functest_utils.logger_test_results(logger, "moon",

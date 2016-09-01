@@ -129,10 +129,13 @@ class TestsLaunch(Lister):
                     description = ""
                     if "auth_name" in test:
                         username = test["auth_name"]
+                        os.environ["OS_USERNAME"] = test["auth_name"]
                     if "auth_password" in test:
                         password = test["auth_password"]
+                        os.environ["OS_PASSWORD"] = test["auth_password"]
                     if "auth_tenant" in test:
                         tenant = test["auth_tenant"]
+                        os.environ["OS_TENANT_NAME"] = test["auth_tenant"]
                     if "auth_host" in test:
                         host = test["auth_host"]
                     if "auth_port" in test:
@@ -158,7 +161,7 @@ class TestsLaunch(Lister):
                     data.append(data_tmp)
                     continue
                 data_tmp = list()
-                tmp_filename = os.path.join("/tmp", uuid4().hex)
+                tmp_filename = os.path.join("/tmp", "moon_{}.tmp".format(uuid4().hex))
                 tmp_filename_fd = open(tmp_filename, "w")
                 self.log.debug("test={}".format(test))
                 if "command" not in test:
@@ -189,6 +192,7 @@ class TestsLaunch(Lister):
                     self.app.stdout = stdout_back
                     result_str = open(tmp_filename, "r").read()
                     self.logfile.write("{}".format(result_str))
+                os.unlink(tmp_filename)
                 data_tmp.append(group_name)
                 data_tmp.append(test["name"])
                 if "result" in test:
