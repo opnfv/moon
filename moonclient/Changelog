@@ -7,6 +7,11 @@
 CHANGES
 =======
 
+0.4.0
+-----
+
+* Add an argument to force the name of the logfile for test command.
+
 0.3.0
 -----
 
