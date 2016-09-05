@@ -43,6 +43,12 @@ class TestsLaunch(Lister):
                  '(examples: /path/to/test.json, /path/to/directory/, '
                  '"/path/to/*-file.json" -- don\'t forget the quote)',
         )
+        parser.add_argument(
+            '--logfile',
+            metavar='<logfile-str>',
+            help='Force Log filename.',
+            default=None
+        )
         return parser
 
     def __replace_var_in_str(self, data_str):
@@ -62,6 +68,8 @@ class TestsLaunch(Lister):
         return False
 
     def take_action(self, parsed_args):
+        if parsed_args.logfile:
+            self.logfile_name = parsed_args.logfile
         self.log.info("Write tests output to {}".format(self.logfile_name))
         if parsed_args.self:
             import sys
@@ -103,8 +111,11 @@ class TestsLaunch(Lister):
             )
 
     def test_file(self, testfile):
-        self.logfile_name = "/tmp/moonclient_test_{}.log".format(time.strftime("%Y%m%d-%H%M%S"))
-        self.logfile = open(self.logfile_name, "w")
+        if not self.logfile_name:
+            self.logfile_name = "/tmp/moonclient_test_{}.log".format(time.strftime("%Y%m%d-%H%M%S"))
+        self.logfile = open(self.logfile_name, "a")
+        self.logfile.write(80*"=" + "\n")
+        self.logfile.write(testfile + "\n\n")
         stdout_back = self.app.stdout
         tests_dict = json.load(open(testfile))
         self.log.debug("tests_dict = {}".format(tests_dict))
@@ -184,7 +195,9 @@ class TestsLaunch(Lister):
                     else:
                         command = test["command"] + " " + global_command_options
                     command = self.__replace_var_in_str(command)
-                    self.logfile.write(time.strftime(self.TIME_FORMAT) + " " + "-----> {}\n".format(command))
+                    self.logfile.write(time.strftime(self.TIME_FORMAT) + " " +
+                                       test["name"] + " " +
+                                       "-----> {}\n".format(command))
                     self.log.info("    \\-executing {}".format(command))
                     self.app.stdout = tmp_filename_fd
                     result_id = self.app.run_subcommand(shlex.split(command))

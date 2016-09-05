@@ -67,11 +67,12 @@ def test_federation():
 
 
 def test_moon_openstack():
-    cmd = "moon test --password console --self"
+    log_filename = "moonclient_selftest.log"
+    cmd = "moon test --password console --self --logfile {}".format(log_filename)
 
-    ret_val = functest_utils.execute_command(cmd, logger)
+    ret_val = functest_utils.execute_command(cmd, exit_on_error=False)
 
-    return ret_val
+    return ret_val, open(log_filename, "rt").read()
 
 
 def main():
@@ -88,6 +89,10 @@ def main():
     else:
         logger.info("OS MOON ERROR")
         test_status = 'FAIL'
+        logger.info("Errors from OpenStack tests:")
+        logger.info(result_os[1])
+        logger.info("Errors from Federation tests:")
+        logger.info(result_odl[1])
 
     details = {
         'timestart': start_time,

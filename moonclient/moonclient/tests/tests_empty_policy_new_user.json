@@ -22,7 +22,7 @@
         "description": "Upload the Cirros image in glance"
       },
       {
-        "name": "nova image-list",
+        "name": "openstack image list",
         "external_command": "nova image-list",
         "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros",
         "description": "Get an Image ID"
@@ -130,7 +130,7 @@
       },
       {
         "name": "add_subject",
-        "command": "subject add admin --subject_pass nomoresecrete",
+        "command": "subject add admin --subject_pass console",
         "result": "",
         "description": "",
         "command_options": ""
@@ -959,7 +959,7 @@
 
       {
         "name": "add_subject",
-        "command": "subject add admin --subject_pass nomoresecrete",
+        "command": "subject add admin --subject_pass console",
         "result": "",
         "description": "Add admin subject.",
         "command_options": ""
@@ -3442,7 +3442,7 @@
       {
         "auth_name": "demo",
         "auth_password": "console",
-        "auth_tenant": "admin",
+        "auth_tenant": "demo",
         "description": "Change user to demo"
       },
 
