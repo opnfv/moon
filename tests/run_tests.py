@@ -13,7 +13,12 @@ import os
 import sys
 import time
 import yaml
-
+import subprocess
+import json
+try:
+    import http.client as client
+except ImportError:
+    import httplib as client
 
 PORT_ODL = 8181
 HOST_ODL = "localhost"
@@ -43,26 +48,42 @@ except ImportError:
     from urllib2 import HTTPBasicAuthHandler, build_opener, install_opener
 
 
+def __get_keystone_url():
+    with subprocess.Popen(["openstack", "endpoint", "show", "keystone", "-f", "yaml"], stdout=subprocess.PIPE) as proc:
+        y = yaml.load(proc.stdout.read())
+        url = y['publicurl']
+        url = url.replace("http://", "")
+        url = url.replace("https://", "")
+        host, port = url.split(":", maxsplit=1)
+        port = port.split("/")[0]
+        return host, port
+
+
 def test_federation():
     # Retrieve Moon token
-    url = urlopen('http://{host}:{port}/moon/token'.format(host=HOST_ODL, port=PORT_ODL),
-                  data='grant_type=password&username=admin&password=console'.encode('utf-8'))
-    code = url.getcode()
-    if code not in (200, 201, 202, 204):
-        return False, "Not able to retrieve Moon token (error code: {}).".format(code)
+    khost, kport = __get_keystone_url()
+    auth_data = {'username': 'admin', 'password': 'console'}
+    conn = client.HTTPConnection(khost, kport)
+    headers = {"Content-type": "application/json"}
+    conn.request("POST", "/moon/auth/tokens", json.dumps(auth_data).encode('utf-8'), headers=headers)
+    resp = conn.getresponse()
+    if resp.status not in (200, 201, 202, 204):
+        return False, "Not able to retrieve Moon token on {}:{} (error code: {}).".format(khost, kport, resp.status)
+
 
     # Retrieve ODL token
-    auth_handler = HTTPBasicAuthHandler()
-    auth_handler.add_password(realm='Moon',
-                              uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
-                              user='admin',
-                              passwd='console')
-    opener = build_opener(auth_handler)
-    install_opener(opener)
-    url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL))
-    code = url.getcode()
-    if code not in (200, 201, 202, 204):
-        return False, "Not able to retrieve ODL token (error code: {}).".format(code)
+    # TODO (asteroide): must found how to get ODL host and port
+    # auth_handler = HTTPBasicAuthHandler()
+    # auth_handler.add_password(realm='Moon',
+    #                           uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
+    #                           user='admin',
+    #                           passwd='console')
+    # opener = build_opener(auth_handler)
+    # install_opener(opener)
+    # url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL))
+    # code = url.getcode()
+    # if code not in (200, 201, 202, 204):
+    #     return False, "Not able to retrieve ODL token (error code: {}).".format(code)
     return True, ""
 
 
