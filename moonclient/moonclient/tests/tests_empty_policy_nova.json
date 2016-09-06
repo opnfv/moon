@@ -20,6 +20,48 @@
         "description": "Upload the Cirros image in glance"
       },
       {
+        "name": "create secgroup",
+        "external_command": "nova secgroup-add-rule default icmp -1 -1 0.0.0.0/0",
+        "result": "",
+        "description": "Create a new secgroup in Nova"
+      },
+      {
+        "name": "create secgroup",
+        "external_command": "nova secgroup-add-rule default tcp 22 22 0.0.0.0/0",
+        "result": "",
+        "description": "Create a new secgroup in Nova"
+      },
+      {
+        "name": "create router",
+        "external_command": "neutron router-create demo-router",
+        "result": "",
+        "description": "Create a new router"
+      },
+      {
+        "name": "set router",
+        "external_command": "neutron router-gateway-set demo-router ext-net",
+        "result": "",
+        "description": "Configure the new router"
+      },
+      {
+        "name": "set router",
+        "external_command": "neutron net-create demo-net",
+        "result": "",
+        "description": "Configure the new router"
+      },
+      {
+        "name": "set router",
+        "external_command": "neutron subnet-create demo-net 192.168.1.0/24 --name demo-subnet --gateway 192.168.1.1",
+        "result": "",
+        "description": "Configure the new router"
+      },
+      {
+        "name": "set router",
+        "external_command": "neutron router-interface-add demo-router demo-subnet",
+        "result": "",
+        "description": "Configure the new router"
+      },
+      {
         "name": "nova image-list",
         "external_command": "nova image-list",
         "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros",
@@ -33,8 +75,8 @@
       },
       {
         "name": "nova boot new server",
-        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image --nic net-id=$uuid_net test_moonclient",
-        "result": "(?P<uuid_image>[\\w-]+)\\s+\\| cirros",
+        "external_command": "nova boot  --flavor m1.tiny --image $uuid_image --nic net-id=$uuid_net --security-group default test_moonclient",
+        "result": "",
         "description": "Get an Image ID"
       },
       {
