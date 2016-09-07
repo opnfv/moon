@@ -135,9 +135,12 @@ class MoonClient(App):
     def nb_error(self):
         return self._nb_error
 
-    def incr_error(self):
+    def incr_error(self, msg=""):
         self._nb_error += 1
-        print("INCREMENTING ERRORS {}".format(self._nb_error))
+        if not msg:
+            print("INCREMENTING ERRORS {}".format(self._nb_error))
+        else:
+            print("INCREMENTING ERRORS {} [{}]".format(self._nb_error, msg))
 
     def get_tenant_uuid(self, tenant_name):
         return self.get_url("/v3/projects?name={}".format(tenant_name), authtoken=True, port=5000)["projects"][0]["id"]

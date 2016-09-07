@@ -220,7 +220,7 @@ class TestsLaunch(Lister):
                         overall_result = overall_result and True
                     else:
                         compare = "\033[1m\033[31mFalse\033[m"
-                        self.app.incr_error()
+                        self.app.incr_error(error_str)
                         overall_result = overall_result and False
                 else:
                     overall_result = overall_result and compare

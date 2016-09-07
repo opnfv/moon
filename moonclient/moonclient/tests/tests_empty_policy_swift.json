@@ -4,7 +4,8 @@
     "authz": [
       {
         "auth_name": "admin",
-        "auth_tenant": "demo",
+        "auth_password": "console",
+        "auth_tenant": "admin",
         "description": "Change user to admin (just in case...)"
       },
 
