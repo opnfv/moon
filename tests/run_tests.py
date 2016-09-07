@@ -49,14 +49,14 @@ except ImportError:
 
 
 def __get_endpoint_url(name="keystone"):
-    with subprocess.Popen(["openstack", "endpoint", "show", name, "-f", "yaml"], stdout=subprocess.PIPE) as proc:
-        y = yaml.load(proc.stdout.read())
-        url = y['publicurl']
-        url = url.replace("http://", "")
-        url = url.replace("https://", "")
-        host, port = url.split(":", maxsplit=1)
-        port = port.split("/")[0]
-        return host, port
+    proc = subprocess.Popen(["openstack", "endpoint", "show", name, "-f", "yaml"], stdout=subprocess.PIPE)
+    y = yaml.load(proc.stdout.read())
+    url = y['publicurl']
+    url = url.replace("http://", "")
+    url = url.replace("https://", "")
+    host, port = url.split(":")
+    port = port.split("/")[0]
+    return host, port
 
 
 def test_federation():
