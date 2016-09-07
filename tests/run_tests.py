@@ -48,8 +48,8 @@ except ImportError:
     from urllib2 import HTTPBasicAuthHandler, build_opener, install_opener
 
 
-def __get_keystone_url():
-    with subprocess.Popen(["openstack", "endpoint", "show", "keystone", "-f", "yaml"], stdout=subprocess.PIPE) as proc:
+def __get_endpoint_url(name="keystone"):
+    with subprocess.Popen(["openstack", "endpoint", "show", name, "-f", "yaml"], stdout=subprocess.PIPE) as proc:
         y = yaml.load(proc.stdout.read())
         url = y['publicurl']
         url = url.replace("http://", "")
@@ -61,18 +61,25 @@ def __get_keystone_url():
 
 def test_federation():
     # Retrieve Moon token
-    khost, kport = __get_keystone_url()
+    nhost, nport = __get_endpoint_url()
     auth_data = {'username': 'admin', 'password': 'console'}
-    conn = client.HTTPConnection(khost, kport)
+    conn = client.HTTPConnection(nhost, nport)
     headers = {"Content-type": "application/json"}
     conn.request("POST", "/moon/auth/tokens", json.dumps(auth_data).encode('utf-8'), headers=headers)
     resp = conn.getresponse()
     if resp.status not in (200, 201, 202, 204):
-        return False, "Not able to retrieve Moon token on {}:{} (error code: {}).".format(khost, kport, resp.status)
+        return False, "Not able to retrieve Moon token on {}:{} (error code: {}).".format(nhost, nport, resp.status)
 
 
     # Retrieve ODL token
-    # TODO (asteroide): must found how to get ODL host and port
+    nhost, nport = __get_endpoint_url(name="neutron")
+    auth_data = {'username': 'admin', 'password': 'console'}
+    conn = client.HTTPConnection(nhost, nport)
+    headers = {"Content-type": "application/json"}
+    conn.request("POST", "/auth/v1/domains", json.dumps(auth_data).encode('utf-8'), headers=headers)
+    resp = conn.getresponse()
+    if resp.status not in (200, 201, 202, 204):
+        return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, nport, resp.status)
     # auth_handler = HTTPBasicAuthHandler()
     # auth_handler.add_password(realm='Moon',
     #                           uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
