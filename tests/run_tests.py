@@ -60,9 +60,17 @@ def __get_endpoint_url(name="keystone"):
 
 
 def test_federation():
+
+    username = "test_fede"
+    password = "pass_fede"
+
+    # Create a new user in OpenStack
+    proc = subprocess.Popen(["openstack", "user", "create", "--password", password, username, "-f", "yaml"], stdout=subprocess.PIPE)
+    logger.info("Create new user ({})".format(proc.stdout.read()))
+
     # Retrieve Moon token
     nhost, nport = __get_endpoint_url()
-    auth_data = {'username': 'admin', 'password': 'console'}
+    auth_data = {'username': username, 'password': password}
     conn = client.HTTPConnection(nhost, nport)
     headers = {"Content-type": "application/json"}
     conn.request("POST", "/moon/auth/tokens", json.dumps(auth_data).encode('utf-8'), headers=headers)
