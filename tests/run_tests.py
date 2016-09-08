@@ -74,7 +74,7 @@ def test_federation():
     # Retrieve ODL token
     nhost, nport = __get_endpoint_url(name="neutron")
     auth_data = {'username': 'admin', 'password': 'console'}
-    conn = client.HTTPConnection(nhost, nport)
+    conn = client.HTTPConnection(nhost, "8181")
     headers = {"Content-type": "application/json"}
     conn.request("POST", "/auth/v1/domains", json.dumps(auth_data).encode('utf-8'), headers=headers)
     resp = conn.getresponse()
