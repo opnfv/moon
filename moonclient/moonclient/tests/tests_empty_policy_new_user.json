@@ -3442,19 +3442,19 @@
 
       {
         "name": "demo: check nova command",
-        "external_command": "nova --os-user-name demo --os-project-name admin list",
+        "external_command": "nova --os-user-name demo --os-project-name demo list",
         "result": "test_moonclient",
         "description": "Check demo can list nova servers due to the current rules"
       },
       {
         "name": "demo: try to pause nova instance",
-        "external_command": "nova --os-username demo --os-project-name admin pause $uuid_server",
+        "external_command": "nova --os-username demo --os-project-name demo pause $uuid_server",
         "result": "^$",
         "description": "Pausing the server must be impossible due to the current rules"
       },
       {
         "name": "check nova command",
-        "external_command": "nova --os-user-name demo  --os-project-name admin list",
+        "external_command": "nova --os-user-name demo  --os-project-name demo list",
         "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
         "description": "Check that nova server is still in running state."
       },
