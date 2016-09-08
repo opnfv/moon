@@ -76,6 +76,12 @@
         "description": "Create a new tenant"
       },
       {
+        "name": "create user demo",
+        "external_command": "openstack user create --password console",
+        "result": "",
+        "description": "Create user demo"
+      },
+      {
         "name": "add role admin to demo",
         "external_command": "openstack role add --project admin --user demo admin",
         "result": "",
@@ -3442,19 +3448,19 @@
 
       {
         "name": "demo: check nova command",
-        "external_command": "nova --os-user-name demo --os-project-name demo list",
+        "external_command": "nova --os-user-name demo --os-project-name demo --os-password console list",
         "result": "test_moonclient",
         "description": "Check demo can list nova servers due to the current rules"
       },
       {
         "name": "demo: try to pause nova instance",
-        "external_command": "nova --os-username demo --os-project-name demo pause $uuid_server",
+        "external_command": "nova --os-username demo --os-project-name demo --os-password console pause $uuid_server",
         "result": "^$",
         "description": "Pausing the server must be impossible due to the current rules"
       },
       {
         "name": "check nova command",
-        "external_command": "nova --os-user-name demo  --os-project-name demo list",
+        "external_command": "nova --os-user-name demo  --os-project-name demo --os-password console list",
         "result": "\\| (?P<uuid_server>[\\w\\-]+)\\s+\\| test_moonclient\\s+\\| ACTIVE\\s+\\| [\\w\\-]+\\s+\\| Running",
         "description": "Check that nova server is still in running state."
       },
