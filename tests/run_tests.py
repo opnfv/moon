@@ -132,13 +132,12 @@ def main():
         }
     }
 
-    functest_utils.logger_test_results(logger, "moon",
+    functest_utils.logger_test_results("moon",
                                        "moon_authentication",
                                        test_status, details)
     if args.report:
         functest_utils.push_results_to_db("moon",
                                           "moon_authentication",
-                                          logger,
                                           start_time,
                                           stop_time,
                                           test_status,
