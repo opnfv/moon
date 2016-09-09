@@ -85,15 +85,15 @@ def test_federation():
     auth_data = {'username': 'admin', 'password': 'console'}
 
     # Get basic auth with curl
-    proc = subprocess.Popen("curl -u {}:{} http://{}:{}/auth/v1/domains".format(
-        auth_data["username"], auth_data["password"], nhost, nport),
-        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    _stdout = proc.stdout.read()
-    _stderr = proc.stderr.read()
-    if len(_stdout) > 0:
-        _stdout_json = json.loads(_stdout)
-        if _stdout_json['code'] not in (200, 201, 202, 204):
-            return False, "Not able to retrieve ODL auth ({}).".format(_stdout)
+    # proc = subprocess.Popen("curl -u {}:{} http://{}:{}/auth/v1/domains".format(
+    #     auth_data["username"], auth_data["password"], nhost, nport),
+    #     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # _stdout = proc.stdout.read()
+    # _stderr = proc.stderr.read()
+    # if len(_stdout) > 0:
+    #     _stdout_json = json.loads(_stdout)
+    #     if _stdout_json['code'] not in (200, 201, 202, 204):
+    #         return False, "Not able to retrieve ODL auth ({}).".format(_stdout)
 
     # Retrieve token from ODL
     # conn = client.HTTPConnection(nhost, "8181")
@@ -104,17 +104,17 @@ def test_federation():
     #     return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, "8181", resp.status)
 
     # Retrieve basic auth from ODL
-    # auth_handler = HTTPBasicAuthHandler()
-    # auth_handler.add_password(realm='Moon',
-    #                           uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
-    #                           user='admin',
-    #                           passwd='console')
-    # opener = build_opener(auth_handler)
-    # install_opener(opener)
-    # url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL))
-    # code = url.getcode()
-    # if code not in (200, 201, 202, 204):
-    #     return False, "Not able to retrieve ODL token (error code: {}).".format(code)
+    auth_handler = HTTPBasicAuthHandler()
+    auth_handler.add_password(realm='Moon',
+                              uri='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport),
+                              user=username,
+                              passwd=password)
+    opener = build_opener(auth_handler)
+    install_opener(opener)
+    url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport))
+    code = url.getcode()
+    if code not in (200, 201, 202, 204):
+        return False, "Not able to authenticate to ODL (error code: {}).".format(code)
     return True, ""
 
 
