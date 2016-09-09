@@ -77,7 +77,7 @@
       },
       {
         "name": "create user demo",
-        "external_command": "openstack user create --password console",
+        "external_command": "openstack user create --password console demo",
         "result": "",
         "description": "Create user demo"
       },

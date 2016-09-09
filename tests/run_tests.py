@@ -79,15 +79,31 @@ def test_federation():
         return False, "Not able to retrieve Moon token on {}:{} (error code: {}).".format(nhost, nport, resp.status)
 
 
-    # Retrieve ODL token
+    # Test ODL auth
     nhost, nport = __get_endpoint_url(name="neutron")
+    nport = "8181"
     auth_data = {'username': 'admin', 'password': 'console'}
-    conn = client.HTTPConnection(nhost, "8181")
-    headers = {"Content-type": "application/json"}
-    conn.request("POST", "/auth/v1/domains", json.dumps(auth_data).encode('utf-8'), headers=headers)
-    resp = conn.getresponse()
-    if resp.status not in (200, 201, 202, 204):
-        return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, nport, resp.status)
+
+    # Get basic auth with curl
+    proc = subprocess.Popen("curl -u {}:{} http://{}:{}/auth/v1/domains".format(
+        auth_data["username"], auth_data["password"], nhost, nport),
+        stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    _stdout = proc.stdout.read()
+    _stderr = proc.stderr.read()
+    if len(_stdout) > 0:
+        _stdout_json = json.loads(_stdout)
+        if _stdout_json['code'] not in (200, 201, 202, 204):
+            return False, "Not able to retrieve ODL auth ({}).".format(_stdout)
+
+    # Retrieve token from ODL
+    # conn = client.HTTPConnection(nhost, "8181")
+    # headers = {"Content-type": "application/json"}
+    # conn.request("POST", "/auth/v1/domains", json.dumps(auth_data).encode('utf-8'), headers=headers)
+    # resp = conn.getresponse()
+    # if resp.status not in (200, 201, 202, 204):
+    #     return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, "8181", resp.status)
+
+    # Retrieve basic auth from ODL
     # auth_handler = HTTPBasicAuthHandler()
     # auth_handler.add_password(realm='Moon',
     #                           uri='http://{host}:{port}/auth/v1/domains'.format(host=HOST_ODL, port=PORT_ODL),
