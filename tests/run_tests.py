@@ -15,6 +15,8 @@ import time
 import yaml
 import subprocess
 import json
+import requests
+from requests.auth import HTTPBasicAuth
 try:
     import http.client as client
 except ImportError:
@@ -104,15 +106,18 @@ def test_federation():
     #     return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, "8181", resp.status)
 
     # Retrieve basic auth from ODL
-    auth_handler = HTTPBasicAuthHandler()
-    auth_handler.add_password(realm='Moon',
-                              uri='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport),
-                              user=username,
-                              passwd=password)
-    opener = build_opener(auth_handler)
-    install_opener(opener)
-    url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport))
-    code = url.getcode()
+    # auth_handler = HTTPBasicAuthHandler()
+    # auth_handler.add_password(realm='Moon',
+    #                           uri='http://{host}:{port}'.format(host=nhost, port=nport),
+    #                           user=username,
+    #                           passwd=password)
+    # opener = build_opener(auth_handler)
+    # install_opener(opener)
+    # url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport))
+    # code = url.getcode()
+    auth = HTTPBasicAuth(username, password)
+    req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
+    code = req.status_code
     if code not in (200, 201, 202, 204):
         return False, "Not able to authenticate to ODL (error code: {}).".format(code)
     return True, ""
