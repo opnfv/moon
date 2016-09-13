@@ -21,6 +21,14 @@ try:
     import http.client as client
 except ImportError:
     import httplib as client
+try:
+    # Python3 version
+    from urllib.request import urlopen, HTTPBasicAuthHandler, build_opener, install_opener
+except ImportError:
+    # Python2 version
+    from urllib import urlopen
+    from urllib2 import HTTPBasicAuthHandler, build_opener, install_opener
+
 
 PORT_ODL = 8181
 HOST_ODL = "localhost"
@@ -41,13 +49,6 @@ COPPER_REPO = dirs.get('dir_repo_moon')
 TEST_DB_URL = functest_yaml.get('results').get('test_db_url')
 
 logger = ft_logger.Logger("moon").getLogger()
-try:
-    # Python3 version
-    from urllib.request import urlopen, HTTPBasicAuthHandler, build_opener, install_opener
-except ImportError:
-    # Python2 version
-    from urllib import urlopen
-    from urllib2 import HTTPBasicAuthHandler, build_opener, install_opener
 
 
 def __get_endpoint_url(name="keystone"):
@@ -70,6 +71,10 @@ def test_federation():
     proc = subprocess.Popen(["openstack", "user", "create", "--password", password, username, "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Create new user ({})".format(proc.stdout.read()))
 
+    # Add the role admin to our new user
+    proc = subprocess.Popen(["openstack", "role", "add ", "--project", "admin", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    logger.info("Add the role admin to our new user ({})".format(proc.stdout.read()))
+
     # Retrieve Moon token
     nhost, nport = __get_endpoint_url()
     auth_data = {'username': username, 'password': password}
@@ -84,37 +89,14 @@ def test_federation():
     # Test ODL auth
     nhost, nport = __get_endpoint_url(name="neutron")
     nport = "8181"
-    auth_data = {'username': 'admin', 'password': 'console'}
 
-    # Get basic auth with curl
-    # proc = subprocess.Popen("curl -u {}:{} http://{}:{}/auth/v1/domains".format(
-    #     auth_data["username"], auth_data["password"], nhost, nport),
-    #     stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # _stdout = proc.stdout.read()
-    # _stderr = proc.stderr.read()
-    # if len(_stdout) > 0:
-    #     _stdout_json = json.loads(_stdout)
-    #     if _stdout_json['code'] not in (200, 201, 202, 204):
-    #         return False, "Not able to retrieve ODL auth ({}).".format(_stdout)
+    # Test with basic login/pass
+    auth = HTTPBasicAuth("admin", "console")
+    req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
+    code = req.status_code
+    if code not in (200, 201, 202, 204):
+        return False, "Not able to authenticate to ODL with admin (error code: {}).".format(code)
 
-    # Retrieve token from ODL
-    # conn = client.HTTPConnection(nhost, "8181")
-    # headers = {"Content-type": "application/json"}
-    # conn.request("POST", "/auth/v1/domains", json.dumps(auth_data).encode('utf-8'), headers=headers)
-    # resp = conn.getresponse()
-    # if resp.status not in (200, 201, 202, 204):
-    #     return False, "Not able to retrieve ODL token on {}:{} (error code: {}).".format(nhost, "8181", resp.status)
-
-    # Retrieve basic auth from ODL
-    # auth_handler = HTTPBasicAuthHandler()
-    # auth_handler.add_password(realm='Moon',
-    #                           uri='http://{host}:{port}'.format(host=nhost, port=nport),
-    #                           user=username,
-    #                           passwd=password)
-    # opener = build_opener(auth_handler)
-    # install_opener(opener)
-    # url = urlopen('http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport))
-    # code = url.getcode()
     auth = HTTPBasicAuth(username, password)
     req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
     code = req.status_code
@@ -140,7 +122,7 @@ def main():
 
     stop_time = time.time()
     duration = round(stop_time - start_time, 1)
-    if result_os == 0 and result_odl[0]:
+    if result_os[0] == 0 and result_odl[0]:
         logger.info("OS MOON PASSED")
         test_status = 'PASS'
     else:
