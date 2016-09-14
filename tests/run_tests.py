@@ -75,6 +75,14 @@ def test_federation():
     proc = subprocess.Popen(["openstack", "role", "add ", "--project", "admin", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the role admin to our new user ({})".format(proc.stdout.read()))
 
+    # Add the sdn tenant
+    proc = subprocess.Popen(["openstack", "project", "add ", "sdn", "-f", "yaml"], stdout=subprocess.PIPE)
+    logger.info("Add the tenant sdn ({})".format(proc.stdout.read()))
+
+    # Add the role admin to test_fede in tenant sdn
+    proc = subprocess.Popen(["openstack", "role", "add ", "--project", "sdn", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    logger.info("Add the role admin for the user test_fede in the tenant sdn ({})".format(proc.stdout.read()))
+
     # Retrieve Moon token
     nhost, nport = __get_endpoint_url()
     auth_data = {'username': username, 'password': password}
@@ -91,11 +99,11 @@ def test_federation():
     nport = "8181"
 
     # Test with basic login/pass
-    auth = HTTPBasicAuth("admin", "console")
-    req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
-    code = req.status_code
-    if code not in (200, 201, 202, 204):
-        return False, "Not able to authenticate to ODL with admin (error code: {}).".format(code)
+    #auth = HTTPBasicAuth("admin", "console")
+    #req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
+    #code = req.status_code
+    #if code not in (200, 201, 202, 204):
+    #    return False, "Not able to authenticate to ODL with admin (error code: {}).".format(code)
 
     auth = HTTPBasicAuth(username, password)
     req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
