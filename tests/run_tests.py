@@ -72,15 +72,15 @@ def test_federation():
     logger.info("Create new user ({})".format(proc.stdout.read()))
 
     # Add the role admin to our new user
-    proc = subprocess.Popen(["openstack", "role", "add ", "--project", "admin", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "role", "add", "--project", "admin", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the role admin to our new user ({})".format(proc.stdout.read()))
 
     # Add the sdn tenant
-    proc = subprocess.Popen(["openstack", "project", "add ", "sdn", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "project", "create", "sdn", "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the tenant sdn ({})".format(proc.stdout.read()))
 
     # Add the role admin to test_fede in tenant sdn
-    proc = subprocess.Popen(["openstack", "role", "add ", "--project", "sdn", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "role", "add", "--project", "sdn", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the role admin for the user test_fede in the tenant sdn ({})".format(proc.stdout.read()))
 
     # Retrieve Moon token
@@ -163,7 +163,7 @@ def main():
                                           details)
         logger.info("Moon results pushed to DB")
 
-    if result_os != 0 or not result_odl[0]:
+    if result_os[0] != 0 or not result_odl[0]:
         return False
     return True
 
