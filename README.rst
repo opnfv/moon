@@ -18,8 +18,8 @@ moonclient
 this is a command-line interface to manipulate keystone-moon
 
 
-odl-aaa-moon
-------------
+upstream/odl-aaa-moon
+---------------------
 
 this is a fork of OpenDaylight/aaa which adds a shiro filter/realm to delegate OpenDaylight authenticaiton to keystone-moon
 
