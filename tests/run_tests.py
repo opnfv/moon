@@ -44,15 +44,17 @@ with open(os.environ["CONFIG_FUNCTEST_YAML"]) as f:
     functest_yaml = yaml.safe_load(f)
 
 dirs = functest_yaml.get('general').get('directories')
-FUNCTEST_REPO = dirs.get('dir_repo_functest')
-COPPER_REPO = dirs.get('dir_repo_moon')
 TEST_DB_URL = functest_yaml.get('results').get('test_db_url')
 
 logger = ft_logger.Logger("moon").getLogger()
 
+RESULTS_DIR = \
+    functest_utils.get_functest_config('general.directories.dir_results')
+
 
 def __get_endpoint_url(name="keystone"):
-    proc = subprocess.Popen(["openstack", "endpoint", "show", name, "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "endpoint", "show",
+                            name, "-f", "yaml"], stdout=subprocess.PIPE)
     y = yaml.load(proc.stdout.read())
     url = y['publicurl']
     url = url.replace("http://", "")
@@ -68,19 +70,26 @@ def test_federation():
     password = "pass_fede"
 
     # Create a new user in OpenStack
-    proc = subprocess.Popen(["openstack", "user", "create", "--password", password, username, "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "user", "create",
+                             "--password", password, username, "-f",
+                             "yaml"], stdout=subprocess.PIPE)
     logger.info("Create new user ({})".format(proc.stdout.read()))
 
     # Add the role admin to our new user
-    proc = subprocess.Popen(["openstack", "role", "add", "--project", "admin", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "role", "add", "--project",
+                             "admin", "--user", username, "admin", "-f",
+                             "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the role admin to our new user ({})".format(proc.stdout.read()))
 
     # Add the sdn tenant
-    proc = subprocess.Popen(["openstack", "project", "create", "sdn", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "project", "create", "sdn",
+                             "-f", "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the tenant sdn ({})".format(proc.stdout.read()))
 
     # Add the role admin to test_fede in tenant sdn
-    proc = subprocess.Popen(["openstack", "role", "add", "--project", "sdn", "--user", username, "admin", "-f", "yaml"], stdout=subprocess.PIPE)
+    proc = subprocess.Popen(["openstack", "role", "add", "--project",
+                             "sdn", "--user", username, "admin", "-f",
+                             "yaml"], stdout=subprocess.PIPE)
     logger.info("Add the role admin for the user test_fede in the tenant sdn ({})".format(proc.stdout.read()))
 
     # Retrieve Moon token
@@ -93,16 +102,15 @@ def test_federation():
     if resp.status not in (200, 201, 202, 204):
         return False, "Not able to retrieve Moon token on {}:{} (error code: {}).".format(nhost, nport, resp.status)
 
-
     # Test ODL auth
     nhost, nport = __get_endpoint_url(name="neutron")
     nport = "8181"
 
     # Test with basic login/pass
-    #auth = HTTPBasicAuth("admin", "console")
-    #req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
-    #code = req.status_code
-    #if code not in (200, 201, 202, 204):
+    # auth = HTTPBasicAuth("admin", "console")
+    # req = requests.get(url='http://{host}:{port}/auth/v1/domains'.format(host=nhost, port=nport), auth=auth)
+    # code = req.status_code
+    # if code not in (200, 201, 202, 204):
     #    return False, "Not able to authenticate to ODL with admin (error code: {}).".format(code)
 
     auth = HTTPBasicAuth(username, password)
@@ -114,10 +122,13 @@ def test_federation():
 
 
 def test_moon_openstack():
-    log_filename = "moonclient_selftest.log"
+    log_filename = RESULTS_DIR + "/moonclient_selftest.log"
     cmd = "moon test --password console --self --logfile {}".format(log_filename)
 
-    ret_val = functest_utils.execute_command(cmd, exit_on_error=False)
+    ret_val = functest_utils.execute_command(cmd,
+                                             info=True,
+                                             exit_on_error=False,
+                                             output_file=log_filename)
 
     return ret_val, open(log_filename, "rt").read()
 
