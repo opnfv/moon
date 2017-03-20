@@ -1,3 +1,5 @@
+.. _moon-releasenotes:
+
 ******************
 Moon Release Notes
 ******************
