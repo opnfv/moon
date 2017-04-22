@@ -18,6 +18,12 @@ moonclient
 this is a command-line interface to manipulate keystone-moon
 
 
+moonv4
+------
+
+this is the new moon framework based on micro-service architectures
+
+
 upstream/odl-aaa-moon
 ---------------------
 
