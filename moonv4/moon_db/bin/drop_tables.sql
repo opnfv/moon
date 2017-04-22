@@ -1,0 +1,18 @@
+use moon;
+drop table action_assignments;
+drop table object_assignments;
+drop table subject_assignments;
+drop table subject_scopes;
+drop table action_scopes;
+drop table object_scopes;
+drop table action_categories;
+drop table subject_categories;
+drop table object_categories;
+drop table rules;
+drop table sub_meta_rules;
+drop table actions;
+drop table objects;
+drop table subjects;
+drop table tenants;
+drop table intra_extensions;
+show tables;

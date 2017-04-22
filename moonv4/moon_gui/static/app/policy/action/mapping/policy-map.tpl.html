@@ -1,0 +1,64 @@
+<div ng-controller="PolicyMapController as map" class="modal" tabindex="-1" data-role="modalMappingPolicy">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$hide()">&times;</button>
+                <h4 class="modal-title" data-translate="moon.policy.map.title" data-translate-values="{ pdpName: map.pdp.name}"></h4>
+            </div>
+
+            <div class="modal-body">
+
+                <form class="form-horizontal" role="form" name="map.form">
+
+                    <div class="form-group" ng-class="{'has-error': map.form.policy.$dirty && (map.form.policy.$invalid || !map.selectedPolicy)}">
+
+                        <label class="col-sm-3 control-label" data-translate="moon.policy.map.form.list">List of Policies</label>
+
+                        <div class="col-sm-6">
+
+                            <ui-select ng-model="map.selectedPolicy" name="policy" required>
+                                <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                                <ui-select-choices repeat="policy in map.policies">
+                                    <div ng-bind="policy.name" ng-value="policy"></div>
+                                </ui-select-choices>
+                            </ui-select>
+
+                            <moon-loader ng-if="map.policiesLoading"></moon-loader>
+
+                            <div class="help-block" ng-show="map.form.policy.$dirty && (map.form.policy.$invalid || !map.selectedPolicy)">
+                                <small class="error" ng-show="map.form.policy.$error.required" data-translate="moon.policy.map.check.policy.required">Policy is required</small>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+            <div class="modal-footer">
+                <div class="btn-toolbar" style="float: right;">
+
+                    <a href="" ng-click="$hide()" class="btn btn-default">
+                        <span data-translate="moon.policy.map.action.cancel">Cancel</span>
+                    </a>
+
+                    <a href="" ng-disabled="map.mappingLoading" ng-click="map.map()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-link"></span>
+                        <span data-translate="moon.policy.map.action.map">Map</span>
+                    </a>
+
+                    <moon-loader ng-if="map.mappingLoading"></moon-loader>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

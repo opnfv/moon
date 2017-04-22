@@ -1,0 +1,194 @@
+<div ng-controller="ProjectViewController as view" class="modal" tabindex="-1" data-role="modalViewProject">
+
+	<div class="modal-dialog">
+
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="$hide()">&times;</button>
+				<h4 class="modal-title" data-translate="moon.project.view.title" data-translate-values="{projectName: view.project.name}"></h4>
+			</div>
+			<div class="modal-body">
+				<dl class="dl-horizontal">
+					<dt>Id</dt>
+					<dd ng-bind="view.project.id"></dd>
+					<dt>Name</dt>
+					<dd ng-bind="view.project.name"></dd>
+					<dt>Is_domain</dt>
+					<dd ng-bind="view.project.is_domain"></dd>
+					<dt>Link</dt>
+					<dd ng-bind="view.project.links.self"></dd>
+					<dt>enabled</dt>
+					<dd ng-bind="view.project.enabled"></dd>
+					<dt>Parent id</dt>
+					<dd ng-bind="view.project.parent_id"></dd>
+					<dt>Domain id</dt>
+					<dd ng-bind="view.project.domain_id"></dd>
+					<dt>Description</dt>
+					<dd ng-bind="view.project.description"></dd>
+				</dl>
+			</div>
+			
+			<!--<div class="modal-body">-->
+			<!---->
+				<!--&lt;!&ndash; objects &ndash;&gt;-->
+			<!---->
+				<!--<div class="row">-->
+					<!--<div class="col-md-12">-->
+						<!--<h1 class="pull-left" data-translate="moon.project.view.object.title">Objects</h1>-->
+					<!--</div>-->
+				<!--</div>-->
+												<!---->
+				<!--<div class="row top05">-->
+					<!--<div class="col-md-3"><label data-translate="moon.project.view.object.name">Name</label></div>-->
+					<!--<div class="col-md-7"><label data-translate="moon.project.view.object.description">Description</label></div>-->
+					<!--<div class="col-md-2"><label data-translate="moon.project.view.object.enabled">Enabled</label></div>-->
+				<!--</div>-->
+				<!---->
+				<!--<div class="row" ng-if="view.objectsLoading">-->
+					<!--<div class="col-md-12"><img src="assets/img/ajax-loader.gif" /> <em data-translate="moon.project.view.object.loading">Loading Objects</em></div>-->
+				<!--</div>-->
+				<!---->
+				<!--<div class="row" ng-if="!view.objectsLoading && !view.hasObjects()">-->
+					<!--<div class="col-md-12" data-translate="moon.project.view.object.notFound">Objects not found</div>-->
+				<!--</div>-->
+				<!---->
+				<!--<div class="row" ng-if="!view.objectsLoading && view.hasObjects()" ng-repeat="object in view.objects">-->
+					<!--<div class="col-md-3">{{object.name}}</div> -->
+					<!--<div class="col-md-7">{{object.description}}</div>-->
+					<!--<div class="col-md-2">-->
+						<!--<span ng-if="object.enabled" class="glyphicon glyphicon-ok"></span>-->
+					<!--</div>-->
+				<!--</div>-->
+                <!---->
+				<!--&lt;!&ndash; subjects &ndash;&gt;-->
+				<!---->
+				<!--<div class="row top10">-->
+					<!--<div class="col-md-12">-->
+						<!--<h1 class="pull-left" data-translate="moon.project.view.subject.title">Subjects</h1>-->
+					<!--</div>-->
+				<!--</div>-->
+												<!---->
+				<!--<div class="row top05">-->
+					<!--<div class="col-md-3"><label data-translate="moon.project.view.subject.name">Name</label></div>-->
+					<!--<div class="col-md-3"><label data-translate="moon.project.view.subject.domain">Domain</label></div>-->
+					<!--<div class="col-md-4"><label data-translate="moon.project.view.subject.mail">Mail</label></div>-->
+					<!--<div class="col-md-2"><label data-translate="moon.project.view.subject.enabled">Enabled</label></div>-->
+				<!--</div>-->
+				<!---->
+				<!--<div class="row">-->
+					<!--<div class="col-md-3">-->
+						<!--<ui-select ng-model="view.selectedSubject" on-select="view.resolveRoles($item); view.resolveGroups($item)">-->
+							<!--<ui-select-match placeholder="(None)">{{$select.selected.name}}</ui-select-match>-->
+							<!--<ui-select-choices repeat="subject in view.subjects">-->
+								<!--<div ng-value="subject">{{subject.name}}</div>-->
+							<!--</ui-select-choices>-->
+						<!--</ui-select>-->
+						<!--<img ng-if="view.subjectsLoading" src="assets/img/ajax-loader.gif" />-->
+					<!--</div> -->
+					<!--<div class="col-md-3">{{view.selectedSubject.domain}}</div>-->
+					<!--<div class="col-md-4">{{view.selectedSubject.mail}}</div>-->
+					<!--<div class="col-md-2">-->
+						<!--<div ng-if="view.selectedSubject != null">-->
+							<!--<span ng-if="view.selectedSubject.enabled" class="glyphicon glyphicon-ok"></span>-->
+						<!--</div>-->
+					<!--</div>-->
+				<!--</div>-->
+                <!---->
+                <!--&lt;!&ndash; roles &ndash;&gt;-->
+                <!---->
+               	<!--<div ng-if="view.hasSelectedSubject()">-->
+                <!---->
+	               	<!--<div class="row top10">-->
+						<!--<div class="col-md-12">-->
+							<!--<h1 class="pull-left" data-translate="moon.project.view.role.title">Roles</h1>-->
+						<!--</div>-->
+					<!--</div>-->
+														<!---->
+					<!--<div class="row top05">-->
+					<!---->
+						<!--<div class="col-md-3"><label data-translate="moon.project.view.role.value">Value</label></div>-->
+		                <!--<div class="col-md-5"><label data-translate="moon.project.view.role.description">Description</label></div>-->
+		                <!--<div class="col-md-2"><label data-translate="moon.project.view.role.assigned">Assigned</label></div>-->
+		                <!--<div class="col-md-2"><label data-translate="moon.project.view.role.enabled">Enabled</label></div>-->
+		                <!---->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="view.rolesLoading">-->
+						<!--<div class="col-md-12"><img src="assets/img/ajax-loader.gif" /> <em data-translate="moon.project.view.role.loading">Loading Roles</em></div>-->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="!view.rolesLoading && !view.hasRoles()">-->
+						<!--<div class="col-md-12" data-translate="moon.project.view.role.notFound">Roles not found</div>-->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="!view.rolesLoading && view.hasRoles()" ng-repeat="role in view.roles">-->
+					 <!---->
+	                 	<!--<div class="col-md-3" ng-bind="role.value"></div>-->
+	                 	<!--<div class="col-md-5" ng-bind="role.description"></div>-->
+	                 	<!--<div class="col-md-2">-->
+	                    	<!--<span ng-if="view.isRoleAssigned(role)" class="glyphicon glyphicon-ok"></span>-->
+	                    <!--</div>-->
+	                 	<!--<div class="col-md-2">-->
+	                 		<!--<span ng-if="role.enabled" class="glyphicon glyphicon-ok"></span>-->
+	                    <!--</div>-->
+			                    	                                <!---->
+	                <!--</div>-->
+                <!---->
+                <!--</div>-->
+                                <!---->
+                <!--&lt;!&ndash; groups &ndash;&gt;-->
+                <!---->
+               	<!--<div ng-if="view.hasSelectedSubject()">-->
+                <!---->
+	               	<!--<div class="row top10">-->
+						<!--<div class="col-md-12">-->
+							<!--<h1 class="pull-left" data-translate="moon.project.view.group.title">Groups</h1>-->
+						<!--</div>-->
+					<!--</div>-->
+														<!---->
+					<!--<div class="row top05">-->
+					<!---->
+						<!--<div class="col-md-3"><label data-translate="moon.project.view.group.value">Value</label></div>-->
+		                <!--<div class="col-md-5"><label data-translate="moon.project.view.group.description">Description</label></div>-->
+		                <!--<div class="col-md-2"><label data-translate="moon.project.view.group.assigned">Assigned</label></div>-->
+		                <!--<div class="col-md-2"><label data-translate="moon.project.view.group.enabled">Enabled</label></div>-->
+		                <!---->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="view.groupsLoading">-->
+						<!--<div class="col-md-12"><img src="assets/img/ajax-loader.gif" /> <em data-translate="moon.project.view.group.loading">Loading Groups</em></div>-->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="!view.groupsLoading && !view.hasGroups()">-->
+						<!--<div class="col-md-12" data-translate="moon.project.view.group.notFound">Groups not found</div>-->
+					<!--</div>-->
+					<!---->
+					<!--<div class="row" ng-if="!view.groupsLoading && view.hasGroups()" ng-repeat="group in view.groups">-->
+					 <!---->
+	                 	<!--<div class="col-md-3">{{group.value}}</div>-->
+	                 	<!--<div class="col-md-5">{{group.description}}</div>-->
+	                 	<!--<div class="col-md-2">-->
+	                    	<!--<span ng-if="view.isGroupAssigned(group)" class="glyphicon glyphicon-ok"></span>-->
+	                    <!--</div>-->
+	                 	<!--<div class="col-md-2">-->
+	                 		<!--<span ng-if="group.enabled" class="glyphicon glyphicon-ok"></span>-->
+	                    <!--</div>-->
+			                    	                                <!---->
+	                <!--</div>-->
+                <!---->
+                <!--</div>-->
+                                				<!---->
+			<!--</div>-->
+			<!---->
+			<div class="modal-footer top10">
+				<div class="btn-toolbar" style="float: right;">
+					<button ng-click="$hide()" class="btn btn-default" data-translate="moon.project.view.action.close">Close</button>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+	
+</div>

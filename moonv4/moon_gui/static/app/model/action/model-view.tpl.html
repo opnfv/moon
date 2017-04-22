@@ -1,0 +1,41 @@
+<div ng-controller="ModelViewController as view" class="modal" tabindex="-1" data-role="modalViewProject">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" ng-click="$hide()">&times;</button>
+                <h4 class="modal-title" data-translate="moon.model.view.title" data-translate-values="{modelName: view.model.name}"></h4>
+            </div>
+            <div class="modal-body">
+                <dl class="dl-horizontal">
+                    <dt data-translate="moon.model.view.id">Id</dt>
+                    <dd ng-bind="view.model.id"></dd>
+                    <dt data-translate="moon.model.view.name">Name</dt>
+                    <dd ng-bind="view.model.name"></dd>
+                    <dt data-translate="moon.model.view.description">Description</dt>
+                    <dd ng-bind="view.model.description"></dd>
+                </dl>
+
+                <div ng-if="view.meta_rules_values">
+                    <moon-meta-rules-list mapped-model="view.model" edit-mode="false"></moon-meta-rules-list>
+                </div>
+
+                <div ng-if="!view.meta_rules_values">
+                    <moon-loader></moon-loader>
+                </div>
+
+            </div>
+
+            <div class="modal-footer top10">
+                <div class="btn-toolbar" style="float: right;">
+                    <button ng-click="$hide()" class="btn btn-default" data-translate="moon.model.view.action.close">Close</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>

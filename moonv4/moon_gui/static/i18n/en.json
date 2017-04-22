@@ -1,0 +1,1266 @@
+{
+	"moon": {
+	    "global": {
+	    	"applicationName": "Moon",
+	        "404": "Page not found",
+	        "error": "A global error occurs: {{stacktrace}}"
+	    },
+	    "compatibility": {
+	    	"label": "Browsers compatibility",
+	    	"title": "Existing browsers compatibility",
+	    	"content": "Moon is compliant with : <ul><li>Internet Explorer 9 or +</li><li><a href=\"http://www.mozilla.org/fr/firefox/\">Firefox</a> up-to-date</li><li><a href=\"http://chrome.google.com\">Chrome</a> up-to-date</li></ul>",
+	    	"close": "Close"
+	    },
+	    "menu": {
+	    	"project": "Project",
+	    	"pdp": "PDP",
+			"logs": "Log",
+			"policy": "Policy",
+			"model":"Model"
+	    },
+		"login":{
+			"title" : "Login",
+			"titlePage" : "Login page",
+			"username" : "Username",
+			"password" : "Password",
+			"login": "Login",
+			"check": {
+				"username": {
+					"required": "Username is required"
+				},
+				"password": {
+					"required": "Password is required"
+				}
+			},
+			"error" :"Unable to login into Keystone, error code : {{errorCode}}",
+			"success" : "Connection established. Welcome to Moon GUI, \"Moon is uppon cloud\""
+		},
+	    "logout": {
+	    	"title": "Logout",
+			"success" : "Successfully logout"
+	    },
+		"dashboard":{
+			"content" : "Moon:Software-Defined Security Framework"
+		},
+		"policy":{
+			"title": "Policies",
+			"list" : {
+				"search": {
+					"placeholder": "Search Policies",
+					"reset": "Reset"
+				},
+				"table" : {
+					"name":"Name",
+					"genre" : "Genre",
+					"description": "Description",
+					"loading": {
+						"category" : "Loading Category"
+					},
+					"notFound": "There is no Policy"
+				},
+				"action": {
+					"title": "Actions",
+					"add": "Add Policy",
+					"detail": "Consut",
+					"edit": "Edit",
+					"map" : "Map Policy to PDP",
+					"unmap" : "Unmap",
+					"delete": "Delete"
+				}
+			},
+			"unmap": {
+				"title": "Unmap Policy to PDP",
+				"content": "Are you sure you want to unmap PDP `{{pdpName}}` / Policy `{{policyName}}` ?",
+				"action": {
+					"unmap": "Unmap",
+					"cancel": "Cancel"
+				},
+				"error": "Unable to unmap PDP `{{pdpName}}` /Policy `{{policyName}}`",
+				"success": "PDP `{{pdpName}}` / Policy `{{policyName}}` successfully unmapped"
+			},
+			"map":{
+				"title": "Map a Policy to PDP `{{pdpName}}`",
+				"form" :{
+					"list": "List of Policies"
+				},
+				"action": {
+					"create": "Map Policy",
+					"cancel": "Cancel",
+					"new": "Create a Policy",
+					"list": "Map an existing Policy",
+					"map": "Map the selected Policy",
+					"delete" : "Delete the selected Policy"
+				},
+				"check": {
+					"policy":{
+						"required" : "Policy is required"
+					}
+				},
+				"error": "Unable to map Policy `{{policyName}}` to the PDP `{{pdpName}}`",
+				"success": "Policy `{{policyName}}` successfully mapped to the PDP `{{pdpName}}`"
+			},
+			"remove": {
+				"title": "Delete Policy",
+				"content": {
+					"query": "Are you sure you want to delete `{{policyName}}` Policy ?"
+				},
+				"action": {
+					"cancel": "Cancel",
+					"delete": "Delete"
+				},
+				"error": "Unable to delete Policy `{{policyName}}`, error code : {{errorCode}}, message : \"{{message}}\"",
+				"success": "Model `{{policyName}}` successfully deleted"
+			},
+			"edit" : {
+				"title": "Policy `{{policyName}}` configuration",
+				"update" : "- update",
+				"show": {
+					"open": "( show )",
+					"close": "( close )"
+				},
+				"basic" : {
+					"title" : "Basic Information",
+					"form": {
+						"id": "Id",
+						"name": "Name",
+						"genre": "Genre",
+						"model": "Model",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Update"
+					},
+					"check": {
+						"name": {
+							"required": "Name is required"
+						},
+						"genre": {
+							"required": "Genre is required"
+						}
+					},
+					"error": "Unable to update Policy `{{policyName}}`",
+					"success": "Policy `{{policyName}}` successfully updated"
+				},
+				"perimeter": {
+					"title" : "Perimeters"
+				},
+				"data": {
+					"title" : "Data"
+				},
+				"rules" : {
+					"title" : "Rules"
+				},
+				"assignments": {
+					"title" : "Assignments"
+				}
+			},
+			"add":{
+				"title": "Add new Policy",
+				"form": {
+					"name": "Name",
+					"genre": "Genre",
+					"model": "Models",
+					"description": "Description"
+				},
+				"action": {
+					"create": "Create Policy",
+					"cancel": "Cancel"
+				},
+				"check": {
+					"name": {
+						"required": "Name is required"
+					},
+					"genre": {
+						"required":  "Genre is required"
+					},
+					"model": {
+						"required":  "Model is required"
+					}
+				},
+				"error": "Unable to create Policy `{{policyName}}`",
+				"success": "Policy `{{policyName}}` successfully created"
+			},
+			"perimeter": {
+				"subject" : {
+					"title" : "List of associated Subjects",
+					"delete": {
+						"error" : "Unable to delete {{subjectName}} Subject, reason : {{reason}}",
+						"success": "Subject `{{subjectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Subject"
+					},
+					"notFound": "There is no Subject"
+				},
+				"object" : {
+					"title" : "List of associated Objects",
+					"delete": {
+						"error" : "Unable to delete {{objectName}} Object, reason : {{reason}}",
+						"success": "Object `{{objectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add an Object"
+					},
+					"notFound": "There is no Object"
+				},
+				"action" : {
+					"title" : "List of associated Actions",
+					"delete": {
+						"error" : "Unable to delete {{actionName}} Action, reason : {{reason}}",
+						"success": "Action `{{actionName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add an Action"
+					},
+					"notFound": "There is no Action"
+				},
+				"table": {
+					"id" : "Id",
+					"name" : "Name",
+					"description" : "Description",
+					"email" : "Email",
+					"partner":{
+						"id" : "Partner Id"
+					},
+					"action": {
+						"title": "Actions",
+						"delete": "Delete",
+						"update": "Update"
+					}
+				},
+				"edit": {
+					"name" : "Name",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"action": {
+						"list": "Map an existing",
+						"new": "Create a new",
+						"create": "Create",
+						"map": "Map the selected",
+						"delete": "Delete"
+					},
+					"create":{
+						"error": "Unable to create `{{name}}`",
+						"success": "`{{name}}` successfully created"
+					},
+					"delete":{
+						"error": "Unable to delete `{{name}}`",
+						"success": "`{{name}}` successfully deleted"
+					}
+				}
+			},
+			"data": {
+				"subject" : {
+					"title" : "List of associated Data Subjects",
+					"delete": {
+						"error" : "Unable to delete {{subjectName}} Subject, reason : {{reason}}",
+						"success": "Subject `{{subjectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Data Subject"
+					},
+					"notFound": "There is no Data Subject"
+				},
+				"object" : {
+					"title" : "List of associated Data Objects",
+					"delete": {
+						"error" : "Unable to delete {{objectName}} Object, reason : {{reason}}",
+						"success": "Object `{{objectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Data Object"
+					},
+					"notFound": "There is no Data Object"
+				},
+				"action" : {
+					"title" : "List of associated Actions",
+					"delete": {
+						"error" : "Unable to delete {{actionName}} Action, reason : {{reason}}",
+						"success": "Action `{{actionName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Data Action"
+					},
+					"notFound": "There is no Data Action"
+				},
+				"table": {
+					"category" : {
+						"id" : "Category Id",
+						"name" : "Category Name"
+					},
+					"name" : "Name",
+					"description" : "Description",
+					"action": {
+						"title": "Actions",
+						"delete": "Delete",
+						"update": "Update"
+					},
+					"loading": {
+						"category" : "Loading Category"
+					}
+				},
+				"edit": {
+					"name" : "Name",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"action": {
+						"list": "Map an existing",
+						"new": "Create a new",
+						"create": "Create",
+						"map": "Map the selected",
+						"delete": "Delete"
+					},
+					"create":{
+						"error": "Unable to create `{{name}}`",
+						"success": "`{{name}}` successfully created"
+					},
+					"delete":{
+						"error": "Unable to delete `{{name}}`",
+						"success": "`{{name}}` successfully deleted"
+					}
+				}
+			},
+			"rules": {
+				"title": "Rules",
+				"list": {
+					"search": {
+						"placeholder": "Search Rule",
+						"reset": "Reset"
+					},
+					"table": {
+						"id" : "Id",
+						"metaRule": "Meta Rule",
+						"description": "Description",
+						"enabled": "Enabled",
+						"rule": "Rule",
+						"notFound": "There is no Rule",
+						"loading": {
+							"metaRule" : "Loading Meta Rule"
+						}
+					},
+					"action": {
+						"title": "Actions",
+						"add": "Add Rule",
+						"detail": "Consult",
+						"edit": "Edit",
+						"delete": "Delete"
+					},
+					"error": "Unable to retrieve Rule"
+				}
+			},
+			"assignments": {
+				"subject" : {
+					"title" : "List of associated Assignments Subjects",
+					"delete": {
+						"error" : "Unable to delete {{subjectName}} Subject, reason : {{reason}}",
+						"success": "Subject `{{subjectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Assignments Subject"
+					},
+					"notFound": "There is no Assignments Subject"
+				},
+				"object" : {
+					"title" : "List of associated Assignments Objects",
+					"delete": {
+						"error" : "Unable to delete {{objectName}} Object, reason : {{reason}}",
+						"success": "Object `{{objectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Assignments Object"
+					},
+					"notFound": "There is no Assignments Object"
+				},
+				"action" : {
+					"title" : "List of associated Assignments Actions",
+					"delete": {
+						"error" : "Unable to delete {{actionName}} Action, reason : {{reason}}",
+						"success": "Action `{{actionName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Assignments Action"
+					},
+					"notFound": "There is no Assignments Action"
+				},
+				"table": {
+					"action": {
+						"title": "Actions",
+						"delete": "Delete",
+						"update": "Update"
+					},
+					"perimeter": {
+						"name" : "Perimeter name"
+					},
+					"data": {
+						"name": "Data name"
+					},
+					"category": {
+						"name" : "Category name"
+					},
+					"loading": {
+						"category" : "Loading Category",
+						"perimeter": "Loading Perimeter",
+						"data": "Loading Data"
+					}
+				},
+				"edit": {
+					"name" : "Name",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"action": {
+						"list": "Map an existing",
+						"new": "Create a new",
+						"create": "Create",
+						"map": "Map the selected",
+						"delete": "Delete"
+					},
+					"create":{
+						"error": "Unable to create `{{name}}`",
+						"success": "`{{name}}` successfully created"
+					},
+					"delete":{
+						"error": "Unable to delete `{{name}}`",
+						"success": "`{{name}}` successfully deleted"
+					}
+				}
+			}
+		},
+		"model":{
+			"title": "Models",
+			"list": {
+				"search": {
+					"placeholder": "Search Model",
+					"reset": "Reset"
+				},
+				"table":{
+					"name":"Name",
+					"description": "Description",
+					"metaRules":{
+						"number" : "Number of Meta Rules"
+					},
+					"notFound": "There is no Models"
+				},
+				"action": {
+					"title": "Actions",
+					"add": "Add Model",
+					"detail": "Consult",
+					"edit": "Edit",
+					"delete": "Delete"
+				},
+				"error": "Unable to retrieve Models"
+			},
+			"edit" : {
+				"title": "Model `{{modelName}}` configuration",
+				"update" : "- update",
+				"basic" : {
+					"title" : "Basic Information",
+					"form": {
+						"id": "Id",
+						"name": "Name",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Update"
+					},
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"error": "Unable to update Model `{{modelName}}`",
+					"success": "Model `{{modelName}}` successfully updated"
+				},
+				"metarules": {
+					"title" : "Meta Rules"
+				}
+			},
+			"view": {
+				"title": "Model `{{modelName}}` details",
+				"name": "Name",
+				"id": "Id",
+				"description": "Description",
+				"action": {
+					"close": "Close"
+				}
+			},
+			"remove": {
+				"title": "Delete Model",
+				"content": {
+					"query": "Are you sure you want to delete `{{modelName}}` Model ?"
+				},
+				"action": {
+					"cancel": "Cancel",
+					"delete": "Delete"
+				},
+				"error": "Unable to delete Model `{{modelName}}`, error code : {{errorCode}}, message : \"{{message}}\"",
+				"success": "Model `{{modelName}}` successfully deleted"
+			},
+			"metarules": {
+				"title": "List of Meta Rules",
+				"table": {
+					"name":"Name",
+					"description": "Description",
+					"metadata": {
+						"subject": {
+							"number": "Number of Subject Categories"
+						},
+						"object" : {
+							"number": "Number of Object Categories"
+						},
+						"action": {
+							"number": "Number of Action Categories"
+						}
+					},
+					"notFound": "There is no Meta Rules"
+				},
+				"edit" : {
+					"title" : "Meta Rule `{{metaRuleName}}` configuration",
+					"update": "- update",
+					"basic": {
+						"title": "Basic Information",
+						"form": {
+							"id": "Id",
+							"name": "Name",
+							"description": "Description"
+						},
+						"action": {
+							"init": "Init",
+							"update": "Update"
+						},
+						"check": {
+							"name": {
+								"required": "Name is required"
+							}
+						},
+						"error": "Unable to update Meta Rule `{{metaRuleName}}`",
+						"success": "Meta Rule `{{metaRuleName}}` successfully updated"
+					}
+				},
+				"update":{
+					"error": "Unable to update Meta Rule `{{metaRuleName}}`",
+					"success": "Meta Rule `{{metaRuleName}}` successfully updated"
+				},
+				"action": {
+					"title": "Actions",
+					"edit": "Edit",
+					"remove": "Remove",
+					"settings" : "Settings",
+					"add": "Add",
+					"detail": {
+						"open": "Consult",
+						"close": "Close"
+					}
+				},
+				"add": {
+					"title": "Add new Meta Rule",
+					"form": {
+						"name": "Nom",
+						"description": "Description"
+					},
+					"action": {
+						"create": "Add Meta Rule",
+						"cancel": "Cancel"
+					},
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"error": "Unable to create Meta Rule `{{metaRuleName}}`",
+					"success": "Meta Rule `{{metaRuleName}}` successfully created"
+				},
+				"map":{
+					"title": "Add a Meta Rule",
+					"form" :{
+						"list": "List of Meta Rules"
+					},
+					"action": {
+						"create": "Add a new Meta Rule",
+						"cancel": "Cancel",
+						"new": "Add a Meta Rule",
+						"list": "Add an existing Meta Rule",
+						"add": "Add the selected Meta Rule",
+						"delete" : "Delete the selected Meta Rule"
+					},
+					"error": "Unable to map Model `{{modelName}}` to the Meta Rule `{{metaRuleName}}`",
+					"success": "Model `{{modelName}}` successfully mapped to the Meta Rule `{{metaRuleName}}`"
+				},
+				"unmap": {
+					"title": "Remove Meta Rule to Model",
+					"content": "Are you sure you want to remove Model `{{modelName}}` / Meta Rule `{{metaRuleName}}` ?",
+					"action": {
+						"unmap": "Remove",
+						"cancel": "Cancel"
+					},
+					"error": "Unable to remove Model `{{modelName}}` / Meta Rule `{{metaRuleName}}`",
+					"success": "Model `{{modelName}}` / Meta Rule `{{metaRuleName}}` successfully removed"
+				},
+				"delete":{
+					"error": "Unable to delete Meta Rule `{{metaRuleName}}`",
+					"success": "Meta Rule `{{metaRuleName}}` successfully deleted"
+				}
+			},
+			"metadata": {
+				"subject" : {
+					"title" : "List of associated Subject Categories",
+					"delete": {
+						"error" : "Unable to delete {{subjectName}} Subject, reason : {{reason}}",
+						"success": "Subject `{{subjectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add a Subject Category"
+					},
+					"notFound": "There is no Subject"
+				},
+				"object" : {
+					"title" : "List of associated Object Categories",
+					"delete": {
+						"error" : "Unable to delete {{objectName}} Object, reason : {{reason}}",
+						"success": "Object `{{objectName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add an Object Category"
+					},
+					"notFound": "There is no Object"
+				},
+				"action" : {
+					"title" : "List of associated Action Categories",
+					"remove": "Remove",
+					"delete": {
+						"error" : "Unable to delete {{actionName}} Action, reason : {{reason}}",
+						"success": "Action `{{actionName}}` successfully deleted"
+					},
+					"add": {
+						"title": "Add an Action Category"
+					},
+					"notFound": "There is no Action"
+				},
+				"table": {
+					"id" : "Id",
+					"name" : "Name",
+					"description" : "Description",
+					"action": {
+						"title": "Actions",
+						"delete": "Delete",
+						"update": "Update"
+					}
+				},
+				"edit": {
+					"name" : "Name",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"action": {
+						"list": "Add an existing Category",
+						"new": "Add a new Category",
+						"create": "Add Category",
+						"add": "Add the selected Category",
+						"delete": "Delete"
+					},
+					"create":{
+						"error": "Unable to create Category `{{name}}`",
+						"success": "Category `{{name}}` successfully created"
+					},
+					"delete":{
+						"error": "Unable to delete Category `{{name}}`",
+						"success": "Category `{{name}}` successfully deleted"
+					}
+				}
+			},
+			"add":{
+				"title": "Add new Model",
+				"form": {
+					"name": "Name",
+					"description": "Description"
+				},
+				"action": {
+					"create": "Create Model",
+					"cancel": "Cancel"
+				},
+				"check": {
+					"name": {
+						"required": "Name is required"
+					}
+				},
+				"error": "Unable to create Model `{{modelName}}`",
+				"success": "Model `{{modelName}}` successfully created"
+			}
+		},
+	    "project": {
+	    	"title": "Projects",
+	    	"list": {
+	    		"search": {
+	    			"placeholder": "Search Projects",
+	    			"reset": "Reset"
+		    	},
+		    	"table": {
+		    		"name": "Name",
+		    		"domain": "Domain",
+		    		"managed": "Managed",
+		    		"enabled": "Enabled",
+		    		"description": "Description",
+		    		"mapping": "PDP",
+		    		"loading": {
+		    			"project": "Loading Projects",
+		    			"pdp": "Loading PDP"
+		    		},
+		    		"notFound": "There is no Projects"
+		    	},
+		    	"action": {
+		    		"title": "Actions",
+		    		"detail": "Consult",
+		    		"delete": "Delete",
+		    		"add": "Add Project",
+		    		"map": "Map to a PDP",
+		    		"unmap": "Unmap"
+		    	},
+		    	"error": "Unable to retrieve Projects"
+	    	},
+	    	"view": {
+	    		"title": "Project `{{projectName}}` details",
+	    		"action": {
+	    			"close": "Close"
+	    		},
+	    		"subject": {
+	    			"title": "Subjects",
+	    			"name": "Name",
+	    			"mail": "Email",
+	    			"domain": "Domain",
+	    			"enabled": "Enabled",
+	    			"error": "Unable to retrieve Subjects"
+	    		},
+	    		"object": {
+	    			"title": "Objects",
+	    			"category": "Category",
+	    			"description": "Description",
+	    			"enabled": "Enabled",
+	    			"name": "Name",
+	    			"error": "Unable to retrieve Objects",
+	    			"loading": "Loading Objects",
+		    		"notFound": "There is no Objects"
+	    		},
+	    		"role": {
+	    			"title": "Roles",
+	    			"category": "Category",
+	    			"value": "Value",
+	    			"description": "Description",
+	    			"assigned": "Assigned",
+	    			"enabled": "Enabled",
+	    			"error": "Unable to retrieve Roles",
+	    			"loading": "Loading Roles",
+		    		"notFound": "There is no Roles"
+	    		},
+	    		"roleAssignment": {
+	    			"title": "Role Assignments",
+	    			"category": "Category",
+	    			"attributes": "Attributes",
+	    			"description": "Description",
+	    			"error": "Unable to retrieve Role Assignments",
+	    			"loading": "Loading Role Assignments",
+		    		"notFound": "There is no Role Assignments"
+	    		},
+	    		"group": {
+	    			"title": "Groups",
+	    			"category": "Category",
+	    			"value": "Value",
+	    			"description": "Description",
+	    			"assigned": "Assigned",
+	    			"enabled": "Enabled",
+	    			"error": "Unable to retrieve Groups",
+	    			"loading": "Loading Groups",
+		    		"notFound": "There is no Groups"
+	    		},
+	    		"groupAssignment": {
+	    			"title": "Group Assignments",
+	    			"category": "Category",
+	    			"attributes": "Attributes",
+	    			"description": "Description",
+	    			"error": "Unable to retrieve Group Assignments",
+	    			"loading": "Loading Group Assignments",
+		    		"notFound": "There is no Group Assignments"
+	    		}
+	    	},
+	    	"add": {
+	    		"title": "Add new Project",
+	    		"form": {
+		    		"name": "Name",
+		    		"description": "Description",
+		    		"enabled": "Enabled",
+		    		"domain": "Domain"
+	    		},
+	    		"action": {
+		    		"create": "Create Project",
+		    		"cancel": "Cancel"
+	    		},
+	    		"check": {
+	    			"name": {
+	    				"required": "Name is required"
+	    			},
+	    			"domain": {
+	    				"required": "Domain is required"
+	    			}
+	    		},
+	    		"error": "Unable to create Project `{{projectName}}`",
+	    		"success": "Project `{{projectName}}` successfully created"
+	    	},
+	    	"remove": {
+	    		"title": "Delete Project",
+	    		"content": {
+					"query": "Are you sure you want to delete `{{projectName}}` Project ?",
+					"isNotMapped": "This Project is not mapped to any PDP",
+					"isMapped": "This project is mapped to `{{pdpName}}` PDP, delete this Project, will remove the mapping."
+				},
+				"mapping":{
+					"remove":{
+						"error": "Unable to remove mapping with Pdp : `{{pdpName}}`"
+					}
+				},
+	    		"action": {
+	    			"cancel": "Cancel",
+	    			"delete": "Delete"
+	    		},
+	    		"error": "Unable to delete Project `{{projectName}}`, error code : {{errorCode}}, message : \"{{message}}\"",
+	    		"success": "Project `{{projectName}}` successfully deleted"
+	    	},
+	    	"map": {
+	    		"title": "Map Project `{{projectName}}` to a PDP",
+	    		"form": {
+		    		"pdp": "PDP"
+	    		},
+	    		"action": {
+		    		"map": "Map",
+		    		"cancel": "Cancel"
+	    		},
+	    		"check": {
+	    			"pdp": {
+	    				"required": "PDP is required"
+	    			}
+	    		},
+	    		"error": "Unable to map Project `{{projectName}}` to a PDP `{{pdpName}}`",
+	    		"success": "Project `{{projectName}}` successfully mapped to a PDP `{{pdpName}}`"
+	    	},
+	    	"unmap": {
+	    		"title": "Unmap Project and PDP",
+	    		"content": "Are you sure you want to unmap Project `{{projectName}}` / PDP `{{pdpName}}` ?",
+	    		"action": {
+		    		"unmap": "Unmap",
+		    		"cancel": "Cancel"
+	    		},
+	    		"error": "Unable to unmap Project `{{projectName}}` / PDP `{{pdpName}}`",
+	    		"success": "Project `{{projectName}}` / PDP `{{pdpName}}` successfully unmapped"
+	    	}
+	    },
+	    "pdp": {
+	    	"title": "PDPs",
+			"edit" : {
+				"title": "Pdp `{{pdpName}}` configuration",
+				"update" : "- update",
+				"basic" : {
+					"title" : "Basic Information",
+					"form": {
+						"id": "Id",
+						"name": "Name",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Update"
+					},
+					"check": {
+						"name": {
+							"required": "Name is required"
+						}
+					},
+					"error": "Unable to update PDP `{{pdpName}}`",
+					"success": "PDP `{{pdpName}}` successfully updated"
+				},
+				"policy": {
+					"title" : "Policies"
+				}
+			},
+	    	"list": {
+	    		"search": {
+	    			"placeholder": "Search PDPs",
+	    			"reset": "Reset"
+		    	},
+		    	"table": {
+		    		"name": "Name",
+		    		"security_pipeline":{
+						"number" : "Number of Securities"
+					},
+		    		"project": "Project",
+		    		"loading": {
+		    			"pdp": "Loading PDPs",
+		    			"project": "Loading Project"
+		    		},
+					"mapping" :{
+						"map": "Is not mapped"
+					},
+		    		"notFound": "There is no PDPs"
+		    	},
+		    	"action": {
+		    		"title": "Actions",
+		    		"detail": "Consult",
+		    		"configure": "Configure",
+		    		"rule": "Rules",
+		    		"delete": "Delete",
+		    		"add": "Add PDP",
+					"edit":"Editer"
+		    	},
+		    	"error": "Unable to retrieve PDPs"
+	    	},
+	    	"add": {
+	    		"title": "Add new PDP",
+	    		"form": {
+		    		"name": "Name",
+		    		"policy": "Policy",
+		    		"description": "Description"
+	    		},
+	    		"action": {
+		    		"create": "Create PDP",
+		    		"cancel": "Cancel"
+	    		},
+	    		"check": {
+	    			"name": {
+	    				"required": "Name is required"
+	    			},
+	    			"policy": {
+	    				"required": "Policy is required"
+	    			}
+	    		},
+	    		"error": "Unable to create PDP `{{pdpName}}`",
+	    		"success": "PDP `{{pdpName}}` successfully created"
+	    	},
+	    	"remove": {
+	    		"title": "Delete PDP",
+	    		"content": "Are you sure you want to delete `{{pdpName}}` PDP ?",
+	    		"action": {
+	    			"cancel": "Cancel",
+	    			"delete": "Delete"
+	    		},
+	    		"error": "Unable to delete PDP `{{pdpName}}`",
+	    		"success": "PDP `{{pdpName}}` successfully deleted"
+	    	},
+	    	"configure": {
+	    		"title": "PDP `{{pdpName}}` configuration",
+	    		"action": {
+	    			"back": "Back to PDPs"
+	    		},
+	    		"subject": {
+	    			"panelTitle": "Subjects configuration",
+	    			"title": "Subjects",
+	    			"add": {
+	    				"title": "Add new Subject",
+	    				"form": {
+		    				"name": "Name",
+		    				"domain": "Domain",
+		    				"enabled": "Enabled",
+		    				"project": "Project",
+		    				"password": "Password",
+		    				"description": "Description"
+						},
+						"action": {
+							"cancel": "Cancel",
+							"add": "Add Subject"
+						},
+			    		"check": {
+			    			"name": {
+			    				"required": "Name is required"
+			    			},
+			    			"domain": {
+			    				"required": "Domain is required"
+			    			},
+			    			"project": {
+			    				"required": "Project is required"
+			    			},
+			    			"password": {
+			    				"required": "Password is required"
+			    			}
+			    		},
+			    		"error": "Unable to add Subject `{{subjectName}}`",
+			    		"success": "Subject `{{subjectName}}` successfully added"
+	    			},
+	    			"remove": {
+	    				"title": "Delete Subject",
+			    		"content": "Are you sure you want to delete `{{subjectName}}` subject of `{{pdpName}}` PDP ?",
+			    		"action": {
+			    			"cancel": "Cancel",
+			    			"delete": "Delete"
+			    		},
+			    		"error": "Unable to delete Subject `{{subjectName}}`",
+			    		"success": "Subject `{{subjectName}}` successfully deleted"
+	    			},
+	    			"category": {
+	    				"title": "Categories",
+	    				"add": {
+		    				"title": "Add new Category",
+		    				"form": {
+			    				"name": "Name"
+							},
+							"action": {
+								"cancel": "Cancel",
+								"add": "Add Category"
+							},
+				    		"check": {
+				    			"name": {
+				    				"required": "Name is required"
+				    			}
+				    		},
+				    		"error": "Unable to add Subject Category `{{categoryName}}`",
+				    		"success": "Subject Category `{{categoryName}}` successfully added"
+		    			},
+		    			"remove": {
+		    				"title": "Delete Category",
+				    		"content": "Are you sure you want to delete `{{categoryName}}` subject category of `{{pdpName}}` PDP ?",
+				    		"action": {
+				    			"cancel": "Cancel",
+				    			"delete": "Delete"
+				    		},
+				    		"error": "Unable to delete Subject Category `{{categoryName}}`",
+				    		"success": "Subject Category `{{categoryName}}` successfully deleted"
+		    			}
+	    			},
+	    			"categoryValue": {
+	    				"title": "Values",
+	    				"add": {
+		    				"title": "Add new Value",
+		    				"form": {
+			    				"value": "Value"
+							},
+							"action": {
+								"cancel": "Cancel",
+								"add": "Add Value"
+							},
+				    		"check": {
+				    			"value": {
+				    				"required": "Value is required"
+				    			}
+				    		},
+				    		"error": "Unable to add Subject Category Value`{{valueName}}`",
+				    		"success": "Subject Category Value `{{valueName}}` successfully added"
+		    			},
+		    			"remove": {
+		    				"title": "Delete Value",
+				    		"content": "Are you sure you want to delete `{{valueName}}` subject category value of `{{pdpName}}` PDP ?",
+				    		"action": {
+				    			"cancel": "Cancel",
+				    			"delete": "Delete"
+				    		},
+				    		"error": "Unable to delete Subject Category Value `{{valueName}}`",
+				    		"success": "Subject Category Value `{{valueName}}` successfully deleted"
+		    			}
+	    			},
+	    			"assignment": {
+	    				"title": "Subject Assignments",
+	    				"action": {
+	    					"assign": "Assign",
+	    					"unassign": "Unassign"
+	    				},
+	    				"list": {
+	    					"notFound": "There is no assignments"
+						},
+						"add": {
+							"error": "Unable to assign Subject `{{subjectName}}` / Category `{{categoryName}}` / Value `{{valueName}}`",
+				    		"success": "Subject `{{subjectName}}` / Category `{{categoryName}}` / Value `{{valueName}}` assignment successfully done"
+						},
+						"remove": {
+							"error": "Unable to unassign Subject `{{subjectName}}` / Category `{{categoryName}}` / Value `{{valueName}}`",
+				    		"success": "Subject `{{subjectName}}` / Category `{{categoryName}}` / Value `{{valueName}}` unassignment successfully done"
+						}
+	    			}
+	    		},
+	    		"object": {
+	    			"panelTitle": "Objects configuration",
+	    			"title": "Objects",
+	    			"add": {
+	    				"title": "Add new Object",
+	    				"form": {
+		    				"name": "Name",
+		    				"image": "Image",
+		    				"flavor": "Flavor"
+						},
+						"action": {
+							"cancel": "Cancel",
+							"add": "Add Object"
+						},
+			    		"check": {
+			    			"name": {
+			    				"required": "Name is required"
+			    			},
+			    			"image": {
+			    				"required": "Image is required"
+			    			},
+			    			"flavor": {
+			    				"required": "Flavor is required"
+			    			}
+			    		},
+			    		"error": "Unable to add Object `{{objectName}}`",
+			    		"success": "Object `{{objectName}}` successfully added"
+	    			},
+	    			"remove": {
+	    				"title": "Delete Object",
+			    		"content": "Are you sure you want to delete `{{objectName}}` object of `{{pdpName}}` PDP ?",
+			    		"action": {
+			    			"cancel": "Cancel",
+			    			"delete": "Delete"
+			    		},
+			    		"error": "Unable to delete Object `{{objectName}}`",
+			    		"success": "Object `{{objectName}}` successfully deleted"
+	    			},
+	    			"category": {
+	    				"title": "Categories",
+	    				"add": {
+		    				"title": "Add new Category",
+		    				"form": {
+			    				"name": "Name"
+							},
+							"action": {
+								"cancel": "Cancel",
+								"add": "Add Category"
+							},
+				    		"check": {
+				    			"name": {
+				    				"required": "Name is required"
+				    			}
+				    		},
+				    		"error": "Unable to add Object Category `{{categoryName}}`",
+				    		"success": "Object Category `{{categoryName}}` successfully added"
+		    			},
+		    			"remove": {
+		    				"title": "Delete Category",
+				    		"content": "Are you sure you want to delete `{{categoryName}}` object category of `{{pdpName}}` PDP ?",
+				    		"action": {
+				    			"cancel": "Cancel",
+				    			"delete": "Delete"
+				    		},
+				    		"error": "Unable to delete Object Category `{{categoryName}}`",
+				    		"success": "Object Category `{{categoryName}}` successfully deleted"
+		    			}
+	    			},
+	    			"categoryValue": {
+	    				"title": "Values",
+	    				"add": {
+		    				"title": "Add new Value",
+		    				"form": {
+			    				"value": "Value"
+							},
+							"action": {
+								"cancel": "Cancel",
+								"add": "Add Value"
+							},
+				    		"check": {
+				    			"value": {
+				    				"required": "Value is required"
+				    			}
+				    		},
+				    		"error": "Unable to add Object Category Value`{{valueName}}`",
+				    		"success": "Object Category Value `{{valueName}}` successfully added"
+		    			},
+		    			"remove": {
+		    				"title": "Delete Value",
+				    		"content": "Are you sure you want to delete `{{valueName}}` object category value of `{{pdpName}}` PDP ?",
+				    		"action": {
+				    			"cancel": "Cancel",
+				    			"delete": "Delete"
+				    		},
+				    		"error": "Unable to delete Object Category Value `{{valueName}}`",
+				    		"success": "Object Category Value `{{valueName}}` successfully deleted"
+		    			}
+	    			},
+	    			"assignment": {
+	    				"title": "Object Assignments",
+	    				"action": {
+	    					"assign": "Assign",
+	    					"unassign": "Unassign"
+	    				},
+	    				"list": {
+	    					"notFound": "There is no assignments"
+						},
+						"add": {
+							"error": "Unable to assign Object `{{objectName}}` / Category `{{categoryName}}` / Value `{{valueName}}`",
+				    		"success": "Object `{{objectName}}` / Category `{{categoryName}}` / Value `{{valueName}}` assignment successfully done"
+						},
+						"remove": {
+							"error": "Unable to unassign Object `{{ObjectName}}` / Category `{{categoryName}}` / Value `{{valueName}}`",
+				    		"success": "Object `{{objectName}}` / Category `{{categoryName}}` / Value `{{valueName}}` unassignment successfully done"
+						}
+	    			}
+	    		}    		
+	    	},
+	    	"rule": {
+	    		"title": "PDP `{{pdpName}}` rules",
+	    		"list": {
+	    			"table": {
+		    			"subject": "Subjects",
+		    			"object": "Objects",
+		    			"notFound": "There is no Rules"
+	    			},
+	    			"action": {
+	    				"title": "Actions",
+	    				"add": "Add Rule",
+	    				"delete": "Delete Rule"
+	    			}
+	    		},
+	    		"add": {
+	    			"title": "Add new Rule",
+	    			"action": {
+	    				"create": "Create Rule",
+	    				"cancel": "Cancel"
+	    			},
+	    			"form": {
+	    				"subject": {
+	    					"subject": "Subjects",
+	    					"category": "Categories",
+	    					"categoryValue": "Values",
+	    					"action": {
+	    						"add": "Add",
+	    						"delete": "Delete"
+	    					}
+	    				},
+	    				"object": {
+	    					"object": "Objects",
+	    					"category": "Categories",
+	    					"categoryValue": "Values",
+	    					"action": {
+	    						"add": "Add",
+	    						"delete": "Delete"
+	    					}
+	    				}
+	    			},
+	    			"success": "Rule successfully created",
+	    			"error": "Unable to create Rule"
+	    		},
+	    		"delete": {
+	    			"title": "Delete Rule",
+	    			"content": "Are you sure you want to delete rule `{{ruleJson}}` of `{{pdpName}}` PDP ?",
+	    			"action": {
+	    				"delete": "Delete Rule",
+	    				"cancel": "Cancel"
+	    			},
+					"error": "Unable to delete Rule `{{ruleJson}}`",
+				    "success": "Rule `{{ruleJson}}` successfully deleted"
+	    		},
+	    		"action": {
+	    			"back": "Back to PDPs"
+	    		}   		
+	    	}
+	    }
+    }
+}

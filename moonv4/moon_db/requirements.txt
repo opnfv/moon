@@ -1,0 +1,5 @@
+stevedore
+sqlalchemy
+pymysql
+requests
+oslo.log

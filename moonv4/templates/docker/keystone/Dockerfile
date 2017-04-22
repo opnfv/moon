@@ -1,0 +1,27 @@
+# Pull base image.
+FROM ubuntu:latest
+
+ENV ADMIN_TOKEN=p4ssw0rd
+ENV ADMIN_PASSWORD=p4ssw0rd
+ENV DB_CONNECTION=mysql+pymysql
+ENV DB_DRIVER=sql
+ENV DB_HOST=localhost
+ENV DB_DATABASE=keystonedb
+ENV DB_USER=keystone
+ENV DB_PASSWORD=p4ssw0rd
+ENV DB_USER_ROOT=root
+ENV DB_PASSWORD_ROOT=p4sswOrd1
+ENV RABBIT_NODE=server
+
+RUN apt-get update && apt-get install apache2 rabbitmq-server keystone python-openstackclient libapache2-mod-wsgi mysql-client -y
+
+RUN apt-get update && apt-get install iputils-ping net-tools -y
+
+
+# ADD set-ops-env.source.sh /root
+ADD run.sh /root
+
+EXPOSE 35357
+EXPOSE 5000
+
+CMD ["/bin/bash", "/root/run.sh"]

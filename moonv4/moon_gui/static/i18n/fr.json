@@ -1,0 +1,1266 @@
+{
+	"moon": {
+	    "global": {
+	    	"applicationName": "Moon",
+	        "404": "Page non trouvée",
+	        "error": "Une erreur globale est survenue: {{stacktrace}}"
+	    },
+	    "compatibility": {
+	    	"label": "Compatibilité navigateurs Web",
+	    	"title": "Compatibilité avec les navigateurs existants",
+	    	"content": "Moon est compatible avec : <ul><li>Internet Explorer 9 ou +</li><li><a href=\"http://www.mozilla.org/fr/firefox/\">Firefox</a> à jour</li><li><a href=\"http://chrome.google.com\">Chrome</a> à jour</li></ul>",
+	    	"close": "Fermer"
+	    },
+	    "menu": {
+	    	"project": "Project",
+	    	"pdp": "PDP",
+			"logs": "Log",
+			"policy": "Politique",
+			"model": "Modèle"
+	    },
+		"login":{
+			"title":"Connexion",
+			"titlePage" : "Page d'idenditifcation",
+			"username" : "Nom d'utilisateur",
+			"password" : "Mot de passe",
+			"login" : "Connexion",
+			"check": {
+				"username": {
+					"required": "Le nom d'utilisateur est requis"
+				},
+				"password": {
+					"required": "Le mot de passe est requis"
+				}
+			},
+			"error" : "Impossible de se connecter à Keystone, code d'erreur {{errorCode}}",
+			"success" : "Connexion établie, Bienvenue sur la GUI de Moon, \"La lune est au dessus des nuages\""
+		},
+	    "logout": {
+	    	"title": "Déconnexion",
+			"success" : "Déconnxion réussie"
+	    },
+		"dashboard":{
+			"content" : "Moon:Software-Defined Security Framework"
+		},
+		"policy": {
+			"title": "Politiques",
+			"list" : {
+				"search": {
+					"placeholder": "Rechercher des Politiques",
+					"reset": "Effacer"
+				},
+				"table" : {
+					"name":"Nom",
+					"genre" : "Genre",
+					"description": "Description",
+					"loading": {
+						"category" : "Chargement de la Catégorie"
+					},
+					"notFound": "Il n'existe aucune Politique"
+				},
+				"action": {
+					"title": "Actions",
+					"add": "Ajouter une Politique",
+					"detail": "Consulter",
+					"edit": "Editer",
+					"map" : "Associer une Politique à la PDP",
+					"unmap" : "Dissocier",
+					"delete": "Supprimer"
+				}
+			},
+			"unmap": {
+				"title": "Dissociation de la Policy et de la PDP",
+				"content": "Voulez-vous dissocier la PDP `{{pdpName}}` et la Policy `{{policyName}}` ?",
+				"action": {
+					"unmap": "Dissocier",
+					"cancel": "Annuler"
+				},
+				"error": "Impossible de dissocier la PDP `{{pdpName}}` et la Policy`{{policyName}}`",
+				"success": "La dissociation de la PDP `{{pdpName}}` et de la Policy `{{policyName}}` a été effectuée avec succès"
+			},
+			"map":{
+				"title": "Associer une Politique à la PDP `{{pdpName}}`",
+				"form" :{
+					"list": "Liste des Politiques"
+				},
+				"action": {
+					"create": "Associer une Politique",
+					"cancel": "Fermer",
+					"new": "Créer une Politique",
+					"list": "Associer une Politique existante",
+					"map": "Associer la Politique sélectionnée",
+					"delete" : "Supprimer la Politique sélectionnée"
+				},
+				"check": {
+					"policy":{
+						"required" : "La politique est requise"
+					}
+				},
+				"error": "Impossible d'associer la Politique `{{policyName}}` à la PDP `{{pdpName}}`",
+				"success": "L'association dde la Politique `{{policyName}}` avec la PDP `{{pdpName}}` a été effectuée avec succès"
+			},
+			"remove": {
+				"title": "Supprimer une Politique",
+				"content": {
+					"query": "Voulez-vous supprimer la Politique `{{policyName}}` ?"
+				},
+				"action": {
+					"cancel": "Annuler",
+					"delete": "Supprimer"
+				},
+				"error": "Impossible de supprimer la Politique `{{policyName}}`",
+				"success": "La Politique `{{policyName}}` a été supprimée avec succès"
+			},
+			"edit" : {
+				"title": "Configuration de la Politique `{{policyName}}`",
+				"update": "- mettre à jour",
+				"show": {
+					"open": "( voir )",
+					"close": "( fermer )"
+				},
+				"basic" : {
+					"title" : "Informations de base",
+					"form": {
+						"id": "Id",
+						"name": "Nom",
+						"genre": "Genre",
+						"model": "Modèle",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Mettre à Jour"
+					},
+					"check": {
+						"name": {
+							"required": "Le Nom est requis"
+						},
+						"Genre": {
+							"required": "Le Genre est requis"
+						}
+					},
+					"error": "Impossible de mettre à jour la Politique `{{policyName}}`",
+					"success": "Le Politique `{{policyName}}` a été mise à jour avec succès"
+				},
+				"perimeter": {
+					"title" : "Périmètres"
+				},
+				"data": {
+					"title" : "Données"
+				},
+				"rules" : {
+					"title" : "Règles"
+				},
+				"assignments": {
+					"title" : "Affectations"
+				}
+			},
+			"add": {
+				"title": "Ajouter une nouvelle Politique",
+				"form": {
+					"name": "Nom",
+					"genre" : "Genre",
+					"model": "Modèles",
+					"description": "Description"
+				},
+				"action": {
+					"create": "Créer la Politique",
+					"cancel": "Annuler"
+				},
+				"check": {
+					"name": {
+						"required": "Le nom est requis"
+					},
+					"genre" : {
+						"required" :"Le Genre est requis"
+					},
+					"model" : {
+						"required" :"Un Modèle est requis"
+					}
+				},
+				"error": "Impossible de créer la Politique `{{policyName}}`",
+				"success": "La Politique `{{policyName}}` a été créée avec succès"
+			},
+			"perimeter" :{
+				"subject" : {
+					"title" : "Liste des Sujets associées",
+					"delete": {
+						"error" : "Impossible de supprimer le Sujet : {{subjectName}}, la raison : {{reason}}",
+						"success": "Sujet `{{subjectName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Element Sujet"
+					},
+					"notFound": "Il n'existe aucun Sujet"
+				},
+				"object" : {
+					"title" : "Liste des Objets associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Objet : {{objectName}}, la raison : {{reason}}",
+						"success": "Objet `{{objectName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Element Objet"
+					},
+					"notFound": "Il n'existe aucun Objet"
+				},
+				"action" : {
+					"title" : "Liste des Actions associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Action : {{actionName}}, la raison : {{reason}}",
+						"success": "Action `{{actionName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Element Action"
+					},
+					"notFound": "Il n'existe aucune Action"
+				},
+				"table": {
+					"id" : "Id",
+					"name" : "Nom",
+					"description" : "Description",
+					"email" : "Email",
+					"partner":{
+						"id" : "Id du Partenaire"
+					},
+					"action": {
+						"title": "Actions",
+						"delete": "Supprimer",
+						"update": "Mettre à jour"
+					}
+				},
+				"edit": {
+					"name" : "Nom",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Le nom est requis"
+						}
+					},
+					"action": {
+						"list": "Associer un Element existante",
+						"new": "Créer une nouvelle Element",
+						"create":"Créer l'Element",
+						"map":"Asscoier l'Element selectionnée",
+						"delete": "Supprimer"
+					},
+					"create": {
+						"error": "Impossible de créer l'Element `{{name}}`",
+						"success": "L'Element `{{name}}` a été créé avec succès"
+					},
+					"delete": {
+						"error": "Impossible de supprimer la Element `{{name}}`",
+						"success": "L'Element `{{name}}` a été supprimée avec succès"
+					}
+				}
+			},
+			"data" :{
+				"subject" : {
+					"title" : "Liste des Data Sujets associées",
+					"delete": {
+						"error" : "Impossible de supprimer la Data Sujet : {{subjectName}}, la raison : {{reason}}",
+						"success": "Data Sujet `{{subjectName}}` a été supprimée avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Data Sujet"
+					},
+					"notFound": "Il n'existe aucune Data Sujet"
+				},
+				"object" : {
+					"title" : "Liste des Data Objets associées",
+					"delete": {
+						"error" : "Impossible de supprimer la Data Objet : {{objectName}}, la raison : {{reason}}",
+						"success": "Data Objet `{{objectName}}` a été supprimée avec succès"
+					},
+					"add": {
+						"title": "Ajouter un Data Objet"
+					},
+					"notFound": "Il n'existe aucun Data Objet"
+				},
+				"action" : {
+					"title" : "Liste des Data Actions associées",
+					"delete": {
+						"error" : "Impossible de supprimer la Data Action : {{actionName}}, la raison : {{reason}}",
+						"success": "Data Action `{{actionName}}` a été supprimée avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Data Action"
+					},
+					"notFound": "Il n'existe aucune Data Action"
+				},
+				"table": {
+					"category" : {
+						"id" : "Id de la Catégorie",
+						"name" : "Nom de la Catégorie"
+					},
+					"name" : "Nom",
+					"description" : "Description",
+					"action": {
+						"title": "Actions",
+						"delete": "Supprimer",
+						"update": "Mettre à jour"
+					},
+					"loading": {
+						"category" : "Loading Catégorie"
+					}
+				},
+				"edit": {
+					"name" : "Nom",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Le nom est requis"
+						}
+					},
+					"action": {
+						"list": "Associer un Element existante",
+						"new": "Créer une nouvelle Element",
+						"create":"Créer l'Element",
+						"map":"Asscoier l'Element selectionnée",
+						"delete": "Supprimer"
+					},
+					"create": {
+						"error": "Impossible de créer l'Element `{{name}}`",
+						"success": "L'Element `{{name}}` a été créé avec succès"
+					},
+					"delete": {
+						"error": "Impossible de supprimer la Element `{{name}}`",
+						"success": "L'Element `{{name}}` a été supprimée avec succès"
+					}
+				}
+			},
+			"rules": {
+				"title": "Règles",
+				"list": {
+					"search": {
+						"placeholder": "Rechercher des Règles",
+						"reset": "Effacer"
+					},
+					"table": {
+						"id" : "Id",
+						"metaRule": "Meta Règle",
+						"description": "Description",
+						"enabled": "Enabled",
+						"rule": "Règle",
+						"notFound": "Il n'existe aucune Règle",
+						"loading": {
+							"metaRule" : "Chargement de la Meta Règle"
+						}
+					},
+					"action": {
+						"title": "Actions",
+						"add": "Ajouter une Règle",
+						"detail": "Consulter",
+						"edit": "Editer",
+						"delete": "Supprimer"
+					},
+					"error": "Impossible de récupérer la liste des Règles"
+				}
+			},
+			"assignments" :{
+				"subject" : {
+					"title" : "Liste des Affectations Sujets associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Affectations Sujet : {{subjectName}}, la raison : {{reason}}",
+						"success": "Affectations Sujet `{{subjectName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Affectations Sujet"
+					},
+					"notFound": "Il n'existe aucune Affectations Sujet"
+				},
+				"object" : {
+					"title" : "Liste des Affectations Objets associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Affectations Objet : {{objectName}}, la raison : {{reason}}",
+						"success": "Affectations Objet `{{objectName}}` a été supprimée avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Affectations Objet"
+					},
+					"notFound": "Il n'existe aucune Affectations Objet"
+				},
+				"action" : {
+					"title" : "Liste des Affectations Actions associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Affectations Action : {{actionName}}, la raison : {{reason}}",
+						"success": "Affectations Action `{{actionName}}` a été supprimée avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Affectations Action"
+					},
+					"notFound": "Il n'existe aucune Affectations Action"
+				},
+				"table": {
+					"action": {
+						"title": "Actions",
+						"delete": "Supprimer",
+						"update": "Mettre à jour"
+					},
+					"perimeter": {
+						"name": "Nom du Périmètre"
+					},
+					"data":{
+						"name" : "Nom des Data"
+					},
+					"category": {
+						"name" : "Nom de la Catégorie"
+					},
+					"loading": {
+						"category" : "Chargement de la Catégorie",
+						"perimeter": "Chargement du Périmètre",
+						"data": "Chargement des Données"
+					}
+				},
+				"edit": {
+					"name" : "Nom",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Le nom est requis"
+						}
+					},
+					"action": {
+						"list": "Associer une Affectations existante",
+						"new": "Créer une nouvelle Affectations",
+						"create":"Créer l'Affectations",
+						"map":"Asscoier l'Affectations selectionnée",
+						"delete": "Supprimer"
+					},
+					"create": {
+						"error": "Impossible de créer l'Affectations `{{name}}`",
+						"success": "L'Affectations `{{name}}` a été créé avec succès"
+					},
+					"delete": {
+						"error": "Impossible de supprimer l'Affectations `{{name}}`",
+						"success": "L'Affectations `{{name}}` a été supprimée avec succès"
+					}
+				}
+			}
+		},
+		"model":{
+			"title": "Modèles",
+			"list": {
+				"search": {
+					"placeholder": "Rechercher des Modèles",
+					"reset": "Effacer"
+				},
+				"table":{
+					"name":"Nom",
+					"description": "Description",
+					"metaRules":{
+						"number" : "Nombre de Meta Règles"
+					},
+					"notFound": "Il n'existe aucun Modèle"
+				},
+				"action": {
+					"title": "Actions",
+					"add": "Ajouter un modèle",
+					"detail": "Consulter",
+					"edit": "Editer",
+					"delete": "Supprimer"
+				},
+				"error": "Impossible de récupérer la liste des Modèles"
+			},
+			"edit" : {
+				"title": "Configuration du Modèle `{{modelName}}`",
+				"update": "- mettre à jour",
+				"basic" : {
+					"title" : "Informations de base",
+					"form": {
+						"id": "Id",
+						"name": "Nom",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Mettre à Jour"
+					},
+					"check": {
+						"name": {
+							"required": "Le Nom est requis"
+						}
+					},
+					"error": "Impossible de mettre à jour le Modèle `{{modelName}}`",
+					"success": "Le Modèle `{{modelName}}` a été mis à jour avec succès"
+				},
+				"metarules": {
+					"title" : "Meta Règles"
+				}
+			},
+			"view": {
+				"title": "Détail du Modèle `{{modelName}}`",
+				"name": "Name",
+				"id": "Id",
+				"description": "Description",
+				"action": {
+					"close": "Fermer"
+				}
+			},
+			"remove": {
+				"title": "Supprimer un Modèle",
+				"content": {
+					"query": "Voulez-vous supprimer le Modèle `{{modelName}}` ?"
+				},
+				"action": {
+					"cancel": "Annuler",
+					"delete": "Supprimer"
+				},
+				"error": "Impossible de supprimer le Modèle `{{modelName}}`",
+				"success": "Le Modèle `{{modelName}}` a été supprimé avec succès"
+			},
+			"metarules" :{
+				"title" : "List des Meta Règles",
+				"table":{
+					"name":"Nom",
+					"description": "Description",
+					"metadata": {
+						"subject" : {
+							"number" : "Nombre de Catégories Sujet"
+						},
+						"object" : {
+							"number" : "Nombre de Catégories Objet"
+						},
+						"action" : {
+							"number" : "Nombre de Catégories Action"
+						}
+					},
+					"notFound": "Il n'existe aucune Meta Règles"
+				},
+				"edit" : {
+					"title" : "Configuration de la Meta Règle `{{metaRuleName}}`",
+					"update": "- mettre à jour",
+					"basic" : {
+						"title" : "Informations de base",
+						"form": {
+							"id": "Id",
+							"name": "Nom",
+							"description": "Description"
+						},
+						"action": {
+							"init": "Init",
+							"update": "Mettre à Jour"
+						},
+						"check": {
+							"name": {
+								"required": "Le Nom est requis"
+							}
+						},
+						"error": "Impossible de mettre à jour la Meta Règle `{{metaRuleName}}`",
+						"success": "La Meta Règle `{{metaRuleName}}` a été mis à jour avec succès"
+					}
+				},
+				"update":{
+					"error": "Impossible de mettre à jour la Meta Règle `{{metaRuleName}}`",
+					"success": "La Meta Règle `{{metaRuleName}}` a été mis à jour avec succès"
+				},
+				"action": {
+					"title": "Actions",
+					"edit": "Editer",
+					"remove": "Enlever",
+					"settings" : "Paramètres",
+					"add": "Ajouter",
+					"detail": {
+						"open": "Consulter",
+						"close": "Fermer"
+					}
+				},
+				"add":{
+					"title": "Ajouter une nouvelle Meta Règle",
+					"form": {
+						"name": "Nom",
+						"description": "Description"
+					},
+					"action": {
+						"create": "Ajouter la Meta Règle",
+						"cancel": "Annuler"
+					},
+					"check": {
+						"name": {
+							"required": "Le nom est requis"
+						}
+					},
+					"error": "Impossible de créer la Meta Règle `{{metaRuleName}}`",
+					"success": "La Meta Règle `{{metaRuleName}}` a été créée avec succès"
+				},
+				"map":{
+					"title": "Ajouter une Meta Règle",
+					"form" :{
+						"list": "Liste des Meta Règles"
+					},
+					"action": {
+						"create": "Ajouter une nouvelle Meta Règle",
+						"cancel": "Fermer",
+						"new": "Ajouter une Meta Règle",
+						"list": "Ajouter une Meta Règle existante",
+						"add": "Ajouter la Meta Règle sélectionnée",
+						"delete" : "Supprimer la Meta Règle sélectionnée"
+					},
+					"error": "Impossible d'associer le Modèle `{{modelName}}` à la Meta Règle `{{metaRuleName}}`",
+					"success": "L'association du Modèle `{{modelName}}` avec la Meta Règle `{{metaRuleName}}` a été effectuée avec succès"
+				},
+				"unmap": {
+					"title": "Enlever de la Meta Règle du Modèle",
+					"content": "Voulez-vous enlever le Modèle `{{modelName}}` de la Meta Règle `{{metaRuleName}}` ?",
+					"action": {
+						"unmap": "Enlever",
+						"cancel": "Annuler"
+					},
+					"error": "Impossible d'enlever le Modèle `{{modelName}}` de la Meta Règle `{{metaRuleName}}`",
+					"success": "La dissociation du Modèle `{{modelName}}` de la Meta Règle `{{metaRuleName}}` a été effectuée avec succès"
+				},
+				"delete": {
+					"error": "Impossible de supprimer la Meta Rule `{{metaRuleName}}`",
+					"success": "La Meta Rule `{{metaRuleName}}` a été supprimée avec succès"
+				}
+			},
+			"metadata" :{
+				"subject" : {
+					"title" : "Liste des Catégories Sujet associées",
+					"delete": {
+						"error" : "Impossible de supprimer le Sujet : {{subjectName}}, la raison : {{reason}}",
+						"success": "Sujet `{{subjectName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Catégorie Sujet"
+					},
+					"notFound": "Il n'existe aucun Sujet"
+				},
+				"object" : {
+					"title" : "Liste des Catégories Objet associées",
+					"delete": {
+						"error" : "Impossible de supprimer l'Objet : {{objectName}}, la raison : {{reason}}",
+						"success": "Objet `{{objectName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Catégorie Objet"
+					},
+					"notFound": "Il n'existe aucun Objet"
+				},
+				"action" : {
+					"title" : "Liste des Catégories Action associées",
+					"remove": "Enlever",
+					"delete": {
+						"error" : "Impossible de supprimer l'Action : {{actionName}}, la raison : {{reason}}",
+						"success": "Action `{{actionName}}` a été supprimé avec succès"
+					},
+					"add": {
+						"title": "Ajouter une Catégorie Action"
+					},
+					"notFound": "Il n'existe aucune Action"
+				},
+				"table": {
+					"id" : "Id",
+					"name" : "Nom",
+					"description" : "Description",
+					"action": {
+						"title": "Actions",
+						"delete": "Supprimer",
+						"update": "Mettre à jour"
+					}
+				},
+				"edit": {
+					"name" : "Nom",
+					"description" : "Description",
+					"check": {
+						"name": {
+							"required": "Le nom est requis"
+						}
+					},
+					"action": {
+						"list": "Ajouter une Catégorie existante",
+						"new": "Ajouter une nouvelle Catégorie",
+						"create":"Ajouter la Catégorie",
+						"add":"Ajouter la Catégorie selectionnée",
+						"delete": "Supprimer"
+					},
+					"create": {
+						"error": "Impossible de créer la Catégorie `{{name}}`",
+						"success": "La Catégorie `{{name}}` a été créé avec succès"
+					},
+					"delete": {
+						"error": "Impossible de supprimer la Catégorie `{{name}}`",
+						"success": "La Catégorie `{{name}}` a été supprimée avec succès"
+					}
+				}
+			},
+			"add":{
+				"title": "Ajouter un nouveau Model",
+				"form": {
+					"name": "Nom",
+					"description": "Description"
+				},
+				"action": {
+					"create": "Créer le Modèle",
+					"cancel": "Annuler"
+				},
+				"check": {
+					"name": {
+						"required": "Le nom est requis"
+					}
+				},
+				"error": "Impossible de créer le Modèle `{{modelName}}`",
+				"success": "Le Modèle `{{modelName}}` a été créé avec succès"
+			}
+		},
+	    "project": {
+	    	"title": "Projects",
+	    	"list": {
+	    		"search": {
+	    			"placeholder": "Rechercher des Projects",
+	    			"reset": "Effacer"
+	    		},
+		    	"table": {
+		    		"name": "Nom",
+		    		"domain": "Domaine",
+		    		"managed": "Supervisé",
+		    		"enabled": "Activé",
+		    		"description": "Description",
+		    		"mapping": "PDP",
+		    		"loading": {
+		    			"project": "Chargement des Projects",
+		    			"pdp": "Chargement du PDP"
+		    		},
+		    		"notFound": "Il n'existe aucun Project"
+		    	},
+		    	"action": {
+		    		"title": "Actions",
+		    		"detail": "Consulter",
+		    		"delete": "Supprimer",
+		    		"add": "Ajouter un Project",
+		    		"map": "Associer à un PDP",
+		    		"unmap": "Dissocier"
+		    	},
+		    	"error": "Impossible de récupérer la liste des Projects"
+	    	},
+	    	"view": {
+	    		"title": "Détail du Project `{{projectName}}`",
+	    		"action": {
+	    			"close": "Fermer"
+	    		},
+	    		"subject": {
+	    			"title": "Sujets",
+	    			"name": "Nom",
+	    			"mail": "Email",
+	    			"domain": "Domaine",
+	    			"enabled": "Activé",
+	    			"error": "Impossible de récupérer la liste des Sujets"
+	    		},
+	    		"object": {
+	    			"title": "Objets",
+	    			"category": "Catégorie",
+	    			"description": "Description",
+	    			"enabled": "Activé",
+	    			"name": "Nom",
+	    			"error": "Impossible de récupérer la liste des Objets",
+	    			"loading": "Chargement des Objets",
+		    		"notFound": "Il n'existe aucun Objet"
+	    		},
+	    		"role": {
+	    			"title": "Roles",
+	    			"category": "Catégorie",
+	    			"value": "Valeur",
+	    			"description": "Description",
+	    			"assigned": "Affecté",
+	    			"enabled": "Activé",
+	    			"error": "Impossible de récupérer la liste des Roles",
+	    			"loading": "Chargement des Roles",
+		    		"notFound": "Il n'existe aucun Role"
+	    		},
+	    		"roleAssignment": {
+	    			"title": "Affectation des roles",
+	    			"category": "Catégorie",
+	    			"attributes": "Attributs",
+	    			"description": "Description",
+	    			"error": "impossible de récupérer la liste des affectations",
+	    			"loading": "Chargement des Affectations",
+		    		"notFound": "Il n'existe aucune Affectation"
+	    		},
+	    		"group": {
+	    			"title": "Groupes",
+	    			"category": "Catégorie",
+	    			"value": "Valeur",
+	    			"description": "Description",
+	    			"assigned": "Affecté",
+	    			"enabled": "Activé",
+	    			"error": "Impossible de récupérer la liste des Groupes",
+	    			"loading": "Chargement des Groupes",
+		    		"notFound": "Il n'existe aucun Groupe"
+	    		},
+	    		"groupAssignment": {
+	    			"title": "Affectation des groupes",
+	    			"category": "Catégorie",
+	    			"attributes": "Attributs",
+	    			"description": "Description",
+	    			"error": "impossible de récupérer la liste des affectations",
+	    			"loading": "Chargement des Affectations",
+		    		"notFound": "Il n'existe aucune Affectation"
+	    		}
+	    	},
+	    	"add": {
+	    		"title": "Ajouter un nouveau Project",
+	    		"form": {
+		    		"name": "Nom",
+		    		"description": "Description",
+		    		"enabled": "Activé",
+		    		"domain": "Domaine"
+	    		},
+	    		"action": {
+		    		"create": "Créer le Project",
+		    		"cancel": "Annuler"
+	    		},
+	    		"check": {
+	    			"name": {
+	    				"required": "Le nom est requis"
+	    			},
+	    			"domain": {
+	    				"required": "Le domaine est requis"
+	    			}
+	    		},
+	    		"error": "Impossible de créer le Project `{{projectName}}`",
+	    		"success": "Le Project `{{projectName}}` a été créé avec succès"
+	    	},
+	    	"remove": {
+	    		"title": "Supprimer un Project",
+				"content": {
+					"query": "Voulez-vous supprimer le Project `{{projectName}}` ?",
+					"isNotMapped": "Ce Project est associé avec aucune PDP.",
+					"isMapped": "Ce project est associé avec le PDP `{{pdpName}}`,  le supprimer va supprimer le mapping associé"
+				},
+				"mapping":{
+					"remove":{
+						"error": "Impossible de supprimer la relation avec `{{pdpName}}`"
+					}
+				},
+	    		"action": {
+	    			"cancel": "Annuler",
+	    			"delete": "Supprimer"
+	    		},
+	    		"error": "Impossible de supprimer le Project `{{projectName}}`",
+	    		"success": "Le Project `{{projectName}}` a été supprimé avec succès"
+	    	},
+	    	"map": {
+	    		"title": "Associé le Project `{{projectName}}` avec une PDP",
+	    		"form": {
+		    		"pdp": "PDP"
+	    		},
+	    		"action": {
+		    		"map": "Associer",
+		    		"cancel": "Annuler"
+	    		},
+	    		"check": {
+	    			"pdp": {
+	    				"required": "L'PDP est requise"
+	    			}
+	    		},
+	    		"error": "Impossible d'associer le Project `{{projectName}}` avec la PDP `{{pdpName}}`",
+	    		"success": "L'association du Project `{{projectName}}` avec la PDP `{{pdpName}}` a été effectué avec succès"
+	    	},
+	    	"unmap": {
+	    		"title": "Dissociation Project et PDP",
+	    		"content": "Voulez-vous dissocier le Project `{{projectName}}` et la PDP `{{pdpName}}` ?",
+	    		"action": {
+		    		"unmap": "Dissocier",
+		    		"cancel": "Annuler"
+	    		},
+	    		"error": "Impossible de dissocier le Project `{{projectName}}` et la PDP `{{pdpName}}`",
+	    		"success": "La dissociation du Project `{{projectName}}` et de la PDP `{{pdpName}}` a été effectuée avec succès"
+	    	}
+	    },
+	    "pdp": {
+	    	"title": "PDPs",
+			"edit" : {
+				"title": "configuration du PDP `{{pdpName}}` ",
+				"update" : "- Mettre à jour",
+				"basic" : {
+					"title" : "Information de base",
+					"form": {
+						"id": "Id",
+						"name": "Nom",
+						"description": "Description"
+					},
+					"action": {
+						"init": "Init",
+						"update": "Mettre à jour"
+					},
+					"check": {
+						"name": {
+							"required": "Le Nom est requis"
+						}
+					},
+					"error": "Impossible de mettre à jour la PDP `{{pdpName}}`",
+					"success": "La PDP `{{pdpName}}` a été mis à jour avec succès"
+				},
+				"policy": {
+					"title" : "Politiques"
+				}
+			},
+	    	"list": {
+	    		"search": {
+	    			"placeholder": "Rechercher des PDPs",
+	    			"reset": "Effacer"
+	    		},
+		    	"table": {
+		    		"name": "Nom",
+					"security_pipeline":{
+						"number" : "Nombre de Règles"
+					},
+					"project": "Project",
+		    		"loading": {
+		    			"pdp": "Chargement des PDPs",
+		    			"project": "Chargement du Project"
+		    		},
+					"mapping" :{
+						"map": "n'est pas associé à un projet"
+					},
+		    		"notFound": "Il n'existe aucune PDP"
+		    	},
+		    	"action": {
+		    		"title": "Actions",
+		    		"detail": "Consulter",
+		    		"configure": "Configurer",
+		    		"rule": "Règles",
+		    		"delete": "Supprimer",
+		    		"add": "Ajouter une PDP",
+					"edit": "Editer"
+		    	},
+		    	"error": "Impossible de récupérer la liste des PDPs"
+	    	},
+	    	"add": {
+	    		"title": "Ajouter une nouvelle PDP",
+	    		"form": {
+		    		"name": "Nom",
+		    		"policy": "Règle",
+		    		"description": "Description"
+	    		},
+	    		"action": {
+		    		"create": "Créer la PDP",
+		    		"cancel": "Annuler"
+	    		},
+	    		"check": {
+	    			"name": {
+	    				"required": "Le nom est requis"
+	    			},
+	    			"policy": {
+	    				"required": "Une règle est requise"
+	    			}
+	    		},
+	    		"error": "Impossible de créer la PDP `{{pdpName}}`",
+	    		"success": "La PDP `{{pdpName}}` a été créée avec succès"
+	    	},
+	    	"remove": {
+	    		"title": "Supprimer une PDP",
+	    		"content": "Voulez-vous supprimer la PDP `{{pdpName}}` ?",
+	    		"action": {
+	    			"cancel": "Annuler",
+	    			"delete": "Supprimer"
+	    		},
+	    		"error": "Impossible de supprimer la PDP `{{pdpName}}`",
+	    		"success": "la PDP `{{pdpName}}` a été supprimé avec succès"
+	    	},
+	    	"configure": {
+	    		"title": "Configuration de la PDP `{{pdpName}}`",
+	    		"action": {
+	    			"back": "Liste des PDPs"
+	    		},
+	    		"subject": {
+	    			"panelTitle": "Configuration des Sujets",
+	    			"title": "Sujets",
+	    			"add": {
+	    				"title": "Ajouter un nouveau Sujet",
+	    				"form": {
+		    				"name": "Nom",
+		    				"domain": "Domaine",
+		    				"enabled": "Activé",
+		    				"project": "Projet",
+		    				"password": "Mot de passe",
+		    				"description": "Description"
+		    			},
+						"action": {
+							"cancel": "Annuler",
+							"add": "Ajouter Sujet"
+						},
+			    		"check": {
+			    			"name": {
+			    				"required": "Le nom est requis"
+			    			},
+			    			"domain": {
+			    				"required": "Le domaine est requis"
+			    			},
+			    			"project": {
+			    				"required": "Le projet est requis"
+			    			},
+			    			"password": {
+			    				"required": "Le mot de passe est requis"
+			    			}
+			    		},
+			    		"error": "Impossible d'ajouter le Sujet `{{subjectName}}`",
+			    		"success": "Le Sujet `{{subjectName}}` a été ajouté avec succès"
+	    			},
+	    			"remove": {
+			    		"title": "Supprimer un Sujet",
+			    		"content": "Voulez-vous supprimer le Sujet `{{subjectName}}` de la PDP `{{pdpName}}` ?",
+			    		"action": {
+			    			"cancel": "Annuler",
+			    			"delete": "Supprimer"
+			    		},
+			    		"error": "Impossible de supprimer le Sujet `{{subjectName}}`",
+			    		"success": "Le Sujet `{{subjectName}}` a été supprimé avec succès"
+			    	},
+			    	"category": {
+	    				"title": "Catégories",
+	    				"add": {
+		    				"title": "Ajouter une nouvelle Catégorie",
+		    				"form": {
+			    				"name": "Nom"
+							},
+							"action": {
+								"cancel": "Annuler",
+								"add": "Ajouter Catégorie"
+							},
+				    		"check": {
+				    			"name": {
+				    				"required": "Le nom est requis"
+				    			}
+				    		},
+				    		"error": "Impossible d'ajouter la Catégorie `{{categoryName}}`",
+				    		"success": "Catégorie `{{categoryName}}` ajoutée avec succès"
+		    			},
+		    			"remove": {
+		    				"title": "Supprimer une Catégorie",
+				    		"content": "Voulez-vous supprimer la Catégorie `{{categoryName}}` de la PDP `{{pdpName}}` ?",
+				    		"action": {
+				    			"cancel": "Annuler",
+				    			"delete": "Supprimer"
+				    		},
+				    		"error": "Impossible de supprimer la Catégorie `{{categoryName}}`",
+				    		"success": "La Catégorie `{{categoryName}}` a été supprimée avec succès"
+		    			}
+	    			},
+	    			"categoryValue": {
+	    				"title": "Valeurs",
+	    				"add": {
+		    				"title": "Ajouter une nouvelle Valeur",
+		    				"form": {
+			    				"value": "Valeur"
+							},
+							"action": {
+								"cancel": "Annuler",
+								"add": "Ajouter Valeur"
+							},
+				    		"check": {
+				    			"value": {
+				    				"required": "La valeur est requise"
+				    			}
+				    		},
+				    		"error": "Impossible d'ajouter la Valeur `{{valueName}}`",
+				    		"success": "Valeur `{{valueName}}` ajoutée avec succès"
+		    			},
+		    			"remove": {
+		    				"title": "Supprimer une Valeur",
+				    		"content": "Voulez-vous supprimer la Valeur `{{valueName}}` de la PDP `{{pdpName}}` ?",
+				    		"action": {
+				    			"cancel": "Annuler",
+				    			"delete": "Supprimer"
+				    		},
+				    		"error": "Impossible de supprimer la Valeur `{{valueName}}`",
+				    		"success": "La Valeur `{{valueName}}` a été supprimée avec succès"
+		    			}
+	    			},
+	    			"assignment": {
+	    				"title": "Affectation des Sujets",
+	    				"action": {
+	    					"assign": "Affecter",
+	    					"unassign": "Désaffecter"
+	    				},
+	    				"list": {
+	    					"notFound": "Il n'existe aucune affectation"
+						},
+						"add": {
+							"error": "Impossible de réaliser l'affectation Sujet `{{subjectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}`",
+				    		"success": "Affectation de Sujet `{{subjectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}` réalisée avec succès"
+						},
+						"remove": {
+							"error": "Impossible de réaliser la désaffectation Sujet `{{subjectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}`",
+				    		"success": "Désaffectation de Sujet `{{subjectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}` réalisée avec succès"
+						}
+	    			}
+	    		},
+	    		"object": {
+	    			"panelTitle": "Configuration des Objets",
+	    			"title": "Objets",
+	    			"add": {
+	    				"title": "Ajouter un nouvel Objet",
+	    				"form": {
+		    				"name": "Nom",
+		    				"image": "Image",
+		    				"flavor": "Type"
+		    			},
+						"action": {
+							"cancel": "Annuler",
+							"add": "Ajouter Objet"
+						},
+			    		"check": {
+			    			"name": {
+			    				"required": "Le nom est requis"
+			    			},
+			    			"image": {
+			    				"required": "L'image est requise"
+			    			},
+			    			"flavor": {
+			    				"required": "Le type est requis"
+			    			}
+			    		},
+			    		"error": "Impossible d'ajouter l'Objet `{{objectName}}`",
+			    		"success": "L'Objet `{{objectName}}` a été ajouté avec succès"
+	    			},
+	    			"remove": {
+			    		"title": "Supprimer un Objet",
+			    		"content": "Voulez-vous supprimer l'Objet `{{objectName}}` de la PDP `{{pdpName}}` ?",
+			    		"action": {
+			    			"cancel": "Annuler",
+			    			"delete": "Supprimer"
+			    		},
+			    		"error": "Impossible de supprimer l'Objet `{{objectName}}`",
+			    		"success": "L'Objet `{{objectName}}` a été supprimé avec succès"
+			    	},
+			    	"category": {
+	    				"title": "Catégories",
+	    				"add": {
+		    				"title": "Ajouter une nouvelle Catégorie",
+		    				"form": {
+			    				"name": "Nom"
+							},
+							"action": {
+								"cancel": "Annuler",
+								"add": "Ajouter Catégorie"
+							},
+				    		"check": {
+				    			"name": {
+				    				"required": "Le nom est requis"
+				    			}
+				    		},
+				    		"error": "Impossible d'ajouter la Catégorie `{{categoryName}}`",
+				    		"success": "Catégorie `{{categoryName}}` ajoutée avec succès"
+		    			},
+		    			"remove": {
+		    				"title": "Supprimer une Catégorie",
+				    		"content": "Voulez-vous supprimer la Catégorie `{{categoryName}}` de la PDP `{{pdpName}}` ?",
+				    		"action": {
+				    			"cancel": "Annuler",
+				    			"delete": "Supprimer"
+				    		},
+				    		"error": "Impossible de supprimer la Catégorie `{{categoryName}}`",
+				    		"success": "La Catégorie `{{categoryName}}` a été supprimée avec succès"
+		    			}
+	    			},
+	    			"categoryValue": {
+	    				"title": "Valeurs",
+	    				"add": {
+		    				"title": "Ajouter une nouvelle Valeur",
+		    				"form": {
+			    				"value": "Valeur"
+							},
+							"action": {
+								"cancel": "Annuler",
+								"add": "Ajouter Valeur"
+							},
+				    		"check": {
+				    			"value": {
+				    				"required": "La valeur est requise"
+				    			}
+				    		},
+				    		"error": "Impossible d'ajouter la Valeur `{{valueName}}`",
+				    		"success": "Valeur `{{valueName}}` ajoutée avec succès"
+		    			},
+		    			"remove": {
+		    				"title": "Supprimer une Valeur",
+				    		"content": "Voulez-vous supprimer la Valeur `{{valueName}}` de la PDP `{{pdpName}}` ?",
+				    		"action": {
+				    			"cancel": "Annuler",
+				    			"delete": "Supprimer"
+				    		},
+				    		"error": "Impossible de supprimer la Valeur `{{valueName}}`",
+				    		"success": "La Valeur `{{valueName}}` a été supprimée avec succès"
+		    			}
+	    			},
+	    			"assignment": {
+	    				"title": "Affectation des Objets",
+	    				"action": {
+	    					"assign": "Affecter",
+	    					"unassign": "Désaffecter"
+	    				},
+	    				"list": {
+	    					"notFound": "Il n'existe aucune affectation"
+						},
+						"add": {
+							"error": "Impossible de réaliser l'affectation Objet `{{objectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}`",
+				    		"success": "Affectation de Objet `{{objectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}` réalisée avec succès"
+						},
+						"remove": {
+							"error": "Impossible de réaliser la désaffectation Objet `{{objectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}`",
+				    		"success": "Désaffectation de Objet `{{objectName}}` / Catégorie `{{categoryName}}` / Valeur `{{valueName}}` réalisée avec succès"
+						}
+	    			}
+	    		}  
+	    	},
+	    	"rule": {
+	    		"title": "Règles de la PDP `{{pdpName}}`",
+	    		"list": {
+	    			"table": {
+		    			"subject": "Sujets",
+		    			"object": "Objects",
+		    			"notFound": "Il n'existe aucune règle"
+	    			},
+	    			"action": {
+	    				"title": "Actions",
+	    				"add": "Ajouter une règle",
+	    				"delete": "Supprimer une règle"
+	    			}
+	    		},
+	    		"add": {
+	    			"title": "Ajouter une nouvelle Règle",
+	    			"action": {
+	    				"create": "Créer la Règle",
+	    				"cancel": "Annuler"
+	    			},
+	    			"form": {
+	    				"subject": {
+	    					"subject": "Sujets",
+	    					"category": "Catégories",
+	    					"categoryValue": "Valeur",
+	    					"action": {
+	    						"add": "Ajouter",
+	    						"delete": "Supprimer"
+	    					}
+	    				},
+	    				"object": {
+	    					"object": "Objets",
+	    					"category": "Catégories",
+	    					"categoryValue": "Valeurs",
+	    					"action": {
+	    						"add": "Ajouter",
+	    						"delete": "Supprimer"
+	    					}
+	    				}
+	    			},
+	    			"success": "La règle a été créée avec succès",
+	    			"error": "Impossible de créer la règle"
+	    		},
+	    		"delete": {
+	    			"title": "Supprime une Règle",
+	    			"content": "Voulez-vous supprimer la Valeur règle `{{ruleJson}}` de la PDP `{{pdpName}}` ?",
+	    			"action": {
+	    				"delete": "Supprimer la Règle",
+	    				"cancel": "Annuler"
+	    			},
+					"error": "Impossible de supprimer la règle `{{ruleJson}}`",
+				    "success": "La règle `{{ruleJson}}` a été supprimée avec succès"
+	    		},
+	    		"action": {
+	    			"back": "Liste des PDPs"
+	    		}  
+	    	}
+	    }	
+	}        
+}

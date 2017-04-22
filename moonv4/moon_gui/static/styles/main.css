@@ -1,0 +1,169 @@
+/* ----------------------------------------------------------------------------------
+# Copyright 2014 Orange
+#
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
+---------------------------------------------------------------------------------- */
+
+html {
+    overflow: auto;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    color: #323232;
+    font-family: Arial, Helvetica, sans-serif;
+    /* http://clagnut.com/blog/348/ */
+    font-size: 1em;
+}
+
+div, span, td, input, textarea, li {
+    font-size: 1em;
+}
+
+.container {
+    font-size: 1.2em;
+}
+
+.footer {
+	margin: 1em 0 1em 0	
+}
+
+input[disabled], textarea[disabled] {
+    background-color: #f6f6f6;
+}
+
+strong, .strong {
+    font-weight: bold;
+}
+
+h1, h2, h3, .likeH2 {
+    color: #FF6600;
+    text-align: center;
+}
+
+h1 {
+    font-size: 2em;
+    margin: 0em;
+}
+
+h2, .likeH2 {
+    font-size: 1.8em;
+    font-weight: lighter;
+    line-height: 1em;
+    margin: 0 0 1em;
+}
+
+h3 {
+    font-size: 1.6em;
+    font-weight: lighter;
+    line-height: 1em;
+    margin: 0 0 1em;
+    text-align: left;
+}
+
+img {
+    border: none;
+    vertical-align: middle;
+}
+
+.banner {
+    margin: 1.5em 0 1.5em 0;
+}
+
+.sub-banner {
+	margin: 0 0 1.5em 0;
+}
+
+.underlined {
+    text-decoration: underline;
+}
+
+.header img {
+    float: left;
+}
+
+.header h1 {
+    position: relative;
+}
+
+hr {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.table {
+    text-align: left !important;
+}
+
+.centered {
+    text-align: center;
+    color: #cbcbcb;
+}
+
+.customTables, .dropdown-menu {
+    text-align: left !important;
+}
+
+.resourceCombo {
+    width: 100%;
+}
+
+.top05 { margin-top: 0.5em; }
+.top10 { margin-top: 1.0em; }
+.top15 { margin-top: 1.5em; }
+.top20 { margin-top: 2.0em; }
+.top25 { margin-top: 2.5em; }
+.top30 { margin-top: 3.0em; }
+
+.left05 { margin-left: 0.5em }
+.left10 { margin-left: 1.0em }
+.left15 { margin-left: 1.5em }
+.left20 { margin-left: 2.0em }
+.left25 { margin-left: 2.5em }
+.left30 { margin-left: 3.0em }
+
+.black {
+	color: #333
+}
+
+.divider {
+	height: 1px;
+	margin: 9px 0;
+	overflow: hidden;
+	background-color: #e5e5e5;
+}
+
+/* */
+/*
+.modal-backdrop.am-fade {
+  opacity: .5;
+  transition: opacity .15s linear;
+  &.ng-enter {
+    opacity: 0;
+    &.ng-enter-active {
+      opacity: .5;
+    }
+  }
+  &.ng-leave {
+    opacity: .5;
+    &.ng-leave-active {
+      opacity: 0;
+    }
+  }
+}
+*/

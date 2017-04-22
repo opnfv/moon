@@ -1,0 +1,35 @@
+<div ng-controller="PDPDeleteController as del" class="modal" tabindex="-1" data-role="modalDeletePDP">
+
+	<div class="modal-dialog">
+
+		<div class="modal-content">
+
+			<div class="modal-header">
+				<button type="button" class="close" ng-click="$hide()">&times;</button>
+				<h4 class="modal-title" data-translate="moon.pdp.remove.title"></h4>
+			</div>
+			
+			<div class="modal-body">
+				<span data-translate="moon.pdp.remove.content" data-translate-values="{ pdpName: del.pdp.name}"></span>
+			</div>
+			
+			<div class="modal-footer">
+				<div class="btn-toolbar" style="float: right;">
+					<a href="" ng-click="$hide()" class="btn btn-default">
+		                <span data-translate="moon.pdp.remove.action.cancel">Cancel</span>
+					</a>
+
+					<a href="" ng-disabled="del.loading" ng-click="del.remove()" class="btn btn-warning">
+		            	<span class="glyphicon glyphicon-trash"></span>
+		                <span data-translate="moon.pdp.remove.action.delete">Delete</span>
+					</a>
+
+					<moon-loader ng-if="del.loading"></moon-loader>
+				</div>
+			</div>
+			
+		</div>
+		
+	</div>
+	
+</div>
