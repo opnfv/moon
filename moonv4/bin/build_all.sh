@@ -18,11 +18,6 @@ cd $MOON_HOME/moon_manager
 python3 setup.py sdist > /tmp/moon_manager.log
 mv dist/*.tar.gz $MOON_HOME/moon_orchestrator/dist
 
-echo Building Moon_Security_Function
-cd $MOON_HOME/moon_secfunction
-python3 setup.py sdist > /tmp/moon_secfunction.log
-mv dist/*.tar.gz $MOON_HOME/moon_orchestrator/dist
-
 echo Building Moon_DB
 cd $MOON_HOME/moon_db
 python3 setup.py sdist > /tmp/moon_db.log
