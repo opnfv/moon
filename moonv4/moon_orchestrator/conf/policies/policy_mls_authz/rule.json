@@ -1,0 +1,16 @@
+{
+	"mls_rule":[
+		["high", "vm_admin", "medium"],
+		["high", "vm_admin", "low"],
+		["medium", "vm_admin", "low"],
+		["high", "vm_access", "medium"],
+		["high", "vm_access", "low"],
+		["medium", "vm_access", "low"],
+	  	["high", "storage_admin", "medium"],
+		["high", "storage_admin", "low"],
+		["medium", "storage_admin", "low"],
+		["high", "storage_access", "medium"],
+		["high", "storage_access", "low"],
+		["medium", "storage_access", "low"]
+	]
+}

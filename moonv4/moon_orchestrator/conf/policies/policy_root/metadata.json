@@ -1,0 +1,19 @@
+{
+    "name": "Root Policy",
+    "model": "RBAC",
+    "genre": "admin",
+    "description": "root extension",
+    "pdp_pipeline": ["authz:rbac_rule"],
+
+    "subject_categories": [
+        "role"
+    ],
+
+    "action_categories": [
+        "action_id"
+    ],
+
+    "object_categories": [
+        "object_id"
+    ]
+}

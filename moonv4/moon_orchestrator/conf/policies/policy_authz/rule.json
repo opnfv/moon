@@ -1,0 +1,25 @@
+{
+	"mls_rule":[
+		["high", "vm_admin", "medium"],
+		["high", "vm_admin", "low"],
+		["medium", "vm_admin", "low"],
+		["high", "vm_access", "high"],
+		["high", "vm_access", "medium"],
+		["high", "vm_access", "low"],
+		["medium", "vm_access", "medium"],
+		["medium", "vm_access", "low"],
+		["low", "vm_access", "low"]
+	],
+	"dte_rule":[
+		["ft", "read", "computing"],
+		["ft", "write", "computing"],
+		["ft", "read", "storage"],
+		["ft", "write", "storage"],
+		["xx", "read", "storage"]
+	],
+	"rbac_rule":[
+		["dev", "xx", "read", "servers"],
+		["admin", "xx", "read", "servers"],
+		["admin", "ft", "read", "servers"]
+	]
+}

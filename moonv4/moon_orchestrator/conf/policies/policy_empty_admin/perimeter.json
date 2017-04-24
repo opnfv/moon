@@ -1,0 +1,39 @@
+{
+    "subjects": [],
+    "actions": [
+        "read",
+        "write"
+    ],
+    "objects": [
+        "authz.subjects",
+        "authz.objects",
+        "authz.actions",
+        "authz.subject_categories",
+        "authz.object_categories",
+        "authz.action_categories",
+        "authz.subject_scopes",
+        "authz.object_scopes",
+        "authz.action_scopes",
+        "authz.subject_assignments",
+        "authz.object_assignments",
+        "authz.action_assignments",
+        "authz.aggregation_algorithm",
+        "authz.sub_meta_rules",
+        "authz.rules",
+        "admin.subjects",
+        "admin.objects",
+        "admin.actions",
+        "admin.subject_categories",
+        "admin.object_categories",
+        "admin.action_categories",
+        "admin.subject_scopes",
+        "admin.object_scopes",
+        "admin.action_scopes",
+        "admin.subject_assignments",
+        "admin.object_assignments",
+        "admin.action_assignments",
+        "admin.aggregation_algorithm",
+        "admin.sub_meta_rules",
+        "admin.rules"
+    ]
+}

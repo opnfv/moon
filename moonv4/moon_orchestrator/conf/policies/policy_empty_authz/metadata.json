@@ -1,0 +1,12 @@
+{
+    "name": "MLS_Policy",
+    "model": "MLS",
+    "genre": "authz",
+    "description": "Multi Level Security Policy",
+
+    "subject_categories": [],
+
+    "action_categories": [],
+
+    "object_categories": []
+}

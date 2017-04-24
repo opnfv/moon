@@ -1,0 +1,55 @@
+{
+    "subject_assignments": {
+        "subject_security_level":{
+			"admin": ["high"],
+			"demo": ["medium"]
+        },
+		"domain":{
+			"admin": ["ft"],
+			"demo": ["xx"]
+        },
+		"role": {
+			"admin": ["admin"],
+			"demo": ["dev"]
+		}
+    },
+
+    "action_assignments": {
+        "resource_action":{
+			"pause": ["vm_admin"],
+			"unpause": ["vm_admin"],
+			"start": ["vm_admin"],
+			"stop": ["vm_admin"],
+			"list": ["vm_access", "vm_admin"],
+			"create": ["vm_admin"],
+			"storage_list": ["storage_access"],
+			"download": ["storage_access"],
+			"post": ["storage_admin"],
+			"upload": ["storage_admin"]
+        },
+		"access": {
+			"pause": ["write"],
+			"unpause": ["write"],
+			"start": ["write"],
+			"stop": ["write"],
+			"list": ["read"],
+			"create": ["write"],
+			"storage_list": ["read"],
+			"download": ["read"],
+			"post": ["write"],
+			"upload": ["write"]
+		}
+    },
+
+    "object_assignments": {
+        "object_security_level": {
+            "servers": ["low"]
+        },
+		"type": {
+			"servers": ["computing"]
+		},
+		"object_id": {
+			"servers": ["servers"]
+		}
+    }
+}

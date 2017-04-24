@@ -1,0 +1,10 @@
+docker-py
+kombu !=4.0.1,!=4.0.0
+oslo.messaging !=5.14.0,!=5.13.0
+oslo.config
+oslo.log
+vine
+jinja2
+sqlalchemy
+pymysql
+werkzeug

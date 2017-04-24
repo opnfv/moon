@@ -1,0 +1,39 @@
+{
+    "subject_assignments": {
+        "role": {
+			"admin": ["root_role"]
+		}
+    },
+
+    "action_assignments": {
+        "action_id": {
+			"read": ["read"],
+			"write": ["write"]
+		}
+    },
+
+    "object_assignments": {
+        "object_id": {
+            "templates": ["templates"],
+		    "sub_meta_rule_algorithms": ["sub_meta_rule_algorithms"],
+		    "aggregation_algorithms": ["aggregation_algorithms"],
+            "tenants": ["tenants"],
+            "intra_extensions": ["intra_extensions"],
+            "admin.subjects": ["admin.subjects"],
+            "admin.objects": ["admin.objects"],
+            "admin.actions": ["admin.actions"],
+            "admin.subject_categories": ["admin.subject_categories"],
+            "admin.object_categories": ["admin.object_categories"],
+            "admin.action_categories": ["admin.action_categories"],
+            "admin.subject_category_scopes": ["admin.subject_category_scopes"],
+            "admin.object_category_scopes": ["admin.object_category_scopes"],
+            "admin.action_category_scopes": ["admin.action_category_scopes"],
+            "admin.subject_assignments": ["admin.subject_assignments"],
+            "admin.object_assignments": ["admin.object_assignments"],
+            "admin.action_assignments": ["admin.action_assignments"],
+            "admin.aggregation_algorithm": ["admin.aggregation_algorithm"],
+            "admin.sub_meta_rules": ["admin.sub_meta_rules"],
+            "admin.rules": ["admin.rules"]
+		}
+    }
+}
