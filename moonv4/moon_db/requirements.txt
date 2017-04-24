@@ -3,3 +3,4 @@ sqlalchemy
 pymysql
 requests
 oslo.log
+oslo.config
