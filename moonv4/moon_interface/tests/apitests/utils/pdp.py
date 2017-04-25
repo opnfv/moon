@@ -33,31 +33,36 @@ def get_keystone_projects():
                 ],
                 "password": {
                     "user": {
-                        "domain": {
-                            "id": "Default"
-                        },
                         "name": KEYSTONE_USER,
+                        "domain": {
+                            "name": "Default"
+                        },
                         "password": KEYSTONE_PASSWORD
                     }
-                }
-            },
-            "scope": {
-                "project": {
-                    "domain": {
-                        "id": "Default"
-                    },
-                    "name": KEYSTONE_PROJECT
                 }
             }
         }
     }
 
     req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
-
     assert req.status_code in (200, 201)
     TOKEN = req.headers['X-Subject-Token']
     HEADERS['X-Auth-Token'] = TOKEN
     req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
+    if req.status_code not in (200, 201):
+        data_auth["auth"]["scope"] = {
+            "project": {
+                "name": KEYSTONE_PROJECT,
+                "domain": {
+                    "id": "Default"
+                }
+            }
+        }
+        req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
+        assert req.status_code in (200, 201)
+        TOKEN = req.headers['X-Subject-Token']
+        HEADERS['X-Auth-Token'] = TOKEN
+        req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
     assert req.status_code in (200, 201)
     return req.json()
 
@@ -145,5 +150,4 @@ def delete_pdp(pdp_id):
     assert type(result) is dict
     assert "result" in result
     assert result["result"]
-
 
