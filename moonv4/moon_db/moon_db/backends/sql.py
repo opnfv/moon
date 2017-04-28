@@ -493,7 +493,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if "policy_list" not in _value["value"] or type(_value["value"]["policy_list"]) is not list:
                     _value["value"]["policy_list"] = []
                 if policy_id and policy_id not in _value["value"]["policy_list"]:
-                    _value["value"]["policy_list"] = [policy_id, ]
+                    _value["value"]["policy_list"].append(policy_id)
                 new_subject = Subject.from_dict(_value)
                 # setattr(_subject, "value", _value["value"])
                 setattr(_subject, "value", getattr(new_subject, "value"))
@@ -560,7 +560,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if "policy_list" not in _value["value"] or type(_value["value"]["policy_list"]) is not list:
                     _value["value"]["policy_list"] = []
                 if policy_id and policy_id not in _value["value"]["policy_list"]:
-                    _value["value"]["policy_list"] = [policy_id, ]
+                    _value["value"]["policy_list"].append(policy_id)
                 new_object = Object.from_dict(_value)
                 # setattr(_object, "value", _value["value"])
                 setattr(_object, "value", getattr(new_object, "value"))
@@ -627,7 +627,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if "policy_list" not in _value["value"] or type(_value["value"]["policy_list"]) is not list:
                     _value["value"]["policy_list"] = []
                 if policy_id and policy_id not in _value["value"]["policy_list"]:
-                    _value["value"]["policy_list"] = [policy_id, ]
+                    _value["value"]["policy_list"].append(policy_id)
                 new_action = Action.from_dict(_value)
                 # setattr(_action, "value", _value["value"])
                 setattr(_action, "value", getattr(new_action, "value"))
