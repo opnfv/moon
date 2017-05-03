@@ -18,7 +18,7 @@ class Policies(object):
 
     def get_policies(self, ctx, args):
         try:
-            data = self.manager.get_policies(user_id=ctx["user_id"], policy_id=ctx["id"])
+            data = self.manager.get_policies(user_id=ctx["user_id"], policy_id=ctx.get("id"))
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -28,7 +28,7 @@ class Policies(object):
 
     def add_policy(self, ctx, args):
         try:
-            data = self.manager.add_policy(user_id=ctx["user_id"], policy_id=ctx["id"], value=args)
+            data = self.manager.add_policy(user_id=ctx["user_id"], policy_id=ctx.get("id"), value=args)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,

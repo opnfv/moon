@@ -18,7 +18,7 @@ class Models(object):
 
     def get_models(self, ctx, args):
         try:
-            data = self.manager.get_models(user_id=ctx["user_id"], model_id=ctx["id"])
+            data = self.manager.get_models(user_id=ctx["user_id"], model_id=ctx.get("id"))
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -28,7 +28,7 @@ class Models(object):
 
     def add_model(self, ctx, args):
         try:
-            data = self.manager.add_model(user_id=ctx["user_id"], model_id=ctx["id"], value=args)
+            data = self.manager.add_model(user_id=ctx["user_id"], model_id=ctx.get("id"), value=args)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
