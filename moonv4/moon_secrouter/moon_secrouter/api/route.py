@@ -5,8 +5,10 @@
 
 import copy
 import time
+import itertools
+from uuid import uuid4
 from oslo_log import log as logging
-from moon_utilities.security_functions import call
+from moon_utilities.security_functions import call, notify
 from oslo_config import cfg
 from moon_secrouter.api.generic import Status, Logs
 
@@ -90,6 +92,7 @@ API = {
     ),
     "function": (
         "authz",
+        "return_authz",
     ),
 }
 
@@ -97,18 +100,109 @@ API = {
 class Cache(object):
 
     # TODO (asteroide): set cache integer in CONF file
-    __UPDATE_INTERVAL = 300
+    __UPDATE_INTERVAL = 10
+    
     __CONTAINERS = {}
-    __LAST_UPDATE = 0
+    __CONTAINERS_UPDATE = 0
 
-    def __update_container(self):
-        containers = call("orchestrator", method="get_container", ctx={}, args={})
-        LOG.info("container={}".format(containers))
-        for key, value in containers["containers"].items():
-            self.__CONTAINERS[key] = value
+    __CONTAINER_CHAINING_UPDATE = 0
+    __CONTAINER_CHAINING = {}
+
+    __PDP = {}
+    __PDP_UPDATE = 0
+    
+    __POLICIES = {}
+    __POLICIES_UPDATE = 0
+    
+    __MODELS = {}
+    __MODELS_UPDATE = 0
+    
+    __AUTHZ_REQUESTS = {}
 
     def update(self, component=None):
         self.__update_container()
+        self.__update_pdp()
+        self.__update_policies()
+        self.__update_models()
+        for key, value in self.__PDP.items():
+            self.__update_container_chaining(value["keystone_project_id"])
+
+    @property
+    def authz_requests(self):
+        return self.__AUTHZ_REQUESTS
+
+    def __update_pdp(self):
+        pdp = call("moon_manager", method="get_pdp", ctx={"user_id": "admin"}, args={})
+        for _pdp in pdp["pdps"].values():
+            if _pdp['keystone_project_id'] not in self.__CONTAINER_CHAINING:
+                self.__CONTAINER_CHAINING[_pdp['keystone_project_id']] = {}
+                # Note (asteroide): force update of chaining
+                self.__update_container_chaining(_pdp['keystone_project_id'])
+        for key, value in pdp["pdps"].items():
+            self.__PDP[key] = value
+
+    @property
+    def pdp(self):
+        current_time = time.time()
+        if self.__PDP_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__update_pdp()
+        self.__PDP_UPDATE = current_time
+        return self.__PDP
+
+    def __update_policies(self):
+        policies = call("moon_manager", method="get_policies", ctx={"user_id": "admin"}, args={})
+        for key, value in policies["policies"].items():
+            self.__POLICIES[key] = value
+
+    @property
+    def policies(self):
+        current_time = time.time()
+        if self.__POLICIES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__update_policies()
+        self.__POLICIES_UPDATE = current_time
+        return self.__POLICIES
+
+    def __update_models(self):
+        models = call("moon_manager", method="get_models", ctx={"user_id": "admin"}, args={})
+        for key, value in models["models"].items():
+            self.__MODELS[key] = value
+
+    @property
+    def models(self):
+        current_time = time.time()
+        if self.__MODELS_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__update_models()
+        self.__MODELS_UPDATE = current_time
+        return self.__MODELS
+
+    def __update_container(self):
+        containers = call("orchestrator", method="get_container", ctx={}, args={})
+        for key, value in containers["containers"].items():
+            self.__CONTAINERS[key] = value
+
+    @property
+    def container_chaining(self):
+        current_time = time.time()
+        if self.__CONTAINER_CHAINING_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            for key, value in self.pdp.items():
+                self.__update_container_chaining(value["keystone_project_id"])
+        self.__CONTAINER_CHAINING_UPDATE = current_time
+        return self.__CONTAINER_CHAINING
+
+    def __update_container_chaining(self, keystone_project_id):
+        container_ids = []
+        for pdp_id, pdp_value, in CACHE.pdp.items():
+            if pdp_value:
+                if pdp_value["keystone_project_id"] == keystone_project_id:
+                    for policy_id in pdp_value["security_pipeline"]:
+                        model_id = CACHE.policies[policy_id]['model_id']
+                        for meta_rule_id in CACHE.models[model_id]["meta_rules"]:
+                            for container_id, container_values, in CACHE.containers.items():
+                                for container_value in container_values:
+                                    if container_value["meta_rule_id"] == meta_rule_id:
+                                        container_ids.append(container_value["container_id"])
+                                        break
+        self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
 
     @property
     def containers(self):
@@ -121,13 +215,56 @@ class Cache(object):
         :return:
         """
         current_time = time.time()
-        if self.__LAST_UPDATE + self.__UPDATE_INTERVAL < current_time:
+        if self.__CONTAINERS_UPDATE + self.__UPDATE_INTERVAL < current_time:
             self.__update_container()
-        self.__LAST_UPDATE = current_time
+        self.__CONTAINERS_UPDATE = current_time
         return self.__CONTAINERS
 
 
 CACHE = Cache()
+
+
+class AuthzRequest:
+
+    result = None
+    req_max_delay = 5
+
+    def __init__(self, ctx, args):
+        self.ctx = ctx
+        self.args = args
+        self.request_id = ctx["request_id"]
+        self.container_chaining = CACHE.container_chaining[self.ctx['id']]
+        ctx["container_chaining"] = copy.deepcopy(self.container_chaining)
+        self.pdp_container = str(self.container_chaining[0])
+        self.run()
+
+    def run(self):
+        notify(request_id=self.request_id, container_id=self.pdp_container, payload=self.ctx)
+        cpt = 0
+        while cpt < self.req_max_delay*10:
+            time.sleep(0.1)
+            cpt += 1
+            if CACHE.authz_requests[self.request_id]:
+                self.result = CACHE.authz_requests[self.request_id]
+                return
+        LOG.warning("Request {} has timed out".format(self.request_id))
+
+    def is_authz(self):
+        if not self.result:
+            return False
+        authz_results = []
+        for key in self.result["pdp_set"]:
+            if "effect" in self.result["pdp_set"][key]:
+                if self.result["pdp_set"][key]["effect"] == "grant":
+                    authz_results.append(True)
+                else:
+                    authz_results.append(False)
+        if list(itertools.accumulate(authz_results, lambda x, y: x & y))[-1]:
+            self.result["pdp_set"]["effect"] = "grant"
+        if self.result:
+            if "pdp_set" in self.result and self.result["pdp_set"]["effect"] == "grant":
+                return True
+        return False
 
 
 class Router(object):
@@ -136,6 +273,7 @@ class Router(object):
     """
 
     __version__ = "0.1.0"
+    cache_requests = {}
 
     def __init__(self, add_master_cnx):
         if CONF.slave.slave_name and add_master_cnx:
@@ -177,13 +315,6 @@ class Router(object):
                 ))
             LOG.info("SLAVE CONNECTION ENDED!")
             LOG.info(result)
-
-    @staticmethod
-    def __get_first_container(keystone_project_id):
-        for container_id, container_value, in CACHE.containers.items():
-            if container_value:
-                if container_value[0]["keystone_project_id"] == keystone_project_id:
-                    return container_value[0]["container_id"]
 
     @staticmethod
     def check_pdp(ctx):
@@ -228,21 +359,32 @@ class Router(object):
                 if component == "orchestrator":
                     return call(component, method=ctx["method"], ctx=ctx, args=args)
                 if component == "manager":
-                    LOG.info("Call Manager {}".format(ctx))
                     result = call("moon_manager", method=ctx["method"], ctx=ctx, args=args)
                     self.send_update(api=ctx["method"], ctx=ctx, args=args)
                     return result
                 if component == "function":
-                    if self.check_pdp(ctx):
-                        LOG.info("Tenant ID={}".format(ctx['id']))
-                        pdp_container = self.__get_first_container(ctx['id'])
-                        LOG.info("pdp_container={}".format(pdp_container))
-                        # TODO (asteroide): call the first security function through a notification
-                        # and not an RPC call (need to play with ID in context)
-                        result = call(pdp_container, method=ctx["method"], ctx=ctx, args=args)
-                        return result
+                    if ctx["method"] == "return_authz":
+                        request_id = ctx["request_id"]
+                        CACHE.authz_requests[request_id] = args
+                        return args
+                    elif self.check_pdp(ctx):
+                        req_id = uuid4().hex
+                        CACHE.authz_requests[req_id] = {}
+                        ctx["request_id"] = req_id
+                        req = AuthzRequest(ctx, args)
+                        # result = copy.deepcopy(req.result)
+                        if req.is_authz():
+                            return {"authz": True,
+                                    "pdp_id": ctx["id"],
+                                    "ctx": ctx, "args": args}
+                        return {"authz": False,
+                                "error": {'code': 403, 'title': 'Authz Error',
+                                          'description': "The authz request is refused."},
+                                "pdp_id": ctx["id"],
+                                "ctx": ctx, "args": args}
                     return {"result": False,
-                            "error": {'code': 500, 'title': 'Moon Error', 'description': "Function component not found."},
+                            "error": {'code': 500, 'title': 'Moon Error',
+                                      'description': "Function component not found."},
                             "pdp_id": ctx["id"],
                             "ctx": ctx, "args": args}
 

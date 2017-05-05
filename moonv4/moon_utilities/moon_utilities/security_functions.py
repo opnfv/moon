@@ -8,13 +8,10 @@ import copy
 import re
 import types
 import requests
-from uuid import uuid4
 from oslo_log import log as logging
 from oslo_config import cfg
 import oslo_messaging
 from moon_utilities import exceptions
-from oslo_config.cfg import ConfigOpts
-# from moon_db.core import PDPManager, ModelManager, PolicyManager
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -158,6 +155,22 @@ def logout(headers, url=None):
 __transport_master = oslo_messaging.get_transport(cfg.CONF, CONF.slave.master_url)
 __transport = oslo_messaging.get_transport(CONF)
 
+__n_transport = oslo_messaging.get_notification_transport(CONF)
+__n_notifier = oslo_messaging.Notifier(__n_transport,
+                                       'router.host',
+                                       driver='messagingv2',
+                                       topics=['authz-workers'])
+__n_notifier = __n_notifier.prepare(publisher_id='router')
+
+
+def notify(request_id, container_id, payload, event_type="authz"):
+    ctxt = {
+        'request_id': request_id,
+        'container_id': container_id
+    }
+    result = __n_notifier.critical(ctxt, event_type, payload=payload)
+    return result
+
 
 def call(endpoint, ctx=None, method="get_status", **kwargs):
     if not ctx:
@@ -183,13 +196,11 @@ class Context:
         self.__keystone_project_id = _keystone_project_id
         self.__pdp_id = None
         self.__pdp_value = None
-        LOG.info("Context pdp={}".format(PDPManager.get_pdp("admin")))
         for _pdp_key, _pdp_value in PDPManager.get_pdp("admin").items():
             if _pdp_value["keystone_project_id"] == _keystone_project_id:
                 self.__pdp_id = _pdp_key
                 self.__pdp_value = copy.deepcopy(_pdp_value)
                 break
-        LOG.info("Context pdp_value={}".format(self.__pdp_value))
         self.__subject = _subject
         self.__object = _object
         self.__action = _action
@@ -200,29 +211,11 @@ class Context:
         self.__headers = []
         policies = PolicyManager.get_policies("admin")
         models = ModelManager.get_models("admin")
-        LOG.info("Context policies={}".format(policies))
-        LOG.info("Context models={}".format(models))
         for policy_id in self.__pdp_value["security_pipeline"]:
             model_id = policies[policy_id]["model_id"]
             for meta_rule in models[model_id]["meta_rules"]:
                 self.__headers.append(meta_rule)
         self.__meta_rules = ModelManager.get_meta_rules("admin")
-        LOG.info("Context meta_rules={}".format(self.__meta_rules))
-        LOG.info("Context headers={}".format(self.__headers))
-        # call("moon_manager",
-        #                          method="get_meta_rules",
-        #                          ctx={"id": self.__intra_extension_id,
-        #                               "user_id": "admin",
-        #                               "method": "get_sub_meta_rules"},
-        #                          args={})["sub_meta_rules"]
-        # for key in self.__intra_extension["pdp_pipeline"]:
-        #     LOG.info("__meta_rules={}".format(self.__meta_rules))
-        #     for meta_rule_key in self.__meta_rules:
-        #         if self.__meta_rules[meta_rule_key]['name'] == key.split(":", maxsplit=1)[-1]:
-        #             self.__headers.append({"name": self.__meta_rules[meta_rule_key]['name'], "id": meta_rule_key})
-        #             break
-        #     else:
-        #         LOG.warning("Cannot find meta_rule_key {}".format(key))
         self.__pdp_set = {}
         self.__init_pdp_set()
 
@@ -254,59 +247,36 @@ class Context:
         for header in self.__headers:
             self.__pdp_set[header] = dict()
             self.__pdp_set[header]["meta_rules"] = self.__meta_rules[header]
-            self.__pdp_set[header]["target"] = self.__add_target()
+            self.__pdp_set[header]["target"] = self.__add_target(header)
             # TODO (asteroide): the following information must be retrieve somewhere
             self.__pdp_set[header]["instruction"] = list()
-            self.__pdp_set[header]["effect"] = "grant"
-        self.__pdp_set["effect"] = "grant"
+            self.__pdp_set[header]["effect"] = "deny"
+        self.__pdp_set["effect"] = "deny"
 
-    def __add_target(self):
+    def __add_target(self, meta_rule_id):
         result = dict()
         _subject = self.__current_request["subject"]
         _object = self.__current_request["object"]
         _action = self.__current_request["action"]
-        categories = self.ModelManager.get_subject_categories("admin")
-        # TODO (asteroide): end the dev of that part
-        # for category in categories:
-        #     result[category] = list()
-        #     assignments = call("moon_secpolicy_{}".format(self.__intra_extension_id),
-        #                        method="get_subject_assignments",
-        #                        ctx={"id": self.__intra_extension_id,
-        #                             "sid": _subject,
-        #                             "scid": category,
-        #                             "user_id": "admin"},
-        #                        args={})["subject_assignments"]
-        #     result[category].extend(assignments[_subject][category])
-        # categories = call("moon_secpolicy_{}".format(self.__intra_extension_id),
-        #                   method="get_object_categories",
-        #                   ctx={"id": self.__intra_extension_id,
-        #                        "user_id": "admin"},
-        #                   args={})["object_categories"]
-        # for category in categories:
-        #     result[category] = list()
-        #     assignments = call("moon_secpolicy_{}".format(self.__intra_extension_id),
-        #                        method="get_object_assignments",
-        #                        ctx={"id": self.__intra_extension_id,
-        #                             "sid": _object,
-        #                             "scid": category,
-        #                             "user_id": "admin"},
-        #                        args={})["object_assignments"]
-        #     result[category].extend(assignments[_object][category])
-        # categories = call("moon_secpolicy_{}".format(self.__intra_extension_id),
-        #                   method="get_action_categories",
-        #                   ctx={"id": self.__intra_extension_id,
-        #                        "user_id": "admin"},
-        #                   args={})["action_categories"]
-        # for category in categories:
-        #     result[category] = list()
-        #     assignments = call("moon_secpolicy_{}".format(self.__intra_extension_id),
-        #                        method="get_action_assignments",
-        #                        ctx={"id": self.__intra_extension_id,
-        #                             "sid": _action,
-        #                             "scid": category,
-        #                             "user_id": "admin"},
-        #                        args={})["action_assignments"]
-        #     result[category].extend(assignments[_action][category])
+        meta_rules = self.ModelManager.get_meta_rules("admin")
+        for header in self.__headers:
+            policy_id = self.PolicyManager.get_policy_from_meta_rules("admin", header)
+            for meta_rule_id in meta_rules:
+                for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
+                    if sub_cat not in result:
+                        result[sub_cat] = []
+                    for assign in self.PolicyManager.get_subject_assignments("admin", policy_id, _subject, sub_cat).values():
+                        result[sub_cat].extend(assign["assignments"])
+                for obj_cat in meta_rules[meta_rule_id]['object_categories']:
+                    if obj_cat not in result:
+                        result[obj_cat] = []
+                    for assign in self.PolicyManager.get_object_assignments("admin", policy_id, _object, obj_cat).values():
+                        result[obj_cat].extend(assign["assignments"])
+                for act_cat in meta_rules[meta_rule_id]['action_categories']:
+                    if act_cat not in result:
+                        result[act_cat] = []
+                    for assign in self.PolicyManager.get_action_assignments("admin", policy_id, _action, act_cat).values():
+                        result[act_cat].extend(assign["assignments"])
         return result
 
     def __repr__(self):
@@ -334,6 +304,18 @@ pdp_set: {pdp_set}
             "pdp_set": copy.deepcopy(self.__pdp_set),
             "request_id": copy.deepcopy(self.__request_id),
         }
+
+    @property
+    def request_id(self):
+        return self.__request_id
+
+    @request_id.setter
+    def request_id(self, value):
+        raise Exception("You cannot update the request_id")
+
+    @request_id.deleter
+    def request_id(self):
+        raise Exception("You cannot update the request_id")
 
     @property
     def initial_request(self):

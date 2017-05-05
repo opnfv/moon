@@ -29,7 +29,6 @@ def timeit(function):
     return wrapper
 
 
-@timeit
 def call(topic="security_router", ctx=None, method="route", **kwargs):
     if not ctx:
         ctx = dict()

@@ -47,16 +47,17 @@ RUN pip3 install .
         )
         # note(asteroide): time to let the new docker boot
         time.sleep(3)
-        self.get_status()
+        # self.get_status()
 
     def get_status(self):
-        transport = oslo_messaging.get_transport(CONF)
-        target = oslo_messaging.Target(topic=self.id, version='1.0')
-        client = oslo_messaging.RPCClient(transport, target)
-        LOG.info("Calling Status on {}".format(self.id))
-        ret = client.call({"component_id": self.id}, 'get_status', args=None)
-        LOG.info(ret)
-        return ret
+        return True
+        # transport = oslo_messaging.get_transport(CONF)
+        # target = oslo_messaging.Target(topic=self.id, version='1.0')
+        # client = oslo_messaging.RPCClient(transport, target)
+        # LOG.info("Calling Status on {}".format(self.id))
+        # ret = client.call({"component_id": self.id}, 'get_status', args=None)
+        # LOG.info(ret)
+        # return ret
 
 
 def run(uuid, conf_file="", docker=None, network_config=None):

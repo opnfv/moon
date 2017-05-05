@@ -28,6 +28,15 @@ class PolicyManager(Managers):
         self.driver = connector.driver
         Managers.PolicyManager = self
 
+    def get_policy_from_meta_rules(self, user_id, meta_rule_id):
+        policies = self.PolicyManager.get_policies("admin")
+        models = self.ModelManager.get_models("admin")
+        for pdp_key, pdp_value in self.PDPManager.get_pdp(user_id).items():
+            for policy_id in pdp_value["security_pipeline"]:
+                model_id = policies[policy_id]["model_id"]
+                if meta_rule_id in models[model_id]["meta_rules"]:
+                    return policy_id
+
     @enforce(("read", "write"), "policies")
     def update_policy(self, user_id, policy_id, value):
         return self.driver.update_policy(policy_id=policy_id, value=value)

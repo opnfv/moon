@@ -39,6 +39,7 @@ meta_rule = {
 rules = {
     "mls": (
         ("high", "medium", "vm-action"),
+        ("high", "low", "vm-action"),
         ("medium", "low", "vm-action"),
     )
 }
