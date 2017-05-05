@@ -76,10 +76,11 @@ class Perimeter(object):
         try:
             if not ctx["perimeter_id"]:
                 data = self.manager.get_subjects(user_id=ctx["user_id"], policy_id=None)
-                for data_id, data_value in data.items():
-                    if data_value['name'] == args['name']:
-                        ctx["perimeter_id"] = data_id
-                        break
+                if 'name' in args:
+                    for data_id, data_value in data.items():
+                        if data_value['name'] == args['name']:
+                            ctx["perimeter_id"] = data_id
+                            break
             data = self.manager.add_subject(user_id=ctx["user_id"], policy_id=ctx["id"],
                                             perimeter_id=ctx["perimeter_id"], value=args)
         except Exception as e:
@@ -112,10 +113,11 @@ class Perimeter(object):
     def set_object(self, ctx, args):
         try:
             data = self.manager.get_objects(user_id=ctx["user_id"], policy_id=None)
-            for data_id, data_value in data.items():
-                if data_value['name'] == args['name']:
-                    ctx["perimeter_id"] = data_id
-                    break
+            if 'name' in args:
+                for data_id, data_value in data.items():
+                    if data_value['name'] == args['name']:
+                        ctx["perimeter_id"] = data_id
+                        break
             data = self.manager.add_object(user_id=ctx["user_id"], policy_id=ctx["id"],
                                            perimeter_id=ctx["perimeter_id"], value=args)
         except Exception as e:
@@ -148,10 +150,11 @@ class Perimeter(object):
     def set_action(self, ctx, args):
         try:
             data = self.manager.get_actions(user_id=ctx["user_id"], policy_id=None)
-            for data_id, data_value in data.items():
-                if data_value['name'] == args['name']:
-                    ctx["perimeter_id"] = data_id
-                    break
+            if 'name' in args:
+                for data_id, data_value in data.items():
+                    if data_value['name'] == args['name']:
+                        ctx["perimeter_id"] = data_id
+                        break
             data = self.manager.add_action(user_id=ctx["user_id"], policy_id=ctx["id"],
                                            perimeter_id=ctx["perimeter_id"], value=args)
         except Exception as e:
