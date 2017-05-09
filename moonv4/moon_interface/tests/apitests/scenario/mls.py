@@ -38,8 +38,17 @@ meta_rule = {
 
 rules = {
     "mls": (
-        ("high", "medium", "vm-action"),
-        ("high", "low", "vm-action"),
-        ("medium", "low", "vm-action"),
+        {
+            "rules": ("high", "medium", "vm-action"),
+            "instructions": ({"decision": "grant"})
+        },
+        {
+            "rules": ("high", "low", "vm-action"),
+            "instructions": ({"decision": "grant"})
+        },
+        {
+            "rules": ("medium", "low", "vm-action"),
+            "instructions": ({"decision": "grant"})
+        },
     )
 }

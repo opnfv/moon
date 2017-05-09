@@ -113,7 +113,7 @@ def create_policy(model_id, meta_rule_list):
         meta_rule_value = scenario.meta_rule[meta_rule_name]
         for rule in scenario.rules[meta_rule_name]:
             _meta_rule = list(meta_rule_value["value"])
-            for data_name in rule:
+            for data_name in rule["rule"]:
                 category_name = _meta_rule.pop(0)
                 if category_name in scenario.subject_categories:
                     data_list.append(scenario.subject_data[category_name][data_name])
@@ -121,7 +121,8 @@ def create_policy(model_id, meta_rule_list):
                     data_list.append(scenario.object_data[category_name][data_name])
                 elif category_name in scenario.action_categories:
                     data_list.append(scenario.action_data[category_name][data_name])
-            add_rule(policy_id, meta_rule_value["id"], data_list)
+            instructions = rule["instructions"]
+            add_rule(policy_id, meta_rule_value["id"], data_list, instructions)
     return policy_id
 
 

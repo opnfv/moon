@@ -527,11 +527,12 @@ def delete_action_assignment(policy_id, action_id, action_cat_id, action_data_id
             assert action_data_id not in result["action_assignments"][key]["assignments"]
 
 
-def add_rule(policy_id, meta_rule_id, rule):
+def add_rule(policy_id, meta_rule_id, rule, instructions={"chain": [{"security_pipeline": "rbac"}]}):
     req = requests.post(URL.format("/policies/{}/rules".format(policy_id)),
                         json={
                             "meta_rule_id": meta_rule_id,
                             "rule": rule,
+                            "instructions": instructions,
                             "enabled": True
                         },
                         headers=HEADERS)
