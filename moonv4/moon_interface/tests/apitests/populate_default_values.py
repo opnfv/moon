@@ -109,9 +109,9 @@ def create_policy(model_id, meta_rule_list):
             add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
 
     for meta_rule_name in scenario.rules:
-        data_list = []
         meta_rule_value = scenario.meta_rule[meta_rule_name]
         for rule in scenario.rules[meta_rule_name]:
+            data_list = []
             _meta_rule = list(meta_rule_value["value"])
             for data_name in rule["rule"]:
                 category_name = _meta_rule.pop(0)
