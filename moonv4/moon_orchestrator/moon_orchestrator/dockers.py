@@ -148,7 +148,7 @@ RUN pip3 install --upgrade .
 
         output = self.docker.create_container(image=self.tag,
                                               command=list(self.run_cmd),
-                                              hostname=str(self.id.replace("_", "-")),
+                                              hostname=str(self.id.replace("_", "-"))[:63],
                                               name=str(self.id),
                                               networking_config=self.__get_docker_network(),
                                               host_config=host_config
