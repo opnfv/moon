@@ -7,19 +7,36 @@ This directory contains all the modules for MoonV4
 
 ### Prerequist
 
--   `sudo apt install python3-dev python3-pip`
--   `sudo pip3 install pip --upgrade`
--   `sudo apt -y install docker-engine` ([Get Docker](https://docs.docker.com/engine/installation/))
--   `echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts`
--   modify moon orchestrator dist path in moon_orchestrator/conf/moon.conf
--   `sudo ln -s $(pwd)/conf /etc/moon`
+```bash
+sudo apt install python3-dev python3-pip
+sudo pip3 install pip --upgrade
+sudo apt -y install docker-engine # ([Get Docker](https://docs.docker.com/engine/installation/))
+echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts
+```
+
+### Install Docker
+
+```bash
+sudo apt-get remove docker docker-engine
+sudo apt-get install     apt-transport-https     ca-certificates     curl     software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo apt-key fingerprint 0EBFCD88
+sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update
+sudo apt-get install docker-ce
+sudo docker run hello-world
+sudo groupadd docker
+sudo gpasswd -a ${USER} docker
+sudo service docker restart
+```
 
 ### Get the code
 
 ```bash
-git clone https://github.com/rebirthmonkey/moonv4.git
-cd moonv4
+git clone https://opnfv.org/moon
+cd moon/moonv4
 export MOON_HOME=$(pwd)
+sudo ln -s $(pwd)/conf /etc/moon
 ```
 
 ### Create an OpenStack environment
