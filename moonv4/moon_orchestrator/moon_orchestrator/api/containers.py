@@ -109,7 +109,7 @@ class Containers(object):
                         "meta_rule_id": meta_rule,
                         "genre": policy_value['genre'],
                         "keystone_project_id": keystone_project_id,
-                        "container_id": "authz_"+hashlib.sha224(pre_container_id.encode("utf-8")).hexdigest()
+                        "container_id": policy_value['genre']+"_"+hashlib.sha224(pre_container_id.encode("utf-8")).hexdigest()
                     })
         return {"containers": self.components[ctx["id"]]}
         # function_components = []

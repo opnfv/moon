@@ -41,10 +41,13 @@ for rule in rules:
     url = "http://172.18.0.11:38001/authz/{}/{}".format(keystone_project_id, "/".join(rule))
     req = requests.get(url)
     print("\033[1m{}\033[m {}".format(url, req.status_code))
-    j = req.json()
-    # print(j)
-    if j.get("authz"):
-        print("\t\033[32m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+    try:
+        j = req.json()
+    except Exception as e:
+        print(req.text)
     else:
-        print("\t\033[31m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+        if j.get("authz"):
+            print("\t\033[32m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+        else:
+            print("\t\033[31m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
 

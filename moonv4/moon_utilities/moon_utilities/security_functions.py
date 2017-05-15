@@ -168,8 +168,10 @@ def notify(request_id, container_id, payload, event_type="authz"):
         'request_id': request_id,
         'container_id': container_id
     }
-    result = __n_notifier.critical(ctxt, event_type, payload=payload)
-    return result
+    __n_notifier.critical(ctxt, event_type, payload=payload)
+    # FIXME (asteroide): the notification mus be done 2 times otherwise the notification
+    #                    may not be sent (need to search why)
+    __n_notifier.critical(ctxt, event_type, payload=payload)
 
 
 def call(endpoint, ctx=None, method="get_status", **kwargs):
@@ -249,9 +251,43 @@ class Context:
             self.__pdp_set[header]["meta_rules"] = self.__meta_rules[header]
             self.__pdp_set[header]["target"] = self.__add_target(header)
             # TODO (asteroide): the following information must be retrieve somewhere
-            self.__pdp_set[header]["instruction"] = list()
-            self.__pdp_set[header]["effect"] = "deny"
+            self.__pdp_set[header]["effect"] = "unset"
         self.__pdp_set["effect"] = "deny"
+
+    @staticmethod
+    def update_target(context):
+        from moon_db.core import PDPManager, ModelManager, PolicyManager
+        # result = dict()
+        current_request = context['current_request']
+        _subject = current_request.get("subject")
+        _object = current_request.get("object")
+        _action = current_request.get("action")
+        meta_rule_id = context['headers'][context['index']]
+        policy_id = PolicyManager.get_policy_from_meta_rules("admin", meta_rule_id)
+        meta_rules = ModelManager.get_meta_rules("admin")
+        # for meta_rule_id in meta_rules:
+        for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
+            if sub_cat not in context["pdp_set"][meta_rule_id]["target"]:
+                context["pdp_set"][meta_rule_id]["target"][sub_cat] = []
+            for assign in PolicyManager.get_subject_assignments("admin", policy_id, _subject, sub_cat).values():
+                for assign in assign["assignments"]:
+                    if assign not in context["pdp_set"][meta_rule_id]["target"][sub_cat]:
+                        context["pdp_set"][meta_rule_id]["target"][sub_cat].append(assign)
+        for obj_cat in meta_rules[meta_rule_id]['object_categories']:
+            if obj_cat not in context["pdp_set"][meta_rule_id]["target"]:
+                context["pdp_set"][meta_rule_id]["target"][obj_cat] = []
+            for assign in PolicyManager.get_object_assignments("admin", policy_id, _object, obj_cat).values():
+                for assign in assign["assignments"]:
+                    if assign not in context["pdp_set"][meta_rule_id]["target"][obj_cat]:
+                        context["pdp_set"][meta_rule_id]["target"][obj_cat].append(assign)
+        for act_cat in meta_rules[meta_rule_id]['action_categories']:
+            if act_cat not in context["pdp_set"][meta_rule_id]["target"]:
+                context["pdp_set"][meta_rule_id]["target"][act_cat] = []
+            for assign in PolicyManager.get_action_assignments("admin", policy_id, _action, act_cat).values():
+                for assign in assign["assignments"]:
+                    if assign not in context["pdp_set"][meta_rule_id]["target"][act_cat]:
+                        context["pdp_set"][meta_rule_id]["target"][act_cat].append(assign)
+        # context["pdp_set"][meta_rule_id]["target"].update(result)
 
     def __add_target(self, meta_rule_id):
         result = dict()
@@ -259,24 +295,22 @@ class Context:
         _object = self.__current_request["object"]
         _action = self.__current_request["action"]
         meta_rules = self.ModelManager.get_meta_rules("admin")
-        for header in self.__headers:
-            policy_id = self.PolicyManager.get_policy_from_meta_rules("admin", header)
-            for meta_rule_id in meta_rules:
-                for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
-                    if sub_cat not in result:
-                        result[sub_cat] = []
-                    for assign in self.PolicyManager.get_subject_assignments("admin", policy_id, _subject, sub_cat).values():
-                        result[sub_cat].extend(assign["assignments"])
-                for obj_cat in meta_rules[meta_rule_id]['object_categories']:
-                    if obj_cat not in result:
-                        result[obj_cat] = []
-                    for assign in self.PolicyManager.get_object_assignments("admin", policy_id, _object, obj_cat).values():
-                        result[obj_cat].extend(assign["assignments"])
-                for act_cat in meta_rules[meta_rule_id]['action_categories']:
-                    if act_cat not in result:
-                        result[act_cat] = []
-                    for assign in self.PolicyManager.get_action_assignments("admin", policy_id, _action, act_cat).values():
-                        result[act_cat].extend(assign["assignments"])
+        policy_id = self.PolicyManager.get_policy_from_meta_rules("admin", meta_rule_id)
+        for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
+            if sub_cat not in result:
+                result[sub_cat] = []
+            for assign in self.PolicyManager.get_subject_assignments("admin", policy_id, _subject, sub_cat).values():
+                result[sub_cat].extend(assign["assignments"])
+        for obj_cat in meta_rules[meta_rule_id]['object_categories']:
+            if obj_cat not in result:
+                result[obj_cat] = []
+            for assign in self.PolicyManager.get_object_assignments("admin", policy_id, _object, obj_cat).values():
+                result[obj_cat].extend(assign["assignments"])
+        for act_cat in meta_rules[meta_rule_id]['action_categories']:
+            if act_cat not in result:
+                result[act_cat] = []
+            for assign in self.PolicyManager.get_action_assignments("admin", policy_id, _action, act_cat).values():
+                result[act_cat].extend(assign["assignments"])
         return result
 
     def __repr__(self):

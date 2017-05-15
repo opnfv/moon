@@ -200,7 +200,12 @@ class Cache(object):
                             for container_id, container_values, in CACHE.containers.items():
                                 for container_value in container_values:
                                     if container_value["meta_rule_id"] == meta_rule_id:
-                                        container_ids.append(container_value["container_id"])
+                                        container_ids.append(
+                                            {
+                                                "container_id": container_value["container_id"],
+                                                "genre": container_value["genre"]
+                                            }
+                                        )
                                         break
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
 
@@ -227,7 +232,7 @@ CACHE = Cache()
 class AuthzRequest:
 
     result = None
-    req_max_delay = 5
+    req_max_delay = 2
 
     def __init__(self, ctx, args):
         self.ctx = ctx
@@ -235,7 +240,7 @@ class AuthzRequest:
         self.request_id = ctx["request_id"]
         self.container_chaining = CACHE.container_chaining[self.ctx['id']]
         ctx["container_chaining"] = copy.deepcopy(self.container_chaining)
-        self.pdp_container = str(self.container_chaining[0])
+        self.pdp_container = self.container_chaining[0]["container_id"]
         self.run()
 
     def run(self):
@@ -256,8 +261,16 @@ class AuthzRequest:
         for key in self.result["pdp_set"]:
             if "effect" in self.result["pdp_set"][key]:
                 if self.result["pdp_set"][key]["effect"] == "grant":
+                    # the pdp is a authorization PDP and grant the request
+                    authz_results.append(True)
+                elif self.result["pdp_set"][key]["effect"] == "passed":
+                    # the pdp is not a authorization PDP (session or delegation) and had run normally
+                    authz_results.append(True)
+                elif self.result["pdp_set"][key]["effect"] == "unset":
+                    # the pdp is not a authorization PDP (session or delegation) and had not yep run
                     authz_results.append(True)
                 else:
+                    # the pdp is (or not) a authorization PDP and had run badly
                     authz_results.append(False)
         if list(itertools.accumulate(authz_results, lambda x, y: x & y))[-1]:
             self.result["pdp_set"]["effect"] = "grant"

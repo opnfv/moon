@@ -62,7 +62,7 @@ class DockerManager:
         :param uuid: the uuid of the intra_extension linked to that component
         :return: the created component
         """
-        component_id = "authz_"+hashlib.sha224(uuid.encode("utf-8")).hexdigest()
+        component_id = component+"_"+hashlib.sha224(uuid.encode("utf-8")).hexdigest()
         if component_id not in CONTAINERS:
             plug = load_plugin(component)
             LOG.info("Creating {} with id {}".format(component, uuid))

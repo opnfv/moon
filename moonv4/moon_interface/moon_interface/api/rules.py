@@ -62,13 +62,34 @@ class Rules(Resource):
         :request body: post = {
             "meta_rule_id": "meta_rule_id1",
             "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+            "instructions": (
+                {"decision": "grant"},
+            )
             "enabled": True
         }
         :return: {
             "rules": [
                 "meta_rule_id": "meta_rule_id1",
-                "rule_id1": ["subject_data_id1", "object_data_id1", "action_data_id1"],
-                "rule_id2": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+                "rule_id1": {
+                    "rule": ["subject_data_id1", "object_data_id1", "action_data_id1"],
+                    "instructions": (
+                        {"decision": "grant"},  # "grant" to immediately exit, 
+                                                # "continue" to wait for the result of next policy
+                                                # "deny" to deny the request
+                    )
+                }
+                "rule_id2": {
+                    "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+                    "instructions": (
+                        {
+                            "update": {
+                                "operation": "add",  # operations may be "add" or "delete"
+                                "target": "rbac:role:admin"  # add the role admin to the current user
+                            }
+                        },
+                        {"chain": {"name": "rbac"}}  # chain with the policy named rbac
+                    )
+                }
             ]
         }
         :internal_api: add_rule

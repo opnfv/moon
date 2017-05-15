@@ -63,8 +63,9 @@ def check_policy(policy_id=None):
         assert policy_template["name"] == result['policies'][policy_id]["name"]
 
 
-def add_policy(name="test_policy"):
+def add_policy(name="test_policy", genre="authz"):
     policy_template["name"] = name
+    policy_template["genre"] = genre
     req = requests.post(URL.format("/policies"), json=policy_template, headers=HEADERS)
     assert req.status_code == 200
     result = req.json()

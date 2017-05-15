@@ -328,6 +328,7 @@ class Rule(Base, DictBase):
         return {
             'id': self.id,
             'rule': self.rule["rule"],
+            'instructions': self.rule["instructions"],
             'enabled': self.rule["enabled"],
             'policy_id': self.policy_id,
             'meta_rule_id': self.meta_rule_id
@@ -651,6 +652,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                     session.delete(_action)
 
     def get_subject_data(self, policy_id, data_id=None, category_id=None):
+        LOG.info("driver {} {} {}".format(policy_id, data_id, category_id))
         with self.get_session_for_read() as session:
             query = session.query(SubjectData)
             if data_id:
@@ -658,6 +660,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             else:
                 query = query.filter_by(policy_id=policy_id, category_id=category_id)
             ref_list = query.all()
+            LOG.info("ref_list={}".format(ref_list))
             return {
                 "policy_id": policy_id,
                 "category_id": category_id,
@@ -979,10 +982,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             query = session.query(Rule)
             query = query.filter_by(policy_id=policy_id, meta_rule_id=meta_rule_id)
             ref_list = query.all()
-            LOG.info("add_rule {}".format(ref_list))
-            LOG.info("add_rule {}".format(value))
             rules = list(map(lambda x: x.rule, ref_list))
-            LOG.info("add_rule rules={}".format(rules))
             if not rules or value not in rules:
                 LOG.info("add_rule IN IF")
                 ref = Rule.from_dict(
