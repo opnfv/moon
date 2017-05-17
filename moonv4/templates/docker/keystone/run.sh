@@ -6,10 +6,20 @@ echo DB_HOST=$DB_HOST
 echo DB_DATABASE=$DB_DATABASE
 echo RABBIT_NODE=$RABBIT_NODE
 echo RABBIT_NODE=$[RABBIT_NODE]
+echo INTERFACE_HOST=$INTERFACE_HOST
 
 sed "s/#admin_token = <None>/admin_token=$ADMIN_TOKEN/g" -i /etc/keystone/keystone.conf
 sed "s/connection = sqlite:\/\/\/\/var\/lib\/keystone\/keystone.db/connection = $DB_CONNECTION:\/\/$DB_USER:$DB_PASSWORD@$DB_HOST\/$DB_DATABASE/g" -i /etc/keystone/keystone.conf
 sed "s/#driver = sql/driver = $DB_DRIVER/g" -i /etc/keystone/keystone.conf
+
+cat << EOF | tee -a /etc/keystone/keystone.conf
+[cors]
+allowed_origin = $INTERFACE_HOST
+max_age = 3600
+allow_methods = GET,POST,PUT,DELETE
+allow_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header
+expose_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header
+EOF
 
 mysql -h $DB_HOST -u$DB_USER_ROOT -p$DB_PASSWORD_ROOT <<EOF
 CREATE DATABASE $DB_DATABASE DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;

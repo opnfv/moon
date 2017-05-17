@@ -3,7 +3,7 @@ FROM ubuntu:latest
 
 ENV ADMIN_TOKEN=p4ssw0rd
 ENV ADMIN_PASSWORD=p4ssw0rd
-ENV DB_CONNECTION=mysql+pymysql
+ENV DB_CONNECTION="mysql+pymysql"
 ENV DB_DRIVER=sql
 ENV DB_HOST=localhost
 ENV DB_DATABASE=keystonedb
@@ -12,6 +12,7 @@ ENV DB_PASSWORD=p4ssw0rd
 ENV DB_USER_ROOT=root
 ENV DB_PASSWORD_ROOT=p4sswOrd1
 ENV RABBIT_NODE=server
+ENV INTERFACE_HOST="http://localhost:3001"
 
 RUN apt-get update && apt-get install apache2 rabbitmq-server keystone python-openstackclient libapache2-mod-wsgi mysql-client -y
 
