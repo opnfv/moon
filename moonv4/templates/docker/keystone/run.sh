@@ -16,9 +16,7 @@ cat << EOF | tee -a /etc/keystone/keystone.conf
 [cors]
 allowed_origin = $INTERFACE_HOST
 max_age = 3600
-allow_methods = GET,POST,PUT,DELETE
-allow_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header
-expose_headers = Content-Type,Cache-Control,Content-Language,Expires,Last-Modified,Pragma,X-Custom-Header
+allow_methods = POST,DELETE
 EOF
 
 mysql -h $DB_HOST -u$DB_USER_ROOT -p$DB_PASSWORD_ROOT <<EOF
