@@ -104,8 +104,16 @@ def _exit(exit_number=0, docker=None, error=None):
     sys.exit(exit_number)
 
 
+def __save_pid():
+    try:
+        open("/var/run/moon_orchestrator.pid", "w").write(str(os.getpid()))
+    except PermissionError:
+        LOG.warning("You don't have the right to write PID file in /var/run... Continuing anyway.")
+
+
 def main():
     # conf_file = options.configure(DOMAIN)
+    __save_pid()
     LOG.info("Starting server with IP {}".format(CONF.orchestrator.host))
 
     docker_manager = DockerManager()
