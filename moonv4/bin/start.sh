@@ -10,8 +10,15 @@ docker run -dti --net=moon --hostname messenger --name messenger -e RABBITMQ_DEF
 echo -e "\033[32mStarting DB manager\033[m"
 docker run -dti --net=moon --hostname db        --name db        -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
 
-echo waiting for 20 seconds before starting Keystone container...
-sleep 20s
+echo "waiting for Database (it may takes time)..."
+echo -e "\033[35m"
+sed '/ready for connections/q' <(docker logs db -f)
+echo -e "\033[m"
+
+echo "waiting for Messenger (it may takes time)..."
+echo -e "\033[35m"
+sed '/Server startup complete;/q' <(docker logs messenger -f)
+echo -e "\033[m"
 
 docker run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 keystone:mitaka
 
@@ -22,8 +29,6 @@ bash $MOON_HOME/bin/build_all.sh
 
 pip install $MOON_HOME/moon_orchestrator/dist/moon_db-0.1.0.tar.gz --upgrade
 pip install $MOON_HOME/moon_orchestrator/dist/moon_utilities-0.1.0.tar.gz --upgrade
-echo waiting for 20 seconds before configuring and starting Orchestrator container...
-sleep 30s
 moon_db_manager upgrade
 
 echo -e "\033[32mStarting Moon Orchestrator\033[m"
