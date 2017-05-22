@@ -45,7 +45,9 @@ class Slaves(object):
             ctx.pop("method")
             ctx.pop("call_master")
             self.slaves[uuid] = ctx
+            LOG.info("New slave added: {}".format(ctx['name']))
             return {"slaves": {uuid: ctx}}
+        LOG.warning("No name given for the new slave.")
 
     def get_slaves(self, ctx, args=None):
         """Get all the known slaves
