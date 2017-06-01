@@ -820,8 +820,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             if ref:
                 old_ref = copy.deepcopy(ref.to_dict())
                 assignments = old_ref["assignments"]
-                assignments.append(data_id)
-                setattr(ref, "assignments", assignments)
+                if data_id not in assignments:
+                    assignments.append(data_id)
+                    setattr(ref, "assignments", assignments)
             else:
                 ref = SubjectAssignment.from_dict(
                     {
@@ -871,8 +872,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             if ref:
                 old_ref = copy.deepcopy(ref.to_dict())
                 assignments = old_ref["assignments"]
-                assignments.append(data_id)
-                setattr(ref, "assignments", assignments)
+                if data_id not in assignments:
+                    assignments.append(data_id)
+                    setattr(ref, "assignments", assignments)
             else:
                 ref = ObjectAssignment.from_dict(
                     {
@@ -922,9 +924,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             if ref:
                 old_ref = copy.deepcopy(ref.to_dict())
                 assignments = old_ref["assignments"]
-                assignments.append(data_id)
-                # FIXME (asteroide): the setattr doesn't work here ; the assignments is not updated in the database
-                setattr(ref, "assignments", assignments)
+                if data_id not in assignments:
+                    assignments.append(data_id)
+                    setattr(ref, "assignments", assignments)
             else:
                 ref = ActionAssignment.from_dict(
                     {
