@@ -1051,7 +1051,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             if not ref:
                 ref = MetaRule.from_dict(
                     {
-                        "id": uuid4().hex,
+                        "id": meta_rule_id if meta_rule_id else uuid4().hex,
                         "value": value
                     }
                 )
@@ -1084,7 +1084,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             ref_list = query.all()
             return {_ref.id: _ref.to_dict() for _ref in ref_list}
 
-    def add_subject_category(self, name, description):
+    def add_subject_category(self, name, description, uuid=None):
         with self.get_session_for_write() as session:
             query = session.query(SubjectCategory)
             query = query.filter_by(name=name)
@@ -1092,7 +1092,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             if not ref:
                 ref = SubjectCategory.from_dict(
                     {
-                        "id": uuid4().hex,
+                        "id": uuid if uuid else uuid4().hex,
                         "name": name,
                         "description": description
                     }
@@ -1116,7 +1116,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             ref_list = query.all()
             return {_ref.id: _ref.to_dict() for _ref in ref_list}
 
-    def add_object_category(self, name, description):
+    def add_object_category(self, name, description, uuid=None):
         with self.get_session_for_write() as session:
             query = session.query(ObjectCategory)
             query = query.filter_by(name=name)
@@ -1124,7 +1124,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             if not ref:
                 ref = ObjectCategory.from_dict(
                     {
-                        "id": uuid4().hex,
+                        "id": uuid if uuid else uuid4().hex,
                         "name": name,
                         "description": description
                     }
@@ -1148,7 +1148,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             ref_list = query.all()
             return {_ref.id: _ref.to_dict() for _ref in ref_list}
 
-    def add_action_category(self, name, description):
+    def add_action_category(self, name, description, uuid=None):
         with self.get_session_for_write() as session:
             query = session.query(ActionCategory)
             query = query.filter_by(name=name)
@@ -1156,7 +1156,7 @@ class ModelConnector(BaseConnector, ModelDriver):
             if not ref:
                 ref = ActionCategory.from_dict(
                     {
-                        "id": uuid4().hex,
+                        "id": uuid if uuid else uuid4().hex,
                         "name": name,
                         "description": description
                     }
