@@ -14,17 +14,26 @@ from utils.pdp import check_pdp
 
 
 logger = None
+HOST = None
+PORT = None
 
 
 def init():
-    global logger
+    global logger, HOST, PORT
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='scenario filename', nargs=1)
     parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
+    parser.add_argument("--host",
+                        help="Set the name of the host to test (default: 172.18.0.11).",
+                        default="172.18.0.11")
+    parser.add_argument("--port", "-p",
+                        help="Set the port of the host to test (default: 38001).",
+                        default="38001")
     parser.add_argument("--test-only", "-t", action='store_true', dest='testonly', help="Do not generate graphs")
     parser.add_argument("--write", "-w", help="Write test data to a JSON file", default="/tmp/data.json")
     parser.add_argument("--input", "-i", help="Get data from a JSON input file")
-    parser.add_argument("--legend", "-l", help="Set the legend (default: 'rbac,rbac+session')", default='rbac,rbac+session')
+    parser.add_argument("--legend", "-l", help="Set the legend (default: 'rbac,rbac+session')",
+                        default='rbac,rbac+session')
     parser.add_argument("--distgraph", "-d",
                         help="Show a distribution graph instead of a linear graph",
                         action='store_true')
@@ -40,6 +49,8 @@ def init():
     if args.filename:
         logger.info("Loading: {}".format(args.filename[0]))
 
+    HOST = args.host
+    PORT = args.port
     return args
 
 
@@ -50,7 +61,8 @@ def get_scenario(args):
 
 def get_keystone_id():
     keystone_project_id = None
-    for pdp_key, pdp_value in check_pdp()["pdps"].items():
+    for pdp_key, pdp_value in check_pdp(moon_url="http://{}:{}".format(HOST, PORT))["pdps"].items():
+        print(pdp_value)
         if pdp_value['security_pipeline'] and pdp_value["keystone_project_id"]:
             print("Found pdp with keystone_project_id={}".format(pdp_value["keystone_project_id"]))
             keystone_project_id = pdp_value["keystone_project_id"]
@@ -66,7 +78,7 @@ def send_requests(scenario, keystone_project_id):
     rules = itertools.product(scenario.subjects.keys(), scenario.objects.keys(), scenario.actions.keys())
     for rule in rules:
         current_request = dict()
-        url = "http://172.18.0.11:38001/authz/{}/{}".format(keystone_project_id, "/".join(rule))
+        url = "http://{}:{}/authz/{}/{}".format(HOST, PORT, keystone_project_id, "/".join(rule))
         current_request['url'] = url
         current_request['start'] = time.time()
         req = requests.get(url)
