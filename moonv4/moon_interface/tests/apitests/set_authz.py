@@ -37,6 +37,9 @@ def init():
     parser.add_argument("--distgraph", "-d",
                         help="Show a distribution graph instead of a linear graph",
                         action='store_true')
+    parser.add_argument("--time", help="Decrease times between request", action='store_true')
+    parser.add_argument("--limit", help="Limit request to LIMIT", type=int)
+    parser.add_argument("--write-image", help="Write the graph to file IMAGE", dest="write_image")
     args = parser.parse_args()
 
     FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -73,13 +76,22 @@ def get_keystone_id():
     return keystone_project_id
 
 
-def send_requests(scenario, keystone_project_id):
+def send_requests(scenario, keystone_project_id, set_time=False, limit=None):
     time_data = dict()
+    time_between_request = 2
+    request_cpt = 0
     rules = itertools.product(scenario.subjects.keys(), scenario.objects.keys(), scenario.actions.keys())
     for rule in rules:
         current_request = dict()
         url = "http://{}:{}/authz/{}/{}".format(HOST, PORT, keystone_project_id, "/".join(rule))
+        request_cpt += 1
         current_request['url'] = url
+        if set_time:
+            time.sleep(time_between_request)
+            if time_between_request > 0:
+                time_between_request -= 0.05
+            else:
+                time_between_request = 0
         current_request['start'] = time.time()
         req = requests.get(url)
         print("\033[1m{}\033[m {}".format(url, req.status_code))
@@ -95,6 +107,8 @@ def send_requests(scenario, keystone_project_id):
         current_request['end'] = time.time()
         current_request['delta'] = current_request["end"]-current_request["start"]
         time_data[url] = current_request
+        if limit and limit < request_cpt:
+            break
     return time_data
 
 
@@ -112,7 +126,7 @@ def get_delta(time_data):
     return time_delta, time_delta_average1
 
 
-def write_graph(time_data, legend=None, input=None):
+def write_graph(time_data, legend=None, input=None, image_file=None):
     logger.info("Writing graph")
     legends = legend.split(",")
     result_data = []
@@ -177,21 +191,27 @@ def write_graph(time_data, legend=None, input=None):
         )
         result_data.append(data2_a)
 
-    plotly.offline.plot({
-        "data": result_data,
-        "layout": Layout(
-            title="Request times delta",
-            xaxis=dict(title='Requests'),
-            yaxis=dict(title='Request duration'),
-        )
-    })
+    plotly.offline.plot(
+        {
+            "data": result_data,
+            "layout": Layout(
+                title="Request times delta",
+                xaxis=dict(title='Requests'),
+                yaxis=dict(title='Request duration'),
+            )
+        },
+        image="svg",
+        image_filename=image_file,
+        image_height=1000,
+        image_width=1200
+    )
     if time_delta_average2:
         logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
         return 1-time_delta_average2/time_delta_average1
     return 0
 
 
-def write_distgraph(time_data, legend=None, input=None):
+def write_distgraph(time_data, legend=None, input=None, image_file=None):
 
     logger.info("Writing graph")
     legends = legend.split(",")[::-1]
@@ -210,7 +230,13 @@ def write_distgraph(time_data, legend=None, input=None):
     fig = ff.create_distplot(result_data, legends, bin_size=.2)
 
     # Plot!
-    plotly.offline.plot(fig)
+    plotly.offline.plot(
+        fig,
+        image="svg",
+        image_filename=image_file,
+        image_height=1000,
+        image_width=1200
+    )
     if time_delta_average2:
         logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
         return 1-time_delta_average2/time_delta_average1
@@ -221,13 +247,13 @@ def main():
     args = init()
     scenario = get_scenario(args)
     keystone_project_id = get_keystone_id()
-    time_data = send_requests(scenario, keystone_project_id)
+    time_data = send_requests(scenario, keystone_project_id, args.time, limit=args.limit)
     save_data(args.write, time_data)
     if not args.testonly:
         if args.distgraph:
-            overhead = write_distgraph(time_data, legend=args.legend, input=args.input)
+            overhead = write_distgraph(time_data, legend=args.legend, input=args.input, image_file=args.write_image)
         else:
-            overhead = write_graph(time_data, legend=args.legend, input=args.input)
+            overhead = write_graph(time_data, legend=args.legend, input=args.input, image_file=args.write_image)
         logger.info("Overhead: {:.2%}".format(overhead))
 
 
