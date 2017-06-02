@@ -1,6 +1,8 @@
 import sys
 import argparse
 import logging
+import copy
+import threading
 from importlib.machinery import SourceFileLoader
 import itertools
 import requests
@@ -9,7 +11,7 @@ import json
 import plotly
 from plotly.graph_objs import Scatter, Layout
 import plotly.figure_factory as ff
-import numpy as np
+from uuid import uuid4
 from utils.pdp import check_pdp
 
 
@@ -37,9 +39,11 @@ def init():
     parser.add_argument("--distgraph", "-d",
                         help="Show a distribution graph instead of a linear graph",
                         action='store_true')
-    parser.add_argument("--time", help="Decrease times between request", action='store_true')
+    parser.add_argument("--request-per-second", help="Number of requests per seconds",
+                        type=int, dest="request_second", default=1)
     parser.add_argument("--limit", help="Limit request to LIMIT", type=int)
     parser.add_argument("--write-image", help="Write the graph to file IMAGE", dest="write_image")
+    parser.add_argument("--write-html", help="Write the graph to HTML file HTML", dest="write_html", default="data.html")
     args = parser.parse_args()
 
     FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -76,39 +80,75 @@ def get_keystone_id():
     return keystone_project_id
 
 
-def send_requests(scenario, keystone_project_id, set_time=False, limit=None):
+class AsyncGet(threading.Thread):
+    def __init__(self, url, semaphore=None, *args, **kwargs):
+        threading.Thread.__init__(self)
+        self.url = url
+        self.kwargs = kwargs
+        self.sema = semaphore
+        self.result = dict()
+        self.uuid = uuid4().hex
+
+    def run(self):
+
+        # self.sema.acquire()
+        current_request = dict()
+        current_request['url'] = self.url
+        try:
+            current_request['start'] = time.time()
+            logger.info("{} start {}".format(self.uuid, current_request['start']))
+            r = requests.get(self.url, **self.kwargs)
+            current_request['end'] = time.time()
+            logger.info("{} end {}".format(self.uuid, current_request['end']))
+            current_request['delta'] = current_request["end"] - current_request["start"]
+            logger.info("{} delta {}".format(self.uuid, current_request['delta']))
+        except requests.exceptions.ConnectionError:
+            logger.warning("Unable to connect to server")
+            return {}
+        if r:
+            logger.debug(r.status_code)
+            logger.debug(r.text)
+            if r.status_code == 200:
+                logger.warning("error code 200 for {}".format(self.url))
+                logger.info("\033[1m{}\033[m {}".format(self.url, r.status_code))
+            try:
+                j = r.json()
+            except Exception as e:
+                logger.error(r.text)
+            else:
+                if j.get("authz"):
+                    logger.info("\t\033[32m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+                else:
+                    logger.info("\t\033[31m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+        self.result = current_request
+        # self.sema.release()
+
+
+def send_requests(scenario, keystone_project_id, request_second=1, limit=None):
+    # sema = threading.BoundedSemaphore(value=request_second)
+    backgrounds = []
     time_data = dict()
-    time_between_request = 2
+    start_timing = time.time()
     request_cpt = 0
     rules = itertools.product(scenario.subjects.keys(), scenario.objects.keys(), scenario.actions.keys())
     for rule in rules:
-        current_request = dict()
         url = "http://{}:{}/authz/{}/{}".format(HOST, PORT, keystone_project_id, "/".join(rule))
         request_cpt += 1
-        current_request['url'] = url
-        if set_time:
-            time.sleep(time_between_request)
-            if time_between_request > 0:
-                time_between_request -= 0.05
-            else:
-                time_between_request = 0
-        current_request['start'] = time.time()
-        req = requests.get(url)
-        print("\033[1m{}\033[m {}".format(url, req.status_code))
-        try:
-            j = req.json()
-        except Exception as e:
-            print(req.text)
-        else:
-            if j.get("authz"):
-                logger.info("\t\033[32m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
-            else:
-                logger.info("\t\033[31m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
-        current_request['end'] = time.time()
-        current_request['delta'] = current_request["end"]-current_request["start"]
-        time_data[url] = current_request
+        background = AsyncGet(url)
+        backgrounds.append(background)
+        background.start()
         if limit and limit < request_cpt:
             break
+        if request_cpt % request_second == 0:
+            if time.time()-start_timing < 1:
+                while True:
+                    if time.time()-start_timing > 1:
+                        break
+            start_timing = time.time()
+    for background in backgrounds:
+        background.join()
+        if background.result:
+            time_data[background.url] = copy.deepcopy(background.result)
     return time_data
 
 
@@ -126,7 +166,7 @@ def get_delta(time_data):
     return time_delta, time_delta_average1
 
 
-def write_graph(time_data, legend=None, input=None, image_file=None):
+def write_graph(time_data, legend=None, input=None, image_file=None, html_file=None):
     logger.info("Writing graph")
     legends = legend.split(",")
     result_data = []
@@ -191,27 +231,41 @@ def write_graph(time_data, legend=None, input=None, image_file=None):
         )
         result_data.append(data2_a)
 
-    plotly.offline.plot(
-        {
-            "data": result_data,
-            "layout": Layout(
-                title="Request times delta",
-                xaxis=dict(title='Requests'),
-                yaxis=dict(title='Request duration'),
-            )
-        },
-        image="svg",
-        image_filename=image_file,
-        image_height=1000,
-        image_width=1200
-    )
+    if image_file:
+        plotly.offline.plot(
+            {
+                "data": result_data,
+                "layout": Layout(
+                    title="Request times delta",
+                    xaxis=dict(title='Requests'),
+                    yaxis=dict(title='Request duration'),
+                )
+            },
+            filename=html_file,
+            image="svg",
+            image_filename=image_file,
+            image_height=1000,
+            image_width=1200
+        )
+    else:
+        plotly.offline.plot(
+            {
+                "data": result_data,
+                "layout": Layout(
+                    title="Request times delta",
+                    xaxis=dict(title='Requests'),
+                    yaxis=dict(title='Request duration'),
+                )
+            },
+            filename=html_file,
+        )
     if time_delta_average2:
         logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
         return 1-time_delta_average2/time_delta_average1
     return 0
 
 
-def write_distgraph(time_data, legend=None, input=None, image_file=None):
+def write_distgraph(time_data, legend=None, input=None, image_file=None, html_file=None):
 
     logger.info("Writing graph")
     legends = legend.split(",")[::-1]
@@ -247,13 +301,15 @@ def main():
     args = init()
     scenario = get_scenario(args)
     keystone_project_id = get_keystone_id()
-    time_data = send_requests(scenario, keystone_project_id, args.time, limit=args.limit)
+    time_data = send_requests(scenario, keystone_project_id, request_second=args.request_second, limit=args.limit)
     save_data(args.write, time_data)
     if not args.testonly:
         if args.distgraph:
-            overhead = write_distgraph(time_data, legend=args.legend, input=args.input, image_file=args.write_image)
+            overhead = write_distgraph(time_data, legend=args.legend, input=args.input, image_file=args.write_image,
+                                       html_file=args.write_html)
         else:
-            overhead = write_graph(time_data, legend=args.legend, input=args.input, image_file=args.write_image)
+            overhead = write_graph(time_data, legend=args.legend, input=args.input, image_file=args.write_image,
+                                   html_file=args.write_html)
         logger.info("Overhead: {:.2%}".format(overhead))
 
 
