@@ -2,7 +2,8 @@ import requests
 import configparser
 
 config = configparser.ConfigParser()
-config.read("/etc/moon/moon.conf")
+if not config.read("moon.conf"):
+    config.read("/etc/moon/moon.conf")
 
 URL = "http://{}:{}".format(config['interface']['host'], config['interface']['port'])
 HEADERS = {"content-type": "application/json"}
@@ -67,8 +68,11 @@ def get_keystone_projects():
     return req.json()
 
 
-def check_pdp(pdp_id=None, keystone_project_id=None):
-    req = requests.get(URL + "/pdp")
+def check_pdp(pdp_id=None, keystone_project_id=None, moon_url=None):
+    _URL = URL
+    if moon_url:
+        _URL = moon_url
+    req = requests.get(_URL + "/pdp")
     assert req.status_code == 200
     result = req.json()
     assert type(result) is dict
