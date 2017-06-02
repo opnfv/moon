@@ -162,6 +162,8 @@ __n_notifier = oslo_messaging.Notifier(__n_transport,
                                        topics=['authz-workers'])
 __n_notifier = __n_notifier.prepare(publisher_id='router')
 
+__targets = {}
+
 
 def notify(request_id, container_id, payload, event_type="authz"):
     ctxt = {
@@ -177,14 +179,20 @@ def notify(request_id, container_id, payload, event_type="authz"):
 def call(endpoint, ctx=None, method="get_status", **kwargs):
     if not ctx:
         ctx = dict()
+    if endpoint not in __targets:
+        __targets[endpoint] = dict()
+        __targets[endpoint]["endpoint"] = oslo_messaging.Target(topic=endpoint, version='1.0')
+        __targets[endpoint]["client"] = dict()
+        __targets[endpoint]["client"]["internal"] = oslo_messaging.RPCClient(__transport,
+                                                                             __targets[endpoint]["endpoint"])
+        __targets[endpoint]["client"]["external"] = oslo_messaging.RPCClient(__transport_master,
+                                                                             __targets[endpoint]["endpoint"])
     if 'call_master' in ctx and ctx['call_master'] and CONF.slave.master_url:
-        transport = __transport_master
-        # LOG.info("Calling master {} on {}...".format(method, endpoint))
+        client = __targets[endpoint]["client"]["external"]
+        LOG.info("Calling master {} on {}...".format(method, endpoint))
     else:
-        transport = __transport
-        # LOG.info("Calling {} on {}...".format(method, endpoint))
-    target = oslo_messaging.Target(topic=endpoint, version='1.0')
-    client = oslo_messaging.RPCClient(transport, target)
+        client = __targets[endpoint]["client"]["internal"]
+        LOG.info("Calling {} on {}...".format(method, endpoint))
     return client.call(ctx, method, **kwargs)
 
 
