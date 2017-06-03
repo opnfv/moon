@@ -19,6 +19,8 @@ logger = None
 HOST = None
 PORT = None
 
+lock = threading.Lock()
+
 
 def init():
     global logger, HOST, PORT
@@ -95,13 +97,11 @@ class AsyncGet(threading.Thread):
         current_request = dict()
         current_request['url'] = self.url
         try:
-            current_request['start'] = time.time()
-            logger.info("{} start {}".format(self.uuid, current_request['start']))
-            r = requests.get(self.url, **self.kwargs)
-            current_request['end'] = time.time()
-            logger.info("{} end {}".format(self.uuid, current_request['end']))
-            current_request['delta'] = current_request["end"] - current_request["start"]
-            logger.info("{} delta {}".format(self.uuid, current_request['delta']))
+            with lock:
+                current_request['start'] = time.time()
+                r = requests.get(self.url, **self.kwargs)
+                current_request['end'] = time.time()
+                current_request['delta'] = current_request["end"] - current_request["start"]
         except requests.exceptions.ConnectionError:
             logger.warning("Unable to connect to server")
             return {}
@@ -171,13 +171,36 @@ def write_graph(time_data, legend=None, input=None, image_file=None, html_file=N
     legends = legend.split(",")
     result_data = []
     time_delta, time_delta_average1 = get_delta(time_data)
-    # time_delta = list()
-    # time_delta_sum1 = 0
-    # for key in time_data:
-    #     time_delta.append(time_data[key]['delta'])
-    #     time_delta_sum1 += time_data[key]['delta']
-    # time_delta_average1 = time_delta_sum1 / len(time_data.keys())
-    current_legend = legends.pop()
+    time_delta_average2 = None
+    if input:
+        for _input in input.split(","):
+            current_legend = legends.pop(0)
+            time_data2 = json.load(open(_input))
+            time_delta2, time_delta_average2 = get_delta(time_data2)
+            for key in time_data.keys():
+                if key in time_data2:
+                    time_delta2.append(time_data2[key]['delta'])
+                else:
+                    time_delta2.append(None)
+            data2 = Scatter(
+                x=list(range(len(time_data.keys()))),
+                y=time_delta2,
+                name=current_legend,
+                line=dict(
+                    color='rgb(255, 192, 118)',
+                    shape='spline')
+            )
+            result_data.append(data2)
+            data2_a = Scatter(
+                x=list(range(len(time_data.keys()))),
+                y=[time_delta_average2 for x in range(len(time_data.keys()))],
+                name=current_legend + " average",
+                line=dict(
+                    color='rgb(255, 152, 33)',
+                    shape='spline')
+            )
+            result_data.append(data2_a)
+    current_legend = legends.pop(0)
     data1 = Scatter(
         x=list(range(len(time_data.keys()))),
         y=time_delta,
@@ -196,40 +219,6 @@ def write_graph(time_data, legend=None, input=None, image_file=None, html_file=N
             shape='spline')
     )
     result_data.append(data1_a)
-    time_delta_average2 = None
-    if input:
-        current_legend = legends.pop()
-        time_data2 = json.load(open(input))
-        time_delta2, time_delta_average2 = get_delta(time_data2)
-        # time_delta2 = list()
-        # time_delta_sum2 = 0
-        # for key in time_data2:
-        #     time_delta.append(time_data2[key]['delta'])
-        #     time_delta_sum2 += time_data2[key]['delta']
-        # time_delta_average2 = time_delta_sum2 / len(time_data2.keys())
-        for key in time_data.keys():
-            if key in time_data2:
-                time_delta2.append(time_data2[key]['delta'])
-            else:
-                time_delta2.append(None)
-        data2 = Scatter(
-            x=list(range(len(time_data.keys()))),
-            y=time_delta2,
-            name=current_legend,
-            line=dict(
-                color='rgb(255, 192, 118)',
-                shape='spline')
-        )
-        result_data.append(data2)
-        data2_a = Scatter(
-            x=list(range(len(time_data.keys()))),
-            y=[time_delta_average2 for x in range(len(time_data.keys()))],
-            name=current_legend + " average",
-            line=dict(
-                color='rgb(255, 152, 33)',
-                shape='spline')
-        )
-        result_data.append(data2_a)
 
     if image_file:
         plotly.offline.plot(
@@ -268,17 +257,20 @@ def write_graph(time_data, legend=None, input=None, image_file=None, html_file=N
 def write_distgraph(time_data, legend=None, input=None, image_file=None, html_file=None):
 
     logger.info("Writing graph")
-    legends = legend.split(",")[::-1]
+    legends = legend.split(",")
     result_data = []
-    time_delta, time_delta_average1 = get_delta(time_data)
-    result_data.append(time_delta)
 
     time_delta_average2 = None
 
     if input:
-        time_data2 = json.load(open(input))
-        time_delta2, time_delta_average2 = get_delta(time_data2)
-        result_data.append(time_delta2)
+        for _input in input.split(","):
+            logger.info("Analysing input {}".format(_input))
+            time_data2 = json.load(open(_input))
+            time_delta2, time_delta_average2 = get_delta(time_data2)
+            result_data.append(time_delta2)
+
+    time_delta, time_delta_average1 = get_delta(time_data)
+    result_data.append(time_delta)
 
     # Create distplot with custom bin_size
     fig = ff.create_distplot(result_data, legends, bin_size=.2)
