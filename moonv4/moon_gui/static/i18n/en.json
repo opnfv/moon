@@ -215,6 +215,10 @@
 					},
 					"notFound": "There is no Action"
 				},
+				"update":{
+					"error": "Unable to update Perimeter `{{perimeterName}}`",
+					"success": "Perimeter `{{perimeterName}}` successfully updated"
+				},
 				"table": {
 					"id" : "Id",
 					"name" : "Name",
@@ -226,23 +230,28 @@
 					"action": {
 						"title": "Actions",
 						"delete": "Delete",
-						"update": "Update"
+						"update": "Update",
+						"unmap": "Unmap"
 					}
 				},
 				"edit": {
 					"name" : "Name",
 					"description" : "Description",
+					"partnerId": "Partner Id",
+					"policies": "Policy list",
+					"email": "E-mail",
+					"selectedPolicies": "Selected Policies",
 					"check": {
 						"name": {
 							"required": "Name is required"
 						}
 					},
 					"action": {
-						"list": "Map an existing",
-						"new": "Create a new",
-						"create": "Create",
-						"map": "Map the selected",
-						"delete": "Delete"
+						"list": "Add an existing Perimeter",
+						"new": "Add a new Perimeter",
+						"create": "Add Perimeter",
+						"add": "Add the selected Perimeter",
+						"delete" : "Delete the selected Perimeter"
 					},
 					"create":{
 						"error": "Unable to create `{{name}}`",
@@ -307,17 +316,25 @@
 				"edit": {
 					"name" : "Name",
 					"description" : "Description",
+					"categories" : "Category List",
+					"policies": "Policy List",
 					"check": {
 						"name": {
 							"required": "Name is required"
+						},
+						"category":{
+							"required": "A Category is required"
+						},
+						"policy":{
+							"required": "A Policy is required"
 						}
 					},
 					"action": {
-						"list": "Map an existing",
-						"new": "Create a new",
-						"create": "Create",
-						"map": "Map the selected",
-						"delete": "Delete"
+						"list": "Add an existing Data",
+						"new": "Create a new Data",
+						"create": "Create Data",
+						"add": "Add the selected Data",
+						"delete": "Delete Data"
 					},
 					"create":{
 						"error": "Unable to create `{{name}}`",
@@ -342,9 +359,14 @@
 						"description": "Description",
 						"enabled": "Enabled",
 						"rule": "Rule",
+						"instructions": "Instruction",
 						"notFound": "There is no Rule",
 						"loading": {
 							"metaRule" : "Loading Meta Rule"
+						},
+						"action":{
+							"title": "Actions",
+							"delete": "Delete"
 						}
 					},
 					"action": {
@@ -355,14 +377,71 @@
 						"delete": "Delete"
 					},
 					"error": "Unable to retrieve Rule"
+				},
+				"edit": {
+					"title" : "List of associated Rules",
+					"action" : {
+						"create": "Create Rules",
+						"delete": {
+							"error" : "Unable to delete {{rulesName}} Action, reason : {{reason}}",
+							"success": "Rules `{{rulesName}}` successfully deleted"
+						},
+						"add": {
+							"title": "Add a Rules",
+							"policies": "Select a policy",
+							"instructions": "Instruction",
+							"metarules" : "Select one of the associated MetaRules",
+							"categories":{
+								"subject": "Select {{number}} Subject(s)",
+								"object": "Select {{number}} Object(s)",
+								"action": "Select {{number}} Action(s)"
+							},
+							"selectedSubjects": "Selected Subject(s)",
+							"selectedObjects": "Selected Object(s)",
+							"selectedActions": "Selected Action(s)",
+							"details":{
+								"show": "Details",
+								"close": "Close"
+							},
+							"check":{
+								"policy":{
+									"required": "A Policy is required"
+								},
+								"instructions":{
+									"required": "An Instruction in JSON format is required"
+								},
+								"metarules":{
+									"required": "A MetaRule is required"
+								},
+								"subject":{
+									"required": "{{number}} Subject(s) are required"
+								},
+								"object":{
+									"required": "{{number}} Object(s) are required"
+								},
+								"action":{
+									"required": "{{number}} a(s) are required"
+								}
+							},
+							"create":{
+								"error": "Unable to create Rules",
+								"success": "Rules successfully created"
+							},
+							"delete":{
+								"error": "Unable to delete Rules, reason : `{{reason}}`",
+								"success": "Rules successfully deleted"
+							}
+						},
+						"notFound": "There is no Rules"
+					}
 				}
 			},
 			"assignments": {
 				"subject" : {
 					"title" : "List of associated Assignments Subjects",
 					"delete": {
-						"error" : "Unable to delete {{subjectName}} Subject, reason : {{reason}}",
-						"success": "Subject `{{subjectName}}` successfully deleted"
+						"error" : "Unable to delete Assignments, reason : {{reason}}",
+						"success": "Assignments successfully deleted"
 					},
 					"add": {
 						"title": "Add a Assignments Subject"
@@ -372,8 +451,8 @@
 				"object" : {
 					"title" : "List of associated Assignments Objects",
 					"delete": {
-						"error" : "Unable to delete {{objectName}} Object, reason : {{reason}}",
-						"success": "Object `{{objectName}}` successfully deleted"
+						"error" : "Unable to delete Assignments, reason : {{reason}}",
+						"success": "Assignments successfully deleted"
 					},
 					"add": {
 						"title": "Add a Assignments Object"
@@ -383,8 +462,8 @@
 				"action" : {
 					"title" : "List of associated Assignments Actions",
 					"delete": {
-						"error" : "Unable to delete {{actionName}} Action, reason : {{reason}}",
-						"success": "Action `{{actionName}}` successfully deleted"
+						"error" : "Unable to delete Assignments, reason : {{reason}}",
+						"success": "Assignments successfully deleted"
 					},
 					"add": {
 						"title": "Add a Assignments Action"
@@ -413,27 +492,39 @@
 					}
 				},
 				"edit": {
-					"name" : "Name",
-					"description" : "Description",
+					"policies": "Select a Policy",
+					"categories": "Select a Category",
+					"perimeters": "Select a Perimeter",
+					"data": "Select a Data",
+					"selectedData" : "Selected Data",
 					"check": {
-						"name": {
-							"required": "Name is required"
+						"policy":{
+							"required": "A Policy is required"
+						},
+						"category":{
+							"required": "A Category is required"
+						},
+						"perimeter":{
+							"required": "A Perimeter is required"
+						},
+						"data":{
+							"required": "A Data is required"
 						}
 					},
 					"action": {
-						"list": "Map an existing",
-						"new": "Create a new",
-						"create": "Create",
-						"map": "Map the selected",
-						"delete": "Delete"
+						"list": "Add an existing Assignments",
+						"new": "Add a new Assignments",
+						"create": "Create Assignments",
+						"map": "Add the selected Assignments",
+						"delete": "Delete Assignments"
 					},
 					"create":{
-						"error": "Unable to create `{{name}}`",
-						"success": "`{{name}}` successfully created"
+						"error": "Unable to create Assignments",
+						"success": "Assignments successfully created"
 					},
 					"delete":{
-						"error": "Unable to delete `{{name}}`",
-						"success": "`{{name}}` successfully deleted"
+						"error": "Unable to delete Assignments, reason : `{{reason}}`",
+						"success": "Assignments successfully deleted"
 					}
 				}
 			}

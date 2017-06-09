@@ -6,9 +6,9 @@
         .module('moon')
         .controller('PolicyListController', PolicyListController);
 
-    PolicyListController.$inject = ['$scope', 'policies', 'ngTableParams', '$filter', '$modal', '$rootScope'];
+    PolicyListController.$inject = ['$scope', 'policies', 'NgTableParams', '$filter', '$modal', '$rootScope'];
 
-    function PolicyListController($scope, policies, ngTableParams, $filter, $modal, $rootScope) {
+    function PolicyListController($scope, policies, NgTableParams, $filter, $modal, $rootScope) {
 
         var list = this;
 
@@ -69,7 +69,7 @@
 
         function newPoliciesTable() {
 
-            list.table = new ngTableParams({
+            list.table = new NgTableParams({
 
                 page: 1,            // show first page
                 count: 10,          // count per page

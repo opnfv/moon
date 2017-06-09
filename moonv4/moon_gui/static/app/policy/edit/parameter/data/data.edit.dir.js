@@ -17,40 +17,43 @@
             controllerAs : 'edit',
             scope : {
                 //Type can be 'ACTION', 'OBJECT', 'SUBJECT'
-                metaDataType: '=',
-                metaRule : '='
+                mnDataType: '=',
+                policy : '='
             },
             restrict : 'E',
             replace : true
         };
+
     }
 
     angular
         .module('moon')
         .controller('moonDataEditController', moonDataEditController);
 
-    moonDataEditController.$inject = ['$scope', 'metaDataService', 'DATA_CST', 'alertService', '$translate', 'formService', 'policyService', 'utilService'];
+    moonDataEditController.$inject = ['$scope', 'dataService', 'DATA_CST', 'alertService', '$translate',
+        'formService', 'policyService', 'utilService', 'metaDataService'];
 
-    function moonDataEditController($scope, metaDataService, DATA_CST, alertService, $translate, formService, policyService, utilService) {
+    function moonDataEditController($scope, dataService, DATA_CST, alertService, $translate,
+                                    formService, policyService, utilService, metaDataService) {
 
         var edit = this;
 
-        edit.metaDataType = $scope.edit.metaDataType;
-        edit.metaRule = $scope.edit.metaRule;
+        edit.dataType = $scope.edit.mnDataType;
+        edit.policy = $scope.edit.policy;
 
-        edit.fromList = true;
+        edit.fromList = false;
 
-        edit.laoading = false;
+        edit.loading = false;
 
         edit.form = {};
 
-        edit.metaData = { name: null, description: null};
+        edit.data = { name: null, description: null};
 
         edit.list = [];
+        edit.policyList = [];
+        edit.categoriesToBeSelected = [];
 
-        edit.create = createMetaData;
-        edit.addToMetaRule = addToMetaRule;
-        edit.deleteMetaData = deleteMetaData;
+        edit.create = createData;
 
         activate();
 
@@ -60,7 +63,51 @@
 
         function activate(){
 
-            switch(edit.metaDataType){
+            loadAllCategories();
+            loadAllPolicies();
+
+            switch(edit.dataType){
+
+                case DATA_CST.TYPE.SUBJECT:
+
+                    dataService.subject.findAllFromPolicyWithCallback(edit.policy.id, callBackList);
+                    break;
+
+                case DATA_CST.TYPE.OBJECT:
+
+                    dataService.object.findAllFromPolicyWithCallback(edit.policy.id, callBackList);
+                    break;
+
+                case DATA_CST.TYPE.ACTION:
+
+                    dataService.action.findAllFromPolicyWithCallback(edit.policy.id, callBackList);
+                    break;
+
+                default :
+
+                    edit.list = [];
+                    break;
+
+            }
+
+            function callBackList(list){
+
+                // For each Data, there is a check about the mapping between the Data and the policy
+                _.each(list, function (element) {
+                    if (element.policy_id !== edit.policy.id) {
+
+                        edit.list.push(element);
+
+                    }
+                });
+
+            }
+
+        }
+
+        function loadAllCategories(){
+
+            switch(edit.dataType){
 
                 case DATA_CST.TYPE.SUBJECT:
 
@@ -79,88 +126,43 @@
 
                 default :
 
-                    edit.list = [];
+                    edit.categoriesToBeSelected = [];
                     break;
 
             }
 
             function callBackList(list){
 
-                edit.list = list
+                edit.categoriesToBeSelected = list;
 
             }
-
         }
 
-        /**
-         * Add
-         */
+        function loadAllPolicies() {
 
-        function addToMetaRule(){
+            edit.policyList = [];
 
-            if(!edit.selectedMetaData){
+            policyService.findAllWithCallback( function(data) {
 
-                return;
+                _.each(data, function(element){
 
-            }
-
-            var metaRuleToSend = edit.metaRule;
-
-            switch(edit.metaDataType){
-
-                case DATA_CST.TYPE.SUBJECT:
-
-                    metaRuleToSend.subject_categories.push(edit.selectedMetaData.id);
-                    break;
-
-                case DATA_CST.TYPE.OBJECT:
-
-                    metaRuleToSend.object_categories.push(edit.selectedMetaData.id);
-                    break;
-
-                case DATA_CST.TYPE.ACTION:
-
-                    metaRuleToSend.action_categories.push(edit.selectedMetaData.id);
-                    break;
-            }
-
-            policyService.update(metaRuleToSend, updateMetaRuleSuccess, updateMetaRuleError);
-
-            function updateMetaRuleSuccess(data){
-
-                $translate('moon.model.metarules.update.success', { metaRuleName: metaRuleToSend.name }).then( function(translatedValue) {
-
-                    alertService.alertSuccess(translatedValue);
+                    if(element.id === edit.policy.id){
+                        edit.selectedPolicy = element;
+                    }
 
                 });
 
-                metaRuleToSend = utilService.transformOne(data, 'meta_rules');
+                edit.policyList = data;
 
-                $scope.$emit('event:updateMetaRuleFromMetaDataAddSuccess', metaRuleToSend);
-
-                stopLoading();
-
-            }
-
-            function updateMetaRuleError(reason){
-
-                $translate('moon.model.metarules.update.error', { metaRuleName: metaRuleToSend.name, reason: reason.message}).then( function(translatedValue) {
-
-                    alertService.alertError(translatedValue);
-
-                });
-
-                stopLoading();
-
-            }
-
+            });
         }
+
 
         /**
          * Create
          */
 
-        function createMetaData() {
+        function createData() {
 
             if(formService.isInvalid(edit.form)) {
 
@@ -170,140 +172,74 @@
 
                 startLoading();
 
-                var metaDataToSend = angular.copy(edit.metaData);
+                var dataToSend = angular.copy(edit.data);
 
-                switch(edit.metaDataType){
+                switch(edit.dataType){
 
                     case DATA_CST.TYPE.SUBJECT:
 
-                        metaDataService.subject.add(metaDataToSend, createSuccess, createError);
+                        dataService.subject.add(dataToSend, edit.policy.id, edit.selectedCategory.id, createSuccess, createError);
                         break;
 
                     case DATA_CST.TYPE.OBJECT:
 
-                        metaDataService.object.add(metaDataToSend, createSuccess, createError);
+                        dataService.object.add(dataToSend, edit.policy.id, edit.selectedCategory.id, createSuccess, createError);
                         break;
 
                     case DATA_CST.TYPE.ACTION:
 
-                        metaDataService.action.add(metaDataToSend, createSuccess, createError);
+                        dataService.action.add(dataToSend, edit.policy.id, edit.selectedCategory.id, createSuccess, createError);
                         break;
                 }
 
             }
 
+            /**
+             * @param data
+             */
             function createSuccess(data) {
 
                 var created = {};
 
-                switch(edit.metaDataType){
+                switch(edit.dataType){
 
                     case DATA_CST.TYPE.SUBJECT:
 
-                        created = utilService.transformOne(data, 'subject_categories');
+                        created = utilService.transformOne(data['subject_data'], 'data');
                         break;
 
                     case DATA_CST.TYPE.OBJECT:
 
-                        created = utilService.transformOne(data, 'object_categories');
+                        created = utilService.transformOne(data['object_data'], 'data');
                         break;
 
                     case DATA_CST.TYPE.ACTION:
 
-                        created = utilService.transformOne(data, 'action_categories');
+                        created = utilService.transformOne(data['action_data'], 'data');
                         break;
                 }
 
-                $translate('moon.model.metadata.edit.create.success', { name: created.name }).then(function (translatedValue) {
+                $translate('moon.policy.data.edit.create.success', { name: created.name }).then(function (translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
+
+                $scope.$emit('event:createDataFromDataEditSuccess', created, edit.dataType);
 
                 stopLoading();
 
                 edit.list.push(created);
 
-                displayList();
-
             }
 
             function createError(reason) {
 
-                $translate('moon.model.metadata.edit.create.error', { name: metaDataToSend.name }).then(function (translatedValue) {
+                $translate('moon.policy.data.edit.create.error', { name: dataToSend.name }).then(function (translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
                 stopLoading();
 
             }
-
-        }
-
-        function deleteMetaData(){
-
-            if(!edit.selectedMetaData){
-
-                return;
-
-            }
-
-            startLoading();
-
-            var metaDataToDelete = angular.copy(edit.selectedMetaData);
-
-            switch(edit.metaDataType){
-                case DATA_CST.TYPE.SUBJECT:
-
-                    metaDataService.subject.delete(metaDataToDelete, deleteSuccess, deleteError);
-                    break;
-
-                case DATA_CST.TYPE.OBJECT:
-
-                    metaDataService.object.delete(metaDataToDelete, deleteSuccess, deleteError);
-                    break;
-
-                case DATA_CST.TYPE.ACTION:
-
-                    metaDataService.action.delete(metaDataToDelete, deleteSuccess, deleteError);
-                    break;
-            }
-
-
-            function deleteSuccess(data) {
-
-                $translate('moon.model.metadata.edit.delete.success', { name: metaDataToDelete.name }).then(function (translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                policyService.findOneWithMetaData(edit.metaRule.id).then( function(metaRule){
-
-                    edit.metaRule = metaRule;
-
-                    cleanSelectedValue();
-
-                    activate();
-
-                    stopLoading();
-
-                    $scope.$emit('event:deleteMetaDataFromMetaDataAddSuccess', edit.metaRule);
-
-                });
-
-            }
-
-            function deleteError(reason) {
-
-                $translate('moon.model.metadata.edit.delete.error', { name: metaDataToDelete.name }).then(function (translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                stopLoading();
-
-            }
-        }
-
-        function cleanSelectedValue(){
-
-            delete edit.selectedMetaData;
 
         }
 
@@ -316,12 +252,6 @@
         function stopLoading(){
 
             edit.loading = false;
-
-        }
-
-        function displayList(){
-
-            edit.fromList = true;
 
         }
 

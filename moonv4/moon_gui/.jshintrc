@@ -48,12 +48,10 @@
   "shadow": false,
   "sub": true,
   "supernew": false,
-  "validthis": false,
+  "validthis": true,
   "noyield": false,
-
   "browser": true,
   "node": true,
-
   "globals": {
     "angular": false,
     "_": false

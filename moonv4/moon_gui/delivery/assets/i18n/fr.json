@@ -215,6 +215,10 @@
 					},
 					"notFound": "Il n'existe aucune Action"
 				},
+				"update":{
+					"error": "Impossible de mettre à jour le Périmètre `{{perimeterName}}`",
+					"success": "Le Périèmtre `{{perimeterName}}` a été mis à jour"
+				},
 				"table": {
 					"id" : "Id",
 					"name" : "Nom",
@@ -226,22 +230,27 @@
 					"action": {
 						"title": "Actions",
 						"delete": "Supprimer",
-						"update": "Mettre à jour"
+						"update": "Mettre à jour",
+						"unmap": "Dissocier"
 					}
 				},
 				"edit": {
 					"name" : "Nom",
 					"description" : "Description",
+					"partnerId": "Partner Id",
+					"policies":"Liste des Politiques",
+					"email": "E-mail",
+					"selectedPolicies": "Politiques selectionnées",
 					"check": {
 						"name": {
 							"required": "Le nom est requis"
 						}
 					},
 					"action": {
-						"list": "Associer un Element existante",
-						"new": "Créer une nouvelle Element",
-						"create":"Créer l'Element",
-						"map":"Asscoier l'Element selectionnée",
+						"list": "Associer un Périmètre existant",
+						"new": "Ajouter un nouveau Périmètre",
+						"create":"Ajouter le Périmètre ",
+						"map":"Asscoier le Périmètre selectionné",
 						"delete": "Supprimer"
 					},
 					"create": {
@@ -307,17 +316,25 @@
 				"edit": {
 					"name" : "Nom",
 					"description" : "Description",
+					"categories": "Liste des Catégories",
+					"policies": "Liste des Politiques",
 					"check": {
 						"name": {
 							"required": "Le nom est requis"
+						},
+						"category":{
+							"required": "Une Catégorie est requise"
+						},
+						"policy":{
+							"required": "Une Politique est requise"
 						}
 					},
 					"action": {
-						"list": "Associer un Element existante",
-						"new": "Créer une nouvelle Element",
-						"create":"Créer l'Element",
-						"map":"Asscoier l'Element selectionnée",
-						"delete": "Supprimer"
+						"list": "Associer une Data existante",
+						"new": "Créer une nouvelle Data",
+						"create":"Créer la Data",
+						"add":"Ajouter la Data selectionnée",
+						"delete": "Supprimer la Data"
 					},
 					"create": {
 						"error": "Impossible de créer l'Element `{{name}}`",
@@ -342,9 +359,14 @@
 						"description": "Description",
 						"enabled": "Enabled",
 						"rule": "Règle",
+						"instructions": "Instruction",
 						"notFound": "Il n'existe aucune Règle",
 						"loading": {
 							"metaRule" : "Chargement de la Meta Règle"
+						},
+						"action":{
+							"title": "Actions",
+							"delete": "Supprimer"
 						}
 					},
 					"action": {
@@ -355,14 +377,71 @@
 						"delete": "Supprimer"
 					},
 					"error": "Impossible de récupérer la liste des Règles"
+				},
+				"edit": {
+					"title" : "Liste des Règles associées",
+					"action" : {
+						"create": "Créer une Règles",
+						"delete": {
+							"error" : "Impossible de supprimer la Règles{{rulesName}}, raison : {{reason}}",
+							"success": "Règles`{{rulesName}}` supprimée avec succès"
+						},
+						"add": {
+							"title": "Ajouter une Règles",
+							"policies": "Sélectionnez une Politique",
+							"instructions": "Instruction",
+							"metarules" : "Sélectionnez une des MetaRules associée(s)",
+							"categories":{
+								"subject": "Sélectionnez {{number}} Sujet(s)",
+								"object": "Sélectionnez {{number}} Object(s)",
+								"action": "Sélectionnez {{number}} Action(s)"
+							},
+							"selectedSubjects": "Sujets(s) sélectionnés",
+							"selectedObjects": "Objet(s) sélectionnés",
+							"selectedActions": "Action(s) sélectionnées",
+							"details":{
+								"show": "Détails",
+								"close": "Fermer"
+							},
+							"check":{
+								"policy":{
+									"required": "Une Politique est requise"
+								},
+								"instructions":{
+									"required": "Une Instruction au format JSON est requise"
+								},
+								"metarules":{
+									"required": "une MetaRules est requise"
+								},
+								"subject":{
+									"required": "{{number}} Sujets(s) sont requis"
+								},
+								"object":{
+									"required": "{{number}} Obje(s) sont requis"
+								},
+								"action":{
+									"required": "{{number}} Sujets(s) sont requises"
+								}
+							},
+							"create": {
+								"error": "Impossible de créer la Règles `{{name}}`",
+								"success": "La règles `{{name}}` a été créé avec succès"
+							},
+							"delete": {
+								"error": "Impossible de supprimer la Règle, raison: `{{reason}}`",
+								"success": "La Règle a été supprimée avec succès"
+							}
+						},
+						"notFound": "Il n'y a pas de Règles"
+					}
 				}
 			},
 			"assignments" :{
 				"subject" : {
 					"title" : "Liste des Affectations Sujets associées",
 					"delete": {
-						"error" : "Impossible de supprimer l'Affectations Sujet : {{subjectName}}, la raison : {{reason}}",
-						"success": "Affectations Sujet `{{subjectName}}` a été supprimé avec succès"
+						"error" : "Impossible de supprimer l'Affectations, la raison : {{reason}}",
+						"success": "Affectations a été supprimé avec succès"
 					},
 					"add": {
 						"title": "Ajouter une Affectations Sujet"
@@ -372,8 +451,8 @@
 				"object" : {
 					"title" : "Liste des Affectations Objets associées",
 					"delete": {
-						"error" : "Impossible de supprimer l'Affectations Objet : {{objectName}}, la raison : {{reason}}",
-						"success": "Affectations Objet `{{objectName}}` a été supprimée avec succès"
+						"error" : "Impossible de supprimer l'Affectations, la raison : {{reason}}",
+						"success": "Affectations a été supprimée avec succès"
 					},
 					"add": {
 						"title": "Ajouter une Affectations Objet"
@@ -383,8 +462,8 @@
 				"action" : {
 					"title" : "Liste des Affectations Actions associées",
 					"delete": {
-						"error" : "Impossible de supprimer l'Affectations Action : {{actionName}}, la raison : {{reason}}",
-						"success": "Affectations Action `{{actionName}}` a été supprimée avec succès"
+						"error" : "Impossible de supprimer l'Affectations, la raison : {{reason}}",
+						"success": "Affectations Action a été supprimée avec succès"
 					},
 					"add": {
 						"title": "Ajouter une Affectations Action"
@@ -413,27 +492,39 @@
 					}
 				},
 				"edit": {
-					"name" : "Nom",
-					"description" : "Description",
+					"policies": "Sélectionnez une Politique",
+					"categories": "Sélectionnez une Catégorie",
+					"perimeters": "Sélectionnez un Perimètre",
+					"data": "Sélectionnez une Donnée",
+					"selectedData" : "Données Séléctionnées",
 					"check": {
-						"name": {
-							"required": "Le nom est requis"
+						"policy":{
+							"required": "Une Politique est requise"
+						},
+						"category":{
+							"required": "Une Catégorie est requise"
+						},
+						"perimeter":{
+							"required": "Un Perimètre est requis"
+						},
+						"data":{
+							"required": "Une Donnée est requise"
 						}
 					},
 					"action": {
-						"list": "Associer une Affectations existante",
-						"new": "Créer une nouvelle Affectations",
+						"list": "Ajouter une Affectations existante",
+						"new": "Ajouter une nouvelle Affectations",
 						"create":"Créer l'Affectations",
-						"map":"Asscoier l'Affectations selectionnée",
-						"delete": "Supprimer"
+						"map":"Ajouter l'Affectations selectionnée",
+						"delete": "Supprimer l'Affectations"
 					},
 					"create": {
-						"error": "Impossible de créer l'Affectations `{{name}}`",
-						"success": "L'Affectations `{{name}}` a été créé avec succès"
+						"error": "Impossible de créer l'Affectations`",
+						"success": "L'Affectations a été créé avec succès"
 					},
 					"delete": {
-						"error": "Impossible de supprimer l'Affectations `{{name}}`",
-						"success": "L'Affectations `{{name}}` a été supprimée avec succès"
+						"error": "Impossible de supprimer l'Affectations, raison : `{{reason}}`",
+						"success": "L'Affectations a été supprimée avec succès"
 					}
 				}
 			}

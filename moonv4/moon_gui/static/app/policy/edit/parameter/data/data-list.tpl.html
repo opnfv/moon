@@ -18,7 +18,7 @@
                         <th data-translate="moon.policy.data.table.name">Name</th>
                         <th data-translate="moon.policy.data.table.description">Description</th>
                         <th data-translate="moon.policy.data.table.category.name">Category</th>
-                        <!--<th data-translate="moon.policy.data.table.action.title"></th>-->
+                        <th data-translate="moon.policy.data.table.action.title"></th>
                     </tr>
                     </thead>
 
@@ -40,6 +40,23 @@
                             </div>
 
                         </td>
+
+                        <td>
+
+                            <a href="" ng-if="!value.loader" ng-click="list.deleteSub(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.data.table.action.delete">Delete</span>
+                            </a>
+
+                            <div ng-if="value.loader">
+
+                                <moon-loader></moon-loader>
+
+                            </div>
+
+                        </td>
+
+
                         <!--<td>
 
                             <div class="dropdown">
@@ -85,9 +102,7 @@
 
                     <tbody ng-if="!list.loadingSub && list.getSubjects().length === 0">
                     <tr>
-                        <td data-translate="moon.policy.data.subject.notFound">There is no Subjects</td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="4" data-translate="moon.policy.data.subject.notFound">There is no Subjects</td>
                     </tr>
                     </tbody>
 
@@ -109,7 +124,7 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfSubject"></moon-meta-data-edit>
+            <moon-data-edit policy="list.policy" mn-data-type="list.typeOfSubject"></moon-data-edit>
 
         </div>
 
@@ -134,8 +149,7 @@
                         <th data-translate="moon.policy.data.table.name">Name</th>
                         <th data-translate="moon.policy.data.table.description">Description</th>
                         <th data-translate="moon.policy.data.table.category.name">Category</th>
-
-                        <!--<th data-translate="moon.policy.data.table.action.title"></th>-->
+                        <th data-translate="moon.policy.data.table.action.title">Actions</th>
                     </tr>
                     </thead>
 
@@ -154,6 +168,21 @@
 
                             <div ng-if="list.getCategoryFromData(value)">
                                 <span ng-bind="value.category.name"></span>
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            <a href="" ng-if="!value.loader" ng-click="list.deleteObj(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.data.table.action.delete">Delete</span>
+                            </a>
+
+                            <div ng-if="value.loader">
+
+                                <moon-loader></moon-loader>
+
                             </div>
 
                         </td>
@@ -200,9 +229,9 @@
 
                     <tbody ng-if="!list.loadingObj && list.getObjects().length === 0">
                     <tr>
-                        <td data-translate="moon.policy.data.object.notFound">There is no Objects</td>
-                        <td></td>
-                        <td></td>
+
+                        <td colspan="4" data-translate="moon.policy.data.object.notFound">There is no Objects</td>
+
                     </tr>
                     </tbody>
 
@@ -224,7 +253,7 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfObject"></moon-meta-data-edit>
+            <moon-data-edit policy="list.policy" mn-data-type="list.typeOfObject"></moon-data-edit>
 
         </div>
 
@@ -249,8 +278,7 @@
                         <th data-translate="moon.policy.data.table.name">Name</th>
                         <th data-translate="moon.policy.data.table.description">Description</th>
                         <th data-translate="moon.policy.data.table.category.name">Category</th>
-
-                        <!--<th data-translate="moon.policy.data.table.action.title"></th>-->
+                        <th data-translate="moon.policy.data.table.action.title">Actions</th>
                     </tr>
                     </thead>
 
@@ -269,6 +297,21 @@
 
                             <div ng-if="list.getCategoryFromData(value)">
                                 <span ng-bind="value.category.name"></span>
+                            </div>
+
+                        </td>
+
+                        <td>
+
+                            <a href="" ng-if="!value.loader" ng-click="list.deleteSub(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.data.table.action.delete">Delete</span>
+                            </a>
+
+                            <div ng-if="value.loader">
+
+                                <moon-loader></moon-loader>
+
                             </div>
 
                         </td>
@@ -315,9 +358,7 @@
 
                     <tbody ng-if="!list.loadingAct && list.getActions().length === 0">
                     <tr>
-                        <td data-translate="moon.policy.data.action.notFound">There is no Actions</td>
-                        <td></td>
-                        <td></td>
+                        <td colspan="4" data-translate="moon.policy.data.action.notFound">There is no Actions</td>
                     </tr>
                     </tbody>
 
@@ -340,7 +381,7 @@
 
         <div class="panel-body">.
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfAction"></moon-meta-data-edit>
+            <moon-data-edit policy="list.policy" mn-data-type="list.typeOfAction"></moon-data-edit>
 
         </div>
 

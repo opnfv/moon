@@ -21,49 +21,49 @@
 	<div>&nbsp;</div>
 
 	<div class="row" >
-	
+
 		<div class="table-responsive" data-role="table">
-		
+
 	        <table class="table table-striped table-hover" ng-table="list.table">
 
 	            <thead>
-	            
+
 	                <tr>
-	                
+
 	                	<th class="customTables sortable"
 							ng-class="{ 'sort-asc': list.table.isSortBy('name', 'asc'), 'sort-desc': list.table.isSortBy('name', 'desc') }"
 							ng-click="list.table.sorting('name', list.table.isSortBy('name', 'asc') ? 'desc' : 'asc')">
 								<div data-translate="moon.pdp.list.table.name">Name</div>
 						</th>
-						
-						<th class="customTables sortable" 
+
+						<th class="customTables sortable"
 							ng-class="{ 'sort-asc': list.table.isSortBy('security_pipeline', 'asc'), 'sort-desc': list.table.isSortBy('security_pipeline', 'desc') }"
 							ng-click="list.table.sorting('security_pipeline', list.table.isSortBy('policy', 'asc') ? 'desc' : 'asc')">
 							<div data-translate="moon.pdp.list.table.security_pipeline.number">Number of Securities</div>
 						</th>
-						
+
 						<th class="customTables"
 							ng-class="{ 'sort-asc': list.table.isSortBy('project', 'asc'), 'sort-desc': list.table.isSortBy('project', 'desc') }"
 							ng-click="list.table.sorting('project', list.table.isSortBy('project', 'asc') ? 'desc' : 'asc')">
 							<div data-translate="moon.pdp.list.table.project">Project</div>
 						</th>
-	                					
+
 	                    <th class="customTables">
 							<div data-translate="moon.pdp.list.action.title">Actions</div>
 						</th>
-	                    
+
 	                </tr>
-	                
+
 	            </thead>
-	                        
+
 	            <tbody ng-if="!list.hasPDPs()">
 	            	<tr>
 	            		<td colspan="12"><span data-translate="moon.pdp.list.table.notFound">There is no PDP</span></td>
 	            	</tr>
 	            </tbody>
-	            
+
 	            <tbody ng-if="list.hasPDPs()">
-	            
+
 		            <tr ng-repeat="pdp in $data | filter:list.search.find | orderBy:sort:reverse">
 		                <td ng-bind="list.getPDPName(pdp)"></td>
 		                <td ng-bind="list.getSecPipelineFromPdp(pdp).length"></td>
@@ -111,15 +111,15 @@
 								</ul>
 							</div>
 		               </td>
-		               
+
 		            </tr>
-		            
+
 	            </tbody>
-	            
+
 	        </table>
-	        
+
 		</div>
-	
+
 	   	<div class="container">
 			<div class="form-inline form-group">
 	           	<a href="" ng-click="list.add.showModal()" class="btn btn-default">

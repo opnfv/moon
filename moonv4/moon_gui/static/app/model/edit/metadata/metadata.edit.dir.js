@@ -29,9 +29,11 @@
         .module('moon')
         .controller('moonMetaDataEditController', moonMetaDataEditController);
 
-    moonMetaDataEditController.$inject = ['$scope', 'metaDataService', 'META_DATA_CST', 'alertService', '$translate', 'formService', 'metaRuleService', 'utilService'];
+    moonMetaDataEditController.$inject = ['$scope', 'metaDataService', 'META_DATA_CST', 'alertService',
+        '$translate', 'formService', 'metaRuleService', 'utilService'];
 
-    function moonMetaDataEditController($scope, metaDataService, META_DATA_CST, alertService, $translate, formService, metaRuleService, utilService) {
+    function moonMetaDataEditController($scope, metaDataService, META_DATA_CST, alertService,
+                                        $translate, formService, metaRuleService, utilService) {
 
         var edit = this;
 
@@ -86,7 +88,7 @@
 
             function callBackList(list){
 
-                edit.list = list
+                edit.list = list;
 
             }
 

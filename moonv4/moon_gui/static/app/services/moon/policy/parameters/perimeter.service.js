@@ -21,30 +21,33 @@
                 perimeter: $resource(REST_URI.PERIMETERS.subject + ':subject_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 }),
 
                 policy: $resource(REST_URI.POLICIES + ':policy_id/subjects/:subject_id', {}, {
                     get: {method: 'GET'},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 })
 
             },
-
 
             object: {
 
                 perimeter:  $resource(REST_URI.PERIMETERS.object + ':object_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 }),
 
                 policy: $resource(REST_URI.POLICIES + ':policy_id/objects/:object_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 })
 
             },
@@ -54,13 +57,15 @@
                 perimeter:  $resource(REST_URI.PERIMETERS.action + ':action_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 }),
 
                 policy: $resource(REST_URI.POLICIES + ':policy_id/actions/:action_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
-                    remove: {method: 'DELETE'}
+                    remove: {method: 'DELETE'},
+                    update: { method: 'PATCH' }
                 })
 
             }
@@ -113,6 +118,12 @@
 
                 },
 
+                unMapPerimeterFromPolicy: function(policyId, subjectId, callbackSuccess, callbackError ){
+
+                    data.subject.policy.remove({policy_id: policyId, subject_id: subjectId}, {}, callbackSuccess, callbackError);
+
+                },
+
                 findAllFromPolicyWithCallback: function(policyId, callback){
 
                     data.subject.policy.get({policy_id: policyId}).$promise.then(function(data) {
@@ -162,6 +173,12 @@
 
                     data.subject.perimeter.create({}, subject, callbackSuccess, callbackError);
 
+                },
+
+                update: function(subject, callbackSuccess, callbackError){
+
+                    data.subject.perimeter.update({subject_id: subject.id}, subject, callbackSuccess, callbackError);
+
                 }
             },
 
@@ -173,7 +190,7 @@
 
                         callback(utilService.transformOne(data, 'objects'));
 
-                    })
+                    });
 
                 },
 
@@ -207,6 +224,12 @@
                         });
 
                     });
+
+                },
+
+                unMapPerimeterFromPolicy: function(policyId, objectId, callbackSuccess, callbackError ){
+
+                    data.object.policy.remove({policy_id: policyId, object_id: objectId}, {}, callbackSuccess, callbackError);
 
                 },
 
@@ -287,6 +310,12 @@
 
                     data.object.perimeter.create({}, object, callbackSuccess, callbackError);
 
+                },
+
+                update: function(object, callbackSuccess, callbackError){
+
+                    data.object.perimeter.update({object_id: object.id}, object, callbackSuccess, callbackError);
+
                 }
             },
 
@@ -331,6 +360,12 @@
                         });
 
                     });
+
+                },
+
+                unMapPerimeterFromPolicy: function(policyId, actionId, callbackSuccess, callbackError){
+
+                    data.action.policy.remove({policy_id: policyId, action_id: actionId}, {}, callbackSuccess, callbackError);
 
                 },
 
@@ -409,6 +444,12 @@
                 add:function (action, callbackSuccess, callbackError ) {
 
                     data.action.perimeter.create({}, action, callbackSuccess, callbackError);
+
+                },
+
+                update: function(action, callbackSuccess, callbackError){
+
+                    data.action.perimeter.update({action_id: action.id}, action, callbackSuccess, callbackError);
 
                 }
             }

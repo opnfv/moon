@@ -14,13 +14,15 @@
     	<div class="col-md-3">
 
 	        <span class="pull-right">
-	            <a href="" ng-click="header.changeLocale('fr', $event)"><img src="assets/img/arrow-link.gif" alt="fr_" />fr</a>
-	            <a href="" ng-click="header.changeLocale('en', $event)"><img src="assets/img/arrow-link.gif" alt="en_" />en</a>
+
+	            <a href="" ng-click="header.changeLocale('fr', $event)" ng-class="{'strong' : header.currentLanguage === 'fr'}"><img src="assets/img/arrow-link.gif" alt="fr_" />fr</a>
+	            <a href="" ng-click="header.changeLocale('en', $event)" ng-class="{'strong' : header.currentLanguage === 'en'}"><img src="assets/img/arrow-link.gif" alt="en_" />en</a>
 
 	            <a href="" ng-if="connected" ng-click="header.logout()" class="left30">
 	            	<span class="glyphicon glyphicon-log-out"></span>
 	            	<span data-translate="moon.logout.title">Logout</span>(<span ng-bind="header.getUser().token.user.name"></span>)
 	            </a>
+
                 <a href="" ng-if="!connected" class="left30">
 	            	<span class="glyphicon glyphicon-log-in"></span>
 	            	<span data-translate="moon.login.title">Login</span>

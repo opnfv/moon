@@ -17,9 +17,7 @@
                     <tr>
                         <th data-translate="moon.policy.assignments.table.perimeter.name">Perimeter name</th>
                         <th data-translate="moon.policy.assignments.table.category.name">Category name</th>
-                        <th data-translate="moon.policy.assignments.table.data.name">Data name</th>
-                        <!--<th data-translate="moon.policy.assignments.table.action.title"></th>-->
-                    </tr>
+                        <th data-translate="moon.policy.assignments.table.data.name">Data name</th></tr>
                     </thead>
 
                     <moon-loader ng-if="list.loadingSub"></moon-loader>
@@ -29,13 +27,14 @@
                         <tr ng-repeat="(key, value) in list.subjects">
 
                             <td>
+
                                 <div ng-if="!list.getPerimeterFromAssignment(value, list.typeOfSubject)">
                                     <moon-loader ng-if="!list.getPerimeterFromAssignment(value)" ></moon-loader>
                                     <em data-translate="moon.policy.assignments.table.loading.perimeter">Loading </em>
                                 </div>
 
                                 <div ng-if="list.getPerimeterFromAssignment(value)">
-                                    <span ng-bind="value.category.name"></span>
+                                    <span ng-bind="value.perimeter.name"></span>
                                 </div>
 
                             </td>
@@ -63,11 +62,23 @@
 
                                     <span ng-if="list.getDataFromAssignmentsIndex(index, value, list.typeOfSubject)">
                                         <span ng-bind="value.assignments_value[index].data.name"></span>
-
-                                        <span ng-if="index < value.assignments.length-1">,</span>
+                                        <a href="" ng-if="!value.loader" ng-click="list.deleteSub(value, value.assignments_value[index].data.id)" >
+                                            <span>(</span><span class="glyphicon glyphicon-transfer"></span><span>)</span>
+                                        </a>
+                                        <span ng-if="index < value.assignments.length-1">,&nbsp;</span>
                                     </span>
 
                                 </span>
+
+                            </td>
+
+                            <td>
+
+                                <div ng-if="value.loader">
+
+                                    <moon-loader></moon-loader>
+
+                                </div>
 
                             </td>
 
@@ -101,7 +112,7 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfSubject"></moon-meta-data-edit>
+            <moon-assignments-edit policy="list.policy" assignments-type="list.typeOfSubject"></moon-assignments-edit>
 
         </div>
 
@@ -122,13 +133,11 @@
                 <table class="table table-striped">
 
                     <thead>
-                    <tr>
-                        <th data-translate="moon.policy.assignments.table.perimeter.name">Perimeter name</th>
-                        <th data-translate="moon.policy.assignments.table.category.name">Category name</th>
-                        <th data-translate="moon.policy.assignments.table.data.name">Data name</th>
-
-                        <!--<th data-translate="moon.policy.assignments.table.action.title"></th>-->
-                    </tr>
+                        <tr>
+                            <th data-translate="moon.policy.assignments.table.perimeter.name">Perimeter name</th>
+                            <th data-translate="moon.policy.assignments.table.category.name">Category name</th>
+                            <th data-translate="moon.policy.assignments.table.data.name">Data name</th>
+                        </tr>
                     </thead>
 
                     <moon-loader ng-if="list.loadingObj"></moon-loader>
@@ -143,7 +152,7 @@
                                 </div>
 
                                 <div ng-if="list.getPerimeterFromAssignment(value)">
-                                    <span ng-bind="value.category.name"></span>
+                                    <span ng-bind="value.perimeter.name"></span>
                                 </div>
 
                             </td>
@@ -169,10 +178,13 @@
                                     </span>
 
                                     <span ng-if="list.getDataFromAssignmentsIndex(index, value, list.typeOfObject)">
+
                                         <span ng-if="value.assignments_value[index].data.name" ng-bind="value.assignments_value[index].data.name"></span>
                                         <span ng-if="value.assignments_value[index].data.value.name" ng-bind="value.assignments_value[index].data.value.name"></span>
-
-                                        <span ng-if="index < value.assignments.length-1">,</span>
+                                        <a href="" ng-if="!value.loader" ng-click="list.deleteObj(value, value.assignments_value[index].data.id)" >
+                                            <span>(</span><span class="glyphicon glyphicon-transfer"></span><span>)</span>
+                                        </a>
+                                        <span ng-if="index < value.assignments.length-1">,&nbsp;</span>
                                     </span>
 
                                 </span>
@@ -207,7 +219,7 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfObject"></moon-meta-data-edit>
+            <moon-assignments-edit policy="list.policy" assignments-type="list.typeOfObject"></moon-assignments-edit>
 
         </div>
 
@@ -228,13 +240,11 @@
                 <table class="table table-striped">
 
                     <thead>
-                    <tr>
-                        <th data-translate="moon.policy.assignments.table.perimeter.name">Perimeter name</th>
-                        <th data-translate="moon.policy.assignments.table.category.name">Category name</th>
-                        <th data-translate="moon.policy.assignments.table.data.name">Data name</th>
-
-                        <!--<th data-translate="moon.policy.assignments.table.action.title"></th>-->
-                    </tr>
+                        <tr>
+                            <th data-translate="moon.policy.assignments.table.perimeter.name">Perimeter name</th>
+                            <th data-translate="moon.policy.assignments.table.category.name">Category name</th>
+                            <th data-translate="moon.policy.assignments.table.data.name">Data name</th>
+                        </tr>
                     </thead>
 
                     <moon-loader ng-if="list.loadingAct"></moon-loader>
@@ -277,8 +287,10 @@
                                 <span ng-if="list.getDataFromAssignmentsIndex(index, value, list.typeOfAction)">
                                     <span ng-if="value.assignments_value[index].data.name" ng-bind="value.assignments_value[index].data.name"></span>
                                     <span ng-if="value.assignments_value[index].data.value.name" ng-bind="value.assignments_value[index].data.value.name"></span>
-
-                                    <span ng-if="index < value.assignments.length-1">,</span>
+                                    <a href="" ng-if="!value.loader" ng-click="list.deleteAct(value, value.assignments_value[index].data.id)" >
+                                        <span>(</span><span class="glyphicon glyphicon-transfer"></span><span>)</span>
+                                    </a>
+                                    <span ng-if="index < value.assignments.length-1">,&nbsp;</span>
                                 </span>
 
                             </span>
@@ -314,7 +326,7 @@
 
         <div class="panel-body">.
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfAction"></moon-meta-data-edit>
+            <moon-assignments-edit policy="list.policy" assignments-type="list.typeOfAction"></moon-assignments-edit>
 
         </div>
 

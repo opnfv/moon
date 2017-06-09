@@ -53,7 +53,11 @@
         </div>
 
         <div class="panel-body" ng-if="edit.model.meta_rules_values">
-            <moon-meta-rules-list mapped-model="edit.model"  edit-mode="edit.editMetaRules"></moon-meta-rules-list>
+            <div class="">
+
+                <moon-meta-rules-list mapped-model="edit.model"  edit-mode="edit.editMetaRules"></moon-meta-rules-list>
+
+            </div>
         </div>
 
         <div class="panel-body" ng-if="!edit.model.meta_rules_values">

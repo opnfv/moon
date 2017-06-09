@@ -17,7 +17,9 @@
             controllerAs : 'list',
             scope : {
                 metaRule: '=',
-                editMode : '='
+                editMode: '=',
+                // shortDisplay : boolean value
+                shortDisplay: '='
             },
             restrict : 'E',
             replace : true
@@ -36,6 +38,7 @@
 
         list.metaRule = $scope.list.metaRule;
         list.editMode = $scope.list.editMode;
+        list.shortDisplay = $scope.list.shortDisplay;
 
         list.typeOfSubject = META_DATA_CST.TYPE.SUBJECT;
         list.typeOfObject = META_DATA_CST.TYPE.OBJECT;
@@ -45,9 +48,9 @@
         list.unMapObj = unMapObj;
         list.unMapAct = unMapAct;
 
-        list.deleteSub = deleteSub;
-        list.deleteObj = deleteObj;
-        list.deleteAct = deleteAct;
+        // list.deleteSub = deleteSub;
+        // list.deleteObj = deleteObj;
+        // list.deleteAct = deleteAct;
 
         list.getSubjectCategories = getSubjectCategories;
         list.getObjectCategories = getObjectCategories;
@@ -82,7 +85,7 @@
 
             list.loadingCatSub = true;
 
-            metaDataService.subject.findSomeWithCallback(list.metaRule.subject_categories, function(categories){
+           metaDataService.subject.findSomeWithCallback(list.metaRule.subject_categories, function(categories){
 
                 list.catSub = categories;
                 list.loadingCatSub = false;
@@ -229,97 +232,99 @@
 
         }
 
-        /**
-         * Delete
-         */
-
-        function deleteSub(subject){
-
-            subject.loader = true;
-
-            metaDataService.subject.delete(subject, deleteSubSuccess, deleteSubError);
-
-            function deleteSubSuccess(data){
-
-                $translate('moon.model.metadata.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeSubFromSubList(subject);
-
-                subject.loader = false;
-
-            }
-
-            function deleteSubError(reason){
-
-                $translate('moon.model.metadata.subject.delete.error', { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                subject.loader = false;
-
-            }
-        }
-
-        function deleteObj(object){
-
-            object.loader = true;
-
-            metaDataService.object.delete(object, deleteObjSuccess, deleteObjError);
-
-            function deleteObjSuccess(data){
-
-                $translate('moon.model.metadata.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeObjFromObjList(object);
-                list.catSub = metaDataService.subject.findSome(metaRule.subject_categories);
-                list.catObj = metaDataService.object.findSome(metaRule.object_categories);
-                list.catAct = metaDataService.action.findSome(metaRule.action_categories);
-                object.loader = false;
-
-            }
-
-            function deleteObjError(reason){
-
-                $translate('moon.model.metadata.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                object.loader = false;
-            }
-        }
-
-        function deleteAct(action){
-
-            action.loader = true;
-
-            metaDataService.action.delete(action, deleteActSuccess, deleteActError);
-
-            function deleteActSuccess(data){
-
-                $translate('moon.model.metadata.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeActFromActList(action);
-
-                action.loader = false;
-
-            }
-
-            function deleteActError(reason){
-
-                $translate('moon.model.metadata.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                action.loader = false;
-
-            }
-        }
+        // /**
+        //  * Delete
+        //  */
+        //
+        // function deleteSub(subject){
+        //
+        //     subject.loader = true;
+        //
+        //     metaDataService.subject.delete(subject, deleteSubSuccess, deleteSubError);
+        //
+        //     function deleteSubSuccess(data){
+        //
+        //         $translate('moon.model.metadata.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
+        //             alertService.alertSuccess(translatedValue);
+        //         });
+        //
+        //         removeSubFromSubList(subject);
+        //
+        //         subject.loader = false;
+        //
+        //     }
+        //
+        //     function deleteSubError(reason){
+        //
+        //         $translate('moon.model.metadata.subject.delete.error',
+        // { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
+        //             alertService.alertError(translatedValue);
+        //         });
+        //
+        //         subject.loader = false;
+        //
+        //     }
+        // }
+        //
+        // function deleteObj(object){
+        //
+        //     object.loader = true;
+        //
+        //     metaDataService.object.delete(object, deleteObjSuccess, deleteObjError);
+        //
+        //     function deleteObjSuccess(data){
+        //
+        //         $translate('moon.model.metadata.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
+        //             alertService.alertSuccess(translatedValue);
+        //         });
+        //
+        //         removeObjFromObjList(object);
+        //         /*list.catSub = metaDataService.subject.findSome(list.metaRule.subject_categories);
+        //         list.catObj = metaDataService.object.findSome(list.metaRule.object_categories);
+        //         list.catAct = metaDataService.action.findSome(list.metaRule.action_categories);*/
+        //
+        //         object.loader = false;
+        //
+        //     }
+        //
+        //     function deleteObjError(reason){
+        //
+        //         $translate('moon.model.metadata.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
+        //             alertService.alertError(translatedValue);
+        //         });
+        //
+        //         object.loader = false;
+        //     }
+        // }
+        //
+        // function deleteAct(action){
+        //
+        //     action.loader = true;
+        //
+        //     metaDataService.action.delete(action, deleteActSuccess, deleteActError);
+        //
+        //     function deleteActSuccess(data){
+        //
+        //         $translate('moon.model.metadata.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
+        //             alertService.alertSuccess(translatedValue);
+        //         });
+        //
+        //         removeActFromActList(action);
+        //
+        //         action.loader = false;
+        //
+        //     }
+        //
+        //     function deleteActError(reason){
+        //
+        //         $translate('moon.model.metadata.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
+        //             alertService.alertError(translatedValue);
+        //         });
+        //
+        //         action.loader = false;
+        //
+        //     }
+        // }
 
         function getSubjectCategories(){
             return list.catSub ? list.catSub : [];
@@ -333,17 +338,17 @@
             return list.catAct ? list.catAct : [];
         }
 
-        function removeSubFromSubList(subject){
-            list.catSub = _.without(list.catSub, subject);
-        }
-
-        function removeObjFromObjList(object){
-            list.catObj = _.without(list.catObj, object);
-        }
-
-        function removeActFromActList(action){
-            list.catAct = _.without(list.catAct, action);
-        }
+        // function removeSubFromSubList(subject){
+        //     list.catSub = _.without(list.catSub, subject);
+        // }
+        //
+        // function removeObjFromObjList(object){
+        //     list.catObj = _.without(list.catObj, object);
+        // }
+        //
+        // function removeActFromActList(action){
+        //     list.catAct = _.without(list.catAct, action);
+        // }
 
         function updateMetaRuleCategories( event, metaRule){
 

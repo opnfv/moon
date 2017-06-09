@@ -28,13 +28,14 @@
         .module('moon')
         .controller('moonRulesListController', moonRulesListController);
 
-    moonRulesListController.$inject = [ 'NgTableParams', '$filter', 'metaRuleService', 'ruleService', 'dataService'];
+    moonRulesListController.$inject = [ '$scope', '$rootScope', 'NgTableParams', '$filter', 'metaRuleService', 'rulesService', 'dataService', '$translate', 'alertService' ];
 
-    function moonRulesListController( NgTableParams, $filter, metaRuleService, ruleService, dataService) {
+    function moonRulesListController( $scope, $rootScope, NgTableParams, $filter, metaRuleService, rulesService, dataService, $translate, alertService ) {
 
         var list = this;
 
         list.rules = [];
+        list.editMode = $scope.list.editMode;
 
         list.loadingRules = true;
 
@@ -43,6 +44,7 @@
         list.getRules = getRules;
         list.hasRules = hasRules;
         list.refreshRules = refreshRules;
+        list.deleteRules = deleteRules;
 
         list.getMetaRuleFromRule = getMetaRuleFromRule;
         list.getCategoryFromRuleIndex = getCategoryFromRuleIndex;
@@ -55,41 +57,40 @@
 
         function activate(){
 
-
             newRulesTable();
 
             manageRules();
+
         }
 
+        var rootListeners = {
 
+            'event:createRulesFromDataRulesSuccess': $rootScope.$on('event:createRulesFromDataRulesSuccess', addRulesToList)
+
+        };
+
+        _.each(rootListeners, function(unbind){
+            $scope.$on('$destroy', rootListeners[unbind]);
+        });
 
         function manageRules(){
 
-            ruleService.findAllFromPolicyWithCallback(list.policy.id, function(data){
-
-                console.log('rules');
-                console.log(data);
+            rulesService.findAllFromPolicyWithCallback(list.policy.id, function(data){
 
                 list.rules = data;
                 list.loadingRules = false;
 
                 refreshRules();
+
             });
         }
-
-
-
-
 
         function newRulesTable() {
 
             list.table = new NgTableParams({
 
                 page: 1,            // show first page
-                count: 10,          // count per page
-                sorting: {
-                    name: 'asc' // initial sorting
-                }
+                count: 10          // count per page
 
             }, {
 
@@ -134,7 +135,12 @@
 
 
         /**
-         * Prerequisite : meta Rule  should be completely loaded
+         * Prerequisite : meta Rule must be completely loader
+         * Depending on the meta_rule, the rule array will be filled by subject(s),  object(s) or an action(s)
+         * the only way to know if rule[i] contains a subject/object/action is to check
+         * how many subject/object/action are associated to a MetaRule
+         * For example if the associated MetaRule contains 2 subjects, 1 object and 2 actions
+         * then the 2 first elements of rule array are 2 subject, the third one will be an object, and the 2 last will be action
          * @param index
          * @param rule
          */
@@ -145,7 +151,7 @@
                 rule.rule_value = Array.apply(null, new Array(rule.rule.length)).map(function(){
                     return {
                         category: {}
-                    }
+                    };
                 });
             }
 
@@ -200,10 +206,11 @@
                     rule.rule_value[index].callCategoryInProgress = false;
                     rule.rule_value[index].category = {
                         name : 'ERROR'
-                    }
+                    };
                 }
 
             }
+
             // if the call is in progress return false
             return false;
         }
@@ -220,7 +227,7 @@
 
             var ind = index + 1;
 
-            return  rule.meta_rule.subject_categories.length < ind && ind <=  ( rule.meta_rule.object_categories.length + rule.meta_rule.subject_categories.length );
+            return  rule.meta_rule.subject_categories.length < ind && ind <= ( rule.meta_rule.object_categories.length + rule.meta_rule.subject_categories.length );
 
         }
 
@@ -240,7 +247,6 @@
             return list.getRules().length > 0;
         }
 
-
         /**
          * Refresh the table
          */
@@ -249,6 +255,48 @@
             list.table.reload();
         }
 
+        function addRulesToList(event, rules){
+            list.rules.push(rules);
+            refreshRules();
+        }
+
+        /**
+         * Delete
+         */
+        function deleteRules(rules){
+
+            rules.loader = true;
+
+            rulesService.delete(rules.id, list.policy.id, deleteRulesSuccess, deleteRulesError );
+
+            function deleteRulesSuccess(){
+
+                $translate('moon.policy.rules.edit.action.add.delete.success').then( function(translatedValue) {
+                    alertService.alertSuccess(translatedValue);
+                });
+
+                removeRulesFromList(rules);
+                refreshRules();
+
+                rules.loader = false;
+
+            }
+
+            function deleteRulesError(reason){
+
+                $translate('moon.policy.rules.edit.action.add.delete.success', {reason: reason.message}).then( function(translatedValue) {
+                    alertService.alertError(translatedValue);
+                });
+
+                rules.loader = false;
+
+            }
+
+        }
+
+        function removeRulesFromList(rules){
+            list.rules = _.without(list.rules, rules);
+        }
     }
 
 })();

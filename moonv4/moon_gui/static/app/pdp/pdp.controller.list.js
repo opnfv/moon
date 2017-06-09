@@ -15,7 +15,7 @@
 		'$scope',
 		'$filter',
 		'$modal',
-		'ngTableParams',
+		'NgTableParams',
 		'pdps',
 		'projectService'];
 
@@ -23,7 +23,7 @@
 							   $scope,
 							   $filter,
 							   $modal,
-							   ngTableParams,
+							   NgTableParams,
 							   pdps,
 							   projectService) {
 		
@@ -79,11 +79,11 @@
 				'event:pdpDeletedError': $rootScope.$on('event:pdpDeletedError', pdpDeletedError),
 				
 		};
-		
-		for (var unbind in rootListeners) {
-			  $scope.$on('$destroy', rootListeners[unbind]);
-		}
-		
+
+		_.each(rootListeners, function(unbind){
+            $scope.$on('$destroy', rootListeners[unbind]);
+        });
+
 		/*
 		 * 
 		 */
@@ -189,13 +189,10 @@
 		 */
 		function newPDPsTable() {
 			
-			list.table = new ngTableParams({
+			list.table = new NgTableParams({
 			    
 				page: 1,            // show first page
 				count: 10,          // count per page
-				sorting: {
-                    name: 'asc' // initial sorting
-				}
 	   	
 			}, {
 		    	

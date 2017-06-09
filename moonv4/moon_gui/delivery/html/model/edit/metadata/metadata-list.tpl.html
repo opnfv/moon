@@ -1,31 +1,34 @@
-<div><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.subject.title">List of associated Subject Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.id">Id</th><th data-translate="moon.model.metadata.table.name">Name</th><th data-translate="moon.model.metadata.table.description">Description</th><th ng-if="list.editMode" data-translate="moon.model.metadata.table.action.title"></th></tr></thead><moon-loader ng-if="list.loadingCatSub"></moon-loader><tbody ng-if="!list.loadingCatSub && list.getSubjectCategories().length > 0"><tr ng-repeat="(key, value) in list.catSub"><td ng-bind="value.id"></td><td ng-bind="value.name"></td><td ng-bind="value.description"></td><td ng-if="list.editMode"><a href="" ng-if="!value.loader" ng-click="list.unMapSub(value)"><span class="glyphicon glyphicon-transfer"></span> <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span> </a><!--<div ng-if="!value.loader" class="dropdown">
+<div><!--
+    !shortDisplay allow to display more details than shortDisplay.
+    It will display panels row by row and each panels list have a table with more columns
+   --><div ng-if="!list.shortDisplay"><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.subject.title">List of associated Subject Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.id">Id</th><th data-translate="moon.model.metadata.table.name">Name</th><th data-translate="moon.model.metadata.table.description">Description</th><th ng-if="list.editMode" data-translate="moon.model.metadata.table.action.title"></th></tr></thead><moon-loader ng-if="list.loadingCatSub"></moon-loader><tbody ng-if="!list.loadingCatSub && list.getSubjectCategories().length > 0"><tr ng-repeat="(key, value) in list.catSub"><td ng-bind="value.id"></td><td ng-bind="value.name"></td><td ng-bind="value.description"></td><td ng-if="list.editMode"><a href="" ng-if="!value.loader" ng-click="list.unMapSub(value)"><span class="glyphicon glyphicon-transfer"></span> <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span> </a><!--<div ng-if="!value.loader" class="dropdown">
 
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span data-translate="moon.model.metadata.table.action.title">Actions</span>
-                                    <span class="caret"></span>
-                                </button>
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <span data-translate="moon.model.metadata.table.action.title">Actions</span>
+                                        <span class="caret"></span>
+                                    </button>
 
-                                <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu">
 
-                                    <li>
-                                        <a href="" ng-click="list.unMapSub(value)" >
-                                            <span class="glyphicon glyphicon-transfer"></span>
-                                            <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span>
-                                        </a>
-                                    </li>
+                                        <li>
+                                            <a href="" ng-click="list.unMapSub(value)" >
+                                                <span class="glyphicon glyphicon-transfer"></span>
+                                                <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span>
+                                            </a>
+                                        </li>
 
-                                    <li class="divider"></li>
+                                        <li class="divider"></li>
 
-                                    <li>
-                                        <a href="" ng-click="list.deleteSub(value)">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                            <span class="control-label" data-translate="moon.model.metadata.table.action.delete">Delete</span>
-                                        </a>
-                                    </li>
+                                        <li>
+                                            <a href="" ng-click="list.deleteSub(value)">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                                <span class="control-label" data-translate="moon.model.metadata.table.action.delete">Delete</span>
+                                            </a>
+                                        </li>
 
-                                </ul>
+                                    </ul>
 
-                            </div>--><div ng-if="value.loader"><moon-loader></moon-loader></div></td></tr></tbody><tbody ng-if="!list.loadingCatSub && list.catSub.length === 0"><tr><td data-translate="moon.model.metadata.subject.notFound">There is no Subjects</td><td></td><td></td><td ng-if="list.editMode"></td></tr></tbody></table></div></div></div><div ng-if="list.editMode" class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.subject.add.title">Add a Subject Category</h4></div><div class="panel-body"><moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfSubject"></moon-meta-data-edit></div></div><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.object.title">List associated of Object Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.id">Id</th><th data-translate="moon.model.metadata.table.name">Name</th><th data-translate="moon.model.metadata.table.description">Description</th><th ng-if="list.editMode" data-translate="moon.model.metadata.table.action.title"></th></tr></thead><moon-loader ng-if="list.loadingCatObj"></moon-loader><tbody ng-if="!list.loadingCatObj && list.catObj.length > 0"><tr ng-repeat="(key, value) in list.catObj"><td ng-bind="value.id"></td><td ng-bind="value.name"></td><td ng-bind="value.description"></td><td ng-if="list.editMode"><a href="" ng-if="!value.loader" ng-click="list.unMapObj(value)"><span class="glyphicon glyphicon-transfer"></span> <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span> </a><!--<div ng-if="!value.loader" class="dropdown">
+                                </div>--><div ng-if="value.loader"><moon-loader></moon-loader></div></td></tr></tbody><tbody ng-if="!list.loadingCatSub && list.catSub.length === 0"><tr><td data-translate="moon.model.metadata.subject.notFound">There is no Subjects</td><td></td><td></td><td ng-if="list.editMode"></td></tr></tbody></table></div></div></div><div ng-if="list.editMode" class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.subject.add.title">Add a Subject Category</h4></div><div class="panel-body"><moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfSubject"></moon-meta-data-edit></div></div><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.object.title">List associated of Object Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.id">Id</th><th data-translate="moon.model.metadata.table.name">Name</th><th data-translate="moon.model.metadata.table.description">Description</th><th ng-if="list.editMode" data-translate="moon.model.metadata.table.action.title"></th></tr></thead><moon-loader ng-if="list.loadingCatObj"></moon-loader><tbody ng-if="!list.loadingCatObj && list.catObj.length > 0"><tr ng-repeat="(key, value) in list.catObj"><td ng-bind="value.id"></td><td ng-bind="value.name"></td><td ng-bind="value.description"></td><td ng-if="list.editMode"><a href="" ng-if="!value.loader" ng-click="list.unMapObj(value)"><span class="glyphicon glyphicon-transfer"></span> <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span> </a><!--<div ng-if="!value.loader" class="dropdown">
 
                                     <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
                                         <span data-translate="moon.model.metadata.table.action.title">Actions</span>
@@ -54,29 +57,32 @@
 
                                 </div>--><div ng-if="value.loader"><moon-loader></moon-loader></div></td></tr></tbody><tbody ng-if="!list.loadingCatObj && list.catObj.length === 0"><tr><td data-translate="moon.model.metadata.object.notFound">There is no Objects</td><td></td><td></td><td ng-if="list.editMode"></td></tr></tbody></table></div></div></div><div ng-if="list.editMode" class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.object.add.title">Add an Object Category</h4></div><div class="panel-body"><moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfObject"></moon-meta-data-edit></div></div><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.action.title">List associated of Action Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.id">Id</th><th data-translate="moon.model.metadata.table.name">Name</th><th data-translate="moon.model.metadata.table.description">Description</th><th ng-if="list.editMode" data-translate="moon.model.metadata.table.action.title"></th></tr></thead><moon-loader ng-if="list.loadingCatAct"></moon-loader><tbody ng-if="!list.loadingCatAct && list.catAct.length > 0"><tr ng-repeat="(key, value) in list.catAct"><td ng-bind="value.id"></td><td ng-bind="value.name"></td><td ng-bind="value.description"></td><td ng-if="list.editMode"><a href="" ng-if="!value.loader" ng-click="list.unMapAct(value)"><span class="glyphicon glyphicon-transfer"></span> <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span> </a><!--<div ng-if="!value.loader" class="dropdown">
 
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span data-translate="moon.model.metadata.table.action.title">Actions</span>
-                                    <span class="caret"></span>
-                                </button>
+                                    <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
+                                        <span data-translate="moon.model.metadata.table.action.title">Actions</span>
+                                        <span class="caret"></span>
+                                    </button>
 
-                                <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu">
 
-                                    <li>
-                                        <a href="" ng-click="list.unMapAct(value)" >
-                                            <span class="glyphicon glyphicon-transfer"></span>
-                                            <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span>
-                                        </a>
-                                    </li>
+                                        <li>
+                                            <a href="" ng-click="list.unMapAct(value)" >
+                                                <span class="glyphicon glyphicon-transfer"></span>
+                                                <span class="control-label" data-translate="moon.model.metadata.action.remove">Remove</span>
+                                            </a>
+                                        </li>
 
-                                    <li class="divider"></li>
+                                        <li class="divider"></li>
 
-                                    <li>
-                                        <a href="" ng-click="list.deleteAct(value)">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                            <span class="control-label" data-translate="moon.model.metadata.table.action.delete">Delete</span>
-                                        </a>
-                                    </li>
+                                        <li>
+                                            <a href="" ng-click="list.deleteAct(value)">
+                                                <span class="glyphicon glyphicon-trash"></span>
+                                                <span class="control-label" data-translate="moon.model.metadata.table.action.delete">Delete</span>
+                                            </a>
+                                        </li>
 
-                                </ul>
+                                    </ul>
 
-                            </div>--><div ng-if="value.loader"><moon-loader></moon-loader></div></td></tr></tbody><tbody ng-if="!list.loadingCatAct && list.catAct.length === 0"><tr><td data-translate="moon.model.metadata.action.notFound">There is no Actions</td><td></td><td></td><td ng-if="list.editMode"></td></tr></tbody></table></div></div></div><div ng-if="list.editMode" class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.action.add.title">Add an Action Category</h4></div><div class="panel-body">.<moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfAction"></moon-meta-data-edit></div></div></div>
+                                </div>--><div ng-if="value.loader"><moon-loader></moon-loader></div></td></tr></tbody><tbody ng-if="!list.loadingCatAct && list.catAct.length === 0"><tr><td data-translate="moon.model.metadata.action.notFound">There is no Actions</td><td></td><td></td><td ng-if="list.editMode"></td></tr></tbody></table></div></div></div><div ng-if="list.editMode" class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.action.add.title">Add an Action Category</h4></div><div class="panel-body">.<moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfAction"></moon-meta-data-edit></div></div></div><!--
+       !shortDisplay allow to display less details than shortDisplay.
+       It will display 3 panels on the same row,  each panels have a table with on columns (name)
+      --><div ng-if="list.shortDisplay"><div class="row"><div class="col-md-4"><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.subject.title">List of associated Subject Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.name">Name</th></tr></thead><moon-loader ng-if="list.loadingCatSub"></moon-loader><tbody ng-if="!list.loadingCatSub && list.getSubjectCategories().length > 0"><tr ng-repeat="(key, value) in list.catSub"><td ng-bind="value.name"></td></tr></tbody><tbody ng-if="!list.loadingCatSub && list.catSub.length === 0"><tr><td data-translate="moon.model.metadata.subject.notFound">There is no Subjects</td></tr></tbody></table></div></div></div></div><div class="col-md-4"><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.object.title">List associated of Object Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.name">Name</th></tr></thead><moon-loader ng-if="list.loadingCatObj"></moon-loader><tbody ng-if="!list.loadingCatObj && list.catObj.length > 0"><tr ng-repeat="(key, value) in list.catObj"><td ng-bind="value.name"></td></tr></tbody><tbody ng-if="!list.loadingCatObj && list.catObj.length === 0"><tr><td data-translate="moon.model.metadata.object.notFound">There is no Objects</td></tr></tbody></table></div></div></div></div><div class="col-md-4"><div class="panel panel-default"><div class="panel-heading"><h4 data-translate="moon.model.metadata.action.title">List associated of Action Categories</h4></div><div class="panel-body"><div class="table-responsive"><table class="table table-striped"><thead><tr><th data-translate="moon.model.metadata.table.name">Name</th></tr></thead><moon-loader ng-if="list.loadingCatAct"></moon-loader><tbody ng-if="!list.loadingCatAct && list.catAct.length > 0"><tr ng-repeat="(key, value) in list.catAct"><td ng-bind="value.name"></td></tr></tbody><tbody ng-if="!list.loadingCatAct && list.catAct.length === 0"><tr><td data-translate="moon.model.metadata.action.notFound">There is no Actions</td></tr></tbody></table></div></div></div></div></div></div></div>

@@ -29,7 +29,7 @@
                 remove: {method: 'DELETE'}
             }),
 
-                action: $resource(REST_URI.METADATA.action + ':action_id', {}, {
+            action: $resource(REST_URI.METADATA.action + ':action_id', {}, {
                 get: {method: 'GET', isArray: false},
                 create: {method: 'POST'},
                 remove: {method: 'DELETE'}
@@ -194,9 +194,9 @@
                         callback([]);
                     }
 
-                    var promises = _(objectListId).map( function(subjectId) {
+                    var promises = _(objectListId).map( function(objectId) {
 
-                        return _self.findOneReturningPromise(subjectId);
+                        return _self.findOneReturningPromise(objectId);
 
                     });
 
@@ -249,7 +249,7 @@
 
                 findOne: function(actionId, callback){
 
-                    data.action.get({actionId: actionId}).$promise.then(function(data) {
+                    data.action.get({action_id: actionId}).$promise.then(function(data) {
 
                         callback(utilService.transformOne(data, 'action_categories'));
 
@@ -259,7 +259,7 @@
 
                 findOneReturningPromise: function(actionId){
 
-                    return data.action.get({actionId: actionId}).$promise;
+                    return data.action.get({action_id: actionId}).$promise;
 
                 },
 
@@ -297,9 +297,9 @@
                         callback([]);
                     }
 
-                    var promises = _(actionListId).map( function(subjectId) {
+                    var promises = _(actionListId).map( function(actionId) {
 
-                        return _self.findOneReturningPromise(subjectId);
+                        return _self.findOneReturningPromise(actionId);
 
                     });
 

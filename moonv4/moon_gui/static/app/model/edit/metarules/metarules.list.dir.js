@@ -59,6 +59,11 @@
         list.edit = { modal: $modal({ template: 'html/model/edit/metarules/action/metarules-edit.tpl.html', show: false }),
             showModal: showEditModal };
 
+        /*list.edit.modal.result.finally(function(){
+             console.log('CATCHING');
+        });*/
+
+
         list.map = { modal: $modal({ template: 'html/model/edit/metarules/action/mapping/metarules-map.tpl.html', show: false }),
             showModal: showMapModal };
 
@@ -223,8 +228,6 @@
                 list.unmap.modal.hide();
 
             });
-
-
 
         }
 

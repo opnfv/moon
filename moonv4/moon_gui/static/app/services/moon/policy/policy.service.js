@@ -82,7 +82,7 @@
 
             findOne: function (policyId) {
 
-                return  this.data.policy.get({policy_id: policyId}).$promise.then(function (data) {
+                return this.data.policy.get({policy_id: policyId}).$promise.then(function (data) {
 
                     return utilService.transformOne(data, 'policies');
 

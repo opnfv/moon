@@ -37,18 +37,22 @@
         }
 
         function loginSuccess() {
+
             $translate('moon.login.success').then( function(translatedValue) {
                 alertService.alertSuccess(translatedValue);
                 $state.go('moon.dashboard');
                 vm.loading = false;
             });
+
         }
 
         function loginError(reason) {
+
             $translate('moon.login.error', { errorCode: reason.status }).then( function(translatedValue) {
                 alertService.alertError(translatedValue);
                 vm.loading = false;
             });
+
         }
     }
 })();

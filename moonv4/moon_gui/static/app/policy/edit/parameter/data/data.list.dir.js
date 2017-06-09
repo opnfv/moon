@@ -28,9 +28,9 @@
         .module('moon')
         .controller('moonDataListController', moonDataListController);
 
-    moonDataListController.$inject = ['$scope', '$rootScope', 'dataService', '$translate', 'alertService', 'policyService', 'DATA_CST', 'utilService', 'metaDataService'];
+    moonDataListController.$inject = ['$scope', '$rootScope', 'dataService', '$translate', 'alertService', 'DATA_CST', 'metaDataService'];
 
-    function moonDataListController($scope, $rootScope, dataService, $translate, alertService, policyService, DATA_CST, utilService, metaDataService){
+    function moonDataListController($scope, $rootScope, dataService, $translate, alertService, DATA_CST, metaDataService){
 
         var list = this;
 
@@ -40,10 +40,6 @@
         list.typeOfSubject = DATA_CST.TYPE.SUBJECT;
         list.typeOfObject = DATA_CST.TYPE.OBJECT;
         list.typeOfAction = DATA_CST.TYPE.ACTION;
-
-        list.unMapSub = unMapSub;
-        list.unMapObj = unMapObj;
-        list.unMapAct = unMapAct;
 
         list.deleteSub = deleteSub;
         list.deleteObj = deleteObj;
@@ -69,13 +65,13 @@
 
         var rootListeners = {
 
-            'event:deleteDataFromDataAddSuccess': $rootScope.$on('event:deleteDataFromDataAddSuccess', deletePolicy)
+            'event:createDataFromDataEditSuccess': $rootScope.$on('event:createDataFromDataEditSuccess', addDataToList)
 
         };
 
-        for (var unbind in rootListeners) {
+        _.each(rootListeners, function(unbind){
             $scope.$on('$destroy', rootListeners[unbind]);
-        }
+        });
 
 
         function manageSubjects(){
@@ -84,8 +80,6 @@
 
             dataService.subject.findAllFromPolicyWithCallback(list.policy.id, function(data){
 
-                console.log('subjects');
-                console.log(data);
                 list.subjects = data;
                 list.loadingSub = false;
 
@@ -98,8 +92,6 @@
 
             dataService.object.findAllFromPolicyWithCallback(list.policy.id, function(data){
 
-                console.log('objects');
-                console.log(data);
                 list.objects = data;
                 list.loadingObj = false;
 
@@ -113,8 +105,6 @@
 
             dataService.action.findAllFromPolicyWithCallback(list.policy.id, function(data){
 
-                console.log('actions');
-                console.log(data);
                 list.actions = data;
                 list.loadingAct = false;
 
@@ -163,118 +153,6 @@
         }
 
         /**
-         * UnMap
-         */
-
-        function unMapSub(subject){
-
-            subject.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.subject_categories = _.without(policyToSend.subject_categories, subject.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                subject.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                subject.loader = false;
-
-            }
-
-        }
-
-        function unMapObj(object){
-
-            object.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.object_categories = _.without(policyToSend.object_categories, object.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                object.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                object.loader = false;
-
-            }
-
-        }
-
-        function unMapAct(action){
-
-            action.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.action_categories = _.without(policyToSend.action_categories, action.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                action.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                action.loader = false;
-
-            }
-
-        }
-
-        /**
          * Delete
          */
 
@@ -282,11 +160,11 @@
 
             subject.loader = true;
 
-            dataService.subject.delete(subject, deleteSubSuccess, deleteSubError);
+            dataService.subject.delete(subject, list.policy.id, subject.category_id, deleteSubSuccess, deleteSubError);
 
             function deleteSubSuccess(data){
 
-                $translate('moon.policy.perimeter.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
+                $translate('moon.policy.data.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
@@ -298,7 +176,7 @@
 
             function deleteSubError(reason){
 
-                $translate('moon.policy.perimeter.subject.delete.error', { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.data.subject.delete.error', { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -311,11 +189,11 @@
 
             object.loader = true;
 
-            dataService.object.delete(object, deleteObjSuccess, deleteObjError);
+            dataService.object.delete(object, list.policy.id, object.category_id, deleteObjSuccess, deleteObjError);
 
             function deleteObjSuccess(data){
 
-                $translate('moon.policy.perimeter.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
+                $translate('moon.policy.data.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
@@ -327,7 +205,7 @@
 
             function deleteObjError(reason){
 
-                $translate('moon.policy.perimeter.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.data.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -339,11 +217,11 @@
 
             action.loader = true;
 
-            dataService.action.delete(action, deleteActSuccess, deleteActError);
+            dataService.action.delete(action, list.policy.id, action.category_id, deleteActSuccess, deleteActError);
 
             function deleteActSuccess(data){
 
-                $translate('moon.policy.perimeter.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
+                $translate('moon.policy.data.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
@@ -355,7 +233,7 @@
 
             function deleteActError(reason){
 
-                $translate('moon.policy.perimeter.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.data.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -388,11 +266,25 @@
             list.actions = _.without(list.actions, action);
         }
 
-        function deletePolicy( event, policy){
+        function addDataToList( event, data, typeOfData){
 
-            list.policy = policy;
+            switch(typeOfData){
 
-            activate();
+                case DATA_CST.TYPE.SUBJECT:
+
+                    list.subjects.push(data);
+                    break;
+
+                case DATA_CST.TYPE.OBJECT:
+
+                    list.objects.push(data);
+                    break;
+
+                case DATA_CST.TYPE.ACTION:
+
+                    list.actions.push(data);
+                    break;
+            }
 
         }
 

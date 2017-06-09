@@ -61,10 +61,12 @@
          */
         function loadPolicices(refresh){
 
+            if(_.isUndefined( list.pdp.security_pipeline)){
+                return;
+            }
             list.policiesId = list.pdp.security_pipeline;
 
             policyService.findSomeWithCallback(list.policiesId, function(policies){
-
 
                 list.policies = policies;
 
@@ -114,10 +116,7 @@
             list.table = new NgTableParams({
 
                 page: 1,            // show first page
-                count: 10,          // count per page
-                sorting: {
-                    name: 'asc' // initial sorting
-                }
+                count: 10         // count per page
 
             }, {
 

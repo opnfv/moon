@@ -115,7 +115,7 @@
 
                     return utilService.transformOne(data, 'meta_rules');
 
-                })
+                });
 
             },
 
@@ -141,7 +141,7 @@
 
                     return metaRule;
 
-                })
+                });
 
             },
 

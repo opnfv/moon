@@ -15,11 +15,10 @@
 
                     <thead>
                         <tr>
-                            <th data-translate="moon.policy.perimeter.table.partner.id">Id</th>
                             <th data-translate="moon.policy.perimeter.table.name">Name</th>
                             <th data-translate="moon.policy.perimeter.table.description">Description</th>
                             <th data-translate="moon.policy.perimeter.table.email">Email</th>
-                            <!--<th data-translate="moon.policy.perimeter.table.action.title"></th>-->
+                            <th data-translate="moon.policy.perimeter.table.action.title"></th>
                         </tr>
                     </thead>
 
@@ -27,40 +26,15 @@
 
                     <tbody ng-if="!list.loadingSub && list.getSubjects().length > 0">
                     <tr ng-repeat="(key, value) in list.subjects">
-                        <td ng-bind="value.partner_id"></td>
                         <td ng-bind="value.name"></td>
                         <td ng-bind="value.description"></td>
                         <td ng-bind="value.email"></td>
-                        <!--<td>
+                        <td>
 
-                            <div class="dropdown">
-
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span data-translate="moon.policy.perimeter.table.action.title">Actions</span>
-                                    <span class="caret"></span>
-                                </button>
-
-                                <ul class="dropdown-menu">
-
-                                    <li>
-                                        <a href="" ng-click="list.unMapSub(value)" >
-                                            <span class="glyphicon glyphicon-transfer"></span>
-                                            <span class="control-label" data-translate="moon.model.metarules.action.unmap">Unmap</span>
-                                        </a>
-                                    </li>
-
-                                    <li class="divider"></li>
-
-                                    <li>
-                                        <a href="" ng-click="list.deleteSub(value)">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                            <span class="control-label" data-translate="moon.policy.perimeter.table.action.delete">Delete</span>
-                                        </a>
-                                    </li>
-
-                                </ul>
-
-                            </div>
+                            <a href="" ng-if="!value.loader" ng-click="list.unMapSub(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.perimeter.table.action.unmap">Unmap</span>
+                            </a>
 
                             <div ng-if="value.loader">
 
@@ -68,7 +42,7 @@
 
                             </div>
 
-                        </td>-->
+                        </td>
 
                     </tr>
                     </tbody>
@@ -77,7 +51,6 @@
                     <tbody ng-if="!list.loadingSub && list.getSubjects().length === 0">
                     <tr>
                         <td data-translate="moon.policy.perimeter.subject.notFound">There is no Subjects</td>
-                        <td></td>
                         <td></td>
                         <td></td>
                         <td></td>
@@ -102,11 +75,12 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfSubject"></moon-meta-data-edit>
+            <moon-perimeter-edit policy="list.policy" perimeter-type="list.typeOfSubject"></moon-perimeter-edit>
 
         </div>
 
     </div>
+
 
     <div class="panel panel-default">
 
@@ -124,10 +98,9 @@
 
                     <thead>
                         <tr>
-                            <th data-translate="moon.policy.perimeter.table.partner.id">Id</th>
                             <th data-translate="moon.policy.perimeter.table.name">Name</th>
                             <th data-translate="moon.policy.perimeter.table.description">Description</th>
-                            <!--<th data-translate="moon.policy.perimeter.table.action.title"></th>-->
+                            <th data-translate="moon.policy.perimeter.table.action.title"></th>
                         </tr>
                     </thead>
 
@@ -135,39 +108,14 @@
 
                     <tbody ng-if="!list.loadingObj && list.getObjects().length > 0">
                     <tr ng-repeat="(key, value) in list.objects">
-                        <td ng-bind="value.partner_id"></td>
                         <td ng-bind="value.name"></td>
                         <td ng-bind="value.description"></td>
-                        <!--<td>
+                        <td>
 
-                            <div class="dropdown">
-
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span data-translate="moon.policy.perimeter.table.action.title">Actions</span>
-                                    <span class="caret"></span>
-                                </button>
-
-                                <ul class="dropdown-menu">
-
-                                    <li>
-                                        <a href="" ng-click="list.unMapObj(value)" >
-                                            <span class="glyphicon glyphicon-transfer"></span>
-                                            <span class="control-label" data-translate="moon.model.metarules.action.unmap">Unmap</span>
-                                        </a>
-                                    </li>
-
-                                    <li class="divider"></li>
-
-                                    <li>
-                                        <a href="" ng-click="list.deleteObj(value)">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                            <span class="control-label" data-translate="moon.policy.perimeter.table.action.delete">Delete</span>
-                                        </a>
-                                    </li>
-
-                                </ul>
-
-                            </div>
+                            <a href="" ng-if="!value.loader" ng-click="list.unMapObj(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.perimeter.table.action.unmap">Unmap</span>
+                            </a>
 
                             <div ng-if="value.loader">
 
@@ -176,13 +124,12 @@
                             </div>
 
                         </td>
-                    </tr>-->
+                    </tr>
                     </tbody>
 
                     <tbody ng-if="!list.loadingObj && list.getObjects().length === 0">
                     <tr>
                         <td data-translate="moon.policy.perimeter.object.notFound">There is no Objects</td>
-                        <td></td>
                         <td></td>
                         <td></td>
                     </tr>
@@ -206,7 +153,7 @@
 
         <div class="panel-body">
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfObject"></moon-meta-data-edit>
+            <moon-perimeter-edit policy="list.policy" perimeter-type="list.typeOfObject"></moon-perimeter-edit>
 
         </div>
 
@@ -228,10 +175,9 @@
 
                     <thead>
                         <tr>
-                            <th data-translate="moon.policy.perimeter.table.partner.id">Id</th>
                             <th data-translate="moon.policy.perimeter.table.name">Name</th>
                             <th data-translate="moon.policy.perimeter.table.description">Description</th>
-                            <!--<th data-translate="moon.policy.perimeter.table.action.title"></th>-->
+                            <th data-translate="moon.policy.perimeter.table.action.title"></th>
                         </tr>
                     </thead>
 
@@ -239,39 +185,14 @@
 
                     <tbody ng-if="!list.loadingAct && list.getActions().length > 0">
                     <tr ng-repeat="(key, value) in list.actions">
-                        <td ng-bind="value.partner_id"></td>
                         <td ng-bind="value.name"></td>
                         <td ng-bind="value.description"></td>
-                        <!--<td>
+                        <td>
 
-                            <div class="dropdown">
-
-                                <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">
-                                    <span data-translate="moon.policy.perimeter.table.action.title">Actions</span>
-                                    <span class="caret"></span>
-                                </button>
-
-                                <ul class="dropdown-menu">
-
-                                    <li>
-                                        <a href="" ng-click="list.unMapAct(value)" >
-                                            <span class="glyphicon glyphicon-transfer"></span>
-                                            <span class="control-label" data-translate="moon.model.metarules.action.unmap">Unmap</span>
-                                        </a>
-                                    </li>
-
-                                    <li class="divider"></li>
-
-                                    <li>
-                                        <a href="" ng-click="list.deleteAct(value)">
-                                            <span class="glyphicon glyphicon-trash"></span>
-                                            <span class="control-label" data-translate="moon.policy.perimeter.table.action.delete">Delete</span>
-                                        </a>
-                                    </li>
-
-                                </ul>
-
-                            </div>
+                            <a href="" ng-if="!value.loader" ng-click="list.unMapAct(value)" >
+                                <span class="glyphicon glyphicon-transfer"></span>
+                                <span class="control-label" data-translate="moon.policy.perimeter.table.action.unmap">Unmap</span>
+                            </a>
 
                             <div ng-if="value.loader">
 
@@ -280,13 +201,12 @@
                             </div>
 
                         </td>
-                    </tr>-->
+                    </tr>
                     </tbody>
 
                     <tbody ng-if="!list.loadingAct && list.getActions().length === 0">
                     <tr>
                         <td data-translate="moon.policy.perimeter.action.notFound">There is no Actions</td>
-                        <td></td>
                         <td></td>
                         <td></td>
                     </tr>
@@ -311,7 +231,7 @@
 
         <div class="panel-body">.
 
-            <moon-meta-data-edit meta-rule="list.metaRule" meta-data-type="list.typeOfAction"></moon-meta-data-edit>
+            <moon-perimeter-edit policy="list.policy" perimeter-type="list.typeOfAction"></moon-perimeter-edit>
 
         </div>
 

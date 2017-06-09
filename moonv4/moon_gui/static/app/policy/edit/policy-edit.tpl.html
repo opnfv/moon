@@ -87,7 +87,7 @@
 
         <div class="panel-body" ng-if="edit.showPerimeters">
 
-            <moon-perimeter-list edit-mode="false" policy="edit.policy" ></moon-perimeter-list>
+            <moon-perimeter-list edit-mode="true" policy="edit.policy" ></moon-perimeter-list>
 
         </div>
 
@@ -120,9 +120,9 @@
 
         </div>
 
-        <div class="panel-body" ng-if="edit.showData">
+        <div class="panel-body" ng-if="edit.showData" > <!-- -->
 
-            <moon-data-list edit-mode="false" policy="edit.policy" ></moon-data-list>
+            <moon-data-list edit-mode="true" policy="edit.policy" ></moon-data-list>
 
         </div>
 
@@ -157,7 +157,7 @@
 
         <div class="panel-body" ng-if="edit.showRules">
 
-            <moon-rules-list edit-mode="false" policy="edit.policy" ></moon-rules-list>
+            <moon-rules-list edit-mode="true" policy="edit.policy" ></moon-rules-list>
 
         </div>
 
@@ -193,7 +193,7 @@
 
         <div class="panel-body" ng-if="edit.showAssignments">
 
-            <moon-assignments-list edit-mode="false" policy="edit.policy" ></moon-assignments-list>
+            <moon-assignments-list edit-mode="true" policy="edit.policy" ></moon-assignments-list>
 
         </div>
 

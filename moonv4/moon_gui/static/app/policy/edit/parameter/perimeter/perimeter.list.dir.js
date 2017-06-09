@@ -22,15 +22,16 @@
             restrict : 'E',
             replace : true
         };
+
     }
 
     angular
         .module('moon')
         .controller('moonPerimeterListController', moonPerimeterListController);
 
-    moonPerimeterListController.$inject = ['$scope', '$rootScope', 'perimeterService', '$translate', 'alertService', 'policyService', 'PERIMETER_CST', 'utilService'];
+    moonPerimeterListController.$inject = ['$scope', '$rootScope', 'perimeterService', '$translate', 'alertService', 'PERIMETER_CST'];
 
-    function moonPerimeterListController($scope, $rootScope, perimeterService, $translate, alertService, policyService, PERIMETER_CST, utilService){
+    function moonPerimeterListController($scope, $rootScope, perimeterService, $translate, alertService, PERIMETER_CST){
 
         var list = this;
 
@@ -44,10 +45,6 @@
         list.unMapSub = unMapSub;
         list.unMapObj = unMapObj;
         list.unMapAct = unMapAct;
-
-        list.deleteSub = deleteSub;
-        list.deleteObj = deleteObj;
-        list.deleteAct = deleteAct;
 
         list.getSubjects = getSubjects;
         list.getObjects = getObjects;
@@ -67,13 +64,14 @@
 
         var rootListeners = {
 
-            'event:deletePerimeterFromPerimeterAddSuccess': $rootScope.$on('event:deletePerimeterFromPerimeterAddSuccess', deletePolicy)
+            'event:deletePerimeterFromPerimeterAddSuccess': $rootScope.$on('event:deletePerimeterFromPerimeterAddSuccess', deletePolicy),
+            'event:createAssignmentsFromAssignmentsEditSuccess': $rootScope.$on('event:createAssignmentsFromAssignmentsEditSuccess', addAssignmentsToPolicy)
 
         };
 
-        for (var unbind in rootListeners) {
+        _.each(rootListeners, function(unbind){
             $scope.$on('$destroy', rootListeners[unbind]);
-        }
+        });
 
 
         function manageSubjects(){
@@ -94,8 +92,6 @@
 
             perimeterService.object.findAllFromPolicyWithCallback(list.policy.id, function(perimeters){
 
-                console.log('objects');
-                console.log(perimeters);
                 list.objects = perimeters;
                 list.loadingObj = false;
 
@@ -109,8 +105,6 @@
 
             perimeterService.action.findAllFromPolicyWithCallback(list.policy.id, function(perimeters){
 
-                console.log('actions');
-                console.log(perimeters);
                 list.actions = perimeters;
                 list.loadingAct = false;
 
@@ -118,207 +112,113 @@
 
         }
 
-
         /**
          * UnMap
          */
 
-        function unMapSub(subject){
+        function unMapSub(perimeter){
 
-            subject.loader = true;
+            perimeter.policy_list = _.without(perimeter.policy_list, list.policy.id);
 
-            var policyToSend = angular.copy(list.policy);
+            perimeter.loader = true;
 
-            policyToSend.subject_categories = _.without(policyToSend.subject_categories, subject.id);
+            var perimeterToSend = angular.copy(perimeter);
 
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
+            perimeterService.subject.unMapPerimeterFromPolicy(list.policy.id , perimeter.id, updatePerimeterSuccess, updatePerimeterError);
 
-            function updatePolicySuccess(data){
+            function updatePerimeterSuccess(data){
 
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.success', { perimeterName: perimeterToSend.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.policy = policyService.findPerimeterFromPolicy(utilService.transformOne(data, 'meta_rules'));
+                $scope.$emit('event:unMapPerimeterFromPerimeterList', perimeter, PERIMETER_CST.TYPE.SUBJECT);
 
                 activate();
 
-                subject.loader = false;
-
+                perimeter.loader = false;
             }
 
-            function updatePolicyError(reason){
+            function updatePerimeterError(reason){
 
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.error', { perimeterName: perimeter.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
-                subject.loader = false;
+                perimeter.loader = false;
 
             }
 
         }
 
-        function unMapObj(object){
+        function unMapObj(perimeter){
 
-            object.loader = true;
+            perimeter.policy_list = _.without(perimeter.policy_list, list.policy.id);
 
-            var policyToSend = angular.copy(list.policy);
+            perimeter.loader = true;
 
-            policyToSend.object_categories = _.without(policyToSend.object_categories, object.id);
+            var perimeterToSend = angular.copy(perimeter);
 
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
+            perimeterService.object.unMapPerimeterFromPolicy(list.policy.id , perimeter.id, updatePerimeterSuccess, updatePerimeterError);
 
-            function updatePolicySuccess(data){
+            function updatePerimeterSuccess(data){
 
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.success', { perimeterName: perimeterToSend.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.policy = policyService.findPerimeterFromPolicy(utilService.transformOne(data, 'meta_rules'));
+                $scope.$emit('event:unMapPerimeterFromPerimeterList', perimeter, PERIMETER_CST.TYPE.OBJECT);
 
                 activate();
 
-                object.loader = false;
-
+                perimeter.loader = false;
             }
 
-            function updatePolicyError(reason){
+            function updatePerimeterError(reason){
 
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.error', { perimeterName: perimeter.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
-                object.loader = false;
+                perimeter.loader = false;
 
             }
 
         }
 
-        function unMapAct(action){
+        function unMapAct(perimeter){
 
-            action.loader = true;
+            perimeter.policy_list = _.without(perimeter.policy_list, list.policy.id);
 
-            var policyToSend = angular.copy(list.policy);
+            perimeter.loader = true;
 
-            policyToSend.action_categories = _.without(policyToSend.action_categories, action.id);
+            var perimeterToSend = angular.copy(perimeter);
 
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
+            perimeterService.action.unMapPerimeterFromPolicy(list.policy.id , perimeter.id, updatePerimeterSuccess, updatePerimeterError);
 
-            function updatePolicySuccess(data){
+            function updatePerimeterSuccess(data){
 
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.success', { perimeterName: perimeterToSend.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.policy = policyService.findPerimeterFromPolicy(utilService.transformOne(data, 'meta_rules'));
+                $scope.$emit('event:unMapPerimeterFromPerimeterList', perimeter, PERIMETER_CST.TYPE.ACTION);
 
                 activate();
 
-                action.loader = false;
-
+                perimeter.loader = false;
             }
 
-            function updatePolicyError(reason){
+            function updatePerimeterError(reason){
 
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.perimeter.update.error', { perimeterName: perimeter.name, reason: reason.message}).then( function(translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
-                action.loader = false;
+                perimeter.loader = false;
 
             }
 
-        }
-
-        /**
-         * Delete
-         */
-
-        function deleteSub(subject){
-
-            subject.loader = true;
-
-            perimeterService.subject.delete(subject, deleteSubSuccess, deleteSubError);
-
-            function deleteSubSuccess(data){
-
-                $translate('moon.policy.perimeter.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeSubFromSubList(subject);
-
-                subject.loader = false;
-
-            }
-
-            function deleteSubError(reason){
-
-                $translate('moon.policy.perimeter.subject.delete.error', { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                subject.loader = false;
-
-            }
-        }
-
-        function deleteObj(object){
-
-            object.loader = true;
-
-            perimeterService.object.delete(object, deleteObjSuccess, deleteObjError);
-
-            function deleteObjSuccess(data){
-
-                $translate('moon.policy.perimeter.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeObjFromObjList(object);
-
-                object.loader = false;
-
-            }
-
-            function deleteObjError(reason){
-
-                $translate('moon.policy.perimeter.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                object.loader = false;
-            }
-        }
-
-        function deleteAct(action){
-
-            action.loader = true;
-
-            perimeterService.action.delete(action, deleteActSuccess, deleteActError);
-
-            function deleteActSuccess(data){
-
-                $translate('moon.policy.perimeter.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                removeActFromActList(action);
-
-                action.loader = false;
-
-            }
-
-            function deleteActError(reason){
-
-                $translate('moon.policy.perimeter.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                action.loader = false;
-
-            }
         }
 
         function getSubjects(){
@@ -350,6 +250,32 @@
             list.policy = policy;
 
             activate();
+
+        }
+
+        function addAssignmentsToPolicy( event, assignments, type){
+
+            switch (type) {
+
+                case PERIMETER_CST.TYPE.SUBJECT:
+
+                    list.subjects.push(assignments);
+                    break;
+
+                case PERIMETER_CST.TYPE.OBJECT:
+
+                    list.objects.push(assignments);
+                    break;
+
+                case PERIMETER_CST.TYPE.ACTION:
+
+                    list.actions.push(assignments);
+                    break;
+
+                default :
+                    break;
+
+            }
 
         }
 

@@ -12,6 +12,7 @@ It is designed to provide a running GUI of the Moon platform instance.
 -   `sudo apt-get install nodejs nodejs-legacy`
 -   `sudo npm install --global gulp-cli`
 
+
 ### Install all packages 
 -   `cd  $MOON_HOME/moon_gui`
 -   `sudo npm install`
@@ -25,25 +26,27 @@ It is designed to provide a running GUI of the Moon platform instance.
 
 ### Build the delivery package
 -   `gulp delivery`
+### Launch the Web Server
 -   `gulp webServerDelivery`
 
 ### Development
 
-During the development it is possible to use the following commands : 
+During the development it is possible to use following commands :
 -   `gulp build`
+Launch a Web Server
 -   `gulp webServer`
-- Gulp webServer will refresh the browse when a file related to the application is changed
+- Gulp webServer will refresh the browser when a file related to the application changed
   
 
 ### Constants
 It is possible to change some constants (API endpoints)
--   `cd  $MOON_HOME/moon_gui/static/app/moon.constants.js`
+- $MOON_HOME/moon_gui/static/app/moon.constants.js
 
 
 ### CORS
 
 The GUI need to connect itself to Keystone and Moon.
-Opening CORS into them to the GUI Web Server is required.
+Opening CORS to the GUI WebServer is required.
 
 In order to modify Keystone :
 

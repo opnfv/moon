@@ -75,8 +75,8 @@ gulp.task('inject', function () {
 
     // Modules js
     var moduleJsStream = gulp.src(paths.modules.map( function(item){return 'node_modules/' + item;}))
-        //.pipe(plugins.concat('modules.js'))
-        //.pipe(plugins.uglify())
+        .pipe(plugins.concat('modules.js'))
+        .pipe(plugins.uglify())
         .pipe(gulp.dest(paths.build + 'js/'));
 
     //Version

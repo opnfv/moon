@@ -1,4 +1,4 @@
-(function() {
+(function () {
 
     'use strict';
 
@@ -11,16 +11,16 @@
     function moonAssignmentsList() {
 
         return {
-            templateUrl : 'html/policy/edit/parameter/assignments/assignments-list.tpl.html',
-            bindToController : true,
-            controller : moonAssignmentsListController,
-            controllerAs : 'list',
-            scope : {
+            templateUrl: 'html/policy/edit/parameter/assignments/assignments-list.tpl.html',
+            bindToController: true,
+            controller: moonAssignmentsListController,
+            controllerAs: 'list',
+            scope: {
                 policy: '=',
-                editMode : '='
+                editMode: '='
             },
-            restrict : 'E',
-            replace : true
+            restrict: 'E',
+            replace: true
         };
     }
 
@@ -28,9 +28,11 @@
         .module('moon')
         .controller('moonAssignmentsListController', moonAssignmentsListController);
 
-    moonAssignmentsListController.$inject = ['$scope', '$rootScope', 'assignmentService', '$translate', 'alertService', 'policyService', 'ASSIGNMENTS_CST', 'utilService', 'metaDataService', 'perimeterService', 'dataService'];
+    moonAssignmentsListController.$inject = ['$scope', '$rootScope', 'assignmentsService', '$translate', 'alertService',
+        'policyService', 'ASSIGNMENTS_CST', 'utilService', 'metaDataService', 'perimeterService', 'dataService'];
 
-    function moonAssignmentsListController($scope, $rootScope, assignmentService, $translate, alertService, policyService, ASSIGNMENTS_CST, utilService, metaDataService, perimeterService, dataService){
+    function moonAssignmentsListController($scope, $rootScope, assignmentsService, $translate, alertService,
+                                           policyService, ASSIGNMENTS_CST, utilService, metaDataService, perimeterService, dataService) {
 
         var list = this;
 
@@ -40,10 +42,6 @@
         list.typeOfSubject = ASSIGNMENTS_CST.TYPE.SUBJECT;
         list.typeOfObject = ASSIGNMENTS_CST.TYPE.OBJECT;
         list.typeOfAction = ASSIGNMENTS_CST.TYPE.ACTION;
-
-        list.unMapSub = unMapSub;
-        list.unMapObj = unMapObj;
-        list.unMapAct = unMapAct;
 
         list.deleteSub = deleteSub;
         list.deleteObj = deleteObj;
@@ -59,7 +57,7 @@
 
         activate();
 
-        function activate(){
+        function activate() {
 
             manageSubjects();
 
@@ -71,37 +69,32 @@
 
         var rootListeners = {
 
-            'event:deleteDataFromDataAddSuccess': $rootScope.$on('event:deleteDataFromDataAddSuccess', deletePolicy)
+            'event:createAssignmentsFromAssignmentsEditSuccess': $rootScope.$on('event:createAssignmentsFromAssignmentsEditSuccess', updateList)
 
         };
 
-        for (var unbind in rootListeners) {
+        _.each(rootListeners, function(unbind){
             $scope.$on('$destroy', rootListeners[unbind]);
-        }
+        });
 
-
-        function manageSubjects(){
+        function manageSubjects() {
 
             list.loadingSub = true;
 
-            assignmentService.subject.findAllFromPolicyWithCallback(list.policy.id, function(data){
+            assignmentsService.subject.findAllFromPolicyWithCallback(list.policy.id, function (data) {
 
-                console.log('subjects');
-                console.log(data);
                 list.subjects = data;
                 list.loadingSub = false;
 
             });
         }
 
-        function manageObjects(){
+        function manageObjects() {
 
             list.loadingObj = true;
 
-            assignmentService.object.findAllFromPolicyWithCallback(list.policy.id, function(data){
+            assignmentsService.object.findAllFromPolicyWithCallback(list.policy.id, function (data) {
 
-                console.log('objects');
-                console.log(data);
                 list.objects = data;
                 list.loadingObj = false;
 
@@ -109,14 +102,12 @@
 
         }
 
-        function manageActions(){
+        function manageActions() {
 
             list.loadingAct = true;
 
-            assignmentService.action.findAllFromPolicyWithCallback(list.policy.id, function(data){
+            assignmentsService.action.findAllFromPolicyWithCallback(list.policy.id, function (data) {
 
-                console.log('actions');
-                console.log(data);
                 list.actions = data;
                 list.loadingAct = false;
 
@@ -126,16 +117,16 @@
 
         function getPerimeterFromAssignment(assignment, type) {
 
-            if(_.has(assignment, 'perimeter')){
+            if (_.has(assignment, 'perimeter')) {
                 return assignment.perimeter;
             }
 
             // if the call has not been made
-            if(!_.has(assignment, 'callPerimeterInProgress')){
+            if (!_.has(assignment, 'callPerimeterInProgress')) {
 
                 assignment.callPerimeterInProgress = true;
 
-                switch(type){
+                switch (type) {
 
                     case ASSIGNMENTS_CST.TYPE.SUBJECT:
                         perimeterService.subject.findOneFromPolicyWithCallback(list.policy.id, assignment.subject_id, setPerimeterToAssignment);
@@ -156,7 +147,7 @@
             // if the call is in progress return false
             return false;
 
-            function setPerimeterToAssignment(perimeter){
+            function setPerimeterToAssignment(perimeter) {
 
                 assignment.callPerimeterInProgress = false;
                 assignment.perimeter = perimeter;
@@ -166,16 +157,16 @@
 
         function getCategoryFromAssignment(data, type) {
 
-            if(_.has(data, 'category')){
+            if (_.has(data, 'category')) {
                 return data.category;
             }
 
             // if the call has not been made
-            if(!_.has(data, 'callCategoryInProgress')){
+            if (!_.has(data, 'callCategoryInProgress')) {
 
                 data.callCategoryInProgress = true;
 
-                switch(type){
+                switch (type) {
 
                     case ASSIGNMENTS_CST.TYPE.SUBJECT:
                         metaDataService.subject.findOne(data.subject_cat_id, setCategoryToData);
@@ -196,7 +187,7 @@
             // if the call is in progress return false
             return false;
 
-            function setCategoryToData(category){
+            function setCategoryToData(category) {
 
                 data.callCategoryInProgress = false;
                 data.category = category;
@@ -205,32 +196,31 @@
         }
 
         /**
-         * Prerequisite : meta Rule  should be completely loaded
          * @param index
          * @param assignment
          * @param type
          */
-        function getDataFromAssignmentsIndex(index, assignment, type){
+        function getDataFromAssignmentsIndex(index, assignment, type) {
 
-            if(!_.has(assignment, 'assignments_value')){
+            if (!_.has(assignment, 'assignments_value')) {
                 // setting an array which will contains every value of the category
-                assignment.assignments_value = Array.apply(null, new Array(assignment.assignments.length)).map(function(){
+                assignment.assignments_value = Array.apply(null, new Array(assignment.assignments.length)).map(function () {
                     return {
                         data: {}
-                    }
+                    };
                 });
             }
 
-            if(_.has(assignment.assignments_value[index], 'callDataInProgress') && !assignment.assignments_value[index].callDataInProgress ){
+            if (_.has(assignment.assignments_value[index], 'callDataInProgress') && !assignment.assignments_value[index].callDataInProgress) {
                 return assignment.assignments_value[index].data;
             }
 
             // if the call has not been made
-            if(!_.has(assignment.assignments_value[index], 'callDataInProgress')){
+            if (!_.has(assignment.assignments_value[index], 'callDataInProgress')) {
 
                 assignment.assignments_value[index].callDataInProgress = true;
 
-                switch(type){
+                switch (type) {
 
                     case ASSIGNMENTS_CST.TYPE.SUBJECT:
                         dataService.subject.data.findOne(list.policy.id, assignment.category_id, assignment.assignments[index], setDataToAssignment);
@@ -251,7 +241,7 @@
             // if the call is in progress return false
             return false;
 
-            function setDataToAssignment(data){
+            function setDataToAssignment(data) {
 
                 assignment.assignments_value[index].callDataInProgress = false;
                 assignment.assignments_value[index].data = data;
@@ -259,145 +249,34 @@
             }
         }
 
-
-
-        /**
-         * UnMap
-         */
-
-        function unMapSub(subject){
-
-            subject.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.subject_categories = _.without(policyToSend.subject_categories, subject.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                subject.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                subject.loader = false;
-
-            }
-
-        }
-
-        function unMapObj(object){
-
-            object.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.object_categories = _.without(policyToSend.object_categories, object.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                object.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                object.loader = false;
-
-            }
-
-        }
-
-        function unMapAct(action){
-
-            action.loader = true;
-
-            var policyToSend = angular.copy(list.policy);
-
-            policyToSend.action_categories = _.without(policyToSend.action_categories, action.id);
-
-            policyService.update(policyToSend, updatePolicySuccess, updatePolicyError);
-
-            function updatePolicySuccess(data){
-
-                $translate('moon.policy.metarules.update.success', { policyName: list.policy.name }).then( function(translatedValue) {
-                    alertService.alertSuccess(translatedValue);
-                });
-
-                list.policy = policyService.findDataFromPolicy(utilService.transformOne(data, 'meta_rules'));
-
-                activate();
-
-                action.loader = false;
-
-            }
-
-            function updatePolicyError(reason){
-
-                $translate('moon.policy.metarules.update.error', { policyName: list.policy.name, reason: reason.message}).then( function(translatedValue) {
-                    alertService.alertError(translatedValue);
-                });
-
-                action.loader = false;
-
-            }
-
-        }
-
         /**
          * Delete
          */
 
-        function deleteSub(subject){
+        function deleteSub(subject, dataId) {
 
             subject.loader = true;
 
-            assignmentService.subject.delete(subject, deleteSubSuccess, deleteSubError);
+            assignmentsService.subject.delete(list.policy.id, subject.subject_id, subject.subject_cat_id, dataId, deleteSubSuccess, deleteSubError);
 
-            function deleteSubSuccess(data){
+            function deleteSubSuccess(data) {
 
-                $translate('moon.policy.perimeter.subject.delete.success', { subjectName: subject.name }).then( function(translatedValue) {
+                $translate('moon.policy.assignments.subject.delete.success').then(function (translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                removeSubFromSubList(subject);
+                manageSubjects();
 
                 subject.loader = false;
 
             }
 
-            function deleteSubError(reason){
+            function deleteSubError(reason) {
 
-                $translate('moon.policy.perimeter.subject.delete.error', { subjectName: subject.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.assignments.subject.delete.error', {
+                    subjectName: subject.name,
+                    reason: reason.message
+                }).then(function (translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -406,27 +285,30 @@
             }
         }
 
-        function deleteObj(object){
+        function deleteObj(object, dataId) {
 
             object.loader = true;
 
-            assignmentService.object.delete(object, deleteObjSuccess, deleteObjError);
+            assignmentsService.object.delete(list.policy.id, object.object_id, object.object_cat_id, dataId, deleteObjSuccess, deleteObjError);
 
-            function deleteObjSuccess(data){
+            function deleteObjSuccess(data) {
 
-                $translate('moon.policy.perimeter.object.delete.success', { objectName: object.name }).then( function(translatedValue) {
+                $translate('moon.policy.assignments.object.delete.success').then(function (translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                removeObjFromObjList(object);
+                manageObjects();
 
                 object.loader = false;
 
             }
 
-            function deleteObjError(reason){
+            function deleteObjError(reason) {
 
-                $translate('moon.policy.perimeter.object.delete.error', { objectName: object.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.assignments.object.delete.error', {
+                    objectName: object.name,
+                    reason: reason.message
+                }).then(function (translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -434,27 +316,30 @@
             }
         }
 
-        function deleteAct(action){
+        function deleteAct(action, dataId) {
 
             action.loader = true;
 
-            assignmentService.action.delete(action, deleteActSuccess, deleteActError);
+            assignmentsService.action.delete(list.policy.id, action.action_id, action.action_cat_id, dataId, deleteActSuccess, deleteActError);
 
-            function deleteActSuccess(data){
+            function deleteActSuccess(data) {
 
-                $translate('moon.policy.perimeter.action.delete.success', { actionName: action.name }).then( function(translatedValue) {
+                $translate('moon.policy.assignments.action.delete.success').then(function (translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
-                removeActFromActList(action);
+                manageActions();
 
                 action.loader = false;
 
             }
 
-            function deleteActError(reason){
+            function deleteActError(reason) {
 
-                $translate('moon.policy.perimeter.action.delete.error', { actionName: action.name, reason: reason.message}).then( function(translatedValue) {
+                $translate('moon.policy.assignments.action.delete.error', {
+                    actionName: action.name,
+                    reason: reason.message
+                }).then(function (translatedValue) {
                     alertService.alertError(translatedValue);
                 });
 
@@ -463,35 +348,43 @@
             }
         }
 
-        function getSubjects(){
+        function getSubjects() {
             return list.subjects ? list.subjects : [];
         }
 
-        function getObjects(){
+        function getObjects() {
             return list.objects ? list.objects : [];
         }
 
-        function getActions(){
+        function getActions() {
             return list.actions ? list.actions : [];
         }
 
-        function removeSubFromSubList(subject){
-            list.subjects = _.without(list.subjects, subject);
-        }
+        function updateList(event, type) {
 
-        function removeObjFromObjList(object){
-            list.objects = _.without(list.objects, object);
-        }
+            switch(type){
 
-        function removeActFromActList(action){
-            list.actions = _.without(list.actions, action);
-        }
+                case ASSIGNMENTS_CST.TYPE.SUBJECT:
 
-        function deletePolicy( event, policy){
+                    manageSubjects();
+                    break;
 
-            list.policy = policy;
+                case ASSIGNMENTS_CST.TYPE.OBJECT:
 
-            activate();
+                    manageObjects();
+                    break;
+
+                case ASSIGNMENTS_CST.TYPE.ACTION:
+
+                    manageActions();
+                    break;
+
+                default :
+
+                    activate();
+                    break;
+
+            }
 
         }
 

@@ -18,7 +18,7 @@
 
             subject: {
 
-                policy: $resource(REST_URI.POLICIES + ':policy_id/subject_data/:subject_id/:data_id', {}, {
+                policy: $resource(REST_URI.POLICIES + ':policy_id/subject_data/:subject_id/:category_id/:data_id', {}, {
                     get: {method: 'GET'},
                     create: {method: 'POST'},
                     remove: {method: 'DELETE'}
@@ -28,7 +28,7 @@
 
             object: {
 
-                policy: $resource(REST_URI.POLICIES + ':policy_id/object_data/:object_id/:data_id', {}, {
+                policy: $resource(REST_URI.POLICIES + ':policy_id/object_data/:object_id/:category_id/:data_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
                     remove: {method: 'DELETE'}
@@ -38,7 +38,7 @@
 
             action: {
 
-                policy: $resource(REST_URI.POLICIES + ':policy_id/action_data/:action_id/:data_id', {}, {
+                policy: $resource(REST_URI.POLICIES + ':policy_id/action_data/:action_id/:category_id/:data_id', {}, {
                     get: {method: 'GET', isArray: false},
                     create: {method: 'POST'},
                     remove: {method: 'DELETE'}
@@ -62,15 +62,33 @@
 
                 },
 
-                delete: function (subject, callbackSuccess, callbackError ) {
+                findAllFromCategoriesWithCallback: function(policyId, categoryId, callback){
 
-                    data.subject.perimeter.remove({subject_id: subject.id}, subject, callbackSuccess, callbackError);
+                    data.subject.policy.get({policy_id: policyId, category_id: categoryId}).$promise.then(function(data) {
+
+                        if(data['subject_data'][0]) {
+
+                            callback(utilService.transform(data['subject_data'][0], 'data'));
+
+                        }else{
+
+                            callback([])
+
+                        }
+
+                    });
 
                 },
 
-                add: function (subject, callbackSuccess, callbackError ) {
+                delete: function (subject, policyId, categoryId, callbackSuccess, callbackError ) {
 
-                    data.subject.perimeter.create({}, subject, callbackSuccess, callbackError);
+                    data.subject.policy.remove({policy_id: policyId, category_id: categoryId, data_id: subject.id}, subject, callbackSuccess, callbackError);
+
+                },
+
+                add: function (subject, policyId, categoryId, callbackSuccess, callbackError ) {
+
+                    data.subject.policy.create({policy_id: policyId, category_id: categoryId}, subject, callbackSuccess, callbackError);
 
                 },
 
@@ -108,15 +126,33 @@
 
                 },
 
-                delete: function (object, callbackSuccess, callbackError ) {
+                findAllFromCategoriesWithCallback: function(policyId, categoryId, callback){
 
-                    data.object.perimeter.remove({object_id: object.id}, object, callbackSuccess, callbackError);
+                    data.object.policy.get({policy_id: policyId, category_id: categoryId}).$promise.then(function(data) {
+
+                        if(data['object_data'][0]) {
+
+                            callback(utilService.transform(data['object_data'][0], 'data'));
+
+                        }else{
+
+                            callback([])
+
+                        }
+
+                    });
 
                 },
 
-                add:function (object, callbackSuccess, callbackError ) {
+                delete: function (object, policyId, categoryId, callbackSuccess, callbackError ) {
 
-                    data.object.perimeter.create({}, object, callbackSuccess, callbackError);
+                    data.object.policy.remove({policy_id: policyId, category_id: categoryId, data_id: object.id}, object, callbackSuccess, callbackError);
+
+                },
+
+                add:function (object, policyId, categoryId, callbackSuccess, callbackError ) {
+
+                    data.object.policy.create({policy_id: policyId, category_id: categoryId}, object, callbackSuccess, callbackError);
 
                 },
 
@@ -125,7 +161,6 @@
                     findOne: function(policyId, objectId, dataId, callback){
 
                         data.object.policy.get({policy_id: policyId, object_id: objectId, data_id : dataId}).$promise.then(function(data) {
-
 
                             if(data['object_data'][0]){
 
@@ -155,15 +190,33 @@
 
                 },
 
-                delete: function (action, callbackSuccess, callbackError ) {
+                findAllFromCategoriesWithCallback: function(policyId, categoryId, callback){
 
-                    data.action.perimeter.remove({action_id: action.id}, action, callbackSuccess, callbackError);
+                    data.action.policy.get({policy_id: policyId, category_id: categoryId}).$promise.then(function(data) {
+
+                        if(data['action_data'][0]) {
+
+                            callback(utilService.transform(data['action_data'][0], 'data'));
+
+                        }else{
+
+                            callback([])
+
+                        }
+
+                    });
 
                 },
 
-                add:function (action, callbackSuccess, callbackError ) {
+                delete: function (action, policyId, categoryId, callbackSuccess, callbackError ) {
 
-                    data.action.perimeter.create({}, action, callbackSuccess, callbackError);
+                    data.action.policy.remove({policy_id: policyId, category_id: categoryId, data_id: action.id}, action, callbackSuccess, callbackError);
+
+                },
+
+                add:function (action, policyId, categoryId, callbackSuccess, callbackError ) {
+
+                    data.action.policy.create({policy_id: policyId, category_id: categoryId}, action, callbackSuccess, callbackError);
 
                 },
 

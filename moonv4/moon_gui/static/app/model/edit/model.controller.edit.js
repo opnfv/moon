@@ -6,9 +6,9 @@
         .module('moon')
         .controller('ModelEditController', ModelEditController);
 
-    ModelEditController.$inject = ['$scope', '$rootScope', 'model', '$stateParams'];
+    ModelEditController.$inject = ['$scope', '$rootScope', 'model', 'metaRuleService'];
 
-    function ModelEditController($scope, $rootScope, model, $stateParams) {
+    function ModelEditController($scope, $rootScope, model, metaRuleService) {
 
         var edit = this;
 
@@ -47,6 +47,12 @@
         function modelUpdatedSuccess(event, model){
 
             edit.model = model;
+
+            metaRuleService.findSomeWithCallback(model.meta_rules, function(metaRules){
+
+                edit.model.meta_rules_values = metaRules;
+
+            });
 
         }
 
