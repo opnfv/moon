@@ -330,6 +330,19 @@ def check_subject_data(policy_id, data_id, category_id):
         assert category_id == _data["category_id"]
 
 
+def delete_subject_data(policy_id, category_id, data_id):
+    req = requests.delete(URL.format("/policies/{}/subject_data/{}/{}".format(policy_id, category_id, data_id)),
+                          headers=HEADERS)
+    assert req.status_code == 200
+    req = requests.get(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)))
+    assert req.status_code == 200
+    result = req.json()
+    assert "subject_data" in result
+    for _data in result['subject_data']:
+        assert data_id not in list(_data['data'].keys())
+        assert category_id == _data["category_id"]
+
+
 def add_object_data(policy_id, category_id, name="object_data1"):
     object_data_template['name'] = name
     req = requests.post(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)),
@@ -351,6 +364,19 @@ def check_object_data(policy_id, data_id, category_id):
         assert category_id == _data["category_id"]
 
 
+def delete_object_data(policy_id, category_id, data_id):
+    req = requests.delete(URL.format("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id)),
+                          headers=HEADERS)
+    assert req.status_code == 200
+    req = requests.get(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)))
+    assert req.status_code == 200
+    result = req.json()
+    assert "object_data" in result
+    for _data in result['object_data']:
+        assert data_id not in list(_data['data'].keys())
+        assert category_id == _data["category_id"]
+
+
 def add_action_data(policy_id, category_id, name="action_data1"):
     action_data_template['name'] = name
     req = requests.post(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)),
@@ -369,6 +395,19 @@ def check_action_data(policy_id, data_id, category_id):
     assert "action_data" in result
     for _data in result['action_data']:
         assert data_id in list(_data['data'].keys())
+        assert category_id == _data["category_id"]
+
+
+def delete_action_data(policy_id, category_id, data_id):
+    req = requests.delete(URL.format("/policies/{}/action_data/{}/{}".format(policy_id, category_id, data_id)),
+                          headers=HEADERS)
+    assert req.status_code == 200
+    req = requests.get(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)))
+    assert req.status_code == 200
+    result = req.json()
+    assert "action_data" in result
+    for _data in result['action_data']:
+        assert data_id not in list(_data['data'].keys())
         assert category_id == _data["category_id"]
 
 

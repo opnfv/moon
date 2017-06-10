@@ -55,6 +55,7 @@ def test_subject_data():
 
     subject_data_id = add_subject_data(policy_id=policy_id, category_id=subject_cat_id)
     check_subject_data(policy_id=policy_id, data_id=subject_data_id, category_id=subject_cat_id)
+    delete_subject_data(policy_id=policy_id, data_id=subject_data_id, category_id=subject_cat_id)
 
 
 def test_object_data():
@@ -69,6 +70,7 @@ def test_object_data():
 
     object_data_id = add_object_data(policy_id=policy_id, category_id=object_cat_id)
     check_object_data(policy_id=policy_id, data_id=object_data_id, category_id=object_cat_id)
+    delete_object_data(policy_id=policy_id, data_id=object_data_id, category_id=object_cat_id)
 
 
 def test_action_data():
@@ -83,6 +85,7 @@ def test_action_data():
 
     action_data_id = add_action_data(policy_id=policy_id, category_id=action_cat_id)
     check_action_data(policy_id=policy_id, data_id=action_data_id, category_id=action_cat_id)
+    delete_action_data(policy_id=policy_id, data_id=action_data_id, category_id=action_cat_id)
 
 
 def test_assignments():
