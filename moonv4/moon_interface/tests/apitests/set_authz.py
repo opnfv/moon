@@ -273,6 +273,9 @@ def write_distgraph(time_data, legend=None, input=None, image_file=None, html_fi
     result_data.append(time_delta)
 
     # Create distplot with custom bin_size
+    if len(legends) < len(result_data):
+        for _cpt in range(len(result_data)-len(legends)):
+            legends.append("NC")
     fig = ff.create_distplot(result_data, legends, bin_size=.2)
 
     # Plot!
@@ -281,7 +284,8 @@ def write_distgraph(time_data, legend=None, input=None, image_file=None, html_fi
         image="svg",
         image_filename=image_file,
         image_height=1000,
-        image_width=1200
+        image_width=1200,
+        filename=html_file
     )
     if time_delta_average2:
         logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
