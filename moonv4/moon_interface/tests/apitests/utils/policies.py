@@ -61,6 +61,7 @@ def check_policy(policy_id=None):
         assert policy_id in result['policies']
         assert "name" in result['policies'][policy_id]
         assert policy_template["name"] == result['policies'][policy_id]["name"]
+    return result
 
 
 def add_policy(name="test_policy", genre="authz"):

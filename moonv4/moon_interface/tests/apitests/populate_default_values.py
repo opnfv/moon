@@ -25,10 +25,11 @@ m = SourceFileLoader("scenario", args.filename[0])
 scenario = m.load_module()
 
 
-def create_model():
+def create_model(model_id=None):
     if args.verbose:
         logger.warning("Creating model {}".format(scenario.model_name))
-    _model_id = add_model(name=scenario.model_name)
+    if not model_id:
+        model_id = add_model(name=scenario.model_name)
     for cat in scenario.subject_categories:
         scenario.subject_categories[cat] = add_subject_category(name=cat)
     for cat in scenario.object_categories:
@@ -47,20 +48,34 @@ def create_model():
                 ob_cat.append(scenario.object_categories[item])
             elif item in scenario.action_categories:
                 act_cat.append(scenario.action_categories[item])
-        meta_rule_id = add_meta_rule(item_name, sub_cat, ob_cat, act_cat)
+        meta_rules = check_meta_rule(meta_rule_id=None)
+        for _meta_rule_id, _meta_rule_value in meta_rules['meta_rules'].items():
+            if _meta_rule_value['name'] == item_name:
+                meta_rule_id = _meta_rule_id
+                break
+        else:
+            meta_rule_id = add_meta_rule(item_name, sub_cat, ob_cat, act_cat)
         item_value["id"] = meta_rule_id
-        meta_rule_list.append(meta_rule_id)
-    return _model_id, meta_rule_list
+        if meta_rule_id not in meta_rule_list:
+            meta_rule_list.append(meta_rule_id)
+    return model_id, meta_rule_list
 
 
 def create_policy(model_id, meta_rule_list):
     if args.verbose:
         logger.warning("Creating policy {}".format(scenario.policy_name))
-    policy_id = add_policy(name=scenario.policy_name, genre=scenario.policy_genre)
+    _policies = check_policy()
+    for _policy_id, _policy_value in _policies["policies"].items():
+        if _policy_value['name'] == scenario.policy_name:
+            policy_id = _policy_id
+            break
+    else:
+        policy_id = add_policy(name=scenario.policy_name, genre=scenario.policy_genre)
 
     update_policy(policy_id, model_id)
 
     for meta_rule_id in meta_rule_list:
+        print("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
         add_meta_rule_to_model(model_id, meta_rule_id)
 
     for subject_cat_name in scenario.subject_data:
@@ -168,12 +183,21 @@ def create_pdp(policy_id=None):
     for pdp_id, pdp_value in pdps.items():
         if scenario.pdp_name == pdp_value["name"]:
             update_pdp(pdp_id, policy_id=policy_id)
+            logger.info("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
             return pdp_id
     _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
     map_to_keystone(pdp_id=_pdp_id, keystone_project_id=admin_project_id)
     return _pdp_id
 
 if __name__ == "__main__":
-    model_id, meta_rule_list = create_model()
+    _models = check_model()
+    for _model_id, _model_value in _models['models'].items():
+        if _model_value['name'] == scenario.model_name:
+            model_id = _model_id
+            meta_rule_list = _model_value['meta_rules']
+            create_model(model_id)
+            break
+    else:
+        model_id, meta_rule_list = create_model()
     policy_id = create_policy(model_id, meta_rule_list)
     pdp_id = create_pdp(policy_id)

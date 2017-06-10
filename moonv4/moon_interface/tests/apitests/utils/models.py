@@ -23,7 +23,7 @@ meta_rule_template = {
 }
 
 
-def check_model(model_id=None):
+def check_model(model_id=None, check_model_name=True):
     req = requests.get(URL.format("/models"))
     assert req.status_code == 200
     result = req.json()
@@ -33,8 +33,9 @@ def check_model(model_id=None):
         assert result["models"]
         assert model_id in result['models']
         assert "name" in result['models'][model_id]
-        assert model_template["name"] == result['models'][model_id]["name"]
-    return result['models']
+        if check_model_name:
+            assert model_template["name"] == result['models'][model_id]["name"]
+    return result
 
 
 def add_model(name=None):
@@ -224,6 +225,8 @@ def check_meta_rule(meta_rule_id, scat_id=None, ocat_id=None, acat_id=None):
     assert "meta_rules" in result
     if "result" in result:
         assert result["result"]
+    if not meta_rule_id:
+        return result
     assert meta_rule_id in result['meta_rules']
     assert "name" in result['meta_rules'][meta_rule_id]
     if scat_id:
@@ -244,17 +247,18 @@ def delete_meta_rule(meta_rule_id):
 
 
 def add_meta_rule_to_model(model_id, meta_rule_id):
-    model = check_model(model_id)
+    model = check_model(model_id, check_model_name=False)['models']
     meta_rule_list = model[model_id]["meta_rules"]
-    meta_rule_list.append(meta_rule_id)
-    req = requests.patch(URL.format("/models/{}".format(model_id)),
-                         json={"meta_rules": meta_rule_list},
-                         headers=HEADERS)
-    assert req.status_code == 200
-    result = req.json()
-    assert type(result) is dict
-    model_id = list(result['models'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "meta_rules" in result['models'][model_id]
-    assert meta_rule_list == result['models'][model_id]["meta_rules"]
+    if meta_rule_id not in meta_rule_list:
+        meta_rule_list.append(meta_rule_id)
+        req = requests.patch(URL.format("/models/{}".format(model_id)),
+                             json={"meta_rules": meta_rule_list},
+                             headers=HEADERS)
+        assert req.status_code == 200
+        result = req.json()
+        assert type(result) is dict
+        model_id = list(result['models'].keys())[0]
+        if "result" in result:
+            assert result["result"]
+        assert "meta_rules" in result['models'][model_id]
+        assert meta_rule_list == result['models'][model_id]["meta_rules"]
