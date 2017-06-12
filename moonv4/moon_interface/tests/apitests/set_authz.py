@@ -109,7 +109,7 @@ class AsyncGet(threading.Thread):
             logger.debug(r.status_code)
             logger.debug(r.text)
             if r.status_code == 200:
-                logger.warning("error code 200 for {}".format(self.url))
+                # logger.warning("error code 200 for {}".format(self.url))
                 logger.info("\033[1m{}\033[m {}".format(self.url, r.status_code))
             try:
                 j = r.json()
@@ -118,8 +118,10 @@ class AsyncGet(threading.Thread):
             else:
                 if j.get("authz"):
                     logger.info("\t\033[32m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+                    current_request['result'] = "Grant"
                 else:
                     logger.info("\t\033[31m{}\033[m {}".format(j.get("authz"), j.get("error", "")))
+                    current_request['result'] = "Deny"
         self.result = current_request
         # self.sema.release()
 
