@@ -176,7 +176,7 @@ def notify(request_id, container_id, payload, event_type="authz"):
     __n_notifier.critical(ctxt, event_type, payload=payload)
 
 
-def call(endpoint, ctx=None, method="get_status", **kwargs):
+def call(endpoint, ctx=None, method="route", **kwargs):
     if not ctx:
         ctx = dict()
     if endpoint not in __targets:
@@ -193,7 +193,9 @@ def call(endpoint, ctx=None, method="get_status", **kwargs):
     else:
         client = __targets[endpoint]["client"]["internal"]
         LOG.info("Calling {} on {}...".format(method, endpoint))
-    return client.call(ctx, method, **kwargs)
+    result = copy.deepcopy(client.call(ctx, method, **kwargs))
+    del client
+    return result
 
 
 class Context:
