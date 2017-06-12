@@ -11,7 +11,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.2.0"
@@ -79,7 +79,8 @@ class SubjectAssignments(Resource):
         }
         :internal_api: update_subject_assignment
         """
-        return call(ctx={"id": uuid, "method": "update_subject_assignment", "user_id": user_id}, args=request.json)
+        return call("security_router",
+                    ctx={"id": uuid, "method": "update_subject_assignment", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
@@ -96,7 +97,8 @@ class SubjectAssignments(Resource):
         }
         :internal_api: delete_subject_assignment
         """
-        return call(ctx={"id": uuid, "method": "delete_subject_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
+        return call("security_router",
+                    ctx={"id": uuid, "method": "delete_subject_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
 
@@ -132,7 +134,8 @@ class ObjectAssignments(Resource):
         }
         :internal_api: get_object_assignments
         """
-        return call(ctx={"id": uuid, "method": "get_object_assignments", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
+        return call("security_router",
+                    ctx={"id": uuid, "method": "get_object_assignments", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
     @check_auth
@@ -159,7 +162,8 @@ class ObjectAssignments(Resource):
         }
         :internal_api: update_object_assignment
         """
-        return call(ctx={"id": uuid, "method": "update_object_assignment", "user_id": user_id}, args=request.json)
+        return call("security_router",
+                    ctx={"id": uuid, "method": "update_object_assignment", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
@@ -176,7 +180,8 @@ class ObjectAssignments(Resource):
         }
         :internal_api: delete_object_assignment
         """
-        return call(ctx={"id": uuid, "method": "delete_object_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
+        return call("security_router",
+                    ctx={"id": uuid, "method": "delete_object_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
 
@@ -212,7 +217,7 @@ class ActionAssignments(Resource):
         }
         :internal_api: get_action_assignments
         """
-        return call(ctx={"id": uuid, "method": "get_action_assignments", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "get_action_assignments", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
     @check_auth
@@ -239,7 +244,7 @@ class ActionAssignments(Resource):
         }
         :internal_api: update_action_assignment
         """
-        return call(ctx={"id": uuid, "method": "update_action_assignment", "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "update_action_assignment", "user_id": user_id},
                     args=request.json)
 
     @check_auth
@@ -257,5 +262,5 @@ class ActionAssignments(Resource):
         }
         :internal_api: delete_action_assignment
         """
-        return call(ctx={"id": uuid, "method": "delete_action_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "delete_action_assignment", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})

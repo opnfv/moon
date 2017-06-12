@@ -12,7 +12,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.2.0"
@@ -51,7 +51,7 @@ class Subjects(Resource):
         }
         :internal_api: get_subjects
         """
-        return call(ctx={"id": uuid, "method": "get_subjects", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "get_subjects", "user_id": user_id}, args={"perimeter_id": perimeter_id})
 
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
@@ -77,7 +77,7 @@ class Subjects(Resource):
         }
         :internal_api: set_subject
         """
-        return call(ctx={"id": uuid, "method": "set_subject", "user_id": user_id, "perimeter_id": None},
+        return call("security_router", ctx={"id": uuid, "method": "set_subject", "user_id": user_id, "perimeter_id": None},
                     args=request.json)
 
     @check_auth
@@ -104,7 +104,7 @@ class Subjects(Resource):
         }
         :internal_api: set_subject
         """
-        return call(ctx={"id": uuid, "method": "set_subject", "user_id": user_id, "perimeter_id": perimeter_id},
+        return call("security_router", ctx={"id": uuid, "method": "set_subject", "user_id": user_id, "perimeter_id": perimeter_id},
                     args=request.json)
 
     @check_auth
@@ -125,7 +125,7 @@ class Subjects(Resource):
         }
         :internal_api: delete_subject
         """
-        return call(ctx={"id": uuid, "method": "delete_subject", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "delete_subject", "user_id": user_id}, args={"perimeter_id": perimeter_id})
 
 
 class Objects(Resource):
@@ -157,7 +157,7 @@ class Objects(Resource):
         }
         :internal_api: get_objects
         """
-        return call(ctx={"id": uuid, "method": "get_objects", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "get_objects", "user_id": user_id}, args={"perimeter_id": perimeter_id})
 
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
@@ -178,7 +178,7 @@ class Objects(Resource):
         }
         :internal_api: set_object
         """
-        return call(ctx={"id": uuid, "method": "set_object", "user_id": user_id, "perimeter_id": None},
+        return call("security_router", ctx={"id": uuid, "method": "set_object", "user_id": user_id, "perimeter_id": None},
                     args=request.json)
 
     @check_auth
@@ -200,7 +200,7 @@ class Objects(Resource):
         }
         :internal_api: set_object
         """
-        return call(ctx={"id": uuid, "method": "set_object", "user_id": user_id, "perimeter_id": perimeter_id},
+        return call("security_router", ctx={"id": uuid, "method": "set_object", "user_id": user_id, "perimeter_id": perimeter_id},
                     args=request.json)
 
     @check_auth
@@ -218,7 +218,7 @@ class Objects(Resource):
         }
         :internal_api: delete_object
         """
-        return call(ctx={"id": uuid, "method": "delete_object", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "delete_object", "user_id": user_id}, args={"perimeter_id": perimeter_id})
 
 
 class Actions(Resource):
@@ -250,7 +250,7 @@ class Actions(Resource):
         }
         :internal_api: get_actions
         """
-        return call(ctx={"id": uuid, "method": "get_actions", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "get_actions", "user_id": user_id}, args={"perimeter_id": perimeter_id})
 
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
@@ -271,7 +271,7 @@ class Actions(Resource):
         }
         :internal_api: set_action
         """
-        return call(ctx={"id": uuid, "method": "set_action", "user_id": user_id, "perimeter_id": None},
+        return call("security_router", ctx={"id": uuid, "method": "set_action", "user_id": user_id, "perimeter_id": None},
                     args=request.json)
 
     @check_auth
@@ -293,7 +293,7 @@ class Actions(Resource):
         }
         :internal_api: set_action
         """
-        return call(ctx={"id": uuid, "method": "set_action", "user_id": user_id, "perimeter_id": perimeter_id},
+        return call("security_router", ctx={"id": uuid, "method": "set_action", "user_id": user_id, "perimeter_id": perimeter_id},
                     args=request.json)
 
     @check_auth
@@ -311,4 +311,4 @@ class Actions(Resource):
         }
         :internal_api: delete_action
         """
-        return call(ctx={"id": uuid, "method": "delete_action", "user_id": user_id}, args={"perimeter_id": perimeter_id})
+        return call("security_router", ctx={"id": uuid, "method": "delete_action", "user_id": user_id}, args={"perimeter_id": perimeter_id})

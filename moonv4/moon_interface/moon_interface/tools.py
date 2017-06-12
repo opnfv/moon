@@ -20,25 +20,6 @@ CONF = cfg.CONF
 TOKENS = {}
 
 
-def timeit(function):
-    def wrapper(*args, **kwargs):
-        LOG.info("Calling {} with {} {}...".format(function, args, kwargs))
-        ret = function(*args, **kwargs)
-        LOG.info("End of {}".format(function))
-        return ret
-    return wrapper
-
-
-def call(topic="security_router", ctx=None, method="route", **kwargs):
-    if not ctx:
-        ctx = dict()
-    transport = oslo_messaging.get_transport(CONF)
-    target = oslo_messaging.Target(topic=topic, version='1.0')
-    client = oslo_messaging.RPCClient(transport, target)
-    LOG.info("Calling {} on {}...".format(method, topic))
-    return client.call(ctx, method, **kwargs)
-
-
 def check_token(token, url=None):
     _verify = False
     if CONF.keystone.server_crt:

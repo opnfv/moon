@@ -11,7 +11,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.2.0"
@@ -52,7 +52,7 @@ class SubjectData(Resource):
         }]
         :internal_api: get_subject_data
         """
-        return call(ctx={"id": uuid, "method": "get_subject_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "get_subject_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
     @check_auth
@@ -79,7 +79,7 @@ class SubjectData(Resource):
         }
         :internal_api: add_subject_data
         """
-        return call(ctx={"id": uuid, "method": "add_subject_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "add_subject_data", "category_id": category_id, "user_id": user_id},
                     args=request.json)
 
     @check_auth
@@ -96,7 +96,7 @@ class SubjectData(Resource):
         }]
         :internal_api: delete_subject_data
         """
-        return call(ctx={"id": uuid, "method": "delete_subject_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "delete_subject_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
 
@@ -132,7 +132,7 @@ class ObjectData(Resource):
         }]
         :internal_api: get_object_data
         """
-        return call(ctx={"id": uuid, "method": "get_object_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "get_object_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
     @check_auth
@@ -159,7 +159,7 @@ class ObjectData(Resource):
         }
         :internal_api: add_object_data
         """
-        return call(ctx={"id": uuid, "method": "add_object_data", "category_id": category_id, "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"id": uuid, "method": "add_object_data", "category_id": category_id, "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
@@ -175,7 +175,7 @@ class ObjectData(Resource):
         }
         :internal_api: delete_object_data
         """
-        return call(ctx={"id": uuid, "method": "delete_object_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "delete_object_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
 
@@ -211,7 +211,7 @@ class ActionData(Resource):
         }]
         :internal_api: get_action_data
         """
-        return call(ctx={"id": uuid, "method": "get_action_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "get_action_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
     @check_auth
@@ -238,7 +238,7 @@ class ActionData(Resource):
         }
         :internal_api: add_action_data
         """
-        return call(ctx={"id": uuid, "method": "add_action_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "add_action_data", "category_id": category_id, "user_id": user_id},
                     args=request.json)
 
     @check_auth
@@ -255,7 +255,7 @@ class ActionData(Resource):
         }
         :internal_api: delete_action_data
         """
-        return call(ctx={"id": uuid, "method": "delete_action_data", "category_id": category_id, "user_id": user_id},
+        return call("security_router", ctx={"id": uuid, "method": "delete_action_data", "category_id": category_id, "user_id": user_id},
                     args={"data_id": data_id})
 
 

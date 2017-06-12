@@ -11,7 +11,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.1.0"
@@ -49,7 +49,7 @@ class MetaRules(Resource):
         }
         :internal_api: get_meta_rules
         """
-        return call(ctx={"method": "get_meta_rules",
+        return call("security_router", ctx={"method": "get_meta_rules",
                          "user_id": user_id,
                          "meta_rule_id": meta_rule_id}, args={})
 
@@ -77,7 +77,7 @@ class MetaRules(Resource):
         }
         :internal_api: add_meta_rules
         """
-        return call(ctx={"method": "add_meta_rules",
+        return call("security_router", ctx={"method": "add_meta_rules",
                          "user_id": user_id,
                          "meta_rule_id": meta_rule_id}, args=request.json)
 
@@ -105,7 +105,7 @@ class MetaRules(Resource):
         }
         :internal_api: set_meta_rules
         """
-        return call(ctx={"method": "set_meta_rules",
+        return call("security_router", ctx={"method": "set_meta_rules",
                          "user_id": user_id,
                          "meta_rule_id": meta_rule_id}, args=request.json)
 
@@ -133,7 +133,7 @@ class MetaRules(Resource):
         }
         :internal_api: delete_meta_rules
         """
-        return call(ctx={"method": "delete_meta_rules",
+        return call("security_router", ctx={"method": "delete_meta_rules",
                          "user_id": user_id,
                          "meta_rule_id": meta_rule_id}, args=request.json)
 

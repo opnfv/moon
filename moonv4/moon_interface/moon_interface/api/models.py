@@ -10,7 +10,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.1.0"
@@ -46,7 +46,7 @@ class Models(Resource):
         }
         :internal_api: get_models
         """
-        return call(ctx={"id": uuid, "method": "get_models", "user_id": user_id}, args={})
+        return call("security_router", ctx={"id": uuid, "method": "get_models", "user_id": user_id}, args={})
 
     @check_auth
     def post(self, uuid=None, user_id=None):
@@ -68,7 +68,7 @@ class Models(Resource):
         }
         :internal_api: add_model
         """
-        return call(ctx={"id": uuid, "method": "add_model", "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"id": uuid, "method": "add_model", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, uuid=None, user_id=None):
@@ -82,7 +82,7 @@ class Models(Resource):
         }
         :internal_api: delete_model
         """
-        return call(ctx={"id": uuid, "method": "delete_model", "user_id": user_id}, args={})
+        return call("security_router", ctx={"id": uuid, "method": "delete_model", "user_id": user_id}, args={})
 
     @check_auth
     def patch(self, uuid=None, user_id=None):
@@ -99,5 +99,5 @@ class Models(Resource):
         }
         :internal_api: update_model
         """
-        return call(ctx={"id": uuid, "method": "update_model", "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"id": uuid, "method": "update_model", "user_id": user_id}, args=request.json)
 

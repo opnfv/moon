@@ -10,7 +10,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.1.0"
@@ -47,7 +47,7 @@ class Rules(Resource):
         }
         :internal_api: get_rules
         """
-        return call(ctx={"id": uuid,
+        return call("security_router", ctx={"id": uuid,
                          "method": "get_rules",
                          "user_id": user_id,
                          "rule_id": rule_id}, args={})
@@ -94,7 +94,7 @@ class Rules(Resource):
         }
         :internal_api: add_rule
         """
-        return call(ctx={"id": uuid,
+        return call("security_router", ctx={"id": uuid,
                          "method": "add_rule",
                          "user_id": user_id,
                          "rule_id": rule_id}, args=request.json)
@@ -109,7 +109,7 @@ class Rules(Resource):
         :return: { "result": true }
         :internal_api: delete_rule
         """
-        return call(ctx={"id": uuid,
+        return call("security_router", ctx={"id": uuid,
                          "method": "delete_rule",
                          "user_id": user_id,
                          "rule_id": rule_id}, args={})

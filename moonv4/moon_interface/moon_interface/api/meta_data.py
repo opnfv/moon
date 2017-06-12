@@ -11,7 +11,7 @@ from flask import request
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.2.0"
@@ -45,7 +45,7 @@ class SubjectCategories(Resource):
         }
         :internal_api: get_subject_categories
         """
-        return call(ctx={"method": "get_subject_categories", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "get_subject_categories", "user_id": user_id}, args={"category_id": category_id})
 
     @check_auth
     def post(self, category_id=None, user_id=None):
@@ -65,7 +65,7 @@ class SubjectCategories(Resource):
         }
         :internal_api: add_subject_category
         """
-        return call(ctx={"method": "set_subject_category", "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"method": "set_subject_category", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, category_id=None, user_id=None):
@@ -79,7 +79,7 @@ class SubjectCategories(Resource):
         }
         :internal_api: delete_subject_category
         """
-        return call(ctx={"method": "delete_subject_category", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "delete_subject_category", "user_id": user_id}, args={"category_id": category_id})
 
 
 class ObjectCategories(Resource):
@@ -107,7 +107,7 @@ class ObjectCategories(Resource):
         }
         :internal_api: get_object_categories
         """
-        return call(ctx={"method": "get_object_categories", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "get_object_categories", "user_id": user_id}, args={"category_id": category_id})
 
     @check_auth
     def post(self, category_id=None, user_id=None):
@@ -127,7 +127,7 @@ class ObjectCategories(Resource):
         }
         :internal_api: add_object_category
         """
-        return call(ctx={"method": "set_object_category", "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"method": "set_object_category", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, category_id=None, user_id=None):
@@ -141,7 +141,7 @@ class ObjectCategories(Resource):
         }
         :internal_api: delete_object_category
         """
-        return call(ctx={"method": "delete_object_category", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "delete_object_category", "user_id": user_id}, args={"category_id": category_id})
 
 
 class ActionCategories(Resource):
@@ -169,7 +169,7 @@ class ActionCategories(Resource):
         }
         :internal_api: get_action_categories
         """
-        return call(ctx={"method": "get_action_categories", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "get_action_categories", "user_id": user_id}, args={"category_id": category_id})
 
     @check_auth
     def post(self, category_id=None, user_id=None):
@@ -189,7 +189,7 @@ class ActionCategories(Resource):
         }
         :internal_api: add_action_category
         """
-        return call(ctx={"method": "set_action_category", "user_id": user_id}, args=request.json)
+        return call("security_router", ctx={"method": "set_action_category", "user_id": user_id}, args=request.json)
 
     @check_auth
     def delete(self, category_id=None, user_id=None):
@@ -203,4 +203,4 @@ class ActionCategories(Resource):
         }
         :internal_api: delete_action_category
         """
-        return call(ctx={"method": "delete_action_category", "user_id": user_id}, args={"category_id": category_id})
+        return call("security_router", ctx={"method": "delete_action_category", "user_id": user_id}, args={"category_id": category_id})

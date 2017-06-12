@@ -10,7 +10,7 @@ from uuid import uuid4
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_interface.tools import call
+from moon_utilities.security_functions import call
 from moon_interface.tools import check_auth
 
 __version__ = "0.1.0"
@@ -55,7 +55,7 @@ class Authz(Resource):
         """
         # Note (asteroide): user_id default to admin to be able to read the database
         # it would be better to have a read-only user.
-        return call(ctx={"id": uuid,
+        return call("security_router", ctx={"id": uuid,
                          "call_master": False,
                          "method": "authz",
                          "subject_name": subject_name,
