@@ -7,6 +7,7 @@ Authz is the endpoint to get authorization response
 """
 
 from uuid import uuid4
+import time
 from flask_restful import Resource
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -55,7 +56,8 @@ class Authz(Resource):
         """
         # Note (asteroide): user_id default to admin to be able to read the database
         # it would be better to have a read-only user.
-        return call("security_router", ctx={"id": uuid,
+        start_time = time.time()
+        result = call("security_router", ctx={"id": uuid,
                          "call_master": False,
                          "method": "authz",
                          "subject_name": subject_name,
@@ -63,4 +65,6 @@ class Authz(Resource):
                          "action_name": action_name,
                          "user_id": "admin",
                          "request_id": uuid4().hex}, args={})
-
+        end_time = time.time()
+        result['time'] = {"start": start_time, "end": end_time}
+        return result
