@@ -12,6 +12,7 @@ from moon_utilities.api import APIList
 from moon_manager.api.models import Models, MetaRules, MetaData
 from moon_manager.api.policies import Policies, Perimeter, Data, Assignments, Rules
 from moon_manager.api.pdp import PDP
+from moon_manager.api.master import Master
 from moon_utilities.security_functions import call
 from moon_utilities.exceptions import IntraExtensionUnknown
 
@@ -52,7 +53,8 @@ class Server:
             Data(),
             Assignments(),
             Rules(),
-            PDP()
+            PDP(),
+            Master()
         ]
         self.server = oslo_messaging.get_rpc_server(self.transport, self.target, self.endpoints,
                                                     executor='threading',

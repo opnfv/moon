@@ -88,7 +88,8 @@ API = {
         "delete_action_assignment",
         "get_rules",
         "add_rule",
-        "delete_rule"
+        "delete_rule",
+        "update_from_master"
     ),
     "function": (
         "authz",
@@ -125,6 +126,7 @@ class Cache(object):
         self.__update_policies()
         self.__update_models()
         for key, value in self.__PDP.items():
+            LOG.info("Updating container_chaining with {}".format(value["keystone_project_id"]))
             self.__update_container_chaining(value["keystone_project_id"])
 
     @property
@@ -192,13 +194,19 @@ class Cache(object):
     def __update_container_chaining(self, keystone_project_id):
         container_ids = []
         for pdp_id, pdp_value, in CACHE.pdp.items():
+            LOG.info("pdp_id, pdp_value = {}, {}".format(pdp_id, pdp_value))
             if pdp_value:
                 if pdp_value["keystone_project_id"] == keystone_project_id:
                     for policy_id in pdp_value["security_pipeline"]:
                         model_id = CACHE.policies[policy_id]['model_id']
+                        LOG.info("model_id = {}".format(model_id))
+                        LOG.info("CACHE = {}".format(CACHE.models[model_id]))
                         for meta_rule_id in CACHE.models[model_id]["meta_rules"]:
+                            LOG.info("CACHE.containers = {}".format(CACHE.containers))
                             for container_id, container_values, in CACHE.containers.items():
+                                LOG.info("container_id, container_values = {}".format(container_id, container_values))
                                 for container_value in container_values:
+                                    LOG.info("container_value[\"meta_rule_id\"] == meta_rule_id = {} {}".format(container_value["meta_rule_id"], meta_rule_id))
                                     if container_value["meta_rule_id"] == meta_rule_id:
                                         container_ids.append(
                                             {
@@ -238,8 +246,13 @@ class AuthzRequest:
         self.ctx = ctx
         self.args = args
         self.request_id = ctx["request_id"]
+        if self.ctx['id'] not in CACHE.container_chaining:
+            LOG.warning("Unknown Project ID {}".format(self.ctx['id']))
+            # TODO (asteroide): add a better exception handler
+            raise Exception("Unknown Project ID {}".format(self.ctx['id']))
         self.container_chaining = CACHE.container_chaining[self.ctx['id']]
         ctx["container_chaining"] = copy.deepcopy(self.container_chaining)
+        LOG.info("self.container_chaining={}".format(self.container_chaining))
         self.pdp_container = self.container_chaining[0]["container_id"]
         self.run()
 
@@ -332,11 +345,43 @@ class Router(object):
     @staticmethod
     def check_pdp(ctx):
         _ctx = copy.deepcopy(ctx)
-        if CONF.slave.slave_name:
-            _ctx['call_master'] = True
+        keystone_id = _ctx.pop('id')
+        # LOG.info("_ctx {}".format(_ctx))
         ext = call("moon_manager", method="get_pdp", ctx=_ctx, args={})
-        if "error" not in ext:
-            return True
+        # LOG.info("check_pdp {}".format(ext))
+        if "error" in ext:
+            return False
+        keystone_id_list = map(lambda x: x["keystone_project_id"], ext['pdps'].values())
+        if not ext['pdps'] or keystone_id not in keystone_id_list:
+            if CONF.slave.slave_name:
+                _ctx['call_master'] = True
+                # update from master if exist and test again
+                LOG.info("Need to update from master {}".format(keystone_id))
+                ext = call("moon_manager", method="get_pdp", ctx=_ctx, args={})
+                if "error" in ext:
+                    return False
+                keystone_id_list = map(lambda x: x["keystone_project_id"], ext['pdps'].values())
+                if not ext['pdps'] or keystone_id not in keystone_id_list:
+                    return False
+                else:
+                    # Must update from Master
+                    _ctx["keystone_id"] = keystone_id
+                    _ctx["pdp_id"] = None
+                    _ctx["security_pipeline"] = None
+                    _ctx['call_master'] = False
+                    pdp_value = {}
+                    for pdp_id, pdp_value in ext["pdps"].items():
+                        if keystone_id == pdp_value["keystone_project_id"]:
+                            _ctx["pdp_id"] = keystone_id
+                            _ctx["security_pipeline"] = pdp_value["security_pipeline"]
+                            break
+                    call("moon_manager", method="update_from_master", ctx=_ctx, args=pdp_value)
+                    CACHE.update()
+                    return True
+            else:
+                # return False otherwise
+                return False
+        return True
 
     def send_update(self, api, ctx={}, args={}):
         # TODO (asteroide): add threads here

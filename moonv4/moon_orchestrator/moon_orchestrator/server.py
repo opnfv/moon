@@ -30,11 +30,6 @@ SLAVES = {}
 docker = Client(base_url=CONF.docker_url)
 
 
-# def get_template(filename="template.dockerfile"):
-#     simple_loader = FileSystemLoader(TEMPLATES_FOLDER)
-#     env = Environment(loader=simple_loader)
-#     return env.get_template(filename)
-
 def kill_handler(signum, frame):
     _exit(0)
 
@@ -102,7 +97,7 @@ def _exit(exit_number=0, error=None):
         else:
             docker.remove_container(container=_container)
 
-    # TODO (dthom): put in the debug log
+    # TODO (asteroide): put in the debug log
     if error:
         LOG.info(str(error))
     sys.exit(exit_number)
@@ -117,7 +112,8 @@ def __save_pid():
 
 
 def server():
-    # conf_file = options.configure(DOMAIN)
+    # TODO (asteroide): need to add some options:
+    #   --foreground: run in foreground
     __save_pid()
     LOG.info("Starting server with IP {}".format(CONF.orchestrator.host))
 

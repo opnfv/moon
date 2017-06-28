@@ -89,7 +89,7 @@ class ModelManager(Managers):
             raise exceptions.SubjectCategoryExisting
         # if not category_id:
         #     category_id = uuid4().hex
-        return self.driver.add_subject_category(name=value["name"], description=value["description"])
+        return self.driver.add_subject_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")
     def delete_subject_category(self, user_id, category_id):
@@ -100,7 +100,7 @@ class ModelManager(Managers):
         return self.driver.delete_subject_category(category_id=category_id)
 
     @enforce("read", "meta_data")
-    def get_object_categories(self, user_id, category_id):
+    def get_object_categories(self, user_id, category_id=None):
         return self.driver.get_object_categories(category_id)
 
     @enforce(("read", "write"), "meta_data")
@@ -109,7 +109,7 @@ class ModelManager(Managers):
             raise exceptions.ObjectCategoryExisting
         # if not category_id:
         #     category_id = uuid4().hex
-        return self.driver.add_object_category(name=value["name"], description=value["description"])
+        return self.driver.add_object_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")
     def delete_object_category(self, user_id, category_id):
@@ -120,7 +120,7 @@ class ModelManager(Managers):
         return self.driver.delete_object_category(category_id=category_id)
 
     @enforce("read", "meta_data")
-    def get_action_categories(self, user_id, category_id):
+    def get_action_categories(self, user_id, category_id=None):
         return self.driver.get_action_categories(category_id=category_id)
 
     @enforce(("read", "write"), "meta_data")
@@ -129,7 +129,7 @@ class ModelManager(Managers):
             raise exceptions.ActionCategoryExisting
         # if not category_id:
         #     category_id = uuid4().hex
-        return self.driver.add_action_category(name=value["name"], description=value["description"])
+        return self.driver.add_action_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")
     def delete_action_category(self, user_id, category_id):

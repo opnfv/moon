@@ -3,3 +3,4 @@ oslo.messaging
 oslo.config
 vine
 oslo.log
+babel

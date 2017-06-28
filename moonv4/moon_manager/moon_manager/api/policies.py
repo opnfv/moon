@@ -64,7 +64,17 @@ class Perimeter(object):
 
     def get_subjects(self, ctx, args):
         try:
-            data = self.manager.get_subjects(user_id=ctx["user_id"], policy_id=ctx["id"], perimeter_id=args['perimeter_id'])
+            data = self.manager.get_subjects(
+                user_id=ctx["user_id"],
+                policy_id=ctx["id"],
+                perimeter_id=args['perimeter_id']
+            )
+            if not args['perimeter_id']:
+                if "perimeter_name" in args:
+                    for _data_id, _data_value in data.items():
+                        if _data_value['name'] == args['perimeter_name']:
+                            data = {_data_id: _data_value}
+                            break
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -102,7 +112,17 @@ class Perimeter(object):
 
     def get_objects(self, ctx, args):
         try:
-            data = self.manager.get_objects(user_id=ctx["user_id"], policy_id=ctx["id"], perimeter_id=args['perimeter_id'])
+            data = self.manager.get_objects(
+                user_id=ctx["user_id"],
+                policy_id=ctx["id"],
+                perimeter_id=args['perimeter_id']
+            )
+            if not args['perimeter_id']:
+                if "perimeter_name" in args:
+                    for _data_id, _data_value in data.items():
+                        if _data_value['name'] == args['perimeter_name']:
+                            data = {_data_id: _data_value}
+                            break
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -285,8 +305,30 @@ class Assignments(object):
     def __init__(self):
         self.manager = PolicyManager
 
+    def __get_subject_id(self, ctx, subject_name):
+        data = self.manager.get_subjects(
+            user_id=ctx["user_id"],
+            policy_id=ctx["id"],
+            perimeter_id=None
+        )
+        for _data_id, _data_value in data.items():
+            if _data_value['name'] == subject_name:
+                return _data_id
+
+    def __get_object_id(self, ctx, object_name):
+        data = self.manager.get_objects(
+            user_id=ctx["user_id"],
+            policy_id=ctx["id"],
+            perimeter_id=None
+        )
+        for _data_id, _data_value in data.items():
+            if _data_value['name'] == object_name:
+                return _data_id
+
     def get_subject_assignments(self, ctx, args):
         try:
+            if "perimeter_name" in args:
+                ctx["perimeter_id"] = self.__get_subject_id(ctx, args['perimeter_name'])
             data = self.manager.get_subject_assignments(user_id=ctx["user_id"], policy_id=ctx["id"],
                                                         subject_id=ctx["perimeter_id"], category_id=ctx["category_id"])
         except Exception as e:
@@ -322,6 +364,8 @@ class Assignments(object):
 
     def get_object_assignments(self, ctx, args):
         try:
+            if "perimeter_name" in args:
+                ctx["perimeter_id"] = self.__get_object_id(ctx, args['perimeter_name'])
             data = self.manager.get_object_assignments(user_id=ctx["user_id"], policy_id=ctx["id"],
                                                        object_id=ctx["perimeter_id"], category_id=ctx["category_id"])
         except Exception as e:
