@@ -5,6 +5,7 @@
 
 import sys
 import os
+import signal
 import hashlib
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -33,6 +34,9 @@ docker = Client(base_url=CONF.docker_url)
 #     simple_loader = FileSystemLoader(TEMPLATES_FOLDER)
 #     env = Environment(loader=simple_loader)
 #     return env.get_template(filename)
+
+def kill_handler(signum, frame):
+    _exit(0)
 
 
 def create_docker_network(name="moon"):
@@ -84,7 +88,7 @@ class DockerManager:
             docker.remove_container(container=component_id)
 
 
-def _exit(exit_number=0, docker=None, error=None):
+def _exit(exit_number=0, error=None):
     for _container in CONTAINERS:
         LOG.warning("Deleting containers named {}...".format(_container))
         # print(40 * "-" + _container)
@@ -109,9 +113,10 @@ def __save_pid():
         open("/var/run/moon_orchestrator.pid", "w").write(str(os.getpid()))
     except PermissionError:
         LOG.warning("You don't have the right to write PID file in /var/run... Continuing anyway.")
+        open("./moon_orchestrator.pid", "w").write(str(os.getpid()))
 
 
-def main():
+def server():
     # conf_file = options.configure(DOMAIN)
     __save_pid()
     LOG.info("Starting server with IP {}".format(CONF.orchestrator.host))
@@ -136,12 +141,20 @@ def main():
         router.get_status()
     except oslo_messaging.rpc.client.RemoteError as e:
         LOG.error("Cannot check status of remote container!")
-        _exit(1, docker, e)
+        _exit(1, e)
     serv = messenger.Server(containers=CONTAINERS, docker_manager=docker_manager, slaves=SLAVES)
     try:
         serv.run()
     finally:
-        _exit(0, docker)
+        _exit(0)
+
+
+def main():
+    signal.signal(signal.SIGTERM, kill_handler)
+    signal.signal(signal.SIGHUP, kill_handler)
+    newpid = os.fork()
+    if newpid == 0:
+        server()
 
 
 if __name__ == '__main__':
