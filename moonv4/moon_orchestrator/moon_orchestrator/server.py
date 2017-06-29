@@ -108,6 +108,7 @@ def __save_pid():
         open("/var/run/moon_orchestrator.pid", "w").write(str(os.getpid()))
     except PermissionError:
         LOG.warning("You don't have the right to write PID file in /var/run... Continuing anyway.")
+        LOG.warning("Writing PID file in {}".format(os.getcwd()))
         open("./moon_orchestrator.pid", "w").write(str(os.getpid()))
 
 
