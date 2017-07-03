@@ -96,6 +96,7 @@ def _exit(exit_number=0, error=None):
             LOG.error(e)
         else:
             docker.remove_container(container=_container)
+    LOG.info("Moon orchestrator: offline")
 
     # TODO (asteroide): put in the debug log
     if error:
