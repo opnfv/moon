@@ -271,11 +271,48 @@ class Authorization(object):
         self.payload = payload
         try:
             if "authz_context" not in payload:
-                self.payload["authz_context"] = Context(self.keystone_project_id,
-                                                        self.payload["subject_name"],
-                                                        self.payload["object_name"],
-                                                        self.payload["action_name"],
-                                                        self.payload["request_id"]).to_dict()
+                try:
+                    self.payload["authz_context"] = Context(self.keystone_project_id,
+                                                            self.payload["subject_name"],
+                                                            self.payload["object_name"],
+                                                            self.payload["action_name"],
+                                                            self.payload["request_id"]).to_dict()
+                except exceptions.SubjectUnknown:
+                    ctx = {
+                        "subject_name": self.payload["subject_name"],
+                        "object_name": self.payload["object_name"],
+                        "action_name": self.payload["action_name"],
+                    }
+                    call("moon_manager", method="update_from_master", ctx=ctx, args={})
+                    self.payload["authz_context"] = Context(self.keystone_project_id,
+                                                            self.payload["subject_name"],
+                                                            self.payload["object_name"],
+                                                            self.payload["action_name"],
+                                                            self.payload["request_id"]).to_dict()
+                except exceptions.ObjectUnknown:
+                    ctx = {
+                        "subject_name": self.payload["subject_name"],
+                        "object_name": self.payload["object_name"],
+                        "action_name": self.payload["action_name"],
+                    }
+                    call("moon_manager", method="update_from_master", ctx=ctx, args={})
+                    self.payload["authz_context"] = Context(self.keystone_project_id,
+                                                            self.payload["subject_name"],
+                                                            self.payload["object_name"],
+                                                            self.payload["action_name"],
+                                                            self.payload["request_id"]).to_dict()
+                except exceptions.ActionUnknown:
+                    ctx = {
+                        "subject_name": self.payload["subject_name"],
+                        "object_name": self.payload["object_name"],
+                        "action_name": self.payload["action_name"],
+                    }
+                    call("moon_manager", method="update_from_master", ctx=ctx, args={})
+                    self.payload["authz_context"] = Context(self.keystone_project_id,
+                                                            self.payload["subject_name"],
+                                                            self.payload["object_name"],
+                                                            self.payload["action_name"],
+                                                            self.payload["request_id"]).to_dict()
                 self.__update_container_chaining()
             else:
                 self.payload["authz_context"]["index"] += 1

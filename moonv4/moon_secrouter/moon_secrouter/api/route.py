@@ -135,6 +135,14 @@ class Cache(object):
 
     def __update_pdp(self):
         pdp = call("moon_manager", method="get_pdp", ctx={"user_id": "admin"}, args={})
+        if not pdp["pdps"]:
+            LOG.info("Updating PDP through master")
+            pdp = call("moon_manager", method="get_pdp",
+                       ctx={
+                           "user_id": "admin",
+                           'call_master': True
+                        },
+                       args={})
         for _pdp in pdp["pdps"].values():
             if _pdp['keystone_project_id'] not in self.__CONTAINER_CHAINING:
                 self.__CONTAINER_CHAINING[_pdp['keystone_project_id']] = {}
@@ -418,6 +426,11 @@ class Router(object):
                     return call(component, method=ctx["method"], ctx=ctx, args=args)
                 if component == "manager":
                     result = call("moon_manager", method=ctx["method"], ctx=ctx, args=args)
+                    if ctx["method"] == "get_pdp":
+                        _ctx = copy.deepcopy(ctx)
+                        _ctx["call_master"] = True
+                        result2 = call("moon_manager", method=ctx["method"], ctx=_ctx, args=args)
+                        result["pdps"].update(result2["pdps"])
                     self.send_update(api=ctx["method"], ctx=ctx, args=args)
                     return result
                 if component == "function":

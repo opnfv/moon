@@ -141,7 +141,6 @@ class Master(object):
 
     def __add_meta_rule(self):
         meta_rules = ModelManager.get_meta_rules("admin")
-        LOG.info("meta_rules={}".format(meta_rules))
         for uuid, value in self.meta_rules.items():
             if uuid not in meta_rules:
                 ModelManager.add_meta_rule("admin", uuid, value=value)
@@ -305,21 +304,22 @@ class Master(object):
 
     def update_from_master(self, ctx, args):
         LOG.info("update_from_master {}".format(ctx))
-        self.__policy_ids = ctx["security_pipeline"]
+        if "security_pipeline" in ctx:
+            self.__policy_ids = ctx["security_pipeline"]
 
-        for policy_id, policy_value in self.policies.items():
-            self.__model_ids.append(policy_value["model_id"])
+            for policy_id, policy_value in self.policies.items():
+                self.__model_ids.append(policy_value["model_id"])
 
-        for model_id, model_value in self.models.items():
-            self.__meta_rule_ids.extend(model_value['meta_rules'])
+            for model_id, model_value in self.models.items():
+                self.__meta_rule_ids.extend(model_value['meta_rules'])
 
-        self.__add_meta_data()
+            self.__add_meta_data()
 
-        self.__add_meta_rule()
+            self.__add_meta_rule()
 
-        for policy_id in ctx["security_pipeline"]:
-            if policy_id in self.policies:
-                PolicyManager.add_policy("admin", policy_id, self.__policies[policy_id])
+            for policy_id in ctx["security_pipeline"]:
+                if policy_id in self.policies:
+                    res = PolicyManager.add_policy("admin", policy_id, self.__policies[policy_id])
 
         self.__add_perimeter(subject_name=ctx.get("subject_name"), object_name=ctx.get("object_name"))
 
@@ -334,12 +334,12 @@ class Master(object):
             if model_id not in models:
                 ModelManager.add_model("admin", model_id, model_value)
 
-        pdp = PDPManager.add_pdp(user_id="admin", pdp_id=ctx["pdp_id"], value=args)
-        if "error" in pdp:
-            LOG.error("Error when adding PDP from master {}".format(pdp))
-            return False
-        LOG.info("pdp={}".format(pdp))
-        call("orchestrator", method="add_container",
-             ctx={"id": ctx.get("id"), "pipeline": ctx['security_pipeline']})
+        if args:
+            pdp = PDPManager.add_pdp(user_id="admin", pdp_id=ctx["pdp_id"], value=args)
+            if "error" in pdp:
+                LOG.error("Error when adding PDP from master {}".format(pdp))
+                return False
+            call("orchestrator", method="add_container",
+                 ctx={"id": ctx.get("id"), "pipeline": ctx['security_pipeline']})
         return True
 

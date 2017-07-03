@@ -325,10 +325,20 @@ class Assignments(object):
             if _data_value['name'] == object_name:
                 return _data_id
 
+    def __get_action_id(self, ctx, action_name):
+        data = self.manager.get_actions(
+            user_id=ctx["user_id"],
+            policy_id=ctx["id"],
+            perimeter_id=None
+        )
+        for _data_id, _data_value in data.items():
+            if _data_value['name'] == action_name:
+                return _data_id
+
     def get_subject_assignments(self, ctx, args):
         try:
-            if "perimeter_name" in args:
-                ctx["perimeter_id"] = self.__get_subject_id(ctx, args['perimeter_name'])
+            if "perimeter_name" in ctx:
+                ctx["perimeter_id"] = self.__get_subject_id(ctx, ctx['perimeter_name'])
             data = self.manager.get_subject_assignments(user_id=ctx["user_id"], policy_id=ctx["id"],
                                                         subject_id=ctx["perimeter_id"], category_id=ctx["category_id"])
         except Exception as e:
@@ -364,8 +374,8 @@ class Assignments(object):
 
     def get_object_assignments(self, ctx, args):
         try:
-            if "perimeter_name" in args:
-                ctx["perimeter_id"] = self.__get_object_id(ctx, args['perimeter_name'])
+            if "perimeter_name" in ctx:
+                ctx["perimeter_id"] = self.__get_object_id(ctx, ctx['perimeter_name'])
             data = self.manager.get_object_assignments(user_id=ctx["user_id"], policy_id=ctx["id"],
                                                        object_id=ctx["perimeter_id"], category_id=ctx["category_id"])
         except Exception as e:
@@ -401,6 +411,8 @@ class Assignments(object):
 
     def get_action_assignments(self, ctx, args):
         try:
+            if "perimeter_name" in ctx:
+                ctx["perimeter_id"] = self.__get_action_id(ctx, ctx['perimeter_name'])
             data = self.manager.get_action_assignments(user_id=ctx["user_id"], policy_id=ctx["id"],
                                                        action_id=ctx["perimeter_id"], category_id=ctx["category_id"])
         except Exception as e:
