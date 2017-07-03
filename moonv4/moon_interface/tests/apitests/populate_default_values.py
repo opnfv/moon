@@ -8,12 +8,26 @@ from utils.policies import *
 parser = argparse.ArgumentParser()
 parser.add_argument('filename', help='scenario filename', nargs=1)
 parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
+parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
 args = parser.parse_args()
 
 FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
-logging.basicConfig(
-    format=FORMAT,
-    level=logging.WARNING)
+if args.debug:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.INFO)
+else:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.WARNING)
+
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.WARNING)
+requests_log.propagate = True
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +41,17 @@ scenario = m.load_module()
 
 def create_model(model_id=None):
     if args.verbose:
-        logger.warning("Creating model {}".format(scenario.model_name))
+        logger.info("Creating model {}".format(scenario.model_name))
     if not model_id:
+        logger.info("Add model")
         model_id = add_model(name=scenario.model_name)
+    logger.info("Add subject categories")
     for cat in scenario.subject_categories:
         scenario.subject_categories[cat] = add_subject_category(name=cat)
+    logger.info("Add object categories")
     for cat in scenario.object_categories:
         scenario.object_categories[cat] = add_object_category(name=cat)
+    logger.info("Add action categories")
     for cat in scenario.action_categories:
         scenario.action_categories[cat] = add_action_category(name=cat)
     sub_cat = []
@@ -54,6 +72,7 @@ def create_model(model_id=None):
                 meta_rule_id = _meta_rule_id
                 break
         else:
+            logger.info("Add meta rule")
             meta_rule_id = add_meta_rule(item_name, sub_cat, ob_cat, act_cat)
         item_value["id"] = meta_rule_id
         if meta_rule_id not in meta_rule_list:
@@ -63,7 +82,7 @@ def create_model(model_id=None):
 
 def create_policy(model_id, meta_rule_list):
     if args.verbose:
-        logger.warning("Creating policy {}".format(scenario.policy_name))
+        logger.info("Creating policy {}".format(scenario.policy_name))
     _policies = check_policy()
     for _policy_id, _policy_value in _policies["policies"].items():
         if _policy_value['name'] == scenario.policy_name:
@@ -75,21 +94,24 @@ def create_policy(model_id, meta_rule_list):
     update_policy(policy_id, model_id)
 
     for meta_rule_id in meta_rule_list:
-        print("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
+        logger.debug("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
         add_meta_rule_to_model(model_id, meta_rule_id)
 
+    logger.info("Add subject data")
     for subject_cat_name in scenario.subject_data:
         for subject_data_name in scenario.subject_data[subject_cat_name]:
             data_id = scenario.subject_data[subject_cat_name][subject_data_name] = add_subject_data(
                 policy_id=policy_id,
                 category_id=scenario.subject_categories[subject_cat_name], name=subject_data_name)
             scenario.subject_data[subject_cat_name][subject_data_name] = data_id
+    logger.info("Add object data")
     for object_cat_name in scenario.object_data:
         for object_data_name in scenario.object_data[object_cat_name]:
             data_id = scenario.object_data[object_cat_name][object_data_name] = add_object_data(
                 policy_id=policy_id,
                 category_id=scenario.object_categories[object_cat_name], name=object_data_name)
             scenario.object_data[object_cat_name][object_data_name] = data_id
+    logger.info("Add action data")
     for action_cat_name in scenario.action_data:
         for action_data_name in scenario.action_data[action_cat_name]:
             data_id = scenario.action_data[action_cat_name][action_data_name] = add_action_data(
@@ -97,13 +119,17 @@ def create_policy(model_id, meta_rule_list):
                 category_id=scenario.action_categories[action_cat_name], name=action_data_name)
             scenario.action_data[action_cat_name][action_data_name] = data_id
 
+    logger.info("Add subjects")
     for name in scenario.subjects:
         scenario.subjects[name] = add_subject(policy_id, name=name)
+    logger.info("Add objects")
     for name in scenario.objects:
         scenario.objects[name] = add_object(policy_id, name=name)
+    logger.info("Add actions")
     for name in scenario.actions:
         scenario.actions[name] = add_action(policy_id, name=name)
 
+    logger.info("Add subject assignments")
     for subject_name in scenario.subject_assignments:
         if type(scenario.subject_assignments[subject_name]) in (list, tuple):
             for items in scenario.subject_assignments[subject_name]:
@@ -120,6 +146,7 @@ def create_policy(model_id, meta_rule_list):
                 subject_data_id = scenario.subject_data[subject_category_name][scenario.subject_assignments[subject_name][subject_category_name]]
                 add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id)
         
+    logger.info("Add object assignments")
     for object_name in scenario.object_assignments:
         if type(scenario.object_assignments[object_name]) in (list, tuple):
             for items in scenario.object_assignments[object_name]:
@@ -136,6 +163,7 @@ def create_policy(model_id, meta_rule_list):
                 object_data_id = scenario.object_data[object_category_name][scenario.object_assignments[object_name][object_category_name]]
                 add_object_assignments(policy_id, object_id, object_cat_id, object_data_id)
 
+    logger.info("Add action assignments")
     for action_name in scenario.action_assignments:
         if type(scenario.action_assignments[action_name]) in (list, tuple):
             for items in scenario.action_assignments[action_name]:
@@ -152,6 +180,7 @@ def create_policy(model_id, meta_rule_list):
                 action_data_id = scenario.action_data[action_category_name][scenario.action_assignments[action_name][action_category_name]]
                 add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
 
+    logger.info("Add rules")
     for meta_rule_name in scenario.rules:
         meta_rule_value = scenario.meta_rule[meta_rule_name]
         for rule in scenario.rules[meta_rule_name]:
@@ -171,8 +200,7 @@ def create_policy(model_id, meta_rule_list):
 
 
 def create_pdp(policy_id=None):
-    if args.verbose:
-        logger.warning("Creating PDP {}".format(scenario.pdp_name))
+    logger.info("Creating PDP {}".format(scenario.pdp_name))
     projects = get_keystone_projects()
     admin_project_id = None
     for _project in projects['projects']:
@@ -183,7 +211,7 @@ def create_pdp(policy_id=None):
     for pdp_id, pdp_value in pdps.items():
         if scenario.pdp_name == pdp_value["name"]:
             update_pdp(pdp_id, policy_id=policy_id)
-            logger.info("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
+            logger.debug("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
             return pdp_id
     _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
     map_to_keystone(pdp_id=_pdp_id, keystone_project_id=admin_project_id)
