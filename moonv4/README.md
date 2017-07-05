@@ -14,7 +14,7 @@ sudo apt -y install docker-engine # ([Get Docker](https://docs.docker.com/engine
 echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts
 ```
 
-### Install Docker
+### Install Docker Engine
 
 ```bash
 sudo apt-get remove docker docker-engine
@@ -39,35 +39,13 @@ export MOON_HOME=$(pwd)
 sudo ln -s $(pwd)/conf /etc/moon
 ```
 
-### Create an OpenStack environment
+## Create an OpenStack environment
+see the templates/docker/keystone/README.md
+Or execute directly `bin/start.sh`
 
-```bash
-cd $MOON_HOME/templates/docker/keystone
-# Check the proxy settings in Dockerfile
-sudo docker build -t keystone:mitaka .
-```
-
-### Start RabbitMQ
-
-```bash
-sudo docker network create -d bridge --subnet=172.18.0.0/16 --gateway=172.18.0.1 moon
-sudo docker run -dti --net=moon --hostname messenger --name messenger --link messenger:messenger -e RABBITMQ_DEFAULT_USER=moon -e RABBITMQ_DEFAULT_PASS=p4sswOrd1 -e RABBITMQ_NODENAME=rabbit@messenger -e RABBITMQ_DEFAULT_VHOST=moon -p 5671:5671 -p 5672:5672 rabbitmq:3-management
-```
-
-### Start MySQL server
-
-```bash
-sudo docker run -dti  --net=moon --hostname db --name db -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
-```
-
-### Start an OpenStack environment
-
-```bash
-sudo docker run -dti --net moon --name keystone --hostname=keystone -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 keystone:mitaka
-```
-
+## Launch all other containers of Moon
 ### Build python packages for all components
-
+TODO: containerize moon_orchestrator
 ```bash
 cd ${MOON_HOME}/moon_orchestrator
 sudo pip3 install pip --upgrade
@@ -75,8 +53,8 @@ cd ${MOON_HOME}/bin
 source build_all.sh
 ```
 
+## Moon_Orchestrator
 ### Start Orchestrator
-
 To start the Moon platform, you have to run the Orchestrator.
 
 ```bash
@@ -100,7 +78,7 @@ cd ${MOON_HOME}/moon_interface/tests/apitests
 pytest
 ```
 
-
+## Configure DB
 ### Relaunch Keystone docker
 If error of `get_keystone_projects()`, then relaunch the Keystone docker, and wait 40 seconds!!!
 ```bash
@@ -115,9 +93,8 @@ cd ${MOON_HOME}/moon_interface/tests/apitests
 python3 populate_default_values.py scenario/ rbac.py
 ```
 
-
+## Log
 ### Get some logs
-
 ```bash
 docker ps
 docker logs messenger
@@ -127,13 +104,11 @@ docker logs moon_interface
 ```
 
 ### Get some statistics
-
 ```bash
 docker stats --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.PIDs}}"
 ```
 
 ### Get the API in PDF
-
 ```bash
 cd ${MOON_HOME}/moon_interface/tools
 sudo pip3 install requests
@@ -144,8 +119,8 @@ pandoc api.rst -o api.pdf
 evince api.pdf
 ```
 
-## How to hack the Moon platform
 
+## How to hack the Moon platform
 ### Force the build of components
 
 If you want to rebuild one or more component, you have to modify the configuration file `moon.conf`. 

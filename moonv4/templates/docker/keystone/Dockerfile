@@ -1,4 +1,3 @@
-# Pull base image.
 FROM ubuntu:latest
 
 ENV ADMIN_TOKEN=p4ssw0rd
@@ -18,8 +17,6 @@ RUN apt-get update && apt-get install apache2 rabbitmq-server keystone python-op
 
 RUN apt-get update && apt-get install iputils-ping net-tools -y
 
-
-# ADD set-ops-env.source.sh /root
 ADD run.sh /root
 
 EXPOSE 35357
