@@ -1,6 +1,12 @@
 import requests
+import configparser
 
-URL = "http://172.18.0.11:38001{}"
+config = configparser.ConfigParser()
+if not config.read("moon.conf"):
+    config.read("/etc/moon/moon.conf")
+
+URL = "http://{}:{}".format(config['interface']['host'], config['interface']['port'])
+URL = URL + "{}"
 HEADERS = {"content-type": "application/json"}
 FILE = open("/tmp/test.log", "w")
 
@@ -580,7 +586,10 @@ def add_rule(policy_id, meta_rule_id, rule, instructions={"chain": [{"security_p
     assert req.status_code == 200
     result = req.json()
     assert "rules" in result
-    rule_id = list(result["rules"].keys())[0]
+    try:
+        rule_id = list(result["rules"].keys())[0]
+    except Exception as e:
+        return False
     assert "policy_id" in result["rules"][rule_id]
     assert policy_id == result["rules"][rule_id]["policy_id"]
     assert "meta_rule_id" in result["rules"][rule_id]

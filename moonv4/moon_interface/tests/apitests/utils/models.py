@@ -1,7 +1,13 @@
 import requests
 import copy
+import configparser
 
-URL = "http://172.18.0.11:38001{}"
+config = configparser.ConfigParser()
+if not config.read("moon.conf"):
+    config.read("/etc/moon/moon.conf")
+
+URL = "http://{}:{}".format(config['interface']['host'], config['interface']['port'])
+URL = URL + "{}"
 HEADERS = {"content-type": "application/json"}
 
 model_template = {
