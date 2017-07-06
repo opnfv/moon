@@ -1,5 +1,5 @@
 
-pdp_name = "pdp1"
+pdp_name = "pdp01"
 policy_name = "RBAC policy example"
 model_name = "RBAC"
 policy_genre = "authz"

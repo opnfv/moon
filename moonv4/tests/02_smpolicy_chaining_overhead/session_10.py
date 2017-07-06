@@ -1,5 +1,5 @@
 
-pdp_name = "pdp1"
+pdp_name = "pdp01"
 policy_name = "Session policy example"
 model_name = "Session"
 policy_genre = "session"

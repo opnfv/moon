@@ -2,8 +2,8 @@
 
 TEST_SCRIPT=${MOON_HOME}/moon_interface/tests/apitests/set_authz.py
 POPULATE_SCRIPT=${MOON_HOME}/moon_interface/tests/apitests/populate_default_values.py
-RESULT_DIR=${MOON_HOME}/tests/01_smpolicy_average_latency/ida/08
-HOST="--limit=50 --stress-test"
+RESULT_DIR=${MOON_HOME}/tests/01_smpolicy_average_latency/varuna/ida/02
+HOST="--host=varuna"
 
 SCENARIO_RBAC010=${MOON_HOME}/tests/01_smpolicy_average_latency/rbac_10.py
 SCENARIO_RBAC050=${MOON_HOME}/tests/01_smpolicy_average_latency/rbac_50.py
@@ -17,27 +17,27 @@ SCENARIO_SESSION=${MOON_HOME}/tests/01_smpolicy_average_latency/session.py
 
 mkdir -p ${RESULT_DIR} 2>/dev/null
 
-python3 ${POPULATE_SCRIPT} ${SCENARIO_RBAC010}
+#python3 ${POPULATE_SCRIPT} ${SCENARIO_RBAC010}
 
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 1 --write="${RESULT_DIR}/data_rbac_10_01.json" --write-html="${RESULT_DIR}/data_rbac_10_01.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 2 --write="${RESULT_DIR}/data_rbac_10_02.json" --write-html="${RESULT_DIR}/data_rbac_10_02.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 3 --write="${RESULT_DIR}/data_rbac_10_03.json" --write-html="${RESULT_DIR}/data_rbac_10_03.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 4 --write="${RESULT_DIR}/data_rbac_10_04.json" --write-html="${RESULT_DIR}/data_rbac_10_04.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 5 --write="${RESULT_DIR}/data_rbac_10_05.json" --write-html="${RESULT_DIR}/data_rbac_10_05.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 6 --write="${RESULT_DIR}/data_rbac_10_06.json" --write-html="${RESULT_DIR}/data_rbac_10_06.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 7 --write="${RESULT_DIR}/data_rbac_10_07.json" --write-html="${RESULT_DIR}/data_rbac_10_07.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 8 --write="${RESULT_DIR}/data_rbac_10_08.json" --write-html="${RESULT_DIR}/data_rbac_10_08.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 9 --write="${RESULT_DIR}/data_rbac_10_09.json" --write-html="${RESULT_DIR}/data_rbac_10_09.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 10 --write="${RESULT_DIR}/data_rbac_10_10.json" --write-html="${RESULT_DIR}/data_rbac_10_10.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 11 --write="${RESULT_DIR}/data_rbac_10_11.json" --write-html="${RESULT_DIR}/data_rbac_10_11.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 12 --write="${RESULT_DIR}/data_rbac_10_12.json" --write-html="${RESULT_DIR}/data_rbac_10_12.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 13 --write="${RESULT_DIR}/data_rbac_10_13.json" --write-html="${RESULT_DIR}/data_rbac_10_13.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 14 --write="${RESULT_DIR}/data_rbac_10_14.json" --write-html="${RESULT_DIR}/data_rbac_10_14.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 15 --write="${RESULT_DIR}/data_rbac_10_15.json" --write-html="${RESULT_DIR}/data_rbac_10_15.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 16 --write="${RESULT_DIR}/data_rbac_10_16.json" --write-html="${RESULT_DIR}/data_rbac_10_16.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 17 --write="${RESULT_DIR}/data_rbac_10_17.json" --write-html="${RESULT_DIR}/data_rbac_10_17.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 18 --write="${RESULT_DIR}/data_rbac_10_18.json" --write-html="${RESULT_DIR}/data_rbac_10_18.html" ${SCENARIO_RBAC010}
-python3 ${TEST_SCRIPT} ${HOST} --request-per-second 19 --write="${RESULT_DIR}/data_rbac_10_19.json" --write-html="${RESULT_DIR}/data_rbac_10_19.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 1 --write="${RESULT_DIR}/data_rbac_10_01.json" --write-html="${RESULT_DIR}/data_rbac_10_01.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 2 --write="${RESULT_DIR}/data_rbac_10_02.json" --write-html="${RESULT_DIR}/data_rbac_10_02.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 3 --write="${RESULT_DIR}/data_rbac_10_03.json" --write-html="${RESULT_DIR}/data_rbac_10_03.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 4 --write="${RESULT_DIR}/data_rbac_10_04.json" --write-html="${RESULT_DIR}/data_rbac_10_04.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 5 --write="${RESULT_DIR}/data_rbac_10_05.json" --write-html="${RESULT_DIR}/data_rbac_10_05.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 6 --write="${RESULT_DIR}/data_rbac_10_06.json" --write-html="${RESULT_DIR}/data_rbac_10_06.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 7 --write="${RESULT_DIR}/data_rbac_10_07.json" --write-html="${RESULT_DIR}/data_rbac_10_07.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 8 --write="${RESULT_DIR}/data_rbac_10_08.json" --write-html="${RESULT_DIR}/data_rbac_10_08.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 9 --write="${RESULT_DIR}/data_rbac_10_09.json" --write-html="${RESULT_DIR}/data_rbac_10_09.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 10 --write="${RESULT_DIR}/data_rbac_10_10.json" --write-html="${RESULT_DIR}/data_rbac_10_10.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 11 --write="${RESULT_DIR}/data_rbac_10_11.json" --write-html="${RESULT_DIR}/data_rbac_10_11.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 12 --write="${RESULT_DIR}/data_rbac_10_12.json" --write-html="${RESULT_DIR}/data_rbac_10_12.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 13 --write="${RESULT_DIR}/data_rbac_10_13.json" --write-html="${RESULT_DIR}/data_rbac_10_13.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 14 --write="${RESULT_DIR}/data_rbac_10_14.json" --write-html="${RESULT_DIR}/data_rbac_10_14.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 15 --write="${RESULT_DIR}/data_rbac_10_15.json" --write-html="${RESULT_DIR}/data_rbac_10_15.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 16 --write="${RESULT_DIR}/data_rbac_10_16.json" --write-html="${RESULT_DIR}/data_rbac_10_16.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 17 --write="${RESULT_DIR}/data_rbac_10_17.json" --write-html="${RESULT_DIR}/data_rbac_10_17.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 18 --write="${RESULT_DIR}/data_rbac_10_18.json" --write-html="${RESULT_DIR}/data_rbac_10_18.html" ${SCENARIO_RBAC010}
+#python3 ${TEST_SCRIPT} ${HOST} --request-per-second 19 --write="${RESULT_DIR}/data_rbac_10_19.json" --write-html="${RESULT_DIR}/data_rbac_10_19.html" ${SCENARIO_RBAC010}
 python3 ${TEST_SCRIPT} ${HOST} --request-per-second 20 --write="${RESULT_DIR}/data_rbac_10_20.json" --write-html="${RESULT_DIR}/data_rbac_10_20.html" ${SCENARIO_RBAC010}
 
 #python3 ${POPULATE_SCRIPT} ${SCENARIO_RBAC050}
