@@ -123,7 +123,7 @@ def server():
 
     network_config = create_docker_network()
 
-    LOG.info("Creating Security Router")
+    LOG.info("Creating Router")
     router = SecurityRouter(options.filename, docker=docker, network_config=network_config)
     CONTAINERS[router.id] = router
 
@@ -131,7 +131,7 @@ def server():
     manager = SecurityManager(options.filename, docker=docker, network_config=network_config)
     CONTAINERS[manager.id] = manager
 
-    LOG.info("Creating Security Interface")
+    LOG.info("Creating Interface")
     interface = SecurityInterface(options.filename, docker=docker, network_config=network_config)
     CONTAINERS[interface.id] = interface
 

@@ -98,6 +98,7 @@ RUN pip3 install --upgrade .
             shutil.copy(_file, os.path.join(self.tmp_dir, "dist"))
 
         try:
+            # TODO: check the symbol link
             shutil.copytree(os.path.dirname(self.conf_file), os.path.join(self.tmp_dir, "conf"))
         except OSError as exc:
             if exc.errno == errno.ENOTDIR:

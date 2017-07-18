@@ -32,3 +32,5 @@ echo Building Moon_Authz
 cd $MOON_HOME/moon_authz
 python3 setup.py sdist > /tmp/moon_authz.log
 mv dist/*.tar.gz $MOON_HOME/moon_orchestrator/dist
+
+# TODO: build container images

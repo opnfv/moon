@@ -2,12 +2,12 @@
 
 ## build keystone image
 
-### without proxy: 
+without proxy: 
 ```bash
 docker build -t keystone:mitaka .
 ```
 
-### with a proxy:
+with a proxy:
 ```bash
 docker build --build-arg https_proxy=http://proxy:3128 --build-arg http_proxy=http://proxy:3128 -t keystone:mitaka .
 ```
@@ -27,17 +27,20 @@ docker network create -d bridge --subnet=172.18.0.0/16 --gateway=172.18.0.1 moon
 ```
 
 ### Start RabbitMQ
+TODO: use our own container 
 ```bash
 docker container run -dti --net=moon --hostname messenger --name messenger -e RABBITMQ_DEFAULT_USER=moon -e RABBITMQ_DEFAULT_PASS=p4sswOrd1 -e RABBITMQ_NODENAME=rabbit@messenger -e RABBITMQ_DEFAULT_VHOST=moon -e RABBITMQ_HIPE_COMPILE=1 -p 5671:5671 -p 5672:5672 -p 8080:15672 rabbitmq:3-management
 ```
 
 
 ### Start MySQL server
+TODO: user our own containter
 ```bash
 docker container run -dti --net=moon --hostname db --name db -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
 ```
 
 ## launch a Keystone container
+TODO: user our own containter
 ```bash
 docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 keystone:mitaka
 ```
@@ -45,7 +48,7 @@ docker container run -dti --net moon --hostname keystone  --name keystone  -e DB
 ## check
 ### log
 ```bash
-docker logs keystone
+docker logs keystone -f
 ```
 
 
