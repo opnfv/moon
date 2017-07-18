@@ -211,6 +211,6 @@ def downgrade(migrate_engine):
             table = sql.Table(_table, meta, autoload=True)
             table.drop(migrate_engine, checkfirst=True)
         except Exception as e:
-            print(e.message)
+            print(e)
 
 

@@ -6,16 +6,14 @@
 """
 
 import os
-import sys
 import glob
-import argparse
 import importlib
 from oslo_config import cfg
 from oslo_log import log as logging
 from sqlalchemy import create_engine
 from moon_db.migrate_repo import versions
 
-# Note (dthom): The next line must be called before the next import
+# Note (asteroide): The next line must be called before the next import
 # aka before registering all the options
 cfg.CONF.register_cli_opt(cfg.StrOpt('command', positional=True,
                                      help="The command to execute (upgrade, downgrade)"))
