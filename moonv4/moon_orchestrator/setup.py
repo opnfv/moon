@@ -7,6 +7,9 @@ from setuptools import setup, find_packages
 import moon_orchestrator
 
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
+
 setup(
 
     name='moon_orchestrator',
@@ -23,7 +26,7 @@ setup(
 
     long_description=open('README.rst').read(),
 
-    # install_requires= ,
+    install_requires=required,
 
     include_package_data=True,
 
