@@ -6,6 +6,8 @@
 from setuptools import setup, find_packages
 import moon_utilities
 
+with open('requirements.txt') as f:
+    required = f.read().splitlines()
 
 setup(
 
@@ -23,7 +25,7 @@ setup(
 
     long_description=open('README.rst').read(),
 
-    # install_requires= ,
+    install_requires=required,
 
     include_package_data=True,
 

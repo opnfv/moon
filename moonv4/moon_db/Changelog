@@ -14,3 +14,8 @@ CHANGES
 1.0.0
 -----
 - First public version of the moon_db library.
+
+1.0.1
+-----
+- Update setup.py to force the installation of requirements.
+
