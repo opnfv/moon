@@ -8,7 +8,7 @@ from oslo_log import log as logging
 from oslo_config import cfg
 from stevedore.driver import DriverManager
 from moon_utilities import options  # noqa
-from moon_db.api import model, policy, pdp, tenants, keystone
+from moon_db.api import model, policy, pdp, keystone
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -217,10 +217,6 @@ class KeystoneDriver(Driver):
 KeystoneManager = keystone.KeystoneManager(
     KeystoneDriver(CONF.database.driver, CONF.database.url)
 )
-
-# ConfigurationManager = configuration.ConfigurationManager(
-#     ConfigurationDriver(CONF.database_configuration.driver, CONF.database_configuration.url)
-# )
 
 ModelManager = model.ModelManager(
     ModelDriver(CONF.database.driver, CONF.database.url)

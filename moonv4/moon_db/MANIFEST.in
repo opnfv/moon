@@ -7,5 +7,5 @@ include README.rst
 include LICENSE
 include setup.py
 include requirements.txt
-graft tests
+# graft tests
 graft bin
