@@ -9,7 +9,7 @@ import signal
 from oslo_config import cfg
 from oslo_log import log as logging
 from moon_utilities import options  # noqa
-from moon_secrouter.messenger import Server
+from moon_router.messenger import Server
 
 
 class AsyncServer(threading.Thread):
@@ -23,7 +23,7 @@ class AsyncServer(threading.Thread):
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
-DOMAIN = "moon_secrouter"
+DOMAIN = "moon_router"
 
 __CWD__ = os.path.dirname(os.path.abspath(__file__))
 

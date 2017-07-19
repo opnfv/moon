@@ -4,14 +4,14 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from setuptools import setup, find_packages
-import moon_secrouter
+import moon_router
 
 
 setup(
 
-    name='moon_secrouter',
+    name='moon_router',
 
-    version=moon_secrouter.__version__,
+    version=moon_router.__version__,
 
     packages=find_packages(),
 
@@ -21,7 +21,7 @@ setup(
 
     description="",
 
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     # install_requires= ,
 
@@ -40,8 +40,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_secrouter = moon_secrouter.server:main',
+            'moon_router = moon_router.server:main',
         ],
     }
-
 )

@@ -7,8 +7,8 @@ from oslo_config import cfg
 import oslo_messaging
 import time
 from oslo_log import log as logging
-from moon_secrouter.api.generic import Status, Logs
-from moon_secrouter.api.route import Router
+from moon_router.api.generic import Status, Logs
+from moon_router.api.route import Router
 from moon_utilities.api import APIList
 
 LOG = logging.getLogger(__name__)

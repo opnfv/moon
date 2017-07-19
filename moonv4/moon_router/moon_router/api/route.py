@@ -10,7 +10,7 @@ from uuid import uuid4
 from oslo_log import log as logging
 from moon_utilities.security_functions import call, notify
 from oslo_config import cfg
-from moon_secrouter.api.generic import Status, Logs
+from moon_router.api.generic import Status, Logs
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

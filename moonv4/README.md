@@ -30,67 +30,94 @@ sudo gpasswd -a ${USER} docker
 sudo service docker restart
 ```
 
-## Launch MySql, RabbitMQ, Keystone containers
-TODO: put all the containers to `dockerhub`
-### moon_mysql:v4.1
+## Launch MySql, RabbitMQ, Keystone
 
-### moon_rabbitmq:v4.1
-
-### moon_keystone:v4.1
+### Cleanup
 ```bash
-docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 asteroide/keystone_mitaka:latest
+docker container rm -f $(docker ps -a | grep moon | cut -d " " -f 1) 2>/dev/null
+docker container rm -f messenger db keystone 2>/dev/null
 ```
 
-## Install Orchestrator
-### Get the code
 
+### Internal Network Creation
 ```bash
-git clone https://git.opnfv.org/moon
-cd moon/moonv4
-export MOON_HOME=$(pwd)
-sudo ln -s $(pwd)/conf /etc/moon
+docker network create -d bridge --subnet=172.88.88.0/16 --gateway=172.88.88.1 moon
 ```
 
-### Start Orchestrator
+
+### MySql
+```bash
+docker container run -dti --net=moon --hostname db --name db -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
+```
+
+### Rabbitmq
+```bash
+docker container run -dti --net=moon --hostname messenger --name messenger -e RABBITMQ_DEFAULT_USER=moon -e RABBITMQ_DEFAULT_PASS=p4sswOrd1 -e RABBITMQ_NODENAME=rabbit@messenger -e RABBITMQ_DEFAULT_VHOST=moon -e RABBITMQ_HIPE_COMPILE=1 -p 5671:5671 -p 5672:5672 -p 8080:15672 rabbitmq:3-management
+```
+
+
+### moon_keystone
+```bash
+docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 wukongsun/moon_keystone:mitaka
+```
+
+
+## Orchestrator
 To start the Moon platform, you have to run the Orchestrator.
 
-TODO: put all Python packages to PIP
-
+### Installation
 ```bash
-cd ${MOON_HOME}/moon_orchestrator
-sudo apt install python3-venv
-pyvenv tests/venv
-. tests/venv/bin/activate
-pip3 install -r requirements.txt --upgrade
-pip3 install dist/moon_db-0.1.0.tar.gz --upgrade
-pip3 install dist/moon_utilities-0.1.0.tar.gz --upgrade
-pip3 install .  --upgrade
+sudo pip3 install moon_db --upgrade
+sudo pip3 install moon_utilities --upgrade
+sudo pip3 install moon_orchestrator  --upgrade
 moon_db_manager upgrade
 ```
 
-### `/etc/moon/moon.conf`
-- edit `dist_dir` variable
-- check each `container` variable 
-
-Launch `Moon Orchestrator`
+### Launch
 ```bash
 moon_orchestrator
 ```
 
 ### Tests
-In the Python venv 
 ```bash
-pip3 install pytest
-cd ${MOON_HOME}/moon_interface/tests/apitests
+sudo pip3 install pytest
+cd /usr/lib/moon_orchestratr/moon_interface/tests/apitests
 pytest
 ```
+
+
+## Launch consul, router, manager, interface
+
+### moon_consul
+```bash
+docker container run -dti --net moon --hostname consul --name consul wukongsun/moon_consul:v4.1
+```
+
+### moon_router
+```bash
+docker container run -dti --net moon --hostname router --name router wukongsun/moon_router:v4.1
+```
+
+### moon_manager
+```bash
+docker container run -dti --net moon --hostname manager --name manager wukongsun/moon_manager:v4.1
+```
+
+
+### moon_interface
+```bash
+docker container run -dti --net moon --hostname interface --name interface wukongsun/moon_interface:v4.1
+```
+
 
 ## Log
 ### Get some logs
 ```bash
 docker ps
+docker logs db
 docker logs messenger
 docker logs keystone
-docker logs moon_router
-docker logs moon_interface
+docker logs router
+docker logs manager
+docker logs interface
 ```
