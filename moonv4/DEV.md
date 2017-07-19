@@ -1,8 +1,8 @@
-# Build Python Packages and Containers
+# Build Python Packages and Docker Images
 
 ## Python Package
-### Get the code
-
+### pre-requist
+Get the code
 ```bash
 git clone https://git.opnfv.org/moon
 cd moon/moonv4
@@ -10,20 +10,51 @@ export MOON_HOME=$(pwd)
 sudo ln -s $(pwd)/conf /etc/moon
 ```
 
-### Build python packages for all components
+Install python wheel
 ```bash
-sudo pip3 install pip --upgrade
-cd ${MOON_HOME}/bin
-source build_all.sh
+sudo apt install python3-wheel
+```
+
+Install pip twine
+```bash
+sudo pip install twine
+```
+
+Package code, wheel is a new format instead of `tar.gz`
+```bash
+python setup.py sdist bdist_wheel
+```
+
+Upload to PyPi
+```bash
+twine upload dist/moon_xxx-y.y.y.whl
+twine upload dist/moon_xxx-y.y.y.tar.gz
+```
+
+Install a package from PyPi
+```bash
+sudo pypi install moon_xxx --upgrade
 ```
 
 ### moon_db
+- change version in `moon_db/__init__.py`
+- add `Changelog`
 
-
-### utilities
-
+### moon_utilities
+- change version in `moon_utilities/__init__.py`
+- add `Changelog`
 
 ### moon_orchestrator
+- change version in `moon_orchestrator/__init__.py`
+- add `Changelog`
+
+
+### Build All Pip
+```bash
+sudo pip3 install pip --upgrade
+cd ${MOON_HOME}/bin
+source build_all_pip.sh
+```
 
 
 ## Container

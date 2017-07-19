@@ -3,4 +3,19 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-__version__ = "1.0.1"
+
+CHANGES
+=======
+
+0.1.0
+-----
+- First version of the moon_orchestrator library.
+
+1.0.0
+-----
+- First public version of the moon_orchestrator library.
+
+1.0.1
+-----
+- add Changelog
+

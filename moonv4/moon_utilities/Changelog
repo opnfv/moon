@@ -19,3 +19,6 @@ CHANGES
 -----
 - Update setup.py to force the installation of requirements.
 
+1.0.2
+-----
+- Test PyPi upload

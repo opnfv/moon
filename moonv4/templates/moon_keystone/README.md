@@ -13,7 +13,7 @@ docker build --build-arg https_proxy=http://proxy:3128 --build-arg http_proxy=ht
 ```
 
 
-## set up an execution environment
+## Setup an execution environment
 
 ### clean up if necessary
 ```bash
