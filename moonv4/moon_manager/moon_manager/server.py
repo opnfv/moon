@@ -6,10 +6,10 @@
 import os
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import options  # noqa
+from moon_utilities import configuration
 from moon_manager.messenger import Server
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.manager")
 CONF = cfg.CONF
 DOMAIN = "moon_manager"
 
@@ -17,6 +17,8 @@ __CWD__ = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
+    configuration.init_logging()
+    configuration.add_component("manager", "manager")
     server = Server()
     server.run()
 

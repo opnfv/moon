@@ -15,8 +15,9 @@ from moon_manager.api.pdp import PDP
 from moon_manager.api.master import Master
 from moon_utilities.security_functions import call
 from moon_utilities.exceptions import IntraExtensionUnknown
+from moon_utilities import configuration
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.manager.messenger")
 CONF = cfg.CONF
 
 
@@ -24,6 +25,7 @@ class Server:
 
     def __init__(self):
         self.TOPIC = "moon_manager"
+        cfg.CONF.transport_url = self.__get_transport_url()
         self.transport = oslo_messaging.get_transport(cfg.CONF)
         self.target = oslo_messaging.Target(topic=self.TOPIC, server='moon_manager_server1')
         # ctx = {'user_id': 'admin', 'id': intra_extension_id, 'method': 'get_intra_extensions'}
@@ -59,6 +61,11 @@ class Server:
         self.server = oslo_messaging.get_rpc_server(self.transport, self.target, self.endpoints,
                                                     executor='threading',
                                                     access_policy=oslo_messaging.DefaultRPCAccessPolicy)
+
+    @staticmethod
+    def __get_transport_url():
+        messenger = configuration.get_configuration(configuration.MESSENGER)["messenger"]
+        return messenger['url']
 
     def run(self):
         try:
