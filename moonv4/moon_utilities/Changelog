@@ -22,3 +22,7 @@ CHANGES
 1.0.2
 -----
 - Test PyPi upload
+
+1.1.0
+-----
+- Add functions to get configuration from Consul

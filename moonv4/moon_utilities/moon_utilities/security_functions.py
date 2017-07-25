@@ -6,15 +6,35 @@
 
 import copy
 import re
+import os
 import types
 import requests
+import time
+from functools import wraps
+from flask import request
 from oslo_log import log as logging
 from oslo_config import cfg
 import oslo_messaging
 from moon_utilities import exceptions
+from moon_utilities import configuration
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.utilities." + __name__)
 CONF = cfg.CONF
+
+keystone_config = configuration.get_configuration("openstack/keystone")["openstack/keystone"]
+slave = configuration.get_configuration(configuration.SLAVE)["slave"]
+
+__transport_master = oslo_messaging.get_transport(cfg.CONF, slave.get("master_url"))
+__transport = oslo_messaging.get_transport(CONF)
+
+__n_transport = oslo_messaging.get_notification_transport(CONF)
+__n_notifier = oslo_messaging.Notifier(__n_transport,
+                                       'router.host',
+                                       driver='messagingv2',
+                                       topics=['authz-workers'])
+__n_notifier = __n_notifier.prepare(publisher_id='router')
+
+__targets = {}
 
 
 def filter_input(func_or_str):
@@ -92,15 +112,15 @@ def enforce(action_names, object_name, **extra):
 
 def login(user=None, password=None, domain=None, project=None, url=None):
     if not user:
-        user = CONF.keystone.user
+        user = keystone_config['user']
     if not password:
-        password = CONF.keystone.password
+        password = keystone_config['password']
     if not domain:
-        domain = CONF.keystone.domain
+        domain = keystone_config['domain']
     if not project:
-        project = CONF.keystone.project
+        project = keystone_config['project']
     if not url:
-        url = CONF.keystone.url
+        url = keystone_config['url']
     headers = {
         "Content-Type": "application/json"
     }
@@ -133,7 +153,7 @@ def login(user=None, password=None, domain=None, project=None, url=None):
 
     req = requests.post("{}/auth/tokens".format(url),
                         json=data_auth, headers=headers,
-                        verify=CONF.keystone.server_crt)
+                        verify=keystone_config['certificate'])
 
     if req.status_code in (200, 201, 204):
         headers['X-Auth-Token'] = req.headers['X-Subject-Token']
@@ -144,25 +164,13 @@ def login(user=None, password=None, domain=None, project=None, url=None):
 
 def logout(headers, url=None):
     if not url:
-        url = CONF.keystone.url
+        url = keystone_config['url']
     headers['X-Subject-Token'] = headers['X-Auth-Token']
-    req = requests.delete("{}/auth/tokens".format(url), headers=headers, verify=CONF.keystone.server_crt)
+    req = requests.delete("{}/auth/tokens".format(url), headers=headers, verify=keystone_config['certificate'])
     if req.status_code in (200, 201, 204):
         return
     LOG.error(req.text)
     raise exceptions.KeystoneError
-
-__transport_master = oslo_messaging.get_transport(cfg.CONF, CONF.slave.master_url)
-__transport = oslo_messaging.get_transport(CONF)
-
-__n_transport = oslo_messaging.get_notification_transport(CONF)
-__n_notifier = oslo_messaging.Notifier(__n_transport,
-                                       'router.host',
-                                       driver='messagingv2',
-                                       topics=['authz-workers'])
-__n_notifier = __n_notifier.prepare(publisher_id='router')
-
-__targets = {}
 
 
 def notify(request_id, container_id, payload, event_type="authz"):
@@ -176,7 +184,7 @@ def notify(request_id, container_id, payload, event_type="authz"):
     __n_notifier.critical(ctxt, event_type, payload=payload)
 
 
-def call(endpoint, ctx=None, method="route", **kwargs):
+def call(endpoint="security_router", ctx=None, method="route", **kwargs):
     if not ctx:
         ctx = dict()
     if endpoint not in __targets:
@@ -187,13 +195,14 @@ def call(endpoint, ctx=None, method="route", **kwargs):
                                                                              __targets[endpoint]["endpoint"])
         __targets[endpoint]["client"]["external"] = oslo_messaging.RPCClient(__transport_master,
                                                                              __targets[endpoint]["endpoint"])
-    if 'call_master' in ctx and ctx['call_master'] and CONF.slave.master_url:
+    if 'call_master' in ctx and ctx['call_master'] and slave.get("master_url"):
         client = __targets[endpoint]["client"]["external"]
         LOG.info("Calling master {} on {}...".format(method, endpoint))
     else:
         client = __targets[endpoint]["client"]["internal"]
         LOG.info("Calling {} on {}...".format(method, endpoint))
     result = copy.deepcopy(client.call(ctx, method, **kwargs))
+    LOG.info("result={}".format(result))
     del client
     return result
 
@@ -429,3 +438,67 @@ pdp_set: {pdp_set}
     @pdp_set.deleter
     def pdp_set(self):
         self.__pdp_set = {}
+
+TOKENS = {}
+
+
+def check_token(token, url=None):
+    _verify = False
+    if keystone_config['certificate']:
+        _verify = keystone_config['certificate']
+    try:
+        os.environ.pop("http_proxy")
+        os.environ.pop("https_proxy")
+    except KeyError:
+        pass
+    if not url:
+        url = keystone_config['url']
+    headers = {
+        "Content-Type": "application/json",
+        'X-Subject-Token': token,
+        'X-Auth-Token': token,
+    }
+    if not keystone_config['check_token']:
+        # TODO (asteroide): must send the admin id
+        return "admin" if not token else token
+    elif keystone_config['check_token'].lower() in ("false", "no", "n"):
+        # TODO (asteroide): must send the admin id
+        return "admin" if not token else token
+    if keystone_config['check_token'].lower() in ("yes", "y", "true"):
+        if token in TOKENS:
+            delta = time.mktime(TOKENS[token]["expires_at"]) - time.mktime(time.gmtime())
+            if delta > 0:
+                return TOKENS[token]["user"]
+            raise exceptions.KeystoneError
+        else:
+            req = requests.get("{}/auth/tokens".format(url), headers=headers, verify=_verify)
+            if req.status_code in (200, 201):
+                # Note (asteroide): the time stamps is not in ISO 8601, so it is necessary to delete
+                # characters after the dot
+                token_time = req.json().get("token").get("expires_at").split(".")
+                TOKENS[token] = dict()
+                TOKENS[token]["expires_at"] = time.strptime(token_time[0], "%Y-%m-%dT%H:%M:%S")
+                TOKENS[token]["user"] = req.json().get("token").get("user").get("id")
+                return TOKENS[token]["user"]
+            LOG.error("{} - {}".format(req.status_code, req.text))
+            raise exceptions.KeystoneError
+    elif keystone_config['check_token'].lower() == "strict":
+        req = requests.head("{}/auth/tokens".format(url), headers=headers, verify=_verify)
+        if req.status_code in (200, 201):
+            return token
+        LOG.error("{} - {}".format(req.status_code, req.text))
+        raise exceptions.KeystoneError
+    raise exceptions.KeystoneError
+
+
+def check_auth(function):
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        token = request.headers.get('X-Auth-Token')
+        token = check_token(token)
+        if not token:
+            raise exceptions.AuthException
+        user_id = kwargs.pop("user_id", token)
+        result = function(*args, **kwargs, user_id=user_id)
+        return result
+    return wrapper

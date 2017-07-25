@@ -5,7 +5,7 @@
 
 from oslo_log import log as logging
 from werkzeug.exceptions import HTTPException
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.utilities.exceptions")
 _ = str
 
 
@@ -475,6 +475,9 @@ class RuleUnknown(AdminRule):
     logger = "ERROR"
 
 
+# Keystone exceptions
+
+
 class KeystoneError(MoonError):
     description = _("There is an error connecting to Keystone.")
     code = 400
@@ -502,4 +505,37 @@ class KeystoneUserConflict(KeystoneUserError):
     title = 'Keystone user error'
     logger = "ERROR"
 
+
+# Consul exceptions
+
+
+class ConsulError(MoonError):
+    description = _("There is an error connecting to Consul.")
+    code = 400
+    title = 'Consul error'
+    logger = "ERROR"
+
+
+class ConsulComponentNotFound(ConsulError):
+    description = _("The component do not exist in Consul database.")
+    code = 500
+    title = 'Consul error'
+    logger = "WARNING"
+
+
+# Containers exceptions
+
+
+class DockerError(MoonError):
+    description = _("There is an error with Docker.")
+    code = 400
+    title = 'Docker error'
+    logger = "ERROR"
+
+
+class ContainerMissing(DockerError):
+    description = _("Some containers are missing.")
+    code = 400
+    title = 'Container missing'
+    logger = "ERROR"
 
