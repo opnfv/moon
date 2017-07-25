@@ -10,8 +10,9 @@ from oslo_log import log as logging
 from moon_router.api.generic import Status, Logs
 from moon_router.api.route import Router
 from moon_utilities.api import APIList
+from moon_utilities import configuration
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.router.messenger")
 
 
 class Server:
@@ -19,9 +20,11 @@ class Server:
     TOPIC = "security_router"
 
     def __init__(self, add_master_cnx=False):
-        if add_master_cnx and cfg.CONF.slave.master_url:
-            self.transport = oslo_messaging.get_transport(cfg.CONF, cfg.CONF.slave.master_url)
-            self.TOPIC = self.TOPIC + "_" + cfg.CONF.slave.slave_name
+        slave = configuration.get_configuration(configuration.SLAVE)["slave"]
+        cfg.CONF.transport_url = self.__get_transport_url()
+        if add_master_cnx and slave["master"]["url"]:
+            self.transport = oslo_messaging.get_transport(cfg.CONF, slave["master"]["url"])
+            self.TOPIC = self.TOPIC + "_" + slave["name"]
         else:
             self.transport = oslo_messaging.get_transport(cfg.CONF)
         self.target = oslo_messaging.Target(topic=self.TOPIC, server='server1')
@@ -36,6 +39,11 @@ class Server:
                                                     executor='threading',
                                                     access_policy=oslo_messaging.DefaultRPCAccessPolicy)
         self.__is_alive = False
+
+    @staticmethod
+    def __get_transport_url():
+        messenger = configuration.get_configuration(configuration.MESSENGER)["messenger"]
+        return messenger['url']
 
     def stop(self):
         self.__is_alive = False

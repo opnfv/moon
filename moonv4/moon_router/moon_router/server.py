@@ -6,9 +6,8 @@
 import os
 import threading
 import signal
-from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import options  # noqa
+from moon_utilities import configuration, exceptions
 from moon_router.messenger import Server
 
 
@@ -21,9 +20,7 @@ class AsyncServer(threading.Thread):
     def run(self):
         self.server.run()
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
-DOMAIN = "moon_router"
+LOG = logging.getLogger("moon.router")
 
 __CWD__ = os.path.dirname(os.path.abspath(__file__))
 
@@ -37,20 +34,27 @@ def stop_thread():
 
 def main():
     global background_threads
-    LOG.info("Starting server with IP {}".format(CONF.security_router.host))
+    configuration.init_logging()
+    try:
+        conf = configuration.get_configuration("components/router")
+    except exceptions.ConsulComponentNotFound:
+        conf = configuration.add_component("router", "router")
     signal.signal(signal.SIGALRM, stop_thread)
     signal.signal(signal.SIGTERM, stop_thread)
     signal.signal(signal.SIGABRT, stop_thread)
     background_master = None
-    if CONF.slave.slave_name:
+    slave = configuration.get_configuration(configuration.SLAVE)["slave"]
+    if slave['name']:
         background_master = AsyncServer(add_master_cnx=True)
         background_threads.append(background_master)
     background_slave = AsyncServer(add_master_cnx=False)
     background_threads.append(background_slave)
-    if CONF.slave.slave_name:
+    if slave['name']:
         background_master.start()
+        LOG.info("Connecting to master...")
     background_slave.start()
-    if CONF.slave.slave_name:
+    LOG.info("Starting main server {}".format(conf["components/router"]["hostname"]))
+    if slave['name']:
         background_master.join()
     background_slave.join()
 

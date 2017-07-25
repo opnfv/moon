@@ -9,11 +9,10 @@ import itertools
 from uuid import uuid4
 from oslo_log import log as logging
 from moon_utilities.security_functions import call, notify
-from oslo_config import cfg
 from moon_router.api.generic import Status, Logs
+from moon_utilities import configuration
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+LOG = logging.getLogger("moon.router.api.route")
 
 API = {
     "orchestrator": (
@@ -308,50 +307,55 @@ class Router(object):
 
     __version__ = "0.1.0"
     cache_requests = {}
+    slave_name = ""
 
     def __init__(self, add_master_cnx):
-        if CONF.slave.slave_name and add_master_cnx:
+        self.slave = configuration.get_configuration(configuration.SLAVE)["slave"]
+        try:
+            self.slave_name = self.slave['name']
+        except KeyError:
+            pass
+        if self.slave_name and add_master_cnx:
             result = call('security_router', method="route",
                           ctx={
-                              "name": CONF.slave.slave_name,
-                              "description": CONF.slave.slave_name,
+                              "name": self.slave_name,
+                              "description": self.slave_name,
                               "call_master": True,
                               "method": "add_slave"}, args={})
             if "result" in result and not result["result"]:
                 LOG.error("An error occurred when sending slave name {} {}".format(
-                    CONF.slave.slave_name, result
+                    self.slave_name, result
                 ))
             self.slave_id = list(result['slaves'].keys())[0]
             result = call('security_router', method="route",
                           ctx={
-                              "name": CONF.slave.slave_name,
-                              "description": CONF.slave.slave_name,
+                              "name": self.slave_name,
+                              "description": self.slave_name,
                               "call_master": True,
                               "method": "get_slaves"}, args={})
             if "result" in result and not result["result"]:
                 LOG.error("An error occurred when receiving slave names {} {}".format(
-                    CONF.slave.slave_name, result
+                    self.slave_name, result
                 ))
             LOG.info("SLAVES: {}".format(result))
 
     def delete(self):
-        if CONF.slave.slave_name and self.slave_id:
+        if self.slave_name and self.slave_id:
             result = call('security_router', method="route",
                           ctx={
-                              "name": CONF.slave.slave_name,
-                              "description": CONF.slave.slave_name,
+                              "name": self.slave_name,
+                              "description": self.slave_name,
                               "call_master": True,
                               "method": "delete_slave",
                               "id": self.slave_id}, args={})
             if "result" in result and not result["result"]:
                 LOG.error("An error occurred when sending slave name {} {}".format(
-                    CONF.slave.slave_name, result
+                    self.slave_name, result
                 ))
             LOG.info("SLAVE CONNECTION ENDED!")
             LOG.info(result)
 
-    @staticmethod
-    def check_pdp(ctx):
+    def check_pdp(self, ctx):
         _ctx = copy.deepcopy(ctx)
         keystone_id = _ctx.pop('id')
         # LOG.info("_ctx {}".format(_ctx))
@@ -361,7 +365,7 @@ class Router(object):
             return False
         keystone_id_list = map(lambda x: x["keystone_project_id"], ext['pdps'].values())
         if not ext['pdps'] or keystone_id not in keystone_id_list:
-            if CONF.slave.slave_name:
+            if self.slave_name:
                 _ctx['call_master'] = True
                 # update from master if exist and test again
                 LOG.info("Need to update from master {}".format(keystone_id))
@@ -393,7 +397,7 @@ class Router(object):
 
     def send_update(self, api, ctx={}, args={}):
         # TODO (asteroide): add threads here
-        if not CONF.slave.slave_name:
+        if not self.slave_name:
             # Note (asteroide):
             # if adding or setting an element: do nothing
             # if updating or deleting an element: force deletion in the slave
@@ -416,6 +420,7 @@ class Router(object):
         :param args: dictionary depending of the real destination
         :return: dictionary depending of the real destination
         """
+        LOG.info("Get Route {} {}".format(ctx, args))
         if ctx["method"] == "get_status":
             return Status().get_status(ctx=ctx, args=args)
         if ctx["method"] == "get_logs":
