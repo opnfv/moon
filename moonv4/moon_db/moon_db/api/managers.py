@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from oslo_log import log as logging
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.db.api.managers")
 
 
 class Managers(object):

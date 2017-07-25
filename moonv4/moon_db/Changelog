@@ -23,3 +23,8 @@ CHANGES
 -----
 - Test PyPi upload
 
+1.0.3
+-----
+- Fix a bug in core.py
+- Update db_manager
+

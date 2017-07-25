@@ -3,23 +3,13 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import os
-import re
-import types
-import json
-import copy
 from uuid import uuid4
-from oslo_config import cfg
 from oslo_log import log as logging
-import requests
-from moon_utilities import exceptions
 from moon_utilities.security_functions import filter_input, enforce
-# from moon_db.api import algorithms
 from moon_db.api.managers import Managers
 
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+LOG = logging.getLogger("moon.db.api.policy")
 
 
 class PolicyManager(Managers):

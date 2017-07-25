@@ -9,7 +9,7 @@ from moon_db.api.managers import Managers
 from moon_utilities.security_functions import filter_input, enforce
 from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.db.api.tenants")
 
 
 class TenantManager(Managers):

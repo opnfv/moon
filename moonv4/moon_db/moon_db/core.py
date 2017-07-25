@@ -3,15 +3,14 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from moon_db.exception import *
 from oslo_log import log as logging
 from oslo_config import cfg
 from stevedore.driver import DriverManager
-from moon_utilities import options  # noqa
+from moon_utilities import configuration
 from moon_db.api import model, policy, pdp, keystone
 
 CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.db")
 
 
 class Driver(DriverManager):
@@ -212,22 +211,21 @@ class KeystoneDriver(Driver):
         super(KeystoneDriver, self).__init__(driver_name, engine_name)
 
 
-# TODO (asteroide): we may use an other driver like the SQL driver
-# so we can change the driver to directly interrogate the Keystone database.
+conf = configuration.get_configuration("database")['database']
 KeystoneManager = keystone.KeystoneManager(
-    KeystoneDriver(CONF.database.driver, CONF.database.url)
+    KeystoneDriver(conf['driver'], conf['url'])
 )
 
 ModelManager = model.ModelManager(
-    ModelDriver(CONF.database.driver, CONF.database.url)
+    ModelDriver(conf['driver'], conf['url'])
 )
 
 PolicyManager = policy.PolicyManager(
-    PolicyDriver(CONF.database.driver, CONF.database.url)
+    PolicyDriver(conf['driver'], conf['url'])
 )
 
 PDPManager = pdp.PDPManager(
-    PDPDriver(CONF.database.driver, CONF.database.url)
+    PDPDriver(conf['driver'], conf['url'])
 )
 
 

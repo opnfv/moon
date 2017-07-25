@@ -8,21 +8,40 @@
 import os
 import glob
 import importlib
-from oslo_config import cfg
-from oslo_log import log as logging
+import argparse
+import logging
 from sqlalchemy import create_engine
 from moon_db.migrate_repo import versions
+from moon_utilities import configuration
 
-# Note (asteroide): The next line must be called before the next import
-# aka before registering all the options
-cfg.CONF.register_cli_opt(cfg.StrOpt('command', positional=True,
-                                     help="The command to execute (upgrade, downgrade)"))
-from moon_utilities import options  # noqa
+parser = argparse.ArgumentParser()
+parser.add_argument('command', help='command (upgrade or downgrade)', nargs=1)
+parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
+parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
+args = parser.parse_args()
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
+if args.debug:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.DEBUG)
+elif args.verbose:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.INFO)
+else:
+    logging.basicConfig(
+        format=FORMAT,
+        level=logging.WARNING)
 
-engine = create_engine(CONF.database.url)
+requests_log = logging.getLogger("requests.packages.urllib3")
+requests_log.setLevel(logging.WARNING)
+requests_log.propagate = True
+
+logger = logging.getLogger("moon.db.manager")
+
+db_conf = configuration.get_configuration("database")["database"]
+engine = create_engine(db_conf['url'])
 
 
 def format_data(ext):
@@ -31,15 +50,15 @@ def format_data(ext):
 
 def run():
     files = glob.glob(versions.__path__[0] + "/[0-9][0-9][0-9]*.py")
-    # args = set_options()
     for filename in files:
         filename = os.path.basename(filename).replace(".py", "")
         o = importlib.import_module("moon_db.migrate_repo.versions.{}".format(filename))
-        LOG.info("Command is {}".format(CONF.command))
-        if CONF.command in ("upgrade", "u", "up"):
-            LOG.info("upgrading moon_db.migrate_repo.versions.{}".format(filename))
+        logger.info("Command is {}".format(args.command[0]))
+        if args.command[0] in ("upgrade", "u", "up"):
+            logger.info("upgrading moon_db.migrate_repo.versions.{}".format(filename))
             o.upgrade(engine)
-        elif CONF.command in ("downgrade", "d", "down"):
-            LOG.info("downgrading moon_db.migrate_repo.versions.{}".format(filename))
+        elif args.command[0] in ("downgrade", "d", "down"):
+            logger.info("downgrading moon_db.migrate_repo.versions.{}".format(filename))
             o.downgrade(engine)
-        LOG.info("Done!")
+        else:
+            logger.critical("Cannot understand the command!")

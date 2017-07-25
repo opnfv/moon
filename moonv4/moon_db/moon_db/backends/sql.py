@@ -6,7 +6,7 @@
 import copy
 import json
 from uuid import uuid4
-from moon_db.exception import *
+from moon_utilities.exceptions import *
 from moon_db.core import PDPDriver, PolicyDriver, ModelDriver
 import sqlalchemy as sql
 import logging
@@ -15,15 +15,12 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from contextlib import contextmanager
 from sqlalchemy import types as sql_types
-from oslo_config import cfg
-# from moon_utilities.exceptions import IntraExtensionUnknown
+from moon_utilities import configuration
 
-# from sqlalchemy.orm.exc import UnmappedInstanceError
-# from keystone.contrib.moon import InterExtensionDriver
 
-CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.db.driver.sql")
 Base = declarative_base()
+DEBUG = True if configuration.get_configuration("logging")['logging']['loggers']['moon']['level'] == "DEBUG" else False
 
 
 class DictBase:
@@ -342,7 +339,7 @@ class Rule(Base, DictBase):
 def session_scope(engine):
     """Provide a transactional scope around a series of operations."""
     if type(engine) is str:
-        echo = True if CONF.debug else False
+        echo = DEBUG
         engine = create_engine(engine, echo=echo)
     session = sessionmaker(bind=engine)()
     try:
@@ -360,7 +357,7 @@ class BaseConnector(object):
     engine = ""
 
     def __init__(self, engine_name):
-        echo = True if CONF.debug else False
+        echo = DEBUG
         self.engine = create_engine(engine_name, echo=echo)
 
     def init_db(self):

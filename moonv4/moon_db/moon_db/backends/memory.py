@@ -11,7 +11,7 @@ from glob import glob
 from oslo_config import cfg
 from moon_db.core import ConfigurationDriver
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.db.driver.memory")
 CONF = cfg.CONF
 
 

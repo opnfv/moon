@@ -8,13 +8,11 @@ import requests
 import json
 from uuid import uuid4
 from oslo_log import log as logging
-from oslo_config import cfg
-from moon_utilities import exceptions
+from moon_utilities import exceptions, configuration
 from moon_db.api.managers import Managers
 from moon_utilities.security_functions import filter_input, login, logout
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+LOG = logging.getLogger("moon.db.api.keystone")
 
 
 class KeystoneManager(Managers):
@@ -22,11 +20,13 @@ class KeystoneManager(Managers):
     def __init__(self, connector=None):
         self.driver = connector.driver
         Managers.KeystoneManager = self
-        self.__url = CONF.keystone.url
-        self.__user = CONF.keystone.user
-        self.__password = CONF.keystone.password
-        self.__domain = CONF.keystone.domain
-        self.__project = CONF.keystone.project
+        conf = configuration.get_configuration("openstack/keystone")['openstack/keystone']
+
+        self.__url = conf['url']
+        self.__user = conf['user']
+        self.__password = conf['password']
+        self.__domain = conf['domain']
+        self.__project = conf['project']
         try:
             os.environ.pop("http_proxy")
             os.environ.pop("https_proxy")
