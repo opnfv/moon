@@ -1,11 +1,25 @@
+import os
+import yaml
 import requests
-import configparser
 
-config = configparser.ConfigParser()
-if not config.read("moon.conf"):
-    config.read("/etc/moon/moon.conf")
+for path in (
+    "moon.conf",
+    "../moon.conf",
+    "{}/moon_orchestrator/conf/moon.conf".format(os.getenv("MOON_HOME")),
+    "/etc/moon/moon.conf"
+):
+    try:
+        config = yaml.safe_load(open(path))
+    except FileNotFoundError:
+        config = None
+        continue
+    else:
+        print("Using {}".format(path))
+        break
+if not config:
+    raise Exception("Configuration file not found...")
 
-URL = "http://{}:{}".format(config['interface']['host'], config['interface']['port'])
+URL = "http://{}:{}".format(config['components']['interface']['hostname'], config['components']['interface']['port'])
 URL = URL + "{}"
 HEADERS = {"content-type": "application/json"}
 FILE = open("/tmp/test.log", "w")
