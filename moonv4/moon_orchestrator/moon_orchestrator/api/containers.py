@@ -10,7 +10,7 @@ from oslo_log import log as logging
 # from moon_db.core import ConfigurationManager
 from moon_utilities.security_functions import call
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.orchestrator.api.containers")
 CONF = cfg.CONF
 
 
@@ -28,38 +28,18 @@ class Containers(object):
                                        ctx={"user_id": "admin", "id": None})["pdps"].items():
             self.add_container(ctx={"id": pdp_key, "pipeline": pdp_value["security_pipeline"]})
 
-            # for _ext_id, _ext_value in self.__get_pdp({"user_id": "admin"}, None)["intra_extensions"].items():
-        #     self.docker_manager.load(component="policy", uuid=_ext_id)
-        #     # FIXME (asteroide): there may be other security_function here (delegation, ...)
-        #     LOG.info("ADDING Containers {}".format(_ext_value))
-        #     self.docker_manager.load(component="function", uuid="{}_{}_{}".format("authz", "rbac_rule", _ext_id))
-
-    # def __get_pdp(self, ctx, args=None):
-    #     """Get information about all pdp
-    #
-    #     :param ctx: {
-    #         "user_id": "uuid of a user",
-    #         "id": "uuid of a tenant or an intra_extension"
-    #     }
-    #     :param args: {}
-    #     :return: {
-    #         "intra_extension_id": {
-    #             "name": "name of the intra extension",
-    #             "model": "model of the intra extension",
-    #             "genre": "genre of the intra extension",
-    #             "description": "description of the intra-extension"
-    #         }
-    #     }
-    #     """
-    #     # TODO (asteroide): check if ctx["id"] is a tenant UUID or an intra_extension UUID.
-    #     _ext = IntraExtensionRootManager.get_intra_extensions_dict(ctx["user_id"])
-    #     if ctx and "id" in ctx and ctx["id"]:
-    #         if ctx["id"] in _ext:
-    #             return {"pdp": {ctx["id"]: _ext[ctx["id"]]}}
-    #         return {"error": "No pdp with id {}".format(ctx["id"])}
-    #     return {"pdp": _ext}
-
     def get_container(self, ctx, args=None):
+        """Get containers linked to an intra-extension
+
+        :param ctx: {
+            "id": "intra_extension_uuid",
+            "keystone_project_id": "Keystone Project UUID"
+        }    
+        :param args: {}
+        :return: {
+            "containers": {...},
+        }
+        """
         uuid = ctx.get("id")
         keystone_project_id = ctx.get("keystone_project_id")
         # _containers = self.docker_manager.get_component(uuid=uuid)
@@ -75,7 +55,7 @@ class Containers(object):
         return {"containers": self.components}
 
     def add_container(self, ctx, args=None):
-        """Add containers linked to an intra-extension
+        """Add containers
 
         :param ctx: {"id": "intra_extension_uuid"}
         :param args: {}
@@ -103,8 +83,10 @@ class Containers(object):
                 for meta_rule in models[policy_value['model_id']]['meta_rules']:
                     genre = policy_value['genre']
                     pre_container_id = "pdp:{}_metarule:{}_project:{}".format(ctx["id"], meta_rule, keystone_project_id)
+                    container_data = {"pdp": ctx["id"], "metarule": meta_rule, "project": keystone_project_id}
                     policy_component = self.docker_manager.load(component=genre,
-                                                                uuid=pre_container_id)
+                                                                uuid=pre_container_id,
+                                                                container_data=container_data)
                     self.components[ctx["id"]].append({
                         "meta_rule_id": meta_rule,
                         "genre": policy_value['genre'],
@@ -112,17 +94,6 @@ class Containers(object):
                         "container_id": policy_value['genre']+"_"+hashlib.sha224(pre_container_id.encode("utf-8")).hexdigest()
                     })
         return {"containers": self.components[ctx["id"]]}
-        # function_components = []
-        # for pdp in ctx['pdp_pipeline']:
-        #     key, value = pdp.split(":")
-        #     LOG.info("add_container {}:{}".format(key, value))
-        #     function_components.append(self.docker_manager.load(component="function",
-        #                                                         uuid="{}_{}_{}".format(key, value, ctx["id"])))
-        # containers = dict()
-        # containers[policy_component.id] = policy_component.get_status()
-        # for component in function_components:
-        #     containers[component.id] = component.get_status()
-        # return {"containers": containers}
 
     def delete_container(self, ctx, args=None):
         """Delete a container

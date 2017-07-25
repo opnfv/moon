@@ -4,3 +4,5 @@ oslo.config
 vine
 oslo.log
 babel
+moon_utilities
+moon_db

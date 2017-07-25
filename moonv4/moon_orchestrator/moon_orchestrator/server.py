@@ -5,56 +5,31 @@
 
 import sys
 import os
-import signal
 import hashlib
-from oslo_config import cfg
 from oslo_log import log as logging
-import oslo_messaging
 from docker import Client
 import docker.errors as docker_errors
-from importlib.machinery import SourceFileLoader
-from moon_utilities import options
-from moon_orchestrator.security_router import SecurityRouter
-from moon_orchestrator.security_interface import SecurityInterface
-from moon_orchestrator.security_manager import SecurityManager
-from moon_orchestrator.security_function import SecurityFunction
-# from moon_orchestrator.security_policy import SecurityPolicy
-# from moon_orchestrator.security_function import SecurityFunction
+from moon_utilities import configuration, exceptions
 from moon_orchestrator import messenger
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+
+LOG = logging.getLogger("moon.orchestrator")
 
 CONTAINERS = {}
 SLAVES = {}
-docker = Client(base_url=CONF.docker_url)
+docker_conf = configuration.get_configuration("docker")['docker']
+docker = Client(base_url=docker_conf['url'])
+LOG.info("docker_url={}".format(docker_conf['url']))
+docker_network = docker_conf['network']
 
 
 def kill_handler(signum, frame):
     _exit(0)
 
 
-def create_docker_network(name="moon"):
-
-    return docker.create_networking_config({
-        name: docker.create_endpoint_config(),
-        'aliases': ['orchestrator', ]
-    })
-
-
-def load_plugin(plugname):
-    try:
-        m = SourceFileLoader("scenario", os.path.join(CONF.plugin_dir, plugname+".py"))
-        return m.load_module()
-    except ImportError as e:
-        LOG.error("Error in importing plugin {}".format(plugname))
-        LOG.error("{}".format(e))
-
-
 class DockerManager:
 
-    @staticmethod
-    def load(component, uuid):
+    def load(self, component, uuid=None, container_data=None):
         """Load a new docker mapping the component given
 
         :param component: the name of the component (policy or function)
@@ -62,12 +37,77 @@ class DockerManager:
         :return: the created component
         """
         component_id = component+"_"+hashlib.sha224(uuid.encode("utf-8")).hexdigest()
-        if component_id not in CONTAINERS:
-            plug = load_plugin(component)
-            LOG.info("Creating {} with id {}".format(component, uuid))
-            component = plug.run(uuid, options.filename, docker=docker, network_config=create_docker_network())
-            CONTAINERS[component_id] = component
-            return component
+        plugins = configuration.get_plugins()
+        if component in plugins.keys():
+            components = configuration.get_components()
+            configuration.add_component(
+                name=component_id,
+                uuid=component_id,
+                port=configuration.increment_port(),
+                bind="0.0.0.0",
+                extra=container_data,
+                container=plugins[component]['container']
+            )
+            _command = plugins[component]['command']
+            try:
+                _index = _command.index("<UUID>")
+                _command[_index] = component_id
+            except ValueError:
+                pass
+            self.run(component_id, environment={"UUID": component_id})
+            CONTAINERS[component_id] = components.get(component_id)
+            CONTAINERS[component_id]["running"] = True
+            return CONTAINERS[component_id]
+
+    def load_all_containers(self):
+        LOG.info("Try to load all containers...")
+        current_containers = [item["Names"][0] for item in docker.containers()]
+        components = configuration.get_components()
+        containers_not_running = []
+        for c_name in (
+                '/keystone',
+                '/consul',
+                '/db',
+                '/messenger'
+        ):
+            if c_name not in current_containers:
+                containers_not_running.append(c_name)
+        if containers_not_running:
+            raise exceptions.ContainerMissing(
+                "Following containers are missing: {}".format(", ".join(containers_not_running)))
+        for c_name in (
+           '/interface',
+           '/manager',
+           '/router'):
+            if c_name not in current_containers:
+                LOG.info("Starting container {}...".format(c_name))
+                self.run(c_name.strip("/"))
+            else:
+                LOG.info("Container {} already running...".format(c_name))
+            CONTAINERS[c_name] = components.get(c_name.strip("/"))
+            CONTAINERS[c_name]["running"] = True
+
+    def run(self, name, environment=None):
+        components = configuration.get_components()
+        if name in components:
+            image = components[name]['container']
+            params = {
+                'image': image,
+                'name': name,
+                'hostname': name,
+                'detach': True,
+                'host_config': docker.create_host_config(network_mode=docker_network)
+            }
+            if 'port' in components[name] and components[name]['port']:
+                params["ports"] = [components[name]['port'], ]
+                params["host_config"] = docker.create_host_config(
+                    network_mode=docker_network,
+                    port_bindings={components[name]['port']: components[name]['port']}
+                )
+            if environment:
+                params["environment"] = environment
+            container = docker.create_container(**params)
+            docker.start(container=container.get('Id'))
 
     @staticmethod
     def get_component(uuid=None):
@@ -114,32 +154,14 @@ def __save_pid():
 
 
 def server():
-    # TODO (asteroide): need to add some options:
-    #   --foreground: run in foreground
-    __save_pid()
-    LOG.info("Starting server with IP {}".format(CONF.orchestrator.host))
+
+    configuration.init_logging()
+    conf = configuration.add_component("orchestrator", "orchestrator")
+    LOG.info("Starting main server {}".format(conf["components/orchestrator"]["hostname"]))
 
     docker_manager = DockerManager()
 
-    network_config = create_docker_network()
-
-    LOG.info("Creating Router")
-    router = SecurityRouter(options.filename, docker=docker, network_config=network_config)
-    CONTAINERS[router.id] = router
-
-    LOG.info("Creating Manager")
-    manager = SecurityManager(options.filename, docker=docker, network_config=network_config)
-    CONTAINERS[manager.id] = manager
-
-    LOG.info("Creating Interface")
-    interface = SecurityInterface(options.filename, docker=docker, network_config=network_config)
-    CONTAINERS[interface.id] = interface
-
-    try:
-        router.get_status()
-    except oslo_messaging.rpc.client.RemoteError as e:
-        LOG.error("Cannot check status of remote container!")
-        _exit(1, e)
+    docker_manager.load_all_containers()
     serv = messenger.Server(containers=CONTAINERS, docker_manager=docker_manager, slaves=SLAVES)
     try:
         serv.run()
@@ -148,11 +170,7 @@ def server():
 
 
 def main():
-    signal.signal(signal.SIGTERM, kill_handler)
-    signal.signal(signal.SIGHUP, kill_handler)
-    newpid = os.fork()
-    if newpid == 0:
-        server()
+    server()
 
 
 if __name__ == '__main__':

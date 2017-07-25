@@ -7,7 +7,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from uuid import uuid4
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.orchestrator.api.slaves")
 CONF = cfg.CONF
 
 

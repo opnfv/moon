@@ -6,10 +6,10 @@
 import json
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_db.core import IntraExtensionRootManager
+# from moon_db.core import IntraExtensionRootManager
 from moon_db.core import ConfigurationManager
 
-LOG = logging.getLogger(__name__)
+LOG = logging.getLogger("moon.orchestrator.api.configuration")
 CONF = cfg.CONF
 
 

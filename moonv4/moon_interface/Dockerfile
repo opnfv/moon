@@ -8,4 +8,4 @@ WORKDIR /root/
 RUN pip3 install -r requirements.txt
 RUN pip3 install .
 
-CMD ["python3", "-m", "moon_router"]
+CMD ["python3", "-m", "moon_interface"]
