@@ -3,22 +3,28 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import os
-from oslo_config import cfg
-from oslo_log import log as logging
-from moon_utilities import options  # noqa
+import logging
+from moon_utilities import configuration, exceptions
 from moon_interface.http_server import HTTPServer
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
-DOMAIN = "moon_interface"
-
-__CWD__ = os.path.dirname(os.path.abspath(__file__))
+LOG = logging.getLogger("moon.interface")
 
 
 def main():
-    LOG.info("Starting server with IP {} on port {}".format(CONF.interface.host, CONF.interface.port))
-    server = HTTPServer(host=CONF.interface.host, port=CONF.interface.port)
+    configuration.init_logging()
+    try:
+        conf = configuration.get_configuration("components/interface")
+        LOG.debug("interface.conf={}".format(conf))
+        hostname = conf["components/interface"].get("hostname", "interface")
+        port = conf["components/interface"].get("port", 80)
+        bind = conf["components/interface"].get("bind", "127.0.0.1")
+    except exceptions.ConsulComponentNotFound:
+        hostname = "interface"
+        bind = "127.0.0.1"
+        port = 80
+        configuration.add_component(uuid="interface", name=hostname, port=port, bind=bind)
+    LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
+    server = HTTPServer(host=bind, port=port)
     server.run()
 
 

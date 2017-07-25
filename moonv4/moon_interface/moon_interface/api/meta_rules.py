@@ -9,15 +9,13 @@ Meta rules are skeleton for security policies
 
 from flask import request
 from flask_restful import Resource
-from oslo_config import cfg
 from oslo_log import log as logging
 from moon_utilities.security_functions import call
-from moon_interface.tools import check_auth
+from moon_utilities.security_functions import check_auth
 
 __version__ = "0.1.0"
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+LOG = logging.getLogger("moon.interface.api." + __name__)
 
 
 class MetaRules(Resource):

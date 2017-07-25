@@ -6,3 +6,4 @@ flask
 flask_restful
 flask_cors
 babel
+moon_utilities

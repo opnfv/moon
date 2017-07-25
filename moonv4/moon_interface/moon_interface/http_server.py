@@ -3,12 +3,12 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from flask import Flask, request
+from flask import Flask
 from flask_cors import CORS, cross_origin
-from flask_restful import Resource, Api, reqparse
+from flask_restful import Resource, Api
 import logging
 from moon_interface import __version__
-from moon_interface.api.generic import Status, Logs, API, InternalAPI
+from moon_interface.api.generic import Status, Logs, API
 from moon_interface.api.models import Models
 from moon_interface.api.policies import Policies
 from moon_interface.api.pdp import PDP
@@ -21,7 +21,7 @@ from moon_interface.api.rules import Rules
 from moon_interface.api.authz import Authz
 from moon_utilities import exceptions
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("moon.interface.http")
 
 
 class Server:
@@ -132,41 +132,6 @@ class HTTPServer(Server):
 
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
-
-        # self.api.add_resource(Status, *Status.__urls__)
-        # self.api.add_resource(Logs, *Logs.__urls__)
-        # self.api.add_resource(API, *API.__urls__)
-        # self.api.add_resource(InternalAPI, *InternalAPI.__urls__)
-        #
-        # self.api.add_resource(InternalAPI, *InternalAPI.__urls__)
-        #
-        # self.api.add_resource(IntraExtensions, *IntraExtensions.__urls__)
-        # self.api.add_resource(SubMetaRuleAlgorithm, *SubMetaRuleAlgorithm.__urls__)
-        # self.api.add_resource(AggregationAlgorithm, *AggregationAlgorithm.__urls__)
-        #
-        # self.api.add_resource(Templates, *Templates.__urls__)
-        # self.api.add_resource(SubMetaRuleAlgorithms, *SubMetaRuleAlgorithms.__urls__)
-        # self.api.add_resource(AggregationAlgorithms, *AggregationAlgorithms.__urls__)
-        #
-        # self.api.add_resource(Subjects, *Subjects.__urls__)
-        # self.api.add_resource(SubjectCategories, *SubjectCategories.__urls__)
-        # self.api.add_resource(SubjectScopes, *SubjectScopes.__urls__)
-        # self.api.add_resource(SubjectAssignments, *SubjectAssignments.__urls__)
-        #
-        # self.api.add_resource(Objects, *Objects.__urls__)
-        # self.api.add_resource(ObjectCategories, *ObjectCategories.__urls__)
-        # self.api.add_resource(ObjectScopes, *ObjectScopes.__urls__)
-        # self.api.add_resource(ObjectAssignments, *ObjectAssignments.__urls__)
-        #
-        # self.api.add_resource(Actions, *Actions.__urls__)
-        # self.api.add_resource(ActionCategories, *ActionCategories.__urls__)
-        # self.api.add_resource(ActionScopes, *ActionScopes.__urls__)
-        # self.api.add_resource(ActionAssignments, *ActionAssignments.__urls__)
-        #
-        # self.api.add_resource(Rules, *Rules.__urls__)
-        # self.api.add_resource(SubMetaRules, *SubMetaRules.__urls__)
-        #
-        # self.api.add_resource(Mappings, *Mappings.__urls__)
 
     def run(self):
         self.app.run(debug=True, host=self._host, port=self._port)  # nosec
