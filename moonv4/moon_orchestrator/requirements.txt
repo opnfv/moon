@@ -8,3 +8,5 @@ jinja2
 sqlalchemy
 pymysql
 werkzeug
+moon_utilities
+moon_db
