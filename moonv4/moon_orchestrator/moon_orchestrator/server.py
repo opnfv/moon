@@ -48,12 +48,12 @@ class DockerManager:
                 extra=container_data,
                 container=plugins[component]['container']
             )
-            _command = plugins[component]['command']
-            try:
-                _index = _command.index("<UUID>")
-                _command[_index] = component_id
-            except ValueError:
-                pass
+            # _command = plugins[component]['command']
+            # try:
+            #     _index = _command.index("<UUID>")
+            #     _command[_index] = component_id
+            # except ValueError:
+            #     pass
             self.run(component_id, environment={"UUID": component_id})
             CONTAINERS[component_id] = components.get(component_id)
             CONTAINERS[component_id]["running"] = True
