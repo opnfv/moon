@@ -30,3 +30,8 @@ CHANGES
 1.1.1
 -----
 - Add a missing requirements
+
+1.2.0
+-----
+- Add authentication features for interface
+
