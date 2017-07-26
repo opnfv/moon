@@ -5,3 +5,4 @@ oslo.log
 vine
 werkzeug
 flask
+requests
