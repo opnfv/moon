@@ -69,7 +69,7 @@ def get_keystone_projects():
             "project": {
                 "name": KEYSTONE_PROJECT,
                 "domain": {
-                    "id": "Default"
+                    "id": "default"
                 }
             }
         }
