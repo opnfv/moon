@@ -14,23 +14,23 @@ sudo apt -y install docker-engine # ([Get Docker](https://docs.docker.com/engine
 echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts
 ```
 
-### Install Docker Engine
+### Configure Docker Engine
 
 ```bash
-sudo apt-get remove docker docker-engine
-sudo apt-get install     apt-transport-https     ca-certificates     curl     software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-sudo apt-key fingerprint 0EBFCD88
-sudo add-apt-repository    "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-sudo apt-get update
-sudo apt-get install docker-ce
-sudo docker run hello-world
-sudo groupadd docker
-sudo gpasswd -a ${USER} docker
+cat <<EOF | sudo tee /etc/docker/daemon.json
+{
+  "hosts": ["tcp://172.88.88.1:2376"]
+}
+EOF
+sudo mv /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak
+sudo sed '/ExecStart=\/usr\/bin\/dockerd -H fd:\/\//ExecStart=\/usr\/bin\/dockerd/' /lib/systemd/system/docker.service.bak | sudo tee /lib/systemd/system/docker.service
 sudo service docker restart
+export DOCKER_HOST=tcp://172.88.88.1:2376
+# if you have a firewall:
+sudo ufw allow in from 172.88.88.0/16
 ```
 
-## Launch MySql, RabbitMQ, Keystone
+## Launch MySql, RabbitMQ, Keystone, Consul
 
 ### Cleanup
 ```bash
@@ -61,37 +61,30 @@ docker container run -dti --net=moon --hostname messenger --name messenger -e RA
 docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 wukongsun/moon_keystone:mitaka
 ```
 
-
-## Orchestrator
-To start the Moon platform, you have to run the Orchestrator.
-
-### Installation
+### moon_consul
 ```bash
-sudo pip3 install moon_db --upgrade
-sudo pip3 install moon_utilities --upgrade
-sudo pip3 install moon_orchestrator  --upgrade
-moon_db_manager upgrade
+docker run -d --net=moon --name=consul --hostname=consul -p 8500:8500 consul
 ```
 
-### Launch
+
+## Orchestrator
+To start the Moon platform, you have to run the Orchestrator container.
+
 ```bash
-moon_orchestrator
+docker container run -dti --net moon --hostname router --name router wukongsun/moon_router:v4.1
 ```
 
 ### Tests
 ```bash
-sudo pip3 install pytest
-cd /usr/lib/moon_orchestratr/moon_interface/tests/apitests
+docker exec -ti interface /bin/bash
+pip3 install pytest
+cd /usr/local/lib/python3.5/dist-packages/moon_interface/tests/apitests
 pytest
 ```
 
 
-## Launch consul, router, manager, interface
+## Launch router, manager, interface, orchestrator independently
 
-### moon_consul
-```bash
-docker container run -dti --net moon --hostname consul --name consul wukongsun/moon_consul:v4.1
-```
 
 ### moon_router
 ```bash
@@ -103,10 +96,14 @@ docker container run -dti --net moon --hostname router --name router wukongsun/m
 docker container run -dti --net moon --hostname manager --name manager wukongsun/moon_manager:v4.1
 ```
 
-
 ### moon_interface
 ```bash
 docker container run -dti --net moon --hostname interface --name interface wukongsun/moon_interface:v4.1
+```
+
+### moon_orchestrator
+```bash
+docker container run -dti --net moon --hostname orchestrator --name orchestrator wukongsun/moon_orchestrator:v4.1
 ```
 
 
