@@ -35,7 +35,7 @@ sudo ufw allow in from 172.88.88.0/16
 ### Cleanup
 ```bash
 docker container rm -f $(docker ps -a | grep moon | cut -d " " -f 1) 2>/dev/null
-docker container rm -f messenger db keystone 2>/dev/null
+docker container rm -f messenger db keystone consul 2>/dev/null
 ```
 
 
@@ -71,7 +71,7 @@ docker run -d --net=moon --name=consul --hostname=consul -p 8500:8500 consul
 To start the Moon platform, you have to run the Orchestrator container.
 
 ```bash
-docker container run -dti --net moon --hostname router --name router wukongsun/moon_router:v4.1
+docker container run -dti --net moon --hostname orchestrator --name orchestrator wukongsun/moon_orchestrator:v4.1
 ```
 
 ### Tests
