@@ -19,7 +19,7 @@ echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts
 ```bash
 cat <<EOF | sudo tee /etc/docker/daemon.json
 {
-  "hosts": ["tcp://172.88.88.1:2376"]
+  "hosts": ["fd://", "tcp://0.0.0.0:2376"]
 }
 EOF
 sudo mv /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak
