@@ -18,6 +18,13 @@ max_age = 3600
 allow_methods = POST,GET,DELETE
 EOF
 
+until echo status | mysql -h${DB_HOST} -u${DB_USER_ROOT} -p${DB_PASSWORD_ROOT}; do
+  >&2 echo "MySQL is unavailable - sleeping"
+  sleep 1
+done
+
+>&2 echo "Mysql is up - executing command"
+
 mysql -h $DB_HOST -u$DB_USER_ROOT -p$DB_PASSWORD_ROOT <<EOF
 CREATE DATABASE $DB_DATABASE DEFAULT CHARACTER SET utf8 DEFAULT COLLATE utf8_general_ci;
 GRANT ALL ON $DB_DATABASE.* TO '$DB_USER'@'%' IDENTIFIED BY '$DB_PASSWORD';
