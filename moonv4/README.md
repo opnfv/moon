@@ -21,9 +21,8 @@ cat <<EOF | sudo tee /etc/docker/daemon.json
 }
 EOF
 sudo mv /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak
-# sudo sed '/ExecStart=\/usr\/bin\/dockerd -H fd:\/\//ExecStart=\/usr\/bin\/dockerd/' /lib/systemd/system/docker.service.bak | sudo tee /lib/systemd/system/docker.service
+sudo sed 's/ExecStart=\/usr\/bin\/dockerd -H fd:\/\//ExecStart=\/usr\/bin\/dockerd/' /lib/systemd/system/docker.service.bak | sudo tee /lib/systemd/system/docker.service
 sudo service docker restart
-export DOCKER_HOST=tcp://172.88.88.1:2376
 # if you have a firewall:
 sudo ufw allow in from 172.88.88.0/16
 ```
@@ -79,7 +78,7 @@ docker container run -dti --net moon --hostname orchestrator --name orchestrator
 
 
 ### Manuel Launch 
-We can also manuelly start the `Moon` framework  
+We can also manually start the `Moon` framework
 
 #### moon_router
 ```bash
