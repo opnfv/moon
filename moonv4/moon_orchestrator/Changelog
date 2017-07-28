@@ -19,3 +19,7 @@ CHANGES
 -----
 - add Changelog
 
+1.1.0
+-----
+- add bootstrap file to start Orchestrator with all configuration
+
