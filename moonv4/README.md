@@ -59,7 +59,7 @@ docker container run -dti --net=moon --hostname messenger --name messenger -e RA
 ### moon_keystone
 Run the `keystone` container (created by the `Moon` project) in the `moon` network
 ```bash
-docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 wukongsun/moon_keystone:mitaka
+docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 wukongsun/moon_keystone:ocata
 ```
 
 ### Consul
