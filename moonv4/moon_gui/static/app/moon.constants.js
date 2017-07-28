@@ -59,21 +59,21 @@
 				}
 			})
 			.constant('REST_URI', {
-                PDP : 'http://192.168.102.118:38001/pdp/',
-				MODELS : 'http://192.168.102.118:38001/models/',
-				METARULES:  'http://192.168.102.118:38001/meta_rules/',
-                RULES:  'http://192.168.102.118:38001/rules/',
-				POLICIES: 'http://192.168.102.118:38001/policies/',
+                PDP : 'http://interface:8081/pdp/',
+				MODELS : 'http://interface:8081/models/',
+				METARULES:  'http://interface:8081/meta_rules/',
+                RULES:  'http://interface:8081/rules/',
+				POLICIES: 'http://interface:8081/policies/',
 				METADATA: {
-                	subject : 'http://192.168.102.118:38001/subject_categories/',
-					object : 'http://192.168.102.118:38001/object_categories/',
-                    action : 'http://192.168.102.118:38001/action_categories/'
+                	subject : 'http://interface:8081/subject_categories/',
+					object : 'http://interface:8081/object_categories/',
+                    action : 'http://interface:8081/action_categories/'
                 },
 				PERIMETERS :{
-                    subject : 'http://192.168.102.118:38001/subjects/',
-                    object : 'http://192.168.102.118:38001/objects/',
-                    action : 'http://192.168.102.118:38001/actions/'
+                    subject : 'http://interface:8081/subjects/',
+                    object : 'http://interface:8081/objects/',
+                    action : 'http://interface:8081/actions/'
 				},
-                KEYSTONE : 'http://192.168.102.118:5000/v3/'
+                KEYSTONE : 'http://keystone:5000/v3/'
 			});
 })();
