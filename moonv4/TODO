@@ -1,5 +1,13 @@
 Here is a list of what must be done to have complete version of the Moon platform.
 
+Architecture
+
+- Add a complete logging system
+- Replace moon_orchestrator with Kubernetes ?
+- Add a load balancer (HAProxy ?)
+- Update Consul with Consul-Template ?
+- Develop the Moon hook in Oslo_Policy
+
 Actions that must be done before the next version:
 
 - manage a token/uuid (ie session ID) in the moon_interface component
@@ -10,13 +18,13 @@ Actions that must be done before the next version:
 - check all input from moon_interface (check that input data are correct and safe)
 - Move @enforce from moon_db to API in Moon_Manager
 - Need to work on unit tests with the new data model
+- Allow to have multiple moon_interface in parallel (needed for load balancing)
 
 Bugs to fix:
 
 - Connect the authz functionality with the enforce decorator
 - The intra_extension ID parameter must be given when the container is ran and not when it is build
   (security_function)
-- The configuration (moon.conf) must be retrieved when the container is ran and not when it is build
 - When a container is deleted, the reference is not deleted from CONTAINERS in orchestrator
 - All request to moon_interface generally end with a 200 HTTP code even if there is an error
 
@@ -27,6 +35,5 @@ Other actions:
 - Write User and administrator documentation
 - Run unit tests
 - Add and run integration tests
-- Add a logging system
 - moon_orchestrator in a docker
 - Add security on RabbitMQ transactions (auth+crypt)
