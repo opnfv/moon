@@ -57,7 +57,7 @@ def HTTPServer(host, port):
             _object = __get_object(target, credentials)
             _project_id = __get_project_id(target, credentials)
             logger.info("GET with args {} / {} - {} - {}".format(_project_id, _subject, _object, rule))
-            _url = "http://authz/{}:{}/{}/{}/{}/{}".format(
+            _url = "http://{}:{}/authz/{}/{}/{}/{}".format(
                 interface_hostname,
                 interface_port,
                 _project_id,
