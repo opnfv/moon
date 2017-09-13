@@ -6,8 +6,8 @@
 import os
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import configuration
-from moon_manager.messenger import Server
+from moon_utilities import configuration, exceptions
+from moon_manager.http_server import HTTPServer
 
 LOG = logging.getLogger("moon.manager")
 CONF = cfg.CONF
@@ -18,8 +18,18 @@ __CWD__ = os.path.dirname(os.path.abspath(__file__))
 
 def main():
     configuration.init_logging()
-    configuration.add_component("manager", "manager")
-    server = Server()
+    try:
+        conf = configuration.get_configuration("components/manager")
+        hostname = conf["components/manager"].get("hostname", "manager")
+        port = conf["components/manager"].get("port", 80)
+        bind = conf["components/manager"].get("bind", "127.0.0.1")
+    except exceptions.ConsulComponentNotFound:
+        hostname = "manager"
+        bind = "127.0.0.1"
+        port = 80
+        configuration.add_component(uuid="manager", name=hostname, port=port, bind=bind)
+    LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
+    server = HTTPServer(host=bind, port=port)
     server.run()
 
 

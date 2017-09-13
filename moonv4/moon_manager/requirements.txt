@@ -1,8 +1,5 @@
-kombu !=4.0.1,!=4.0.0
-oslo.messaging
-oslo.config
-vine
-oslo.log
-babel
+flask
+flask_restful
+flask_cors
 moon_utilities
 moon_db

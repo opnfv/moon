@@ -2,67 +2,137 @@
 # This software is distributed under the terms and conditions of the 'Apache-2.0'
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+"""
+PDP are Policy Decision Point.
 
-import os
-import json
-import copy
-from uuid import uuid4
+"""
+
+from flask import request
+from flask_restful import Resource
 from oslo_log import log as logging
-from oslo_config import cfg
-from moon_utilities import exceptions
+from moon_utilities.security_functions import check_auth
 from moon_db.core import PDPManager
-from moon_utilities.misc import get_uuid_from_name
-from moon_utilities.security_functions import call
 
-LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
+__version__ = "0.1.0"
+
+LOG = logging.getLogger("moon.manager.api." + __name__)
 
 
-class PDP(object):
+def add_container(uuid, pipeline):
+    # TODO: to implement
+    LOG.warning("Add container not implemented!")
+    LOG.info(uuid)
+    LOG.info(pipeline)
 
-    def __init__(self):
-        self.manager = PDPManager
 
-    def get_pdp(self, ctx, args=None):
+class PDP(Resource):
+    """
+    Endpoint for pdp requests
+    """
+
+    __urls__ = (
+        "/pdp",
+        "/pdp/",
+        "/pdp/<string:uuid>",
+        "/pdp/<string:uuid>/",
+    )
+
+    @check_auth
+    def get(self, uuid=None, user_id=None):
+        """Retrieve all pdp
+
+        :param uuid: uuid of the pdp
+        :param user_id: user ID who do the request
+        :return: {
+            "pdp_id1": {
+                "name": "...",
+                "security_pipeline": [...],
+                "keystone_project_id": "keystone_project_id1",
+                "description": "...",
+            }
+        }
+        :internal_api: get_pdp
+        """
         try:
-            data = self.manager.get_pdp(user_id=ctx["user_id"], pdp_id=ctx.get("id"))
+            data = PDPManager.get_pdp(user_id=user_id, pdp_id=uuid)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e),
-                    "ctx": ctx, "args": args}
+                    "error": str(e)}
         return {"pdps": data}
 
-    def add_pdp(self, ctx, args):
+    @check_auth
+    def post(self, uuid=None, user_id=None):
+        """Create pdp.
+
+        :param uuid: uuid of the pdp (not used here)
+        :param user_id: user ID who do the request
+        :request body: {
+            "name": "...",
+            "security_pipeline": [...],
+            "keystone_project_id": "keystone_project_id1",
+            "description": "...",
+        }
+        :return: {
+            "pdp_id1": {
+                "name": "...",
+                "security_pipeline": [...],
+                "keystone_project_id": "keystone_project_id1",
+                "description": "...",
+            }
+        }
+        :internal_api: add_pdp
+        """
         try:
-            data = self.manager.add_pdp(user_id=ctx["user_id"], pdp_id=None, value=args)
+            data = PDPManager.add_pdp(user_id=user_id, pdp_id=None, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e),
-                    "ctx": ctx, "args": args}
+                    "error": str(e)}
         return {"pdps": data}
 
-    def delete_pdp(self, ctx, args):
+    @check_auth
+    def delete(self, uuid=None, user_id=None):
+        """Delete a pdp
+
+        :param uuid: uuid of the pdp to delete
+        :param user_id: user ID who do the request
+        :return: {
+            "result": "True or False",
+            "message": "optional message"
+        }
+        :internal_api: delete_pdp
+        """
         try:
-            data = self.manager.delete_pdp(user_id=ctx["user_id"], pdp_id=ctx.get("id"))
+            data = PDPManager.delete_pdp(user_id=user_id, pdp_id=uuid)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e),
-                    "ctx": ctx, "args": args}
+                    "error": str(e)}
         return {"result": True}
 
-    def update_pdp(self, ctx, args):
+    @check_auth
+    def patch(self, uuid=None, user_id=None):
+        """Update a pdp
+
+        :param uuid: uuid of the pdp to update
+        :param user_id: user ID who do the request
+        :return: {
+            "pdp_id1": {
+                "name": "...",
+                "security_pipeline": [...],
+                "keystone_project_id": "keystone_project_id1",
+                "description": "...",
+            }
+        }
+        :internal_api: update_pdp
+        """
         try:
-            data = self.manager.update_pdp(user_id=ctx["user_id"], pdp_id=ctx.get("id"), value=args)
-            call("orchestrator", method="add_container",
-                 ctx={"id": ctx.get("id"), "pipeline": data[ctx.get("id")]['security_pipeline']})
+            data = PDPManager.update_pdp(user_id=user_id, pdp_id=uuid, value=request.json)
+            add_container(uuid=uuid, pipeline=data[uuid]['security_pipeline'])
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e),
-                    "ctx": ctx, "args": args}
+                    "error": str(e)}
         return {"pdps": data}
-
 
