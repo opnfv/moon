@@ -55,7 +55,6 @@ subject_assignment_template = {
 
 
 def check_policy(policy_id=None):
-    print("URL={}".format(URL.format("/policies")))
     req = requests.get(URL.format("/policies"))
     assert req.status_code == 200
     result = req.json()

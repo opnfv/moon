@@ -21,12 +21,14 @@ HOST = None
 PORT = None
 HOST_AUTHZ = None
 PORT_AUTHZ = None
+HOST_KEYSTONE = None
+PORT_KEYSTONE = None
 
 lock = threading.Lock()
 
 
 def init():
-    global logger, HOST, PORT, HOST_AUTHZ, PORT_AUTHZ
+    global logger, HOST, PORT, HOST_AUTHZ, PORT_AUTHZ, HOST_KEYSTONE, PORT_KEYSTONE
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='scenario filename', nargs=1)
     parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
@@ -34,34 +36,31 @@ def init():
     parser.add_argument("--dry-run", "-n", action='store_true', help="Dry run", dest="dry_run")
     parser.add_argument("--host",
                         help="Set the name of the host to test (default: 172.18.0.11).",
-                        default="172.18.0.11")
+                        default="127.0.0.1")
+    parser.add_argument("--port", "-p",
+                        help="Set the port of the host to test (default: 8082).",
+                        default="8082")
     parser.add_argument("--host-authz",
                         help="Set the name of the host to test authorization (default: 172.18.0.11).",
-                        default="172.18.0.11",
+                        default="127.0.0.1",
                         dest="host_authz")
-    parser.add_argument("--port", "-p",
-                        help="Set the port of the host to test (default: 38001).",
-                        default="38001")
     parser.add_argument("--port-authz",
-                        help="Set the port of the host to test authorization (default: 38001).",
-                        default="38001",
+                        help="Set the port of the host to test authorization (default: 8081).",
+                        default="8081",
                         dest="port_authz")
-    parser.add_argument("--test-only", "-t", action='store_true', dest='testonly', help="Do not generate graphs")
+    parser.add_argument("--host-keystone",
+                        help="Set the name of the Keystone host (default: 172.18.0.11).",
+                        default="127.0.0.1")
+    parser.add_argument("--port-keystone",
+                        help="Set the port of the Keystone host (default: 5000).",
+                        default="5000")
     parser.add_argument("--stress-test", "-s", action='store_true', dest='stress_test',
                         help="Execute stressing tests (warning delta measures will be false, implies -t)")
     parser.add_argument("--write", "-w", help="Write test data to a JSON file", default="/tmp/data.json")
     parser.add_argument("--pdp", help="Test on pdp PDP")
-    parser.add_argument("--input", "-i", help="Get data from a JSON input file")
-    parser.add_argument("--legend", "-l", help="Set the legend (default: 'rbac,rbac+session')",
-                        default='rbac,rbac+session')
-    # parser.add_argument("--distgraph", "-d",
-    #                     help="Show a distribution graph instead of a linear graph",
-    #                     action='store_true')
     parser.add_argument("--request-per-second", help="Number of requests per seconds",
-                        type=int, dest="request_second", default=1)
-    parser.add_argument("--limit", help="Limit request to LIMIT", type=int)
-    parser.add_argument("--write-image", help="Write the graph to file IMAGE", dest="write_image")
-    parser.add_argument("--write-html", help="Write the graph to HTML file HTML", dest="write_html", default="data.html")
+                        type=int, dest="request_second", default=-1)
+    parser.add_argument("--limit", help="Limit request to LIMIT", type=int, default=500)
     args = parser.parse_args()
 
     FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -94,6 +93,8 @@ def init():
     PORT = args.port
     HOST_AUTHZ = args.host_authz
     PORT_AUTHZ = args.port_authz
+    HOST_KEYSTONE = args.host_keystone
+    PORT_KEYSTONE = args.port_keystone
     return args
 
 
@@ -104,7 +105,7 @@ def get_scenario(args):
 
 def get_keystone_id(pdp_name):
     keystone_project_id = None
-    logger.error("get_keystone_id url={}".format("http://{}:{}".format(HOST, PORT)))
+    # logger.error("get_keystone_id url={}".format("http://{}:{}".format(HOST_KEYSTONE, PORT_KEYSTONE)))
     for pdp_key, pdp_value in check_pdp(moon_url="http://{}:{}".format(HOST, PORT))["pdps"].items():
         logger.debug(pdp_value)
         if pdp_name:
@@ -191,7 +192,7 @@ def send_requests(scenario, keystone_project_id, request_second=1, limit=500,
     OBJECTS = tuple(scenario.objects.keys())
     ACTIONS = tuple(scenario.actions.keys())
     # for rule in rules:
-    while request_cpt <= limit:
+    while request_cpt < limit:
         rule = (random.choice(SUBJECTS), random.choice(OBJECTS), random.choice(ACTIONS))
         url = "http://{}:{}/authz/{}/{}".format(HOST_AUTHZ, PORT_AUTHZ, keystone_project_id, "/".join(rule))
         indexes.append(url)
@@ -207,12 +208,13 @@ def send_requests(scenario, keystone_project_id, request_second=1, limit=500,
             background.start()
         # if limit and limit < request_cpt:
         #     break
-        if request_cpt % request_second == 0:
-            if time.time()-start_timing < 1:
-                while True:
-                    if time.time()-start_timing > 1:
-                        break
-            start_timing = time.time()
+        if request_second > 0:
+            if request_cpt % request_second == 0:
+                if time.time()-start_timing < 1:
+                    while True:
+                        if time.time()-start_timing > 1:
+                            break
+                start_timing = time.time()
     if not stress_test:
         for background in backgrounds:
             background.join()
@@ -235,131 +237,6 @@ def get_delta(time_data):
     return time_delta, time_delta_average1
 
 
-def write_graph(time_data, legend=None, input=None, image_file=None, html_file=None):
-    logger.info("Writing graph")
-    legends = legend.split(",")
-    result_data = []
-    time_delta, time_delta_average1 = get_delta(time_data)
-    time_delta_average2 = None
-    # if input:
-    #     for _input in input.split(","):
-    #         current_legend = legends.pop(0)
-    #         time_data2 = json.load(open(_input))
-    #         time_delta2, time_delta_average2 = get_delta(time_data2)
-    #         for item in time_data:
-    #             if key in time_data2:
-    #                 time_delta2.append(time_data2[key]['delta'])
-    #             else:
-    #                 time_delta2.append(None)
-    #         data2 = Scatter(
-    #             x=list(range(len(time_data))),
-    #             y=time_delta2,
-    #             name=current_legend,
-    #             line=dict(
-    #                 color='rgb(255, 192, 118)',
-    #                 shape='spline')
-    #         )
-    #         result_data.append(data2)
-    #         data2_a = Scatter(
-    #             x=list(range(len(time_data))),
-    #             y=[time_delta_average2 for x in range(len(time_data))],
-    #             name=current_legend + " average",
-    #             line=dict(
-    #                 color='rgb(255, 152, 33)',
-    #                 shape='spline')
-    #         )
-    #         result_data.append(data2_a)
-    current_legend = legends.pop(0)
-    data1 = Scatter(
-        x=list(range(len(time_data))),
-        y=time_delta,
-        name=current_legend,
-        line=dict(
-            color='rgb(123, 118, 255)')
-    )
-    result_data.append(data1)
-    data1_a = Scatter(
-        x=list(range(len(time_data))),
-        y=[time_delta_average1 for x in range(len(time_data))],
-        name=current_legend + " average",
-        line=dict(
-            color='rgb(28, 20, 255)')
-    )
-    result_data.append(data1_a)
-
-    if image_file:
-        plotly.offline.plot(
-            {
-                "data": result_data,
-                "layout": Layout(
-                    title="Request times delta",
-                    xaxis=dict(title='Requests'),
-                    yaxis=dict(title='Request duration'),
-                )
-            },
-            filename=html_file,
-            image="svg",
-            image_filename=image_file,
-            image_height=1000,
-            image_width=1200
-        )
-    else:
-        plotly.offline.plot(
-            {
-                "data": result_data,
-                "layout": Layout(
-                    title="Request times delta",
-                    xaxis=dict(title='Requests'),
-                    yaxis=dict(title='Request duration'),
-                )
-            },
-            filename=html_file,
-        )
-    if time_delta_average2:
-        logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
-        return 1-time_delta_average2/time_delta_average1
-    return 0
-
-
-# def write_distgraph(time_data, legend=None, input=None, image_file=None, html_file=None):
-#
-#     logger.info("Writing graph")
-#     legends = legend.split(",")
-#     result_data = []
-#
-#     time_delta_average2 = None
-#
-#     if input:
-#         for _input in input.split(","):
-#             logger.info("Analysing input {}".format(_input))
-#             time_data2 = json.load(open(_input))
-#             time_delta2, time_delta_average2 = get_delta(time_data2)
-#             result_data.append(time_delta2)
-#
-#     time_delta, time_delta_average1 = get_delta(time_data)
-#     result_data.append(time_delta)
-#
-#     # Create distplot with custom bin_size
-#     if len(legends) < len(result_data):
-#         for _cpt in range(len(result_data)-len(legends)):
-#             legends.append("NC")
-#     fig = ff.create_distplot(result_data, legends, bin_size=.2)
-#
-#     # Plot!
-#     plotly.offline.plot(
-#         fig,
-#         image="svg",
-#         image_filename=image_file,
-#         image_height=1000,
-#         image_width=1200,
-#         filename=html_file
-#     )
-#     if time_delta_average2:
-#         logger.info("Average: {} and {}".format(time_delta_average1, time_delta_average2))
-#         return 1-time_delta_average2/time_delta_average1
-#     return 0
-
-
 def main():
     args = init()
     scenario = get_scenario(args)
@@ -374,14 +251,6 @@ def main():
     )
     if not args.dry_run:
         save_data(args.write, time_data)
-        if not args.testonly:
-            # if args.distgraph:
-            #     overhead = write_distgraph(time_data, legend=args.legend, input=args.input, image_file=args.write_image,
-            #                                html_file=args.write_html)
-            # else:
-            overhead = write_graph(time_data, legend=args.legend, input=args.input, image_file=args.write_image,
-                                   html_file=args.write_html)
-            logger.info("Overhead: {:.2%}".format(overhead))
 
 
 if __name__ == "__main__":
