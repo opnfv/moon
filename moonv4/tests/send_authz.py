@@ -140,12 +140,14 @@ def _send(url, stress_test=False):
     except requests.exceptions.ConnectionError:
         logger.warning("Unable to connect to server")
         return {}
-    if res and not stress_test:
+    if not stress_test:
         logger.debug(res.status_code)
         logger.debug(res.text)
         if res.status_code == 200:
             # logger.warning("error code 200 for {}".format(self.url))
             logger.info("\033[1m{}\033[m {}".format(url, res.status_code))
+        else:
+            logger.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
         try:
             j = res.json()
         except Exception as e:
