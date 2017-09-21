@@ -9,18 +9,12 @@ import base64
 import mysql.connector
 import re
 import subprocess
-# import pika
-# import pika.credentials
-# import pika.exceptions
 
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("moon.bootstrap")
 requests_log = logging.getLogger("requests.packages.urllib3")
 requests_log.setLevel(logging.WARNING)
 requests_log.propagate = True
-pika_log = logging.getLogger("pika")
-pika_log.setLevel(logging.ERROR)
-pika_log.propagate = True
 
 if len(sys.argv) == 2:
     if os.path.isfile(sys.argv[1]):
@@ -167,40 +161,6 @@ def start_database():
                 break
 
 
-def wait_for_message_queue():
-    for messenger in get("messenger"):
-        url = messenger['url']
-        match = re.search("(?P<proto>^[\\w+]+):\/\/(?P<user>\\w+):(?P<password>.+)@(?P<host>\\w+):?(?P<port>\\d*)/?(?P<virtual_host>\\w+)",
-                          url)
-        config = match.groupdict()
-        while True:
-            try:
-                connection = pika.BlockingConnection(
-                    pika.ConnectionParameters(
-                        host=config['host'],
-                        port=int(config['port']),
-                        virtual_host=config['virtual_host'],
-                        credentials=pika.credentials.PlainCredentials(
-                            config['user'],
-                            config['password']
-                        )
-                    )
-                )
-                connection.close()
-            except (
-                pika.exceptions.ProbableAuthenticationError,
-                pika.exceptions.ConnectionClosed,
-                ConnectionResetError,
-                pika.exceptions.IncompatibleProtocolError
-            ):
-                log.info("Waiting for MessageQueue ({})".format(config["host"]))
-                time.sleep(1)
-                continue
-            else:
-                log.info("MessageQueue is up")
-                break
-
-
 def start_keystone():
     output = subprocess.run(["docker", "run", "-dti", "--net=moon", "--hostname=keystone", "--name=keystone",
                              "-e", "DB_HOST=db", "-e", "DB_PASSWORD_ROOT=p4sswOrd1", "-p", "35357:35357",
@@ -214,6 +174,7 @@ def start_keystone():
     for config in get("openstack/keystone"):
         while True:
             try:
+                time.sleep(1)
                 req = requests.get(config["url"])
             except requests.exceptions.ConnectionError:
                 log.info("Waiting for Keystone ({})".format(config["url"]))
@@ -252,14 +213,11 @@ def start_moon(data_config):
 
 def main():
     data_config = search_config_file()
-    subprocess.run(["docker", "rm", "-f", "consul", "db", "manager", "wrapper", "interface", "authz*"])
+    subprocess.run(["docker", "rm", "-f", "consul", "db", "manager", "wrapper", "interface", "authz*", "keystone"])
     start_consul(data_config)
     start_database()
     start_keystone()
     start_moon(data_config)
-    # wait_for_message_queue()
-    # import moon_orchestrator.server
-    # moon_orchestrator.server.main()
 
 main()
 
