@@ -9,7 +9,7 @@ This directory contains all the modules for MoonV4
 sudo apt install python3-dev python3-pip
 sudo pip3 install pip --upgrade
 sudo apt -y install docker-engine # ([Get Docker](https://docs.docker.com/engine/installation/))
-echo 127.0.0.1 messenger db keystone | sudo tee -a /etc/hosts
+echo 127.0.0.1 messenger db keystone interface manager | sudo tee -a /etc/hosts
 ```
 
 
@@ -27,7 +27,7 @@ sudo service docker restart
 sudo ufw allow in from 172.88.88.0/16
 ```
 
-## Run Standard Containers
+## Before running containers
 ### Cleanup
 Remove already running containers
 ```bash
@@ -42,19 +42,20 @@ Create an internal Docker network called `moon`
 docker network create -d bridge --subnet=172.88.88.0/16 --gateway=172.88.88.1 moon
 ```
 
+### Install Moon_DB
+Install the moon_db library
+```bash
+sudo pip3 install moon_db
+```
+
+## Starting containers manually
 
 ### MySql
-Run the standard `MySql` container in the `moon` network
+Run the standard `MySql` container in the `moon` network and configure it
 ```bash
 docker container run -dti --net=moon --hostname db --name db -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
+moon_db_manager upgrade
 ```
-
-### Rabbitmq
-Run the standard `Rabbitmq` container in the `moon` network
-```bash
-docker container run -dti --net=moon --hostname messenger --name messenger -e RABBITMQ_DEFAULT_USER=moon -e RABBITMQ_DEFAULT_PASS=p4sswOrd1 -e RABBITMQ_NODENAME=rabbit@messenger -e RABBITMQ_DEFAULT_VHOST=moon -e RABBITMQ_HIPE_COMPILE=1 -p 5671:5671 -p 5672:5672 -p 8080:15672 rabbitmq:3-management
-```
-
 
 ### moon_keystone
 Run the `keystone` container (created by the `Moon` project) in the `moon` network
@@ -68,46 +69,37 @@ Run the standard `Consul` container in the `moon` network
 docker run -d --net=moon --name=consul --hostname=consul -p 8500:8500 consul
 ```
 
+### Moon platform
 
-## Run Moon's Containers
-### Automatic Launch
-To start the `Moon` framework, you only have to run the `moon_orchestrator` container
-```bash
-docker container run -dti --net moon --hostname orchestrator --name orchestrator wukongsun/moon_orchestrator:v4.1
-```
-
-
-### Manuel Launch 
-We can also manually start the `Moon` framework
-
-#### moon_router
-```bash
-docker container run -dti --net moon --hostname router --name router wukongsun/moon_router:v4.1
-```
-
-#### moon_manager
 ```bash
 docker container run -dti --net moon --hostname manager --name manager wukongsun/moon_manager:v4.1
-```
-
-#### moon_interface
-```bash
 docker container run -dti --net moon --hostname interface --name interface wukongsun/moon_interface:v4.1
 ```
 
-#### moon_orchestrator
-```bash
-docker container run -dti --net moon --hostname orchestrator --name orchestrator wukongsun/moon_orchestrator:v4.1
-```
+## Starting containers automatically
 
+To start the `Moon` framework, you only have to run the `bootstrap` script
+```bash
+python3 bin/bootstrap.py
+```
+The script will ask you to start one or more Moon containers
 
 ### Tests
 ```bash
-docker exec -ti interface /bin/bash
-pip3 install pytest
-cd /usr/local/lib/python3.5/dist-packages/moon_interface/tests/apitests
+sudo pip3 install pytest
+cd tests
 pytest
 ```
+
+### Run scenario
+```bash
+sudo pip3 install requests
+cd tests 
+python3 populate_default_values.py -v scenario/rbac.py
+python3 send_authz.py -v scenario/rbac.py
+```
+
+
 
 ## Log
 ### Get some logs
