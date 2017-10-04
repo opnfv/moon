@@ -14,7 +14,6 @@ def main():
     configuration.init_logging()
     try:
         conf = configuration.get_configuration("components/interface")
-        LOG.debug("interface.conf={}".format(conf))
         hostname = conf["components/interface"].get("hostname", "interface")
         port = conf["components/interface"].get("port", 80)
         bind = conf["components/interface"].get("bind", "127.0.0.1")
@@ -25,6 +24,8 @@ def main():
         configuration.add_component(uuid="interface", name=hostname, port=port, bind=bind)
     LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
     server = HTTPServer(host=bind, port=port)
+    # LOG.info("Starting server")
+    # server = HTTPServer(host="0.0.0.0", port=8081)
     server.run()
 
 

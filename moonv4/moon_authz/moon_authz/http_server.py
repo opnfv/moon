@@ -3,25 +3,19 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from flask import Flask, jsonify
-from flask_cors import CORS, cross_origin
-from flask_restful import Resource, Api
+from flask import Flask, request
+# from flask_cors import CORS, cross_origin
+from flask_restful import Resource, Api, reqparse
 import logging
-from moon_manager import __version__
-from moon_manager.api.generic import Status, Logs, API
-from moon_manager.api.models import Models
-from moon_manager.api.policies import Policies
-from moon_manager.api.pdp import PDP
-from moon_manager.api.meta_rules import MetaRules
-from moon_manager.api.meta_data import SubjectCategories, ObjectCategories, ActionCategories
-from moon_manager.api.perimeter import Subjects, Objects, Actions
-from moon_manager.api.data import SubjectData, ObjectData, ActionData
-from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
-from moon_manager.api.rules import Rules
-from moon_manager.api.containers import Container
-from moon_utilities import configuration, exceptions
+from moon_utilities import exceptions
+from moon_authz import __version__
+from moon_authz.api.authorization import Authz
+from moon_utilities.cache import Cache
 
-logger = logging.getLogger("moon.manager.http")
+logger = logging.getLogger("moon." + __name__)
+
+CACHE = Cache()
+CACHE.update()
 
 
 class Server:
@@ -68,13 +62,7 @@ class Server:
         raise NotImplementedError()
 
 __API__ = (
-    Status, Logs, API,
-    MetaRules, SubjectCategories, ObjectCategories, ActionCategories,
-    Subjects, Objects, Actions,
-    SubjectAssignments, ObjectAssignments, ActionAssignments,
-    SubjectData, ObjectData, ActionData,
-    Rules, Container,
-    Models, Policies, PDP
+    Authz,
  )
 
 
@@ -100,29 +88,40 @@ class Root(Resource):
             "tree": tree
         }
 
+    def head(self):
+        return "", 201
+
 
 class HTTPServer(Server):
 
-    def __init__(self, host="localhost", port=80, **kwargs):
+    def __init__(self, host="0.0.0.0", port=38001, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
+        self.component_data = kwargs.get("component_data", {})
+        logger.info("HTTPServer port={} {}".format(port, kwargs))
         self.app = Flask(__name__)
-        conf = configuration.get_configuration("components/manager")
-        self.manager_hostname = conf["components/manager"].get("hostname", "manager")
-        self.manager_port = conf["components/manager"].get("port", 80)
-        #Todo : specify only few urls instead of *
-        CORS(self.app)
+        self._port = port
+        self._host = host
+        # Todo : specify only few urls instead of *
+        # CORS(self.app)
+        self.component_id = kwargs.get("component_id")
+        self.keystone_project_id = kwargs.get("keystone_project_id")
+        self.container_chaining = kwargs.get("container_chaining")
         self.api = Api(self.app)
         self.__set_route()
-        self.__hook_errors()
+        # self.__hook_errors()
+
+        @self.app.errorhandler(exceptions.AuthException)
+        def _auth_exception(error):
+            return {"error": "Unauthorized"}, 401
 
     def __hook_errors(self):
-
+        # FIXME (dthom): it doesn't work
         def get_404_json(e):
-            return jsonify({"result": False, "code": 404, "description": str(e)}), 404
+            return {"error": "Error", "code": 404, "description": e}
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
-            return jsonify({"result": False, "code": 400, "description": str(e)}), 400
+            return {"error": "Error", "code": 400, "description": e}
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 
@@ -130,8 +129,12 @@ class HTTPServer(Server):
         self.api.add_resource(Root, '/')
 
         for api in __API__:
-            self.api.add_resource(api, *api.__urls__)
+            self.api.add_resource(api, *api.__urls__,
+                                  resource_class_kwargs={
+                                      "component_data": self.component_data,
+                                      "cache": CACHE
+                                  }
+                                  )
 
     def run(self):
-        self.app.run(debug=True, host=self._host, port=self._port)  # nosec
-
+        self.app.run(host=self._host, port=self._port)  # nosec
