@@ -4,14 +4,10 @@ import logging
 import copy
 import threading
 from importlib.machinery import SourceFileLoader
-import itertools
 import requests
 import time
 import json
 import random
-import plotly
-from plotly.graph_objs import Scatter, Layout
-import plotly.figure_factory as ff
 from uuid import uuid4
 from utils.pdp import check_pdp
 
@@ -32,7 +28,7 @@ def init():
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='scenario filename', nargs=1)
     parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
-    parser.add_argument("--debug", action='store_true', help="debug mode")
+    parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
     parser.add_argument("--dry-run", "-n", action='store_true', help="Dry run", dest="dry_run")
     parser.add_argument("--host",
                         help="Set the name of the host to test (default: 172.18.0.11).",
@@ -105,9 +101,7 @@ def get_scenario(args):
 
 def get_keystone_id(pdp_name):
     keystone_project_id = None
-    # logger.error("get_keystone_id url={}".format("http://{}:{}".format(HOST_KEYSTONE, PORT_KEYSTONE)))
     for pdp_key, pdp_value in check_pdp(moon_url="http://{}:{}".format(HOST, PORT))["pdps"].items():
-        logger.debug(pdp_value)
         if pdp_name:
             if pdp_name != pdp_value["name"]:
                 continue
@@ -141,26 +135,23 @@ def _send(url, stress_test=False):
         logger.warning("Unable to connect to server")
         return {}
     if not stress_test:
-        logger.debug(res.status_code)
-        logger.debug(res.text)
         if res.status_code == 200:
-            # logger.warning("error code 200 for {}".format(self.url))
             logger.info("\033[1m{}\033[m {}".format(url, res.status_code))
         else:
             logger.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
         try:
             j = res.json()
         except Exception as e:
-            logger.debug(e)
+            logger.exception(e)
             logger.error(res.text)
         else:
-            if j.get("authz"):
-                logger.warning("{} \033[32m{}\033[m".format(url, j.get("authz")))
+            if j.get("result"):
+                logger.warning("{} \033[32m{}\033[m".format(url, j.get("result")))
                 logger.debug("{}".format(j.get("error", "")))
                 current_request['result'] = "Grant"
             else:
-                logger.warning("{} \033[31m{}\033[m".format(url, j.get("authz")))
-                logger.debug("{}".format(j.get("error", "")))
+                logger.warning("{} \033[31m{}\033[m".format(url, "Deny"))
+                logger.debug("{}".format(j))
                 current_request['result'] = "Deny"
     return current_request
 
