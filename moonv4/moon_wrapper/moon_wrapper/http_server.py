@@ -3,74 +3,139 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import requests
-import json
-from flask import Flask, request
+from flask import Flask, jsonify
+from flask_cors import CORS, cross_origin
+from flask_restful import Resource, Api
 import logging
-from moon_utilities import configuration
+from moon_wrapper import __version__
+from moon_wrapper.api.generic import Status, Logs, API
+from moon_wrapper.api.wrapper import Wrapper
+from moon_utilities.cache import Cache
+from moon_utilities import configuration, exceptions
 
 logger = logging.getLogger("moon.wrapper.http")
 
 
-def __get_subject(target, credentials):
-    _subject = target.get("user_id", "")
-    if not _subject:
-        _subject = credentials.get("user_id", "")
-    return _subject
+CACHE = Cache()
 
 
-def __get_object(target, credentials):
-    try:
-        # note: case of Glance
-        return target['target']['name']
-    except KeyError:
-        pass
+class Server:
+    """Base class for HTTP server"""
 
-    # note: default case
-    return target.get("project_id", "")
+    def __init__(self, host="localhost", port=80, api=None, **kwargs):
+        """Run a server
+
+        :param host: hostname of the server
+        :param port: port for the running server
+        :param kwargs: optional parameters
+        :return: a running server
+        """
+        self._host = host
+        self._port = port
+        self._api = api
+        self._extra = kwargs
+
+    @property
+    def host(self):
+        return self._host
+
+    @host.setter
+    def host(self, name):
+        self._host = name
+
+    @host.deleter
+    def host(self):
+        self._host = ""
+
+    @property
+    def port(self):
+        return self._port
+
+    @port.setter
+    def port(self, number):
+        self._port = number
+
+    @port.deleter
+    def port(self):
+        self._port = 80
+
+    def run(self):
+        raise NotImplementedError()
+
+__API__ = (
+    Status, Logs, API
+ )
 
 
-def __get_project_id(target, credentials):
-    return target.get("project_id", "")
+class Root(Resource):
+    """
+    The root of the web service
+    """
+    __urls__ = ("/", )
+    __methods = ("get", "post", "put", "delete", "options")
+
+    def get(self):
+        tree = {"/": {"methods": ("get",),
+                      "description": "List all methods for that service."}}
+        for item in __API__:
+            tree[item.__name__] = {"urls": item.__urls__}
+            _methods = []
+            for _method in self.__methods:
+                if _method in dir(item):
+                    _methods.append(_method)
+            tree[item.__name__]["methods"] = _methods
+            tree[item.__name__]["description"] = item.__doc__.strip()
+        return {
+            "version": __version__,
+            "tree": tree
+        }
 
 
-def HTTPServer(host, port):
-    app = Flask(__name__)
-    conf = configuration.get_configuration("components/wrapper")
-    timeout = conf["components/wrapper"].get("timeout", 5)
-    conf = configuration.get_configuration("components/interface")
-    interface_hostname = conf["components/interface"].get("hostname", "interface")
-    interface_port = conf["components/interface"].get("port", 80)
-    conf = configuration.get_configuration("logging")
-    try:
-        debug = conf["logging"]["loggers"]['moon']['level'] == "DEBUG"
-    except KeyError:
-        debug = False
+class HTTPServer(Server):
 
-    @app.route("/", methods=['POST', 'GET'])
-    def wrapper():
-        try:
-            target = json.loads(request.form.get('target', {}))
-            credentials = json.loads(request.form.get('credentials', {}))
-            rule = request.form.get('rule', "")
-            _subject = __get_subject(target, credentials)
-            _object = __get_object(target, credentials)
-            _project_id = __get_project_id(target, credentials)
-            logger.info("GET with args {} / {} - {} - {}".format(_project_id, _subject, _object, rule))
-            _url = "http://{}:{}/authz/{}/{}/{}/{}".format(
-                interface_hostname,
-                interface_port,
-                _project_id,
-                _subject,
-                _object,
-                rule
-            )
-            req = requests.get(url=_url, timeout=timeout)
-            logger.info("req txt={}".format(req.text))
-            if req.json()["result"] == True:
-                return "True"
-        except Exception as e:
-            logger.exception("An exception occurred: {}".format(e))
-        return "False"
+    def __init__(self, host="localhost", port=80, **kwargs):
+        super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
+        self.app = Flask(__name__)
+        self.port = port
+        conf = configuration.get_configuration("components/orchestrator")
+        _hostname = conf["components/orchestrator"].get("hostname",
+                                                        "orchestrator")
+        _port = conf["components/manager"].get("port", 80)
+        _protocol = conf["components/manager"].get("protocol", "http")
+        self.orchestrator_url = "{}://{}:{}".format(
+            _protocol, _hostname, _port)
+        # Todo : specify only few urls instead of *
+        # CORS(self.app)
+        self.api = Api(self.app)
+        self.__set_route()
+        self.__hook_errors()
 
-    app.run(debug=debug, host=host, port=port)
+    def __hook_errors(self):
+
+        def get_404_json(e):
+            return jsonify({"result": False, "code": 404,
+                            "description": str(e)}), 404
+        self.app.register_error_handler(404, get_404_json)
+
+        def get_400_json(e):
+            return jsonify({"result": False, "code": 400,
+                            "description": str(e)}), 400
+        self.app.register_error_handler(400, lambda e: get_400_json)
+        self.app.register_error_handler(403, exceptions.AuthException)
+
+    def __set_route(self):
+        self.api.add_resource(Root, '/')
+
+        for api in __API__:
+            self.api.add_resource(api, *api.__urls__)
+        self.api.add_resource(Wrapper, *Wrapper.__urls__,
+                              resource_class_kwargs={
+                                  "orchestrator_url": self.orchestrator_url,
+                                  "cache": CACHE,
+                              }
+                              )
+
+    def run(self):
+        self.app.run(host=self._host, port=self._port)  # nosec
+        # self.app.run(debug=True, host=self._host, port=self._port)  # nosec
+

@@ -1,4 +1,5 @@
 import json
+import yaml
 import logging
 import requests
 import argparse
@@ -26,6 +27,7 @@ def init():
     parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
     parser.add_argument("--format", "-f", help="Output format (txt, json)", default="json")
     parser.add_argument("--output", "-o", help="Output filename")
+    parser.add_argument("--from-policies", "-p", help="Get API from policy.{json,yaml}", target="policies")
     parser.add_argument("--credentials", "-c", help="Github credential filename (inside format user:pass)")
     args = parser.parse_args()
 
@@ -98,6 +100,13 @@ def to_str(results):
     return output
 
 
+def get_data_from_policies(policies):
+    for filename in policies.split(","):
+        try:
+            obj = json.loads(open(filename.strip()).read())
+
+
+
 def save(results, args):
     if args.output:
         if args.format == 'json':
@@ -114,8 +123,11 @@ def save(results, args):
 def main():
     args = init()
     results = {}
-    for key in URLS:
-        results[key] = get_content(key, args)
+    if not args.policies:
+        for key in URLS:
+            results[key] = get_content(key, args)
+    else:
+        get_data_from_policies(args.policies)
     save(results, args)
 
 if __name__ == "__main__":

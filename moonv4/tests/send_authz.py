@@ -136,7 +136,9 @@ def _send(url, stress_test=False):
         return {}
     if not stress_test:
         if res.status_code == 200:
-            logger.info("\033[1m{}\033[m {}".format(url, res.status_code))
+            logger.warning("\033[1m{}\033[m \033[32mGrant\033[m".format(url))
+        elif res.status_code == 401:
+            logger.warning("\033[1m{}\033[m \033[31mDeny\033[m".format(url))
         else:
             logger.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
         try:
@@ -146,11 +148,11 @@ def _send(url, stress_test=False):
             logger.error(res.text)
         else:
             if j.get("result"):
-                logger.warning("{} \033[32m{}\033[m".format(url, j.get("result")))
+                # logger.warning("{} \033[32m{}\033[m".format(url, j.get("result")))
                 logger.debug("{}".format(j.get("error", "")))
                 current_request['result'] = "Grant"
             else:
-                logger.warning("{} \033[31m{}\033[m".format(url, "Deny"))
+                # logger.warning("{} \033[31m{}\033[m".format(url, "Deny"))
                 logger.debug("{}".format(j))
                 current_request['result'] = "Deny"
     return current_request

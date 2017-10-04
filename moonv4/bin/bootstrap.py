@@ -213,6 +213,7 @@ def start_moon(data_config):
         output = subprocess.run(cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE)
+        time.sleep(3)
         if output.returncode != 0:
             log.info(" ".join(cmd))
             log.info(output.returncode)

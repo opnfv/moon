@@ -53,8 +53,8 @@ def get_configuration(key):
     url = "http://{}:{}/v1/kv/{}".format(CONSUL_HOST, CONSUL_PORT, key)
     req = requests.get(url)
     if req.status_code != 200:
-        LOG.info("url={}".format(url))
-        raise exceptions.ConsulComponentNotFound
+        LOG.error("url={}".format(url))
+        raise exceptions.ConsulComponentNotFound("error={}: {}".format(req.status_code, req.text))
     data = req.json()
     if len(data) == 1:
         data = data[0]

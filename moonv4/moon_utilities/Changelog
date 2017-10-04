@@ -35,3 +35,7 @@ CHANGES
 -----
 - Add authentication features for interface
 
+1.3.0
+-----
+- Add cache functionality
+

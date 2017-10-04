@@ -3,23 +3,16 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 import logging
 from moon_interface import __version__
 from moon_interface.api.generic import Status, Logs, API
-from moon_interface.api.models import Models
-from moon_interface.api.policies import Policies
-from moon_interface.api.pdp import PDP
-from moon_interface.api.meta_rules import MetaRules
-from moon_interface.api.meta_data import SubjectCategories, ObjectCategories, ActionCategories
-from moon_interface.api.perimeter import Subjects, Objects, Actions
-from moon_interface.api.data import SubjectData, ObjectData, ActionData
-from moon_interface.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
-from moon_interface.api.rules import Rules
 from moon_interface.api.authz import Authz
-from moon_utilities import exceptions
+from moon_interface.api.wrapper import Wrapper
+from moon_interface.authz_requests import CACHE
+from moon_utilities import configuration, exceptions
 
 logger = logging.getLogger("moon.interface.http")
 
@@ -68,13 +61,7 @@ class Server:
         raise NotImplementedError()
 
 __API__ = (
-    Status, Logs, API,
-    MetaRules, SubjectCategories, ObjectCategories, ActionCategories,
-    Subjects, Objects, Actions,
-    SubjectAssignments, ObjectAssignments, ActionAssignments,
-    SubjectData, ObjectData, ActionData,
-    Rules, Authz,
-    Models, Policies, PDP
+    Status, Logs, API
  )
 
 
@@ -106,24 +93,28 @@ class HTTPServer(Server):
     def __init__(self, host="localhost", port=80, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.app = Flask(__name__)
+        self.port = port
+        conf = configuration.get_configuration("components/manager")
+        self.manager_hostname = conf["components/manager"].get("hostname", "manager")
+        self.manager_port = conf["components/manager"].get("port", 80)
         #Todo : specify only few urls instead of *
         CORS(self.app)
         self.api = Api(self.app)
         self.__set_route()
-        # self.__hook_errors()
+        self.__hook_errors()
 
-        @self.app.errorhandler(exceptions.AuthException)
-        def _auth_exception(error):
-            return {"error": "Unauthorized"}, 401
+        # @self.app.errorhandler(exceptions.AuthException)
+        # def _auth_exception(error):
+        #     return {"error": "Unauthorized"}, 401
 
     def __hook_errors(self):
-        # FIXME (dthom): it doesn't work
+
         def get_404_json(e):
-            return {"error": "Error", "code": 404, "description": e}
+            return jsonify({"result": False, "code": 404, "description": str(e)}), 404
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
-            return {"error": "Error", "code": 400, "description": e}
+            return jsonify({"result": False, "code": 400, "description": str(e)}), 400
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 
@@ -132,7 +123,23 @@ class HTTPServer(Server):
 
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
+        self.api.add_resource(Wrapper, *Wrapper.__urls__,
+                              resource_class_kwargs={
+                                  "port": self.port,
+                                  "cache": CACHE,
+                                  "interface_name": self.host,
+                                  "manager_url": "http://{}:{}".format(self.manager_hostname, self.manager_port),
+                              }
+                              )
+        self.api.add_resource(Authz, *Authz.__urls__,
+                              resource_class_kwargs={
+                                  "cache": CACHE,
+                                  "interface_name": self.host,
+                                  "manager_url": "http://{}:{}".format(self.manager_hostname, self.manager_port),
+                              }
+                              )
 
     def run(self):
-        self.app.run(debug=True, host=self._host, port=self._port)  # nosec
+        self.app.run(host=self._host, port=self._port)  # nosec
+        # self.app.run(debug=True, host=self._host, port=self._port)  # nosec
 
