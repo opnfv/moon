@@ -79,7 +79,9 @@ def get(key):
 
 def start_consul(data_config):
     cmd = ["docker", "run", "-d", "--net=moon", "--name=consul", "--hostname=consul", "-p", "8500:8500", "consul"]
-    output = subprocess.run(cmd)
+    output = subprocess.run(cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     if output.returncode != 0:
         log.info(" ".join(cmd))
         log.info(output.returncode)
@@ -128,13 +130,14 @@ def start_database():
     cmd = ["docker", "run", "-dti", "--net=moon", "--hostname=db", "--name=db",
            "-e", "MYSQL_ROOT_PASSWORD=p4sswOrd1", "-e", "MYSQL_DATABASE=moon", "-e", "MYSQL_USER=moon",
            "-e", "MYSQL_PASSWORD=p4sswOrd1", "-p", "3306:3306", "mysql:latest"]
-    output = subprocess.run(cmd)
+    output = subprocess.run(cmd,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     if output.returncode != 0:
         log.info(cmd)
         log.error(output.stderr)
         log.error(output.stdout)
         raise Exception("Error starting DB container!")
-    log.info(get("database"))
     for database in get("database"):
         database_url = database['url']
         match = re.search("(?P<proto>^[\\w+]+):\/\/(?P<user>\\w+):(?P<password>.+)@(?P<host>\\w+):*(?P<port>\\d*)",
@@ -155,7 +158,9 @@ def start_database():
                 continue
             else:
                 log.info("Database is up, populating it...")
-                output = subprocess.run(["moon_db_manager", "upgrade"])
+                output = subprocess.run(["moon_db_manager", "upgrade"],
+                                        stdout=subprocess.PIPE,
+                                        stderr=subprocess.PIPE)
                 if output.returncode != 0:
                     raise Exception("Error populating the database!")
                 break
@@ -164,7 +169,9 @@ def start_database():
 def start_keystone():
     output = subprocess.run(["docker", "run", "-dti", "--net=moon", "--hostname=keystone", "--name=keystone",
                              "-e", "DB_HOST=db", "-e", "DB_PASSWORD_ROOT=p4sswOrd1", "-p", "35357:35357",
-                             "-p", "5000:5000", "keystone:mitaka"])
+                             "-p", "5000:5000", "keystone:mitaka"],
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE)
     if output.returncode != 0:
         raise Exception("Error starting Keystone container!")
     # TODO: Keystone answers request too quickly
@@ -187,27 +194,31 @@ def start_keystone():
 
 def start_moon(data_config):
     cmds = [
-        ["docker", "run", "-dti", "--net=moon", "--name=wrapper", "--hostname=wrapper", "-p",
-         "{0}:{0}".format(data_config['components']['wrapper']['port']),
-         data_config['components']['wrapper']['container']],
-        ["docker", "run", "-dti", "--net=moon", "--name=interface", "--hostname=interface", "-p",
-         "{0}:{0}".format(data_config['components']['interface']['port']),
-         data_config['components']['interface']['container']],
-        ["docker", "run", "-dti", "--net=moon", "--name=manager", "--hostname=manager", "-p",
+        # ["docker", "run", "-dti", "--net=moon", "--name=wrapper", "--hostname=wrapper", "-p",
+        #  "{0}:{0}".format(data_config['components']['wrapper']['port']),
+        #  data_config['components']['wrapper']['container']],
+        ["docker", "run", "-dti", "--net=moon", "--name=manager",
+         "--hostname=manager", "-p",
          "{0}:{0}".format(data_config['components']['manager']['port']),
          data_config['components']['manager']['container']],
+        ["docker", "run", "-dti", "--net=moon", "--name=interface",
+         "--hostname=interface", "-p",
+         "{0}:{0}".format(data_config['components']['interface']['port']),
+         data_config['components']['interface']['container']],
     ]
     for cmd in cmds:
-        log.warning("Start {} ?".format(cmd[-1]))
-        answer = input()
-        if answer.lower() in ("y", "yes", "o", "oui"):
-            output = subprocess.run(cmd)
-            if output.returncode != 0:
-                log.info(" ".join(cmd))
-                log.info(output.returncode)
-                log.error(output.stderr)
-                log.error(output.stdout)
-                raise Exception("Error starting {} container!".format(cmd[-1]))
+        log.warning("Start {}".format(cmd[-1]))
+        # answer = input()
+        # if answer.lower() in ("y", "yes", "o", "oui"):
+        output = subprocess.run(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        if output.returncode != 0:
+            log.info(" ".join(cmd))
+            log.info(output.returncode)
+            log.error(output.stderr)
+            log.error(output.stdout)
+            raise Exception("Error starting {} container!".format(cmd[-1]))
     subprocess.run(["docker", "ps"])
 
 
