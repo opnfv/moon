@@ -12,4 +12,4 @@ OPNFV MOON user guide
    :numbered:
    :maxdepth: 2
 
-   userguide.rst
+   feature.usage.rst
