@@ -12,7 +12,7 @@ Moon Release Notes
    :numbered:
    :maxdepth: 4
 
-   moon-release.rst
+   release-notes.rst
 
 Revision: _sha1_
 
