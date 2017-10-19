@@ -13,7 +13,7 @@ Moon installation and configuration instruction
    :numbered:
    :maxdepth: 2
 
-   feature.configuration.rst
+   installation.rst
 
 
 
