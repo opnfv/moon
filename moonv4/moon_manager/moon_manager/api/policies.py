@@ -51,7 +51,7 @@ class Policies(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"policies": data}
 
     @check_auth
@@ -77,11 +77,12 @@ class Policies(Resource):
         :internal_api: add_policy
         """
         try:
-            data = PolicyManager.add_policy(user_id=user_id, policy_id=uuid, value=request.json)
+            data = PolicyManager.add_policy(
+                user_id=user_id, policy_id=uuid, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"policies": data}
 
     @check_auth
@@ -101,7 +102,7 @@ class Policies(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
     @check_auth
@@ -121,10 +122,11 @@ class Policies(Resource):
         :internal_api: update_policy
         """
         try:
-            data = PolicyManager.update_policy(user_id=user_id, policy_id=uuid, value=request.json)
+            data = PolicyManager.update_policy(
+                user_id=user_id, policy_id=uuid, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"policies": data}
 

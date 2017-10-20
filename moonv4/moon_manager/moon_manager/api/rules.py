@@ -9,7 +9,6 @@ Rules (TODO)
 from flask import request
 from flask_restful import Resource
 from oslo_log import log as logging
-from moon_utilities.security_functions import call
 from moon_utilities.security_functions import check_auth
 from moon_db.core import PolicyManager
 
@@ -40,8 +39,10 @@ class Rules(Resource):
             "rules": [
                 "policy_id": "policy_id1",
                 "meta_rule_id": "meta_rule_id1",
-                "rule_id1": ["subject_data_id1", "object_data_id1", "action_data_id1"],
-                "rule_id2": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+                "rule_id1":
+                    ["subject_data_id1", "object_data_id1", "action_data_id1"],
+                "rule_id2":
+                    ["subject_data_id2", "object_data_id2", "action_data_id2"],
             ]
         }
         :internal_api: get_rules
@@ -53,7 +54,7 @@ class Rules(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"rules": data}
 
     @check_auth
@@ -75,23 +76,31 @@ class Rules(Resource):
             "rules": [
                 "meta_rule_id": "meta_rule_id1",
                 "rule_id1": {
-                    "rule": ["subject_data_id1", "object_data_id1", "action_data_id1"],
+                    "rule": ["subject_data_id1",
+                             "object_data_id1",
+                             "action_data_id1"],
                     "instructions": (
-                        {"decision": "grant"},  # "grant" to immediately exit, 
-                                                # "continue" to wait for the result of next policy
-                                                # "deny" to deny the request
+                        {"decision": "grant"},
+                        # "grant" to immediately exit,
+                        # "continue" to wait for the result of next policy
+                        # "deny" to deny the request
                     )
                 }
                 "rule_id2": {
-                    "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+                    "rule": ["subject_data_id2",
+                             "object_data_id2",
+                             "action_data_id2"],
                     "instructions": (
                         {
                             "update": {
-                                "operation": "add",  # operations may be "add" or "delete"
-                                "target": "rbac:role:admin"  # add the role admin to the current user
+                                "operation": "add",
+                                    # operations may be "add" or "delete"
+                                "target": "rbac:role:admin"
+                                    # add the role admin to the current user
                             }
                         },
-                        {"chain": {"name": "rbac"}}  # chain with the policy named rbac
+                        {"chain": {"name": "rbac"}}
+                            # chain with the policy named rbac
                     )
                 }
             ]
@@ -107,7 +116,7 @@ class Rules(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"rules": data}
 
     @check_auth
@@ -121,10 +130,11 @@ class Rules(Resource):
         :internal_api: delete_rule
         """
         try:
-            data = PolicyManager.delete_rule(user_id=user_id, policy_id=uuid, rule_id=rule_id)
+            data = PolicyManager.delete_rule(
+                user_id=user_id, policy_id=uuid, rule_id=rule_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 

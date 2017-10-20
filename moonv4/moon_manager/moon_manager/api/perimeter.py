@@ -3,8 +3,10 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 """
-* Subjects are the source of an action on an object (examples : users, virtual machines)
-* Objects are the destination of an action (examples virtual machines, virtual Routers)
+* Subjects are the source of an action on an object
+  (examples : users, virtual machines)
+* Objects are the destination of an action
+  (examples virtual machines, virtual Routers)
 * Actions are what subject wants to do on an object
 """
 
@@ -35,7 +37,8 @@ class Subjects(Resource):
 
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
-        """Retrieve all subjects or a specific one if perimeter_id is given for a given policy
+        """Retrieve all subjects or a specific one if perimeter_id is
+        given for a given policy
 
         :param uuid: uuid of the policy
         :param perimeter_id: uuid of the subject
@@ -58,7 +61,7 @@ class Subjects(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subjects": data}
 
     @check_auth
@@ -87,18 +90,20 @@ class Subjects(Resource):
         """
         try:
             if not perimeter_id:
-                data = PolicyManager.get_subjects(user_id=user_id, policy_id=None)
+                data = PolicyManager.get_subjects(user_id=user_id,
+                                                  policy_id=None)
                 if 'name' in request.json:
                     for data_id, data_value in data.items():
                         if data_value['name'] == request.json['name']:
                             perimeter_id = data_id
                             break
-            data = PolicyManager.add_subject(user_id=user_id, policy_id=uuid,
-                                             perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_subject(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subjects": data}
 
     @check_auth
@@ -127,18 +132,20 @@ class Subjects(Resource):
         """
         try:
             if not perimeter_id:
-                data = PolicyManager.get_subjects(user_id=user_id, policy_id=None)
+                data = PolicyManager.get_subjects(user_id=user_id,
+                                                  policy_id=None)
                 if 'name' in request.json:
                     for data_id, data_value in data.items():
                         if data_value['name'] == request.json['name']:
                             perimeter_id = data_id
                             break
-            data = PolicyManager.add_subject(user_id=user_id, policy_id=uuid,
-                                             perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_subject(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subjects": data}
 
     @check_auth
@@ -160,11 +167,12 @@ class Subjects(Resource):
         :internal_api: delete_subject
         """
         try:
-            data = PolicyManager.delete_subject(user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
+            data = PolicyManager.delete_subject(
+                user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -184,7 +192,8 @@ class Objects(Resource):
 
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
-        """Retrieve all objects or a specific one if perimeter_id is given for a given policy
+        """Retrieve all objects or a specific one if perimeter_id is
+        given for a given policy
 
         :param uuid: uuid of the policy
         :param perimeter_id: uuid of the object
@@ -206,7 +215,7 @@ class Objects(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"objects": data}
 
     @check_auth
@@ -235,12 +244,13 @@ class Objects(Resource):
                     if data_value['name'] == request.json['name']:
                         perimeter_id = data_id
                         break
-            data = PolicyManager.add_object(user_id=user_id, policy_id=uuid,
-                                            perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_object(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"objects": data}
 
     @check_auth
@@ -269,12 +279,13 @@ class Objects(Resource):
                     if data_value['name'] == request.json['name']:
                         perimeter_id = data_id
                         break
-            data = PolicyManager.add_object(user_id=user_id, policy_id=uuid,
-                                            perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_object(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"objects": data}
 
     @check_auth
@@ -293,11 +304,12 @@ class Objects(Resource):
         :internal_api: delete_object
         """
         try:
-            data = PolicyManager.delete_object(user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
+            data = PolicyManager.delete_object(
+                user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -317,7 +329,8 @@ class Actions(Resource):
 
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
-        """Retrieve all actions or a specific one if perimeter_id is given for a given policy
+        """Retrieve all actions or a specific one if perimeter_id
+        is given for a given policy
 
         :param uuid: uuid of the policy
         :param perimeter_id: uuid of the action
@@ -331,11 +344,12 @@ class Actions(Resource):
         :internal_api: get_actions
         """
         try:
-            data = PolicyManager.get_actions(user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
+            data = PolicyManager.get_actions(
+                user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"actions": data}
 
     @check_auth
@@ -364,12 +378,13 @@ class Actions(Resource):
                     if data_value['name'] == request.json['name']:
                         perimeter_id = data_id
                         break
-            data = PolicyManager.add_action(user_id=user_id, policy_id=uuid,
-                                            perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_action(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"actions": data}
 
     @check_auth
@@ -398,12 +413,13 @@ class Actions(Resource):
                     if data_value['name'] == request.json['name']:
                         perimeter_id = data_id
                         break
-            data = PolicyManager.add_action(user_id=user_id, policy_id=uuid,
-                                            perimeter_id=perimeter_id, value=request.json)
+            data = PolicyManager.add_action(
+                user_id=user_id, policy_id=uuid,
+                perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"actions": data}
 
     @check_auth
@@ -422,9 +438,10 @@ class Actions(Resource):
         :internal_api: delete_action
         """
         try:
-            data = PolicyManager.delete_action(user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
+            data = PolicyManager.delete_action(
+                user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}

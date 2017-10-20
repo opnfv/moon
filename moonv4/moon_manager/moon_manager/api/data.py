@@ -27,12 +27,14 @@ class SubjectData(Resource):
         "/policies/<string:uuid>/subject_data",
         "/policies/<string:uuid>/subject_data/",
         "/policies/<string:uuid>/subject_data/<string:category_id>",
-        "/policies/<string:uuid>/subject_data/<string:category_id>/<string:data_id>",
+        "/policies/<string:uuid>/subject_data/<string:category_id>/"
+        "<string:data_id>",
     )
 
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
-        """Retrieve all subject categories or a specific one if sid is given for a given policy
+        """Retrieve all subject categories or a specific one if sid is given
+        for a given policy
 
         :param uuid: uuid of the policy
         :param category_id: uuid of the subject category
@@ -51,12 +53,14 @@ class SubjectData(Resource):
         :internal_api: get_subject_data
         """
         try:
-            data = PolicyManager.get_subject_data(user_id=user_id, policy_id=uuid,
-                                                  category_id=category_id, data_id=data_id)
+            data = PolicyManager.get_subject_data(user_id=user_id,
+                                                  policy_id=uuid,
+                                                  category_id=category_id,
+                                                  data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subject_data": data}
 
     @check_auth
@@ -84,12 +88,14 @@ class SubjectData(Resource):
         :internal_api: add_subject_data
         """
         try:
-            data = PolicyManager.set_subject_data(user_id=user_id, policy_id=uuid,
-                                                  category_id=category_id, value=request.json)
+            data = PolicyManager.set_subject_data(user_id=user_id,
+                                                  policy_id=uuid,
+                                                  category_id=category_id,
+                                                  value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subject_data": data}
 
     @check_auth
@@ -107,12 +113,13 @@ class SubjectData(Resource):
         :internal_api: delete_subject_data
         """
         try:
-            data = PolicyManager.delete_subject_data(user_id=user_id, policy_id=uuid,
+            data = PolicyManager.delete_subject_data(user_id=user_id,
+                                                     policy_id=uuid,
                                                      data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -125,12 +132,14 @@ class ObjectData(Resource):
         "/policies/<string:uuid>/object_data",
         "/policies/<string:uuid>/object_data/",
         "/policies/<string:uuid>/object_data/<string:category_id>",
-        "/policies/<string:uuid>/object_data/<string:category_id>/<string:data_id>",
+        "/policies/<string:uuid>/object_data/<string:category_id>/"
+        "<string:data_id>",
     )
 
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
-        """Retrieve all object categories or a specific one if sid is given for a given policy
+        """Retrieve all object categories or a specific one if sid is given
+        for a given policy
 
         :param uuid: uuid of the policy
         :param category_id: uuid of the object category
@@ -149,12 +158,14 @@ class ObjectData(Resource):
         :internal_api: get_object_data
         """
         try:
-            data = PolicyManager.get_object_data(user_id=user_id, policy_id=uuid,
-                                                 category_id=category_id, data_id=data_id)
+            data = PolicyManager.get_object_data(user_id=user_id,
+                                                 policy_id=uuid,
+                                                 category_id=category_id,
+                                                 data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"object_data": data}
 
     @check_auth
@@ -182,12 +193,14 @@ class ObjectData(Resource):
         :internal_api: add_object_data
         """
         try:
-            data = PolicyManager.add_object_data(user_id=user_id, policy_id=uuid,
-                                                 category_id=category_id, value=request.json)
+            data = PolicyManager.add_object_data(user_id=user_id,
+                                                 policy_id=uuid,
+                                                 category_id=category_id,
+                                                 value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"object_data": data}
 
     @check_auth
@@ -205,12 +218,13 @@ class ObjectData(Resource):
         :internal_api: delete_object_data
         """
         try:
-            data = PolicyManager.delete_object_data(user_id=user_id, policy_id=uuid,
-                                                   data_id=data_id)
+            data = PolicyManager.delete_object_data(user_id=user_id,
+                                                    policy_id=uuid,
+                                                    data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -223,12 +237,14 @@ class ActionData(Resource):
         "/policies/<string:uuid>/action_data",
         "/policies/<string:uuid>/action_data/",
         "/policies/<string:uuid>/action_data/<string:category_id>",
-        "/policies/<string:uuid>/action_data/<string:category_id>/<string:data_id>",
+        "/policies/<string:uuid>/action_data/<string:category_id>/"
+        "<string:data_id>",
     )
 
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
-        """Retrieve all action categories or a specific one if sid is given for a given policy
+        """Retrieve all action categories or a specific one if sid is given
+        for a given policy
 
         :param uuid: uuid of the policy
         :param category_id: uuid of the action category
@@ -247,12 +263,14 @@ class ActionData(Resource):
         :internal_api: get_action_data
         """
         try:
-            data = PolicyManager.get_action_data(user_id=user_id, policy_id=uuid,
-                                                 category_id=category_id, data_id=data_id)
+            data = PolicyManager.get_action_data(user_id=user_id,
+                                                 policy_id=uuid,
+                                                 category_id=category_id,
+                                                 data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"action_data": data}
 
     @check_auth
@@ -280,12 +298,14 @@ class ActionData(Resource):
         :internal_api: add_action_data
         """
         try:
-            data = PolicyManager.add_action_data(user_id=user_id, policy_id=uuid,
-                                                 category_id=category_id, value=request.json)
+            data = PolicyManager.add_action_data(user_id=user_id,
+                                                 policy_id=uuid,
+                                                 category_id=category_id,
+                                                 value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"action_data": data}
 
     @check_auth
@@ -303,12 +323,13 @@ class ActionData(Resource):
         :internal_api: delete_action_data
         """
         try:
-            data = PolicyManager.delete_action_data(user_id=user_id, policy_id=uuid,
+            data = PolicyManager.delete_action_data(user_id=user_id,
+                                                    policy_id=uuid,
                                                     data_id=data_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 

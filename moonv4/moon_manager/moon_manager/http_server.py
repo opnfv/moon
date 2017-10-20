@@ -18,7 +18,7 @@ from moon_manager.api.perimeter import Subjects, Objects, Actions
 from moon_manager.api.data import SubjectData, ObjectData, ActionData
 from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
 from moon_manager.api.rules import Rules
-from moon_manager.api.containers import Container
+# from moon_manager.api.containers import Container
 from moon_utilities import configuration, exceptions
 
 logger = logging.getLogger("moon.manager.http")
@@ -73,7 +73,7 @@ __API__ = (
     Subjects, Objects, Actions,
     SubjectAssignments, ObjectAssignments, ActionAssignments,
     SubjectData, ObjectData, ActionData,
-    Rules, Container,
+    Rules, #Container,
     Models, Policies, PDP
  )
 

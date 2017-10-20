@@ -58,7 +58,7 @@ class PDP(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"pdps": data}
 
     @check_auth
@@ -84,11 +84,12 @@ class PDP(Resource):
         :internal_api: add_pdp
         """
         try:
-            data = PDPManager.add_pdp(user_id=user_id, pdp_id=None, value=request.json)
+            data = PDPManager.add_pdp(
+                user_id=user_id, pdp_id=None, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"pdps": data}
 
     @check_auth
@@ -108,7 +109,7 @@ class PDP(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
     @check_auth
@@ -128,11 +129,12 @@ class PDP(Resource):
         :internal_api: update_pdp
         """
         try:
-            data = PDPManager.update_pdp(user_id=user_id, pdp_id=uuid, value=request.json)
+            data = PDPManager.update_pdp(
+                user_id=user_id, pdp_id=uuid, value=request.json)
             add_container(uuid=uuid, pipeline=data[uuid]['security_pipeline'])
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"pdps": data}
 

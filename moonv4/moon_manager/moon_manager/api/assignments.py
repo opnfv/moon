@@ -60,7 +60,7 @@ class SubjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subject_assignments": data}
 
     @check_auth
@@ -97,7 +97,7 @@ class SubjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"subject_assignments": data}
 
     @check_auth
@@ -122,7 +122,7 @@ class SubjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -164,7 +164,7 @@ class ObjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"object_assignments": data}
 
     @check_auth
@@ -201,7 +201,7 @@ class ObjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"object_assignments": data}
 
     @check_auth
@@ -226,7 +226,7 @@ class ObjectAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
 
@@ -268,7 +268,7 @@ class ActionAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"action_assignments": data}
 
     @check_auth
@@ -305,7 +305,7 @@ class ActionAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"action_assignments": data}
 
     @check_auth
@@ -330,5 +330,5 @@ class ActionAssignments(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}

@@ -49,7 +49,7 @@ class Models(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"models": data}
 
     @check_auth
@@ -73,11 +73,12 @@ class Models(Resource):
         :internal_api: add_model
         """
         try:
-            data = ModelManager.add_model(user_id=user_id, model_id=uuid, value=request.json)
+            data = ModelManager.add_model(
+                user_id=user_id, model_id=uuid, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"models": data}
 
     @check_auth
@@ -97,7 +98,7 @@ class Models(Resource):
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
     @check_auth
@@ -116,10 +117,11 @@ class Models(Resource):
         :internal_api: update_model
         """
         try:
-            data = ModelManager.update_model(user_id=user_id, model_id=uuid, value=request.json)
+            data = ModelManager.update_model(
+                user_id=user_id, model_id=uuid, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"models": data}
 

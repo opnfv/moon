@@ -39,7 +39,8 @@ class MetaRules(Resource):
                 "meta_rule_id1": {
                     "name": "name of the meta rule",
                     "algorithm": "name of the meta rule algorithm",
-                    "subject_categories": ["subject_category_id1", "subject_category_id2"],
+                    "subject_categories": ["subject_category_id1",
+                                           "subject_category_id2"],
                     "object_categories": ["object_category_id1"],
                     "action_categories": ["action_category_id1"]
                 },
@@ -48,11 +49,12 @@ class MetaRules(Resource):
         :internal_api: get_meta_rules
         """
         try:
-            data = ModelManager.get_meta_rules(user_id=user_id, meta_rule_id=meta_rule_id)
+            data = ModelManager.get_meta_rules(
+                user_id=user_id, meta_rule_id=meta_rule_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"meta_rules": data}
 
     @check_auth
@@ -63,7 +65,8 @@ class MetaRules(Resource):
         :param user_id: user ID who do the request
         :request body: post = {
             "name": "name of the meta rule",
-            "subject_categories": ["subject_category_id1", "subject_category_id2"],
+            "subject_categories": ["subject_category_id1",
+                                   "subject_category_id2"],
             "object_categories": ["object_category_id1"],
             "action_categories": ["action_category_id1"]
         }
@@ -71,7 +74,8 @@ class MetaRules(Resource):
             "meta_rules": {
                 "meta_rule_id1": {
                     "name": "name of the meta rule",
-                    "subject_categories": ["subject_category_id1", "subject_category_id2"],
+                    "subject_categories": ["subject_category_id1",
+                                           "subject_category_id2"],
                     "object_categories": ["object_category_id1"],
                     "action_categories": ["action_category_id1"]
                 },
@@ -80,11 +84,12 @@ class MetaRules(Resource):
         :internal_api: add_meta_rules
         """
         try:
-            data = ModelManager.add_meta_rule(user_id=user_id, meta_rule_id=None, value=request.json)
+            data = ModelManager.add_meta_rule(
+                user_id=user_id, meta_rule_id=None, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"meta_rules": data}
 
     @check_auth
@@ -95,7 +100,8 @@ class MetaRules(Resource):
         :param user_id: user ID who do the request
         :request body: patch = {
             "name": "name of the meta rule",
-            "subject_categories": ["subject_category_id1", "subject_category_id2"],
+            "subject_categories": ["subject_category_id1",
+                                   "subject_category_id2"],
             "object_categories": ["object_category_id1"],
             "action_categories": ["action_category_id1"]
         }
@@ -103,7 +109,8 @@ class MetaRules(Resource):
             "meta_rules": {
                 "meta_rule_id1": {
                     "name": "name of the meta rule",
-                    "subject_categories": ["subject_category_id1", "subject_category_id2"],
+                    "subject_categories": ["subject_category_id1",
+                                           "subject_category_id2"],
                     "object_categories": ["object_category_id1"],
                     "action_categories": ["action_category_id1"]
                 },
@@ -112,11 +119,12 @@ class MetaRules(Resource):
         :internal_api: set_meta_rules
         """
         try:
-            data = ModelManager.set_meta_rule(user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
+            data = ModelManager.set_meta_rule(
+                user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"meta_rules": data}
 
     @check_auth
@@ -127,7 +135,8 @@ class MetaRules(Resource):
         :param user_id: user ID who do the request
         :request body: delete = {
             "name": "name of the meta rule",
-            "subject_categories": ["subject_category_id1", "subject_category_id2"],
+            "subject_categories": ["subject_category_id1",
+                                   "subject_category_id2"],
             "object_categories": ["object_category_id1"],
             "action_categories": ["action_category_id1"]
         }
@@ -135,7 +144,8 @@ class MetaRules(Resource):
             "meta_rules": {
                 "meta_rule_id1": {
                     "name": "name of the meta rule",
-                    "subject_categories": ["subject_category_id1", "subject_category_id2"],
+                    "subject_categories": ["subject_category_id1",
+                                           "subject_category_id2"],
                     "object_categories": ["object_category_id1"],
                     "action_categories": ["action_category_id1"]
                 },
@@ -144,10 +154,11 @@ class MetaRules(Resource):
         :internal_api: delete_meta_rules
         """
         try:
-            data = ModelManager.delete_meta_rule(user_id=user_id, meta_rule_id=meta_rule_id)
+            data = ModelManager.delete_meta_rule(
+                user_id=user_id, meta_rule_id=meta_rule_id)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
-                    "error": str(e)}
+                    "error": str(e)}, 500
         return {"result": True}
 
