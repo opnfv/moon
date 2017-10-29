@@ -4,15 +4,11 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 
-import copy
 import base64
 import json
 import requests
 import logging
 import logging.config
-# from oslo_log import log as logging
-from oslo_config import cfg
-# import oslo_messaging
 from moon_utilities import exceptions
 
 LOG = logging.getLogger("moon.utilities")
@@ -31,11 +27,6 @@ COMPONENTS = "components"
 def init_logging():
     config = get_configuration("logging")
     logging.config.dictConfig(config['logging'])
-
-
-def init_oslo_config():
-    cfg.CONF.transport_url = get_configuration("messenger")['messenger']['url']
-    cfg.CONF.rpc_response_timeout = 5
 
 
 def increment_port():
@@ -123,4 +114,3 @@ def get_components():
 
 
 init_logging()
-init_oslo_config()

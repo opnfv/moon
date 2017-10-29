@@ -49,7 +49,6 @@ class Cache(object):
 
     __AUTHZ_REQUESTS = {}
 
-
     def __init__(self):
         self.manager_url = "{}://{}:{}".format(
             configuration.get_components()['manager'].get('protocol', 'http'),
@@ -82,7 +81,8 @@ class Cache(object):
         return self.__SUBJECTS
 
     def update_subjects(self, policy_id=None):
-        req = requests.get("{}/policies/{}/subjects".format(self.manager_url, policy_id))
+        req = requests.get("{}/policies/{}/subjects".format(
+            self.manager_url, policy_id))
         self.__SUBJECTS[policy_id] = req.json()['subjects']
 
     def get_subject(self, policy_id, name):
@@ -103,7 +103,8 @@ class Cache(object):
         return self.__OBJECTS
 
     def update_objects(self, policy_id=None):
-        req = requests.get("{}/policies/{}/objects".format(self.manager_url, policy_id))
+        req = requests.get("{}/policies/{}/objects".format(
+            self.manager_url, policy_id))
         self.__OBJECTS[policy_id] = req.json()['objects']
 
     def get_object(self, policy_id, name):
@@ -124,7 +125,8 @@ class Cache(object):
         return self.__ACTIONS
 
     def update_actions(self, policy_id=None):
-        req = requests.get("{}/policies/{}/actions".format(self.manager_url, policy_id))
+        req = requests.get("{}/policies/{}/actions".format(
+            self.manager_url, policy_id))
         self.__ACTIONS[policy_id] = req.json()['actions']
 
     def get_action(self, policy_id, name):
@@ -184,10 +186,12 @@ class Cache(object):
             req = requests.get("{}/policies/{}/subject_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/subject_assignments".format(self.manager_url, policy_id))
+            req = requests.get("{}/policies/{}/subject_assignments".format(
+                self.manager_url, policy_id))
         if policy_id not in self.__SUBJECT_ASSIGNMENTS:
             self.__SUBJECT_ASSIGNMENTS[policy_id] = {}
-        self.__SUBJECT_ASSIGNMENTS[policy_id].update(req.json()['subject_assignments'])
+        self.__SUBJECT_ASSIGNMENTS[policy_id].update(
+            req.json()['subject_assignments'])
 
     def get_subject_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.subject_assignments:
@@ -208,10 +212,12 @@ class Cache(object):
             req = requests.get("{}/policies/{}/object_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/object_assignments".format(self.manager_url, policy_id))
+            req = requests.get("{}/policies/{}/object_assignments".format(
+                self.manager_url, policy_id))
         if policy_id not in self.__OBJECT_ASSIGNMENTS:
             self.__OBJECT_ASSIGNMENTS[policy_id] = {}
-        self.__OBJECT_ASSIGNMENTS[policy_id].update(req.json()['object_assignments'])
+        self.__OBJECT_ASSIGNMENTS[policy_id].update(
+            req.json()['object_assignments'])
 
     def get_object_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.object_assignments:
@@ -232,10 +238,12 @@ class Cache(object):
             req = requests.get("{}/policies/{}/action_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/action_assignments".format(self.manager_url, policy_id))
+            req = requests.get("{}/policies/{}/action_assignments".format(
+                self.manager_url, policy_id))
         if policy_id not in self.__ACTION_ASSIGNMENTS:
             self.__ACTION_ASSIGNMENTS[policy_id] = {}
-        self.__ACTION_ASSIGNMENTS[policy_id].update(req.json()['action_assignments'])
+        self.__ACTION_ASSIGNMENTS[policy_id].update(
+            req.json()['action_assignments'])
 
     def get_action_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.action_assignments:
@@ -378,23 +386,27 @@ class Cache(object):
             #     if meta_rule_id in self.models[model_id]["meta_rules"]:
             #         return pdp_value["keystone_project_id"]
 
-    def get_containers_from_keystone_project_id(self, keystone_project_id, meta_rule_id=None):
+    def get_containers_from_keystone_project_id(self, keystone_project_id,
+                                                meta_rule_id=None):
         for container_id, container_value in self.containers.items():
+            LOG.info("container={}".format(container_value))
             if 'keystone_project_id' not in container_value:
                 continue
             if container_value['keystone_project_id'] == keystone_project_id:
                 if not meta_rule_id:
                     yield container_id, container_value
-                elif container_value['meta_rule_id'] == meta_rule_id:
+                elif container_value.get('meta_rule_id') == meta_rule_id:
                     yield container_id, container_value
                     break
 
     # containers functions
 
     def __update_container(self):
-        req = requests.get("{}/containers".format(self.manager_url))
-        containers = req.json()
-        for key, value in containers["containers"].items():
+        LOG.info("orchestrator={}".format("{}/pods".format(self.orchestrator_url)))
+        req = requests.get("{}/pods".format(self.orchestrator_url))
+        LOG.info("pods={}".format(req.text))
+        pods = req.json()
+        for key, value in pods["pods"].items():
             if key not in self.__CONTAINERS:
                 self.__CONTAINERS[key] = value
             else:
@@ -487,34 +499,24 @@ class Cache(object):
     def __update_container_chaining(self, keystone_project_id):
         container_ids = []
         for pdp_id, pdp_value, in self.__PDP.items():
-            # LOG.info("pdp_id, pdp_value = {}, {}".format(pdp_id, pdp_value))
-            # LOG.info("__POLICIES = {}".format(self.__POLICIES))
             if pdp_value:
                 if pdp_value["keystone_project_id"] == keystone_project_id:
                     for policy_id in pdp_value["security_pipeline"]:
                         model_id = self.__POLICIES[policy_id]['model_id']
-                        # LOG.info("model_id = {}".format(model_id))
-                        # LOG.info("CACHE = {}".format(self.__MODELS[model_id]))
-                        # LOG.info("CACHE.containers = {}".format(self.__CONTAINERS))
-                        # LOG.info("CACHE.models = {}".format(self.__MODELS))
                         for meta_rule_id in self.__MODELS[model_id]["meta_rules"]:
-                            # LOG.info("meta_rule = {}".format(self.__MODELS[model_id]["meta_rules"]))
                             for container_id, container_value in self.get_containers_from_keystone_project_id(
                                 keystone_project_id,
                                 meta_rule_id
                             ):
-                                # LOG.info("CONTAINER: {} {}".format(container_id, container_value))
                                 container_ids.append(
                                     {
-                                        "container_id": self.__CONTAINERS[container_id]["container_id"],
+                                        "container_id": self.__CONTAINERS[container_id]["name"],
                                         "genre": self.__CONTAINERS[container_id]["genre"],
                                         "policy_id": policy_id,
                                         "meta_rule_id": meta_rule_id,
-                                        "hostname": self.__CONTAINERS[container_id]["hostname"],
-                                        "hostip": self.__CONTAINERS[container_id]["port"][0]["IP"],
-                                        "port": self.__CONTAINERS[container_id]["port"][0]["PublicPort"],
+                                        "hostname": self.__CONTAINERS[container_id]["name"],
+                                        "port": self.__CONTAINERS[container_id]["port"],
                                     }
                                 )
-        # LOG.info("__update_container_chaining={}".format(container_ids))
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
 

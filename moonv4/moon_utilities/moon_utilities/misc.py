@@ -4,18 +4,10 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 
-import os
-import re
-import types
-import requests
-from oslo_log import log as logging
-from oslo_config import cfg
-import oslo_messaging
-from moon_utilities import exceptions
-from oslo_config.cfg import ConfigOpts
+import logging
+import random
 
 LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
 
 
 def get_uuid_from_name(name, elements, **kwargs):
@@ -45,3 +37,108 @@ def get_name_from_uuid(uuid, elements, **kwargs):
             else:
                 return elements[element].get('name')
 
+
+def get_random_name():
+    _list = (
+        "windy",
+        "vengeful",
+        "precious",
+        "vivacious",
+        "quiet",
+        "confused",
+        "exultant",
+        "impossible",
+        "thick",
+        "obsolete",
+        "piquant",
+        "fanatical",
+        "tame",
+        "perfect",
+        "animated",
+        "dark",
+        "stimulating",
+        "drunk",
+        "depressed",
+        "fumbling",
+        "like",
+        "undesirable",
+        "spurious",
+        "subsequent",
+        "spiteful",
+        "last",
+        "stale",
+        "hulking",
+        "giddy",
+        "minor",
+        "careful",
+        "possessive",
+        "gullible",
+        "fragile",
+        "divergent",
+        "ill-informed",
+        "false",
+        "jumpy",
+        "damaged",
+        "likeable",
+        "volatile",
+        "handsomely",
+        "wet",
+        "long-term",
+        "pretty",
+        "taboo",
+        "normal",
+        "magnificent",
+        "nutty",
+        "puzzling",
+        "small",
+        "kind",
+        "devilish",
+        "chubby",
+        "paltry",
+        "cultured",
+        "old",
+        "defective",
+        "hanging",
+        "innocent",
+        "jagged",
+        "economic",
+        "good",
+        "sulky",
+        "real",
+        "bent",
+        "shut",
+        "furry",
+        "terrific",
+        "hollow",
+        "terrible",
+        "mammoth",
+        "pleasant",
+        "scared",
+        "obnoxious",
+        "absorbing",
+        "imported",
+        "infamous",
+        "grieving",
+        "ill-fated",
+        "mighty",
+        "handy",
+        "comfortable",
+        "astonishing",
+        "brown",
+        "assorted",
+        "wrong",
+        "unsightly",
+        "spooky",
+        "delightful",
+        "acid",
+        "inconclusive",
+        "mere",
+        "careless",
+        "historical",
+        "flashy",
+        "squealing",
+        "quarrelsome",
+        "empty",
+        "long",
+    )
+    return random.choice(_list)

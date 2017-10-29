@@ -12,27 +12,14 @@ import requests
 import time
 from functools import wraps
 from flask import request
-from oslo_log import log as logging
-from oslo_config import cfg
-import oslo_messaging
+import logging
 from moon_utilities import exceptions
 from moon_utilities import configuration
 
 LOG = logging.getLogger("moon.utilities." + __name__)
-CONF = cfg.CONF
 
 keystone_config = configuration.get_configuration("openstack/keystone")["openstack/keystone"]
-slave = configuration.get_configuration(configuration.SLAVE)["slave"]
-
-__transport_master = oslo_messaging.get_transport(cfg.CONF, slave.get("master_url"))
-__transport = oslo_messaging.get_transport(CONF)
-
-__n_transport = oslo_messaging.get_notification_transport(CONF)
-__n_notifier = oslo_messaging.Notifier(__n_transport,
-                                       'router.host',
-                                       driver='messagingv2',
-                                       topics=['authz-workers'])
-__n_notifier = __n_notifier.prepare(publisher_id='router')
+# slave = configuration.get_configuration(configuration.SLAVE)["slave"]
 
 __targets = {}
 
@@ -171,40 +158,6 @@ def logout(headers, url=None):
         return
     LOG.error(req.text)
     raise exceptions.KeystoneError
-
-
-def notify(request_id, container_id, payload, event_type="authz"):
-    ctxt = {
-        'request_id': request_id,
-        'container_id': container_id
-    }
-    __n_notifier.critical(ctxt, event_type, payload=payload)
-    # FIXME (asteroide): the notification mus be done 2 times otherwise the notification
-    #                    may not be sent (need to search why)
-    __n_notifier.critical(ctxt, event_type, payload=payload)
-
-
-def call(endpoint="security_router", ctx=None, method="route", **kwargs):
-    if not ctx:
-        ctx = dict()
-    if endpoint not in __targets:
-        __targets[endpoint] = dict()
-        __targets[endpoint]["endpoint"] = oslo_messaging.Target(topic=endpoint, version='1.0')
-        __targets[endpoint]["client"] = dict()
-        __targets[endpoint]["client"]["internal"] = oslo_messaging.RPCClient(__transport,
-                                                                             __targets[endpoint]["endpoint"])
-        __targets[endpoint]["client"]["external"] = oslo_messaging.RPCClient(__transport_master,
-                                                                             __targets[endpoint]["endpoint"])
-    if 'call_master' in ctx and ctx['call_master'] and slave.get("master_url"):
-        client = __targets[endpoint]["client"]["external"]
-        LOG.info("Calling master {} on {}...".format(method, endpoint))
-    else:
-        client = __targets[endpoint]["client"]["internal"]
-        LOG.info("Calling {} on {}...".format(method, endpoint))
-    result = copy.deepcopy(client.call(ctx, method, **kwargs))
-    LOG.info("result={}".format(result))
-    del client
-    return result
 
 
 class Context:

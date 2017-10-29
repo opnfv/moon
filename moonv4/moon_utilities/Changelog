@@ -39,3 +39,15 @@ CHANGES
 -----
 - Add cache functionality
 
+1.3.1
+-----
+- Delete Oslo config possibilities
+
+1.3.2
+-----
+- Delete Oslo logging and config
+
+1.3.3
+-----
+- Update the cache
+
