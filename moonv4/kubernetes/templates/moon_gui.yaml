@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: moon
+  name: gui
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: gui
+    spec:
+      hostname: gui
+      containers:
+      - name: gui
+        image: wukongsun/moon_gui:v4.1
+        ports:
+        - containerPort: 80
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gui
+  namespace: moon
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      nodePort: 30002
+  selector:
+    app: gui
+  type: NodePort

@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: moonforming
+  namespace: moon
+spec:
+  template:
+    metadata:
+      name: moonforming
+    spec:
+      containers:
+      - name: moonforming
+        image: asteroide/moonforming:v1.1
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/moon
+      volumes:
+      - name: config-volume
+        configMap:
+          name: moon-config
+      restartPolicy: Never
+      #backoffLimit: 4

@@ -1,0 +1,40 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: moon
+  name: orchestrator
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: orchestrator
+    spec:
+      hostname: orchestrator
+      containers:
+      - name: orchestrator
+        image: wukongsun/moon_orchestrator:v4.3
+        ports:
+        - containerPort: 8083
+        volumeMounts:
+        - name: config-volume
+          mountPath: /root/.kube
+      volumes:
+      - name: config-volume
+        configMap:
+          name: config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: orchestrator
+  namespace: moon
+spec:
+  ports:
+    - port: 8083
+      targetPort: 8083
+      nodePort: 30003
+  selector:
+    app: orchestrator
+  type: NodePort

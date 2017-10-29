@@ -1,0 +1,33 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  namespace: moon
+  name: consul
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: consul
+    spec:
+      hostname: consul
+      containers:
+      - name: consul
+        image: consul:latest
+        ports:
+        - containerPort: 8500
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: consul
+  namespace: moon
+spec:
+  ports:
+    - port: 8500
+      targetPort: 8500
+      nodePort: 30005
+  selector:
+    app: consul
+  type: NodePort
