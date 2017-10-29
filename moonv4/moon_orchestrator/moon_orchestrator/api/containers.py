@@ -8,7 +8,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 # from moon_db.core import IntraExtensionRootManager
 # from moon_db.core import ConfigurationManager
-from moon_utilities.security_functions import call
+# from moon_utilities.security_functions import call
 
 LOG = logging.getLogger("moon.orchestrator.api.containers")
 CONF = cfg.CONF
@@ -24,9 +24,9 @@ class Containers(object):
     def __init__(self, docker_manager):
         self.docker_manager = docker_manager
         self.components = dict()
-        for pdp_key, pdp_value in call("moon_manager", method="get_pdp",
-                                       ctx={"user_id": "admin", "id": None})["pdps"].items():
-            self.add_container(ctx={"id": pdp_key, "pipeline": pdp_value["security_pipeline"]})
+        # for pdp_key, pdp_value in call("moon_manager", method="get_pdp",
+        #                                ctx={"user_id": "admin", "id": None})["pdps"].items():
+        #     self.add_container(ctx={"id": pdp_key, "pipeline": pdp_value["security_pipeline"]})
 
     def get_container(self, ctx, args=None):
         """Get containers linked to an intra-extension

@@ -9,6 +9,7 @@ RUN pip3 install pip --upgrade
 ADD . /root
 WORKDIR /root/
 RUN pip3 install -r requirements.txt --upgrade
+RUN pip3 install /root/dist/* --upgrade
 RUN pip3 install . --upgrade
 
-CMD ["python3", "bootstrap.py"]
+CMD ["python3", "-m", "moon_orchestrator"]
