@@ -14,9 +14,7 @@ import requests
 import time
 from uuid import uuid4
 
-from moon_interface.containers import DockerManager
 from moon_interface.authz_requests import AuthzRequest
-from moon_utilities import configuration
 
 __version__ = "0.1.0"
 
@@ -78,78 +76,6 @@ def container_exist(cache, uuid):
                 return
             except requests.exceptions.ConnectionError:
                 return
-
-
-def build_container(cache, manager_url, uuid, meta_rule_id, plugin_name="authz"):
-    """Create the container and update the cache with the given perimeter elements
-
-    :param cache: Cache to use
-    :param manager_url: URL of the manager
-    :param uuid: Keystone Project ID
-    :param meta_rule_id: UUID of the meta_rule
-    :param plugin_name: name of the plugin to use
-    :return: True or False
-    """
-    LOG.info("Building a new container for {}".format(plugin_name))
-    manager = DockerManager()
-    tcp_port = configuration.increment_port()
-    container_name = configuration.get_plugins()[plugin_name]['container']
-    name = "{}_{}".format(plugin_name, uuid4().hex)
-    policy_id = cache.get_policy_from_meta_rules(meta_rule_id)
-    container_data = {
-        "name": name,
-        "hostname": name,
-        "port": {
-            "PrivatePort": tcp_port,
-            "Type": "tcp",
-            "IP": "0.0.0.0",
-            "PublicPort": tcp_port
-        },
-        "keystone_project_id": uuid,
-        "pdp_id": cache.get_pdp_from_keystone_project(uuid),
-        "meta_rule_id": meta_rule_id,
-        "policy_id": policy_id,
-        "container_name": container_name,
-        "plugin_name": plugin_name
-    }
-    container = manager.create_container(container_data)
-    container_data['container_id'] = container.id
-    container_data['port']["IP"] = container.ip
-    container_data['start_time'] = time.time()
-    req = requests.post("{}/containers".format(manager_url),
-                        json=container_data)
-    if req.status_code == 200:
-        cache.add_container(container_data)
-        return True
-
-
-def create_containers(cache, manager_url, uuid, plugin_name="authz"):
-    """Create the container and update the cache with the given perimeter elements
-
-    :param cache: Cache to use
-    :param manager_url: URL of the manager
-    :param uuid: Keystone Project ID
-    :param plugin_name: name of the plugin to use
-    :return: True or False
-    """
-    LOG.info("Need to create some containers for {}".format(uuid))
-    for pdp_id, pdp_value in cache.pdp.items():
-        LOG.info("pdp {}".format(pdp_value))
-        if uuid == pdp_value.get("keystone_project_id", ""):
-            LOG.info("uuid {}".format(uuid))
-            for policy_id in pdp_value.get("security_pipeline", []):
-                LOG.info("policy {}".format(policy_id))
-                model_id = cache.policies[policy_id]["model_id"]
-                model_value = cache.models[model_id]
-                for meta_rule_id in model_value["meta_rules"]:
-                    LOG.info("meta_rule {}".format(meta_rule_id))
-                    build_container(
-                        cache=cache,
-                        uuid=uuid,
-                        manager_url=manager_url,
-                        meta_rule_id=meta_rule_id,
-                        plugin_name=plugin_name)
-            return
 
 
 def create_authz_request(cache, interface_name, manager_url, uuid, subject_name, object_name, action_name):
@@ -230,12 +156,6 @@ class Authz(Resource):
                            "result": False,
                            "message": "Unknown Project ID or "
                                       "Project ID is not bind to a PDP."}, 403
-        if not container_exist(self.CACHE, uuid):
-            create_containers(
-                cache=self.CACHE,
-                uuid=uuid,
-                manager_url=self.MANAGER_URL,
-                plugin_name="authz")
         authz_request = create_authz_request(
             cache=self.CACHE,
             uuid=uuid,

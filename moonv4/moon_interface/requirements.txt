@@ -1,9 +1,4 @@
-kombu !=4.0.1,!=4.0.0
-oslo.messaging
-oslo.config
-vine
 flask
 flask_restful
 flask_cors
-babel
 moon_utilities

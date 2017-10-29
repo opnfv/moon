@@ -7,8 +7,7 @@ Those API are helping API used to manage the Moon platform.
 """
 
 from flask_restful import Resource, request
-from oslo_log import log as logging
-from moon_utilities.security_functions import call
+import logging
 import moon_interface.api
 from moon_utilities.security_functions import check_auth
 
@@ -36,7 +35,7 @@ class Status(Resource):
           }
         }
         """
-        return call("security_router", method="get_status", ctx={"component_id": component_id})
+        raise NotImplemented
 
 
 class Logs(Resource):
@@ -71,7 +70,7 @@ class Logs(Resource):
         args["to"] = to_str
         args["event_number"] = event_number
 
-        return call("security_router", method="get_logs", ctx={"component_id": component_id}, args=args)
+        raise NotImplemented
 
 
 class API(Resource):
@@ -130,22 +129,3 @@ class API(Resource):
                 return {"error": "Unknown endpoint_id {}".format(endpoint_id)}
             return {group_id: api_desc[group_id]}
         return api_desc
-
-
-class InternalAPI(Resource):
-    """
-    Endpoint for status requests
-    """
-
-    __urls__ = ("/internal_api", "/internal_api/", "/internal_api/<string:component_id>")
-
-    def get(self, component_id=None, user_id=""):
-        api_list = ("orchestrator", "security_router")
-        if not component_id:
-            return {"api": api_list}
-        if component_id in api_list:
-            api_desc = dict()
-            api_desc["name"] = component_id
-            api_desc["endpoints"] = call("security_router", component_id, {}, "list_api")
-            return api_desc
-
