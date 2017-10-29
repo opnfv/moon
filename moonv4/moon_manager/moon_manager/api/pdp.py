@@ -9,20 +9,29 @@ PDP are Policy Decision Point.
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
+import requests
 from moon_utilities.security_functions import check_auth
 from moon_db.core import PDPManager
+from moon_utilities import configuration
 
 __version__ = "0.1.0"
 
 LOG = logging.getLogger("moon.manager.api." + __name__)
 
 
-def add_container(uuid, pipeline):
-    # TODO: to implement
-    LOG.warning("Add container not implemented!")
-    LOG.info(uuid)
-    LOG.info(pipeline)
+def delete_pod(uuid):
+    raise NotImplementedError
+
+
+def add_pod(uuid, data):
+    conf = configuration.get_configuration("components/orchestrator")
+    hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
+    port = conf["components/orchestrator"].get("port", 80)
+    proto = conf["components/orchestrator"].get("protocol", "http")
+    req = requests.post("{}://{}:{}/pods".format(proto, hostname, port),
+                        data=data)
+    LOG.info(req.text)
 
 
 class PDP(Resource):
@@ -86,6 +95,7 @@ class PDP(Resource):
         try:
             data = PDPManager.add_pdp(
                 user_id=user_id, pdp_id=None, value=request.json)
+            add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -106,6 +116,7 @@ class PDP(Resource):
         """
         try:
             data = PDPManager.delete_pdp(user_id=user_id, pdp_id=uuid)
+            delete_pod(uuid)
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
@@ -131,7 +142,7 @@ class PDP(Resource):
         try:
             data = PDPManager.update_pdp(
                 user_id=user_id, pdp_id=uuid, value=request.json)
-            add_container(uuid=uuid, pipeline=data[uuid]['security_pipeline'])
+            add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
             LOG.error(e, exc_info=True)
             return {"result": False,
