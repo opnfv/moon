@@ -15,9 +15,9 @@ import requests
 import time
 from uuid import uuid4
 
-from moon_interface.api.authz import pdp_in_cache, pdp_in_manager, container_exist, \
-    create_containers, create_authz_request
-from moon_interface.authz_requests import AuthzRequest
+# from moon_interface.api.authz import pdp_in_cache, pdp_in_manager, container_exist, \
+#     create_containers, create_authz_request
+# from moon_interface.authz_requests import AuthzRequest
 from moon_utilities import configuration
 
 __version__ = "0.1.0"
@@ -31,7 +31,8 @@ class Wrapper(Resource):
     """
 
     __urls__ = (
-        "/",
+        "/authz",
+        "/authz/",
     )
 
     def __init__(self, **kwargs):

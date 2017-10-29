@@ -100,8 +100,8 @@ class HTTPServer(Server):
         conf = configuration.get_configuration("components/orchestrator")
         _hostname = conf["components/orchestrator"].get("hostname",
                                                         "orchestrator")
-        _port = conf["components/manager"].get("port", 80)
-        _protocol = conf["components/manager"].get("protocol", "http")
+        _port = conf["components/orchestrator"].get("port", 80)
+        _protocol = conf["components/orchestrator"].get("protocol", "http")
         self.orchestrator_url = "{}://{}:{}".format(
             _protocol, _hostname, _port)
         # Todo : specify only few urls instead of *
