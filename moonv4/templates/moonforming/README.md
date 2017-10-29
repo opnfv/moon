@@ -7,6 +7,6 @@ Usage
 =====
 
 ```bash
-docker run asteroide/moonforming:1.0
+docker run asteroide/moonforming:v1.1
 ```
 

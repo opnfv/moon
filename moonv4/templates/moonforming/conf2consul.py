@@ -82,9 +82,9 @@ def main():
         sys.exit(1)
 
     put("database", data_config["database"])
-    put("messenger", data_config["messenger"])
-    put("slave", data_config["slave"])
-    put("docker", data_config["docker"])
+    # put("messenger", data_config["messenger"])
+    # put("slave", data_config["slave"])
+    # put("docker", data_config["docker"])
     put("logging", data_config["logging"])
     put("components_port_start", data_config["components"]["port_start"])
 
