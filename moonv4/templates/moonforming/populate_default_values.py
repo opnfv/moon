@@ -204,13 +204,13 @@ def create_policy(model_id, meta_rule_list):
 
 def create_pdp(policy_id=None):
     logger.info("Creating PDP {}".format(scenario.pdp_name))
-    projects = get_keystone_projects()
-    project_id = args.keystone_pid
-    if not project_id:
-        for _project in projects['projects']:
-            if _project['name'] == "admin":
-                project_id = _project['id']
-    assert project_id
+    # projects = get_keystone_projects()
+    # project_id = args.keystone_pid
+    # if not project_id:
+    #     for _project in projects['projects']:
+    #         if _project['name'] == "admin":
+    #             project_id = _project['id']
+    # assert project_id
     pdps = check_pdp()["pdps"]
     for pdp_id, pdp_value in pdps.items():
         if scenario.pdp_name == pdp_value["name"]:
@@ -218,7 +218,7 @@ def create_pdp(policy_id=None):
             logger.debug("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
             return pdp_id
     _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
-    map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)
+    # map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)
     return _pdp_id
 
 if __name__ == "__main__":
