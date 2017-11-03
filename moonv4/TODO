@@ -3,30 +3,24 @@ Here is a list of what must be done to have complete version of the Moon platfor
 Architecture
 
 - Add a complete logging system
-- Replace moon_orchestrator with Kubernetes ?
-- Add a load balancer (HAProxy ?)
-- Update Consul with Consul-Template ?
-- Develop the Moon hook in Oslo_Policy
+- Replace moon_orchestrator with Kubernetes
 
 Actions that must be done before the next version:
 
 - manage a token/uuid (ie session ID) in the moon_interface component
-- update RabbitMQ connections in security_function to have work queues instead of RPC
 - add a timestamps in moon_router to know if the database has been modified
 - rename moon_db and moon_utilities because they are not container but just libraries
 - work on moonclient because it doesn't work with the new data model
 - check all input from moon_interface (check that input data are correct and safe)
 - Move @enforce from moon_db to API in Moon_Manager
 - Need to work on unit tests with the new data model
-- Allow to have multiple moon_interface in parallel (needed for load balancing)
 
 Bugs to fix:
 
 - Connect the authz functionality with the enforce decorator
-- The intra_extension ID parameter must be given when the container is ran and not when it is build
-  (security_function)
-- When a container is deleted, the reference is not deleted from CONTAINERS in orchestrator
-- All request to moon_interface generally end with a 200 HTTP code even if there is an error
+- When adding user or VM in GUI, there is a bug in the backend (manager ?)
+- GUI: in the "Projects" tab, move the "Map" link in the "Action" button
+- GUI: move tabs in this order : "Models, Policy, PDP, Projects"
 
 Other actions:
 
@@ -35,5 +29,5 @@ Other actions:
 - Write User and administrator documentation
 - Run unit tests
 - Add and run integration tests
-- moon_orchestrator in a docker
-- Add security on RabbitMQ transactions (auth+crypt)
+- Need to check if the Moon platform still can retrieve users and roles from Keystone
+- Need to retrieve VM from Nova
