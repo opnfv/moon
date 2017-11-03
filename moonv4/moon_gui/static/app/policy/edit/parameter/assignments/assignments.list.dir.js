@@ -169,15 +169,15 @@
                 switch (type) {
 
                     case ASSIGNMENTS_CST.TYPE.SUBJECT:
-                        metaDataService.subject.findOne(data.subject_cat_id, setCategoryToData);
+                        metaDataService.subject.findOne(data.category_id, setCategoryToData);
                         break;
 
                     case ASSIGNMENTS_CST.TYPE.OBJECT:
-                        metaDataService.object.findOne(data.object_cat_id, setCategoryToData);
+                        metaDataService.object.findOne(data.category_id, setCategoryToData);
                         break;
 
                     case ASSIGNMENTS_CST.TYPE.ACTION:
-                        metaDataService.action.findOne(data.action_cat_id, setCategoryToData);
+                        metaDataService.action.findOne(data.category_id, setCategoryToData);
                         break;
 
                 }
@@ -257,7 +257,7 @@
 
             subject.loader = true;
 
-            assignmentsService.subject.delete(list.policy.id, subject.subject_id, subject.subject_cat_id, dataId, deleteSubSuccess, deleteSubError);
+            assignmentsService.subject.delete(list.policy.id, subject.subject_id, subject.category_id, dataId, deleteSubSuccess, deleteSubError);
 
             function deleteSubSuccess(data) {
 
@@ -289,7 +289,7 @@
 
             object.loader = true;
 
-            assignmentsService.object.delete(list.policy.id, object.object_id, object.object_cat_id, dataId, deleteObjSuccess, deleteObjError);
+            assignmentsService.object.delete(list.policy.id, object.object_id, object.category_id, dataId, deleteObjSuccess, deleteObjError);
 
             function deleteObjSuccess(data) {
 
@@ -320,7 +320,7 @@
 
             action.loader = true;
 
-            assignmentsService.action.delete(list.policy.id, action.action_id, action.action_cat_id, dataId, deleteActSuccess, deleteActError);
+            assignmentsService.action.delete(list.policy.id, action.action_id, action.category_id, dataId, deleteActSuccess, deleteActError);
 
             function deleteActSuccess(data) {
 
