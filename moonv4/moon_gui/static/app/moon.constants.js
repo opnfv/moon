@@ -59,21 +59,21 @@
 				}
 			})
 			.constant('REST_URI', {
-                PDP : 'http://interface:8081/pdp/',
-				MODELS : 'http://interface:8081/models/',
-				METARULES:  'http://interface:8081/meta_rules/',
-                RULES:  'http://interface:8081/rules/',
-				POLICIES: 'http://interface:8081/policies/',
+                PDP : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/pdp/',
+				MODELS : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/models/',
+				METARULES:  'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/meta_rules/',
+                RULES:  'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/rules/',
+				POLICIES: 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/policies/',
 				METADATA: {
-                	subject : 'http://interface:8081/subject_categories/',
-					object : 'http://interface:8081/object_categories/',
-                    action : 'http://interface:8081/action_categories/'
+                	subject : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/subject_categories/',
+					object : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/object_categories/',
+                    action : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/action_categories/'
                 },
 				PERIMETERS :{
-                    subject : 'http://interface:8081/subjects/',
-                    object : 'http://interface:8081/objects/',
-                    action : 'http://interface:8081/actions/'
+                    subject : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/subjects/',
+                    object : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/objects/',
+                    action : 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}/actions/'
 				},
-                KEYSTONE : 'http://keystone:5000/v3/'
+                KEYSTONE : 'http://{{KEYSTONE_HOST}}:{{KEYSTONE_PORT}}/v3/'
 			});
 })();
