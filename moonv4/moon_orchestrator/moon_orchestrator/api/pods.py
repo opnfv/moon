@@ -8,7 +8,7 @@ from flask_restful import Resource
 from moon_utilities.security_functions import check_auth
 import logging
 
-LOG = logging.getLogger("moon.orchestrator.api.containers")
+LOG = logging.getLogger("moon.orchestrator.api.pods")
 
 
 class Pods(Resource):
@@ -42,12 +42,15 @@ class Pods(Resource):
         :internal_api: get_pdp
         """
         pods = {}
-        LOG.info("pods={}".format(self.driver.get_pods()))
+        # LOG.info("pods={}".format(self.driver.get_pods()))
+        if uuid:
+            return {"pods": self.driver.get_pods(uuid)}
         for _pod_key, _pod_values in self.driver.get_pods().items():
+            pods[_pod_key] = []
             for _pod_value in _pod_values:
                 if _pod_value['namespace'] != "moon":
                     continue
-                pods[_pod_key] = _pod_value
+                pods[_pod_key].append(_pod_value)
         return {"pods": pods}
 
     @check_auth

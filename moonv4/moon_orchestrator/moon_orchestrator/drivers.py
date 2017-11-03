@@ -6,7 +6,6 @@
 from kubernetes import client, config
 import logging
 import urllib3.exceptions
-import time
 from moon_utilities import configuration
 
 logger = logging.getLogger("moon.orchestrator.drivers")
@@ -14,12 +13,10 @@ logger = logging.getLogger("moon.orchestrator.drivers")
 
 def get_driver():
     try:
-        driver = K8S()
+        return K8S()
     except urllib3.exceptions.MaxRetryError as e:
         logger.exception(e)
         return Docker()
-    else:
-        return K8S()
 
 
 class Driver:
@@ -60,25 +57,19 @@ class K8S(Driver):
         self.client = client.CoreV1Api()
 
     def get_pods(self, name=None):
-        # pods = self.client.list_pod_for_all_namespaces(watch=False)
-        # if not namespace:
-        #     return pods
-        # # TODO: get pods with specific namespace
-        # for pod in pods:
-        #     logger.info("%s\t%s\t%s" % (pod.status.pod_ip,
-        #                                 pod.metadata.namespace,
-        #                                 pod.metadata.name))
-        # return pods
         if name:
             pods = self.client.list_pod_for_all_namespaces(watch=False)
-            for pod in pods:
-                if pod.metadata.name == name:
+            for pod in pods.items:
+                logger.info("get_pods {}".format(pod.metadata.name))
+                if name in pod.metadata.name:
                     return pod
             else:
                 return None
+        logger.info("get_pods cache={}".format(self.cache))
         return self.cache
 
-    def __create_pod(self, client, data):
+    @staticmethod
+    def __create_pod(client, data):
         pod_manifest = {
             'apiVersion': 'extensions/v1beta1',
             'kind': 'Deployment',
@@ -89,7 +80,7 @@ class K8S(Driver):
                 'replicas': 1,
                 'template': {
                     'metadata': {'labels': {'app': data[0].get('name')}},
-                    # 'hostname': data.get('name'),
+                    'hostname': data[0].get('name'),
                     'spec': {
                         'containers': []
                     }
@@ -101,6 +92,7 @@ class K8S(Driver):
                 {
                     'image': _data.get('container', "busybox"),
                     'name': _data.get('name'),
+                    'hostname': _data.get('name'),
                     'ports': [
                         {"containerPort": _data.get('port', 80)},
                     ],
@@ -118,9 +110,12 @@ class K8S(Driver):
         resp = client.create_namespaced_deployment(body=pod_manifest,
                                                    namespace='moon')
         logger.info("Pod {} created!".format(data[0].get('name')))
+        # logger.info(yaml.dump(pod_manifest, sys.stdout))
+        # logger.info(resp)
         return resp
 
-    def __create_service(self, client, data, expose=False):
+    @staticmethod
+    def __create_service(client, data, expose=False):
         service_manifest = {
             'apiVersion': 'v1',
             'kind': 'Service',
@@ -154,26 +149,17 @@ class K8S(Driver):
 
     def load_pod(self, data, api_client=None, ext_client=None, expose=False):
         _client = api_client if api_client else self.client
-        logger.info("Creating pod/service {}".format(data[0].get('name')))
-        logger.info("Creating pod/service {}".format(data))
         pod = self.__create_pod(client=ext_client, data=data)
         service = self.__create_service(client=_client, data=data[0],
                                         expose=expose)
-        # logger.info("data={}".format(data))
-        # logger.info("service={}".format(service))
+        # logger.info("load_poad data={}".format(data))
+        # logger.info("pod.metadata.uid={}".format(pod.metadata.uid))
         self.cache[pod.metadata.uid] = data
-        #     {
-        #     "ip": "",
-        #     "hostname": pod.metadata.name,
-        #     "port": service.spec.ports[0].node_port,
-        #     "pdp": "",
-        #     "keystone_project_id": data[0].get('keystone_project_id'),
-        #     "plugin_names": [d.get('genre') for d in data],
-        #     "namespace": "moon"
-        # }
 
     def delete_pod(self, uuid=None, name=None):
         logger.info("Deleting pod {}".format(uuid))
+        # TODO: delete_namespaced_deployment
+        # https://github.com/kubernetes-incubator/client-python/blob/master/kubernetes/client/apis/extensions_v1beta1_api.py
 
     def get_slaves(self):
         contexts, active_context = config.list_kube_config_contexts()
@@ -184,6 +170,8 @@ class Docker(Driver):
 
     def load_pod(self, data, api_client=None, ext_client=None):
         logger.info("Creating pod {}".format(data[0].get('name')))
+        raise NotImplementedError
 
     def delete_pod(self, uuid=None, name=None):
         logger.info("Deleting pod {}".format(uuid))
+        raise NotImplementedError

@@ -388,29 +388,28 @@ class Cache(object):
 
     def get_containers_from_keystone_project_id(self, keystone_project_id,
                                                 meta_rule_id=None):
-        for container_id, container_value in self.containers.items():
-            LOG.info("container={}".format(container_value))
-            if 'keystone_project_id' not in container_value:
-                continue
-            if container_value['keystone_project_id'] == keystone_project_id:
-                if not meta_rule_id:
-                    yield container_id, container_value
-                elif container_value.get('meta_rule_id') == meta_rule_id:
-                    yield container_id, container_value
-                    break
+        for container_id, container_values in self.containers.items():
+            for container_value in container_values:
+                if 'keystone_project_id' not in container_value:
+                    continue
+                if container_value['keystone_project_id'] == keystone_project_id:
+                    if not meta_rule_id:
+                        yield container_id, container_value
+                    elif container_value.get('meta_rule_id') == meta_rule_id:
+                        yield container_id, container_value
+                        break
 
     # containers functions
 
     def __update_container(self):
-        LOG.info("orchestrator={}".format("{}/pods".format(self.orchestrator_url)))
         req = requests.get("{}/pods".format(self.orchestrator_url))
-        LOG.info("pods={}".format(req.text))
         pods = req.json()
         for key, value in pods["pods"].items():
-            if key not in self.__CONTAINERS:
-                self.__CONTAINERS[key] = value
-            else:
-                self.__CONTAINERS[key].update(value)
+            # if key not in self.__CONTAINERS:
+            self.__CONTAINERS[key] = value
+            # else:
+            #     for container in value:
+            #         self.__CONTAINERS[key].update(value)
 
     def add_container(self, container_data):
         """Add a new container in the cache
@@ -491,6 +490,8 @@ class Cache(object):
         current_time = time.time()
         if self.__CONTAINER_CHAINING_UPDATE + self.__UPDATE_INTERVAL < current_time:
             for key, value in self.pdp.items():
+                if not value["keystone_project_id"]:
+                    continue
                 self.__update_container_chaining(value["keystone_project_id"])
         self.__CONTAINER_CHAINING_UPDATE = current_time
         LOG.info(self.__CONTAINER_CHAINING_UPDATE)
@@ -508,14 +509,18 @@ class Cache(object):
                                 keystone_project_id,
                                 meta_rule_id
                             ):
+                                _raw = requests.get("{}/pods/{}".format(
+                                    self.orchestrator_url, container_value["name"])
+                                )
+                                LOG.debug("_raw={}".format(_raw.text))
                                 container_ids.append(
                                     {
-                                        "container_id": self.__CONTAINERS[container_id]["name"],
-                                        "genre": self.__CONTAINERS[container_id]["genre"],
+                                        "container_id": container_value["name"],
+                                        "genre": container_value["genre"],
                                         "policy_id": policy_id,
                                         "meta_rule_id": meta_rule_id,
-                                        "hostname": self.__CONTAINERS[container_id]["name"],
-                                        "port": self.__CONTAINERS[container_id]["port"],
+                                        "hostname": container_value["name"],
+                                        "port": container_value["port"],
                                     }
                                 )
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids

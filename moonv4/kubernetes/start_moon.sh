@@ -16,6 +16,7 @@ echo =========================================
 kubectl get pods -n moon
 echo =========================================
 
+sleep 5
 kubectl create -n moon -f kubernetes/templates/moon_configuration.yaml
 
 echo Waiting for jobs moonforming
@@ -23,8 +24,14 @@ sleep 5
 kubectl get jobs -n moon
 kubectl logs -n moon jobs/moonforming
 
+sleep 5
+
 kubectl create -n moon -f kubernetes/templates/moon_manager.yaml
+
+sleep 2
+
 kubectl create -n moon -f kubernetes/templates/moon_orchestrator.yaml
+
 kubectl create -n moon -f kubernetes/templates/moon_gui.yaml
 
 

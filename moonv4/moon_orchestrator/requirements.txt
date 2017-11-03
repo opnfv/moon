@@ -5,3 +5,4 @@ werkzeug
 moon_utilities
 moon_db
 kubernetes
+pyaml

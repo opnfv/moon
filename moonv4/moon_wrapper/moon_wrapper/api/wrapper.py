@@ -12,6 +12,7 @@ from flask_restful import Resource
 import logging
 import json
 import requests
+from moon_utilities import exceptions
 import time
 from uuid import uuid4
 
@@ -45,7 +46,7 @@ class Wrapper(Resource):
     #     return self.manage_data()
 
     def post(self):
-        LOG.info("POST {}".format(request.form))
+        LOG.debug("POST {}".format(request.form))
         response = flask.make_response("False")
         if self.manage_data():
             response = flask.make_response("True")
@@ -75,10 +76,25 @@ class Wrapper(Resource):
         return target.get("project_id", "none")
 
     def get_interface_url(self, project_id):
-        for container in self.CACHE.containers.values():
-            if container.get("keystone_project_id") == project_id:
-                return "http://{}:{}".format(container['hostname'],
-                                             container['port'][0]["PublicPort"])
+        for containers in self.CACHE.containers.values():
+            for container in containers:
+                if container.get("keystone_project_id") == project_id:
+                    if "interface" in container['name']:
+                        return "http://{}:{}".format(
+                            container['name'],
+                            container['port'])
+        self.CACHE.update()
+        # Note (asteroide): test an other time after the update
+        for containers in self.CACHE.containers.values():
+            for container in containers:
+                if container.get("keystone_project_id") == project_id:
+                    if "interface" in container['name']:
+                        return "http://{}:{}".format(
+                            container['name'],
+                            container['port'])
+        raise exceptions.AuthzException("Keystone Project "
+                                        "ID ({}) is unknown or not mapped "
+                                        "to a PDP.".format(project_id))
 
     def manage_data(self):
         target = json.loads(request.form.get('target', {}))
@@ -87,16 +103,19 @@ class Wrapper(Resource):
         _subject = self.__get_subject(target, credentials)
         _object = self.__get_object(target, credentials)
         _project_id = self.__get_project_id(target, credentials)
-        LOG.info("POST with args project={} / "
+        LOG.debug("POST with args project={} / "
                  "subject={} - object={} - action={}".format(
                     _project_id, _subject, _object, rule))
         interface_url = self.get_interface_url(_project_id)
-        req = requests.get("{}/{}/{}/{}".format(
+        LOG.debug("interface_url={}".format(interface_url))
+        req = requests.get("{}/authz/{}/{}/{}/{}".format(
             interface_url,
+            _project_id,
             _subject,
             _object,
             rule
         ))
+        LOG.debug("Get interface {}".format(req.text))
         if req.status_code == 200:
             if req.json().get("result", False):
                 return True

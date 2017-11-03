@@ -14,6 +14,11 @@ spec:
       containers:
       - name: keystone
         image: asteroide/keystone:mitaka
+        env:
+        - name: KEYSTONE_HOSTNAME
+          value: "varuna"
+        - name: KEYSTONE_PORT
+          value: "30006"
         ports:
         - containerPort: 35357
           containerPort: 5000

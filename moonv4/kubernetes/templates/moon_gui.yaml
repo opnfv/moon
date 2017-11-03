@@ -13,7 +13,16 @@ spec:
       hostname: gui
       containers:
       - name: gui
-        image: wukongsun/moon_gui:v4.1
+        image: wukongsun/moon_gui:v4.3
+        env:
+        - name: MANAGER_HOST
+          value: "varuna"
+        - name: MANAGER_PORT
+          value: "30001"
+        - name: KEYSTONE_HOST
+          value: "varuna"
+        - name: KEYSTONE_PORT
+          value: "30006"
         ports:
         - containerPort: 80
 ---

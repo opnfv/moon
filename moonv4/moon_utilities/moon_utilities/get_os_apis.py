@@ -101,10 +101,10 @@ def to_str(results):
 
 
 def get_data_from_policies(policies):
-    for filename in policies.split(","):
-        try:
-            obj = json.loads(open(filename.strip()).read())
-
+    return
+    # for filename in policies.split(","):
+    #     try:
+    #         obj = json.loads(open(filename.strip()).read())
 
 
 def save(results, args):

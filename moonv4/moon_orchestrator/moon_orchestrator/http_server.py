@@ -10,6 +10,7 @@ import logging
 from kubernetes import client, config
 import random
 import requests
+import time
 from moon_orchestrator import __version__
 from moon_orchestrator.api.pods import Pods
 from moon_orchestrator.api.generic import Logs, Status
@@ -17,7 +18,7 @@ from moon_utilities import configuration, exceptions
 from moon_utilities.misc import get_random_name
 from moon_orchestrator.drivers import get_driver
 
-logger = logging.getLogger("moon.orchestrator.http")
+LOG = logging.getLogger("moon.orchestrator.http")
 
 
 class Server:
@@ -106,13 +107,26 @@ class HTTPServer(Server):
         # CORS(self.app)
         self.api = Api(self.app)
         self.driver = get_driver()
-        logger.info("Driver = {}".format(self.driver.__class__))
+        LOG.info("Driver = {}".format(self.driver.__class__))
         self.__set_route()
         self.__hook_errors()
+        pdp = None
+        while True:
+            try:
+                pdp = requests.get(
+                    "http://{}:{}/pdp".format(self.manager_hostname,
+                                              self.manager_port))
+            except requests.exceptions.ConnectionError:
+                LOG.warning("Manager is not ready, standby...")
+                time.sleep(1)
+            except KeyError:
+                LOG.warning("Manager is not ready, standby...")
+                time.sleep(1)
+            else:
+                if "pdps" in pdp.json():
+                    break
+        LOG.debug("pdp={}".format(pdp))
         self.create_wrappers()
-        pdp = requests.get("http://{}:{}/pdp".format(self.manager_hostname,
-                                                     self.manager_port))
-        logger.info("pdp={}".format(pdp))
         for _pdp_key, _pdp_value in pdp.json()['pdps'].items():
             if _pdp_value.get('keystone_project_id'):
                 # TODO: select context to add security function
@@ -151,8 +165,8 @@ class HTTPServer(Server):
 
     def create_wrappers(self):
         contexts, active_context = self.driver.get_slaves()
-        logger.info("contexts: {}".format(contexts))
-        logger.info("active_context: {}".format(active_context))
+        LOG.debug("contexts: {}".format(contexts))
+        LOG.debug("active_context: {}".format(active_context))
         conf = configuration.get_configuration("components/wrapper")
         hostname = conf["components/wrapper"].get(
             "hostname", "wrapper")
@@ -162,7 +176,7 @@ class HTTPServer(Server):
             "wukongsun/moon_wrapper:v4.3")
         for _ctx in contexts:
             _config = config.new_client_from_config(context=_ctx['name'])
-            logger.info("_config={}".format(_config))
+            LOG.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
             # TODO: get data from consul
@@ -173,7 +187,7 @@ class HTTPServer(Server):
                 "namespace": "moon"
             }, ]
             pod = self.driver.load_pod(data, api_client, ext_client, expose=True)
-            logger.info('wrapper pod={}'.format(pod))
+            LOG.debug('wrapper pod={}'.format(pod))
 
     def create_security_function(self, keystone_project_id,
                                  pdp_id, policy_ids, active_context=None,
@@ -189,11 +203,11 @@ class HTTPServer(Server):
         security function in all context (ie, in all slaves)
         :return: None
         """
-        logger.info(self.driver.get_pods())
+        LOG.debug(self.driver.get_pods())
         for key, value in self.driver.get_pods().items():
             for _pod in value:
                 if _pod.get('keystone_project_id') == keystone_project_id:
-                    logger.warning("A pod for this Keystone project {} "
+                    LOG.warning("A pod for this Keystone project {} "
                                    "already exists.".format(keystone_project_id))
                     return
         plugins = configuration.get_plugins()
@@ -247,14 +261,14 @@ class HTTPServer(Server):
             active_context = _active_context
             _config = config.new_client_from_config(
                 context=active_context['name'])
-            logger.info("_config={}".format(_config))
+            LOG.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
             self.driver.load_pod(data, api_client, ext_client)
             return
         for _ctx in contexts:
             _config = config.new_client_from_config(context=_ctx['name'])
-            logger.info("_config={}".format(_config))
+            LOG.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
             self.driver.load_pod(data, api_client, ext_client)

@@ -11,6 +11,7 @@ from flask import request
 from flask_restful import Resource
 import logging
 import requests
+import time
 from moon_utilities.security_functions import check_auth
 from moon_db.core import PDPManager
 from moon_utilities import configuration
@@ -25,12 +26,20 @@ def delete_pod(uuid):
 
 
 def add_pod(uuid, data):
+    LOG.info("Add a new pod {}".format(data))
     conf = configuration.get_configuration("components/orchestrator")
     hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
     port = conf["components/orchestrator"].get("port", 80)
     proto = conf["components/orchestrator"].get("protocol", "http")
-    req = requests.post("{}://{}:{}/pods".format(proto, hostname, port),
-                        data=data)
+    while True:
+        try:
+            req = requests.post("{}://{}:{}/pods".format(proto, hostname, port),
+                                data=data)
+        except requests.exceptions.ConnectionError:
+            LOG.warning("Orchestrator is not ready, standby...")
+            time.sleep(1)
+        else:
+            break
     LOG.info(req.text)
 
 
@@ -93,8 +102,14 @@ class PDP(Resource):
         :internal_api: add_pdp
         """
         try:
+            data = dict(request.json)
+            if not data.get("keystone_project_id"):
+                data["keystone_project_id"] = None
             data = PDPManager.add_pdp(
                 user_id=user_id, pdp_id=None, value=request.json)
+            uuid = list(data.keys())[0]
+            LOG.info("data={}".format(data))
+            LOG.info("uuid={}".format(uuid))
             add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
             LOG.error(e, exc_info=True)
@@ -140,8 +155,13 @@ class PDP(Resource):
         :internal_api: update_pdp
         """
         try:
+            _data = dict(request.json)
+            if not _data.get("keystone_project_id"):
+                _data["keystone_project_id"] = None
             data = PDPManager.update_pdp(
-                user_id=user_id, pdp_id=uuid, value=request.json)
+                user_id=user_id, pdp_id=uuid, value=_data)
+            LOG.info("data={}".format(data))
+            LOG.info("uuid={}".format(uuid))
             add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
             LOG.error(e, exc_info=True)

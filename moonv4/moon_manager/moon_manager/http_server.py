@@ -7,6 +7,8 @@ from flask import Flask, jsonify
 from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 import logging
+import sqlalchemy.exc
+import time
 from moon_manager import __version__
 from moon_manager.api.generic import Status, Logs, API
 from moon_manager.api.models import Models
@@ -20,8 +22,10 @@ from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, 
 from moon_manager.api.rules import Rules
 # from moon_manager.api.containers import Container
 from moon_utilities import configuration, exceptions
+from moon_db.core import PDPManager
 
-logger = logging.getLogger("moon.manager.http")
+
+LOG = logging.getLogger("moon.manager.http")
 
 
 class Server:
@@ -132,6 +136,22 @@ class HTTPServer(Server):
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
 
+    @staticmethod
+    def __check_if_db_is_up():
+        first = True
+        while True:
+            try:
+                PDPManager.get_pdp(user_id="admin", pdp_id=None)
+            except sqlalchemy.exc.ProgrammingError:
+                time.sleep(1)
+                if first:
+                    LOG.warning("Waiting for the database...")
+                    first = False
+            else:
+                LOG.warning("Database is up, resuming operations...")
+                break
+
     def run(self):
+        self.__check_if_db_is_up()
         self.app.run(debug=True, host=self._host, port=self._port)  # nosec
 

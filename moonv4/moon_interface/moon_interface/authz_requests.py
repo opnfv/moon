@@ -28,6 +28,8 @@ class AuthzRequest:
         self.context = Context(ctx, CACHE)
         self.args = args
         self.request_id = ctx["request_id"]
+        # LOG.info("container={}".format(CACHE.containers))
+        # LOG.info("container_chaining={}".format(CACHE.container_chaining))
         if ctx['project_id'] not in CACHE.container_chaining:
             raise exceptions.KeystoneProjectError("Unknown Project ID {}".format(ctx['project_id']))
         self.container_chaining = CACHE.container_chaining[ctx['project_id']]
@@ -39,6 +41,9 @@ class AuthzRequest:
     def run(self):
         self.context.delete_cache()
         try:
+            LOG.debug("url=http://{}:{}/authz".format(
+                self.container_chaining[0]["hostname"],
+                self.container_chaining[0]["port"]))
             req = requests.post("http://{}:{}/authz".format(
                 self.container_chaining[0]["hostname"],
                 self.container_chaining[0]["port"],
@@ -80,48 +85,48 @@ class AuthzRequest:
             # req.raw.decode_content = True
             self.result = pickle.loads(req.content)
 
-    def __exec_next_state(self, rule_found):
-        index = self.context.index
-        current_meta_rule = self.context.headers[index]
-        current_container = self.__get_container_from_meta_rule(current_meta_rule)
-        current_container_genre = current_container["genre"]
-        try:
-            next_meta_rule = self.context.headers[index + 1]
-        except IndexError:
-            next_meta_rule = None
-        if current_container_genre == "authz":
-            if rule_found:
-                return True
-            pass
-            if next_meta_rule:
-                # next will be session if current is deny and session is unset
-                if self.payload["authz_context"]['pdp_set'][next_meta_rule]['effect'] == "unset":
-                    return notify(
-                        request_id=self.payload["authz_context"]["request_id"],
-                        container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
-                        payload=self.payload)
-                # next will be delegation if current is deny and session is passed or deny and delegation is unset
-                else:
-                    LOG.error("Delegation is not developed!")
-
-            else:
-                # else next will be None and the request is sent to router
-                return self.__return_to_router()
-        elif current_container_genre == "session":
-            pass
-            # next will be next container in headers if current is passed
-            if self.payload["authz_context"]['pdp_set'][current_meta_rule]['effect'] == "passed":
-                return notify(
-                    request_id=self.payload["authz_context"]["request_id"],
-                    container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
-                    payload=self.payload)
-            # next will be None if current is grant and the request is sent to router
-            else:
-                return self.__return_to_router()
-        elif current_container_genre == "delegation":
-            LOG.error("Delegation is not developed!")
-            # next will be authz if current is deny
-            # next will be None if current is grant and the request is sent to router
+    # def __exec_next_state(self, rule_found):
+    #     index = self.context.index
+    #     current_meta_rule = self.context.headers[index]
+    #     current_container = self.__get_container_from_meta_rule(current_meta_rule)
+    #     current_container_genre = current_container["genre"]
+    #     try:
+    #         next_meta_rule = self.context.headers[index + 1]
+    #     except IndexError:
+    #         next_meta_rule = None
+    #     if current_container_genre == "authz":
+    #         if rule_found:
+    #             return True
+    #         pass
+    #         if next_meta_rule:
+    #             # next will be session if current is deny and session is unset
+    #             if self.payload["authz_context"]['pdp_set'][next_meta_rule]['effect'] == "unset":
+    #                 return notify(
+    #                     request_id=self.payload["authz_context"]["request_id"],
+    #                     container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
+    #                     payload=self.payload)
+    #             # next will be delegation if current is deny and session is passed or deny and delegation is unset
+    #             else:
+    #                 LOG.error("Delegation is not developed!")
+    #
+    #         else:
+    #             # else next will be None and the request is sent to router
+    #             return self.__return_to_router()
+    #     elif current_container_genre == "session":
+    #         pass
+    #         # next will be next container in headers if current is passed
+    #         if self.payload["authz_context"]['pdp_set'][current_meta_rule]['effect'] == "passed":
+    #             return notify(
+    #                 request_id=self.payload["authz_context"]["request_id"],
+    #                 container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
+    #                 payload=self.payload)
+    #         # next will be None if current is grant and the request is sent to router
+    #         else:
+    #             return self.__return_to_router()
+    #     elif current_container_genre == "delegation":
+    #         LOG.error("Delegation is not developed!")
+    #         # next will be authz if current is deny
+    #         # next will be None if current is grant and the request is sent to router
 
     def set_result(self, result):
         self.result = result
