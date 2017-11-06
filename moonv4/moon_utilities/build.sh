@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=moon_utilities-1.3.3
+VERSION=moon_utilities-1.3.4
 
 python3 setup.py sdist bdist_wheel
 

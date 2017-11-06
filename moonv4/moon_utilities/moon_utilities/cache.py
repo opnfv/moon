@@ -520,6 +520,7 @@ class Cache(object):
                                         "policy_id": policy_id,
                                         "meta_rule_id": meta_rule_id,
                                         "hostname": container_value["name"],
+                                        "hostip": "127.0.0.1",
                                         "port": container_value["port"],
                                     }
                                 )

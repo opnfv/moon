@@ -154,6 +154,8 @@ class HTTPServer(Server):
         self.api.add_resource(Pods, *Pods.__urls__,
                               resource_class_kwargs={
                                   "driver": self.driver,
+                                  "create_security_function_hook":
+                                      self.create_security_function,
                               })
 
     def run(self):
@@ -190,7 +192,8 @@ class HTTPServer(Server):
             LOG.debug('wrapper pod={}'.format(pod))
 
     def create_security_function(self, keystone_project_id,
-                                 pdp_id, policy_ids, active_context=None,
+                                 pdp_id, policy_ids, manager_data={},
+                                 active_context=None,
                                  active_context_name=None):
         """ Create security functions
 
@@ -203,13 +206,14 @@ class HTTPServer(Server):
         security function in all context (ie, in all slaves)
         :return: None
         """
-        LOG.debug(self.driver.get_pods())
+        # LOG.info(self.driver.get_pods())
         for key, value in self.driver.get_pods().items():
             for _pod in value:
                 if _pod.get('keystone_project_id') == keystone_project_id:
                     LOG.warning("A pod for this Keystone project {} "
                                    "already exists.".format(keystone_project_id))
                     return
+
         plugins = configuration.get_plugins()
         conf = configuration.get_configuration("components/interface")
         i_hostname = conf["components/interface"].get("hostname", "interface")
@@ -228,12 +232,21 @@ class HTTPServer(Server):
                 "namespace": "moon"
             },
         ]
-        policies = requests.get("http://{}:{}/policies".format(
-            self.manager_hostname, self.manager_port)).json().get(
-            "policies", dict())
-        models = requests.get("http://{}:{}/models".format(
-            self.manager_hostname, self.manager_port)).json().get(
-            "models", dict())
+        LOG.info("data={}".format(data))
+        policies = manager_data.get('policies')
+        if not policies:
+            LOG.info("No policy data from Manager, trying to get them")
+            policies = requests.get("http://{}:{}/policies".format(
+                self.manager_hostname, self.manager_port)).json().get(
+                "policies", dict())
+        LOG.info("policies={}".format(policies))
+        models = manager_data.get('models')
+        if not models:
+            LOG.info("No models data from Manager, trying to get them")
+            models = requests.get("http://{}:{}/models".format(
+                self.manager_hostname, self.manager_port)).json().get(
+                "models", dict())
+        LOG.info("models={}".format(models))
 
         for policy_id in policy_ids:
             if policy_id in policies:
@@ -251,7 +264,10 @@ class HTTPServer(Server):
                             'keystone_project_id': keystone_project_id,
                             "namespace": "moon"
                         })
+        LOG.info("data={}".format(data))
         contexts, _active_context = self.driver.get_slaves()
+        LOG.info("active_context_name={}".format(active_context_name))
+        LOG.info("active_context={}".format(active_context))
         if active_context_name:
             for _context in contexts:
                 if _context["name"] == active_context_name:
@@ -264,13 +280,14 @@ class HTTPServer(Server):
             LOG.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
-            self.driver.load_pod(data, api_client, ext_client)
+            self.driver.load_pod(data, api_client, ext_client, expose=False)
             return
+        LOG.info("contexts={}".format(contexts))
         for _ctx in contexts:
             _config = config.new_client_from_config(context=_ctx['name'])
             LOG.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
-            self.driver.load_pod(data, api_client, ext_client)
+            self.driver.load_pod(data, api_client, ext_client, expose=False)
 
 
