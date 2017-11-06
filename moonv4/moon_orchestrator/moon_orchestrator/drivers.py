@@ -8,14 +8,14 @@ import logging
 import urllib3.exceptions
 from moon_utilities import configuration
 
-logger = logging.getLogger("moon.orchestrator.drivers")
+LOG = logging.getLogger("moon.orchestrator.drivers")
 
 
 def get_driver():
     try:
         return K8S()
     except urllib3.exceptions.MaxRetryError as e:
-        logger.exception(e)
+        LOG.exception(e)
         return Docker()
 
 
@@ -60,12 +60,12 @@ class K8S(Driver):
         if name:
             pods = self.client.list_pod_for_all_namespaces(watch=False)
             for pod in pods.items:
-                logger.info("get_pods {}".format(pod.metadata.name))
+                LOG.info("get_pods {}".format(pod.metadata.name))
                 if name in pod.metadata.name:
                     return pod
             else:
                 return None
-        logger.info("get_pods cache={}".format(self.cache))
+        LOG.info("get_pods cache={}".format(self.cache))
         return self.cache
 
     @staticmethod
@@ -101,7 +101,7 @@ class K8S(Driver):
                         {'name': "TYPE", "value": _data.get('genre', "None")},
                         {'name': "PORT", "value": str(_data.get('port', 80))},
                         {'name': "PDP_ID", "value": _data.get('pdp_id', "None")},
-                        {'name': "META_RULE_ID", "value": "None"},
+                        {'name': "META_RULE_ID", "value": _data.get('meta_rule_id', "None")},
                         {'name': "KEYSTONE_PROJECT_ID",
                          "value": _data.get('keystone_project_id', "None")},
                     ]
@@ -109,7 +109,7 @@ class K8S(Driver):
             )
         resp = client.create_namespaced_deployment(body=pod_manifest,
                                                    namespace='moon')
-        logger.info("Pod {} created!".format(data[0].get('name')))
+        LOG.info("Pod {} created!".format(data[0].get('name')))
         # logger.info(yaml.dump(pod_manifest, sys.stdout))
         # logger.info(resp)
         return resp
@@ -131,7 +131,7 @@ class K8S(Driver):
                 'selector': {
                     'app': data.get('name')
                 },
-                'type': 'NodePort',
+                # 'type': 'NodePort',
                 'endpoints': [{
                     'port': data.get('port', 80),
                     'protocol': 'TCP',
@@ -144,7 +144,7 @@ class K8S(Driver):
             service_manifest['spec']['type'] = "NodePort"
         resp = client.create_namespaced_service(namespace="moon",
                                                 body=service_manifest)
-        logger.info("Service {} created!".format(data.get('name')))
+        LOG.info("Service {} created!".format(data.get('name')))
         return resp
 
     def load_pod(self, data, api_client=None, ext_client=None, expose=False):
@@ -152,12 +152,12 @@ class K8S(Driver):
         pod = self.__create_pod(client=ext_client, data=data)
         service = self.__create_service(client=_client, data=data[0],
                                         expose=expose)
-        # logger.info("load_poad data={}".format(data))
+        # logger.info("load_pod data={}".format(data))
         # logger.info("pod.metadata.uid={}".format(pod.metadata.uid))
         self.cache[pod.metadata.uid] = data
 
     def delete_pod(self, uuid=None, name=None):
-        logger.info("Deleting pod {}".format(uuid))
+        LOG.info("Deleting pod {}".format(uuid))
         # TODO: delete_namespaced_deployment
         # https://github.com/kubernetes-incubator/client-python/blob/master/kubernetes/client/apis/extensions_v1beta1_api.py
 
@@ -169,9 +169,9 @@ class K8S(Driver):
 class Docker(Driver):
 
     def load_pod(self, data, api_client=None, ext_client=None):
-        logger.info("Creating pod {}".format(data[0].get('name')))
+        LOG.info("Creating pod {}".format(data[0].get('name')))
         raise NotImplementedError
 
     def delete_pod(self, uuid=None, name=None):
-        logger.info("Deleting pod {}".format(uuid))
+        LOG.info("Deleting pod {}".format(uuid))
         raise NotImplementedError
