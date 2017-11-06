@@ -6,7 +6,7 @@ RUN pip3 install moon_utilities moon_db pip --upgrade
 ADD . /root
 WORKDIR /root/
 RUN pip3 install -r requirements.txt --upgrade
-RUN pip3 install /root/dist/* --upgrade
+#RUN pip3 install /root/dist/* --upgrade
 RUN pip3 install .
 
 CMD ["python3", "-m", "moon_interface"]

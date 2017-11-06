@@ -25,6 +25,7 @@ class Pods(Resource):
 
     def __init__(self, **kwargs):
         self.driver = kwargs.get("driver")
+        self.create_security_function = kwargs.get("create_security_function_hook")
 
     @check_auth
     def get(self, uuid=None, user_id=None):
@@ -72,7 +73,15 @@ class Pods(Resource):
             }
         }
         """
-        return {"pods": None}
+        LOG.info("POST param={}".format(request.json))
+        self.create_security_function(
+            request.json.get("keystone_project_id"),
+            request.json.get("pdp_id"),
+            request.json.get("security_pipeline"),
+            manager_data=request.json,
+            active_context=None,
+            active_context_name=None)
+        return {"pods": self.driver.get_pods(request.json.get("pdp_id"))}
 
     @check_auth
     def delete(self, uuid=None, user_id=None):

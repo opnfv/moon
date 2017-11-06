@@ -28,8 +28,6 @@ class AuthzRequest:
         self.context = Context(ctx, CACHE)
         self.args = args
         self.request_id = ctx["request_id"]
-        # LOG.info("container={}".format(CACHE.containers))
-        # LOG.info("container_chaining={}".format(CACHE.container_chaining))
         if ctx['project_id'] not in CACHE.container_chaining:
             raise exceptions.KeystoneProjectError("Unknown Project ID {}".format(ctx['project_id']))
         self.container_chaining = CACHE.container_chaining[ctx['project_id']]
@@ -40,36 +38,35 @@ class AuthzRequest:
 
     def run(self):
         self.context.delete_cache()
+        req = None
         try:
-            LOG.debug("url=http://{}:{}/authz".format(
-                self.container_chaining[0]["hostname"],
-                self.container_chaining[0]["port"]))
             req = requests.post("http://{}:{}/authz".format(
-                self.container_chaining[0]["hostname"],
+                self.container_chaining[0]["hostip"],
                 self.container_chaining[0]["port"],
             ), data=pickle.dumps(self.context))
             if req.status_code != 200:
-                # LOG.error("Cannot connect to {}".format(
-                #     "http://{}:{}/authz".format(
-                #         self.container_chaining[0]["hostname"],
-                #         self.container_chaining[0]["port"]
-                #     )))
+                # LOG.error("req={}".format(req))
                 raise exceptions.AuthzException(
                     "Receive bad response from Authz function "
-                    "(with hostname - {})".format(
+                    "(with IP address - {})".format(
                         req.status_code
                     ))
         except requests.exceptions.ConnectionError:
+            LOG.error("Cannot connect to {}".format(
+                "http://{}:{}/authz".format(
+                    self.container_chaining[0]["hostip"],
+                    self.container_chaining[0]["port"]
+                )))
+        except ValueError:
             try:
                 req = requests.post("http://{}:{}/authz".format(
-                    self.container_chaining[0]["hostip"],
+                    self.container_chaining[0]["hostname"],
                     self.container_chaining[0]["port"],
                 ), data=pickle.dumps(self.context))
                 if req.status_code != 200:
-                    # LOG.error("req={}".format(req))
                     raise exceptions.AuthzException(
                         "Receive bad response from Authz function "
-                        "(with IP address - {})".format(
+                        "(with hostname - {})".format(
                             req.status_code
                         ))
             except requests.exceptions.ConnectionError:
@@ -81,7 +78,7 @@ class AuthzRequest:
                 raise exceptions.AuthzException(
                     "Cannot connect to Authz function with IP address")
         self.context.set_cache(CACHE)
-        if len(self.container_chaining) == 1:
+        if req and len(self.container_chaining) == 1:
             # req.raw.decode_content = True
             self.result = pickle.loads(req.content)
 

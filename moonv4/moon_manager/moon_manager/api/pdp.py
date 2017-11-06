@@ -14,6 +14,8 @@ import requests
 import time
 from moon_utilities.security_functions import check_auth
 from moon_db.core import PDPManager
+from moon_db.core import PolicyManager
+from moon_db.core import ModelManager
 from moon_utilities import configuration
 
 __version__ = "0.1.0"
@@ -26,15 +28,23 @@ def delete_pod(uuid):
 
 
 def add_pod(uuid, data):
+    if not data.get("keystone_project_id"):
+        return
     LOG.info("Add a new pod {}".format(data))
+    if "pdp_id" not in data:
+        data["pdp_id"] = uuid
+    data['policies'] = PolicyManager.get_policies(user_id="admin")
+    data['models'] = ModelManager.get_models(user_id="admin")
     conf = configuration.get_configuration("components/orchestrator")
     hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
     port = conf["components/orchestrator"].get("port", 80)
     proto = conf["components/orchestrator"].get("protocol", "http")
     while True:
         try:
-            req = requests.post("{}://{}:{}/pods".format(proto, hostname, port),
-                                data=data)
+            req = requests.post(
+                "{}://{}:{}/pods".format(proto, hostname, port),
+                json=data,
+                headers={"content-type": "application/json"})
         except requests.exceptions.ConnectionError:
             LOG.warning("Orchestrator is not ready, standby...")
             time.sleep(1)
