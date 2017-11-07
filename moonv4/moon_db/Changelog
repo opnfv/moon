@@ -28,3 +28,7 @@ CHANGES
 - Fix a bug in core.py
 - Update db_manager
 
+1.1.0
+-----
+- When adding a subject, check the existence of that user in the Keystone DB and
+  create it if necessary

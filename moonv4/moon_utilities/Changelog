@@ -55,3 +55,7 @@ CHANGES
 -----
 - Fix a bug on the connection between interface and authz
 
+1.4.0
+-----
+- Add a waiting loop when the Keystone server is not currently available
+
