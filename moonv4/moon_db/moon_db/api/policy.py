@@ -4,10 +4,9 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from uuid import uuid4
-from oslo_log import log as logging
-from moon_utilities.security_functions import filter_input, enforce
+import logging
+from moon_utilities.security_functions import enforce
 from moon_db.api.managers import Managers
-
 
 LOG = logging.getLogger("moon.db.api.policy")
 
@@ -52,9 +51,17 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "perimeter")
     def add_subject(self, user_id, policy_id, perimeter_id=None, value=None):
+        k_user = Managers.KeystoneManager.get_user_by_name(value.get('name'))
+        if not k_user['users']:
+            k_user = Managers.KeystoneManager.create_user(value)
         if not perimeter_id:
-            perimeter_id = uuid4().hex
-        # TODO (asteroide): must check and add Keystone ID here
+            try:
+                perimeter_id = k_user['users'][0].get('id', uuid4().hex)
+            except IndexError:
+                k_user = Managers.KeystoneManager.get_user_by_name(
+                    value.get('name'))
+                perimeter_id = uuid4().hex
+        value.update(k_user['users'][0])
         return self.driver.set_subject(policy_id=policy_id, perimeter_id=perimeter_id, value=value)
 
     @enforce(("read", "write"), "perimeter")

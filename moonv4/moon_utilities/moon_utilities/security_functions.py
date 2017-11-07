@@ -98,6 +98,7 @@ def enforce(action_names, object_name, **extra):
 
 
 def login(user=None, password=None, domain=None, project=None, url=None):
+    start_time = time.time()
     if not user:
         user = keystone_config['user']
     if not password:
@@ -138,15 +139,19 @@ def login(user=None, password=None, domain=None, project=None, url=None):
         }
     }
 
-    req = requests.post("{}/auth/tokens".format(url),
-                        json=data_auth, headers=headers,
-                        verify=keystone_config['certificate'])
+    while True:
+        req = requests.post("{}/auth/tokens".format(url),
+                            json=data_auth, headers=headers,
+                            verify=keystone_config['certificate'])
 
-    if req.status_code in (200, 201, 204):
-        headers['X-Auth-Token'] = req.headers['X-Subject-Token']
-        return headers
-    LOG.error(req.text)
-    raise exceptions.KeystoneError
+        if req.status_code in (200, 201, 204):
+            headers['X-Auth-Token'] = req.headers['X-Subject-Token']
+            return headers
+        LOG.warning("Waiting for Keystone...")
+        if time.time() - start_time == 100:
+            LOG.error(req.text)
+            raise exceptions.KeystoneError
+        time.sleep(5)
 
 
 def logout(headers, url=None):
