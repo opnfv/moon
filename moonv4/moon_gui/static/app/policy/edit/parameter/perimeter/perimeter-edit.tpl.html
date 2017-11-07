@@ -1,0 +1,166 @@
+<div>
+
+    <div class="col-md-4 col-sm-4 col-xs-4">
+        <a class="btn btn-primary" type="button" style="white-space: normal;" ng-click="edit.fromList = !edit.fromList">
+            <span ng-if="!edit.fromList" data-translate="moon.policy.perimeter.edit.action.list">Add from the list</span>
+            <span ng-if="edit.fromList" data-translate="moon.policy.perimeter.edit.action.new">Add a new Perimeter</span>
+        </a>
+    </div>
+
+    <div class="col-md-8 col-sm-8 col-xs-8">
+
+        <form name="selectMetaData" ng-if="edit.fromList" class="form-horizontal" role="form"  >
+
+            <div class="form-group" >
+
+                <ui-select ng-model="edit.selectedPerimeter" name="object">
+
+                    <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                    <ui-select-choices repeat="aPerimeter in edit.list">
+                        <div ng-value="aPerimeter" ng-bind="aPerimeter.name"></div>
+                    </ui-select-choices>
+
+                </ui-select>
+
+            </div>
+
+            <div class="form-group">
+
+                <div class="pull-left col-md-4 col-sm-4 col-xs-4">
+
+                    <a href="" ng-disabled="edit.loading || !edit.selectedPerimeter" ng-click="edit.deletePerimeter()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-trash"></span>
+                        <span data-translate="moon.policy.perimeter.edit.action.delete">Delete</span>
+                    </a>
+
+                </div>
+
+                <div class="pull-right col-md-7 col-md-offset-1 col-sm-7 col-sm-offset-1 col-xs-7 col-xs-offset-1 ">
+
+                    <a href="" ng-disabled="edit.loading || !edit.selectedPerimeter" ng-click="edit.addToPolicy()" class="btn btn-warning" style="white-space: normal;">
+                        <span class="glyphicon glyphicon-link"></span>
+                        <span data-translate="moon.policy.perimeter.edit.action.add">Add the selected Perimeter</span>
+                    </a>
+
+                </div>
+
+            </div>
+
+            <moon-loader ng-if="edit.loading"></moon-loader>
+
+        </form>
+
+        <form ng-if="!edit.fromList" class="form-horizontal" role="form" name="edit.form">
+
+            <div class="form-group" ng-class="{'has-error': edit.form.name.$invalid && edit.form.name.$dirty}">
+
+                <label for="name" class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.name">Name</label>
+
+                <div class="col-sm-6">
+
+                    <input name="name" id="name" class="form-control" type="text" data-ng-model="edit.perimeter.name" required />
+
+                    <div class="help-block" ng-show="edit.form.name.$dirty && edit.form.name.$invalid">
+                        <small class="error" ng-show="edit.form.name.$error.required" data-translate="moon.policy.perimeter.edit.check.name.required">Name is required</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="description" class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.description">Description</label>
+                <div class="col-sm-6">
+                    <textarea id="description" name="description" class="form-control" data-ng-model="edit.perimeter.description"></textarea>
+                </div>
+
+            </div>
+
+            <!--
+            <div class="form-group">
+
+                <label for="partnerId" class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.partnerId">Partner Id</label>
+
+                <div class="col-sm-6">
+                    <input name="partnerId" id="partnerId" class="form-control" type="text" data-ng-model="edit.perimeter.partnerId" />
+                </div>
+
+            </div>
+            -->
+
+
+            <div class="form-group" ng-if="edit.perimeterType === edit.subjectType" ng-class="{'has-error': edit.form.email.$invalid && edit.form.email.$dirty}">
+
+                <label for="email" class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.email">Email</label>
+
+                <div class="col-sm-6">
+                    <input name="email" id="email" class="form-control" type="email" data-ng-model="edit.perimeter.email" />
+                </div>
+
+            </div>
+
+
+            <div class="form-group" >
+
+                <label for="policyList" class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.policies">Policy List </label>
+
+                <div class="col-sm-5">
+
+                    <ui-select ng-model="edit.selectedPolicy" id="policyList">
+
+                        <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                        <ui-select-choices repeat="aPolicy in edit.policiesToBeSelected">
+                            <div ng-value="aPolicy" ng-bind="aPolicy.name"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                </div>
+
+                <div class="col-sm-1 text-center">
+                    <a href="" ng-click="edit.addPolicyToPerimeter()"><span style="font-size:1.5em; line-height: 1.5em;" class="glyphicon glyphicon-plus-sign"></span></a>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label class="col-sm-3 control-label" data-translate="moon.policy.perimeter.edit.selectedPolicies">Selected Policies</label>
+
+                <div class="col-sm-6">
+
+                    <ul>
+
+                       <li ng-repeat="(key, value) in edit.selectedPolicyList">
+
+                            <span ng-bind="value.name" ></span> <a href="" ng-click="edit.removeSelectedPolicy(value)"><span style="font-size:1.5em; line-height: 1.5em" class="glyphicon glyphicon-remove"></span></a>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <div class="pull-right">
+
+                    <a href="" ng-disabled="edit.loading" ng-click="edit.create()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-save"></span>
+                        <span data-translate="moon.policy.perimeter.edit.action.create">Create</span>
+                    </a>
+
+                    <moon-loader ng-if="edit.loading"></moon-loader>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>

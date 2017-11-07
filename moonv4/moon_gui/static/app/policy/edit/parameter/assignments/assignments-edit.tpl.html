@@ -1,0 +1,165 @@
+<div>
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+
+        <form ng-if="!edit.fromList" class="form-horizontal" role="form" name="edit.form">
+
+            <!-- Select Policy -->
+            <div class="form-group" ng-class="{'has-error': edit.form.policyList.$invalid && edit.form.policyList.$dirty}" >
+
+                <label for="policyList" class="col-sm-3 control-label" data-translate="moon.policy.assignments.edit.policies">Policy List</label>
+
+                <div class="col-sm-6" ng-if="edit.loadingPolicies" >
+                    <moon-loader></moon-loader>
+                </div>
+
+                <div class="col-sm-6" ng-if="!edit.loadingPolicies" >
+
+                    <ui-select ng-model="edit.selectedPolicy"  name="policyList" id="policyList" required>
+
+                        <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                        <ui-select-choices repeat="aPolicy in edit.policyList">
+                            <div ng-value="aPolicy" ng-bind="aPolicy.name"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                    <div class="help-block" ng-show="edit.form.policyList.$dirty && edit.form.policyList.$invalid">
+                        <small class="error" ng-show="edit.form.policyList.$error.required" data-translate="moon.policy.assignments.edit.check.policy.required">Policy is required</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Select Perimeter -->
+            <div class="form-group" ng-class="{'has-error': edit.form.perimeterList.$invalid && edit.form.perimeterList.$dirty}" >
+
+                <label for="perimeterList" class="col-sm-3 control-label" data-translate="moon.policy.assignments.edit.perimeters">Perimeter List</label>
+
+                <div class="col-sm-6" ng-if="edit.loadingPerimeters" >
+                    <moon-loader></moon-loader>
+                </div>
+
+                <div class="col-sm-6" ng-if="!edit.loadingPerimeters" >
+
+                    <ui-select ng-model="edit.selectedPerimeter"  name="perimeterList" id="perimeterList" required>
+
+                        <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                        <ui-select-choices repeat="aPerimeter in edit.perimeterList">
+                            <div ng-value="aPerimeter" ng-bind="aPerimeter.name"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                    <div class="help-block" ng-show="edit.form.perimeterList.$dirty && edit.form.perimeterList.$invalid">
+                        <small class="error" ng-show="edit.form.perimeterList.$error.required" data-translate="moon.policy.assignments.edit.check.perimeter.required">Perimeter is required</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Select Category -->
+            <div class="form-group" ng-class="{'has-error': edit.form.categoryList.$invalid && edit.form.categoryList.$dirty}" >
+
+                <label for="categoryList" class="col-sm-3 control-label" data-translate="moon.policy.assignments.edit.categories">Category List</label>
+
+                <div class="col-sm-6" ng-if="edit.loadingCategories" >
+                    <moon-loader></moon-loader>
+                </div>
+
+                <div class="col-sm-6" ng-if="!edit.loadingCategories" >
+
+                    <ui-select ng-model="edit.selectedCategory"  name="categoryList" id="categoryList" required>
+
+                        <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                        <ui-select-choices repeat="aCategory in edit.categoryList">
+                            <div ng-value="aCategory" ng-bind="aCategory.name"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                    <div class="help-block" ng-show="edit.form.categoryList.$dirty && edit.form.categoryList.$invalid">
+                        <small class="error" ng-show="edit.form.categoryList.$error.required" data-translate="moon.policy.assignments.edit.check.category.required">Category is required</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Select Data -->
+            <div class="form-group" ng-if="edit.selectedCategory" ng-class="{'has-error': edit.form.dataList.$invalid && edit.form.dataList.$dirty}" >
+
+                <label for="dataList" class="col-sm-3 control-label" data-translate="moon.policy.assignments.edit.data">Data List</label>
+
+                <div class="col-sm-6" ng-if="edit.loadingData" >
+                    <moon-loader></moon-loader>
+                </div>
+
+                <div class="col-sm-4" ng-if="!edit.loadingData" >
+
+                    <ui-select ng-model="edit.selectedData"  name="dataList" id="dataList">
+
+                        <ui-select-match placeholder="(None)" ng-bind="edit.getName($select.selected)"></ui-select-match>
+                        <ui-select-choices repeat="aData in edit.dataToBeSelected">
+                            <div ng-value="aData" ng-bind="edit.getName(aData)"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                    <div class="help-block" ng-show="edit.form.dataList.$dirty && edit.form.dataList.$invalid || !edit.assignementsAttributeValid">
+                        <small class="error" ng-show="edit.form.dataList.$error.required || !edit.assignementsAttributeValid" data-translate="moon.policy.assignments.edit.check.data.required">Data is required</small>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-2 text-center">
+                    <a href="" ng-if="edit.selectedData"
+                       ng-click="edit.addSelectedData()"><span style="font-size:1.5em; line-height: 1.5em;" class="glyphicon glyphicon-plus-sign"></span></a>
+                </div>
+
+            </div>
+
+            <!-- Selected DataList -->
+            <div class="form-group" ng-if="!edit.loadingData">
+
+                <label class="col-sm-3 control-label" data-translate="moon.policy.assignments.edit.selectedData">Selected Data)</label>
+
+                <div class="col-sm-6">
+
+                    <ul>
+
+                        <li ng-repeat="(key, value) in edit.selectedDataList">
+
+                            <span ng-bind="edit.getName(value)" ></span> <a href="" ng-click="edit.removeSelectedData(value)"><span style="font-size:1.5em; line-height: 1.5em" class="glyphicon glyphicon-remove"></span></a>
+
+                        </li>
+
+                    </ul>
+
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <div class="pull-right">
+
+                    <a href="" ng-disabled="edit.loading" ng-click="edit.create()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-save"></span>
+                        <span data-translate="moon.policy.assignments.edit.action.create">Create</span>
+                    </a>
+
+                    <moon-loader ng-if="edit.loading"></moon-loader>
+
+                </div>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+</div>

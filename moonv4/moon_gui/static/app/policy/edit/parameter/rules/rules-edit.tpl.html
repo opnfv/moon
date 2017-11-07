@@ -1,0 +1,341 @@
+<div>
+
+    <div class="col-md-12 col-sm-12 col-xs-12">
+
+        <form ng-if="!edit.fromList" class="form-horizontal" role="form" name="edit.form">
+
+            <!-- Select Policy -->
+            <div class="form-group" ng-class="{'has-error': edit.form.policyList.$invalid && edit.form.policyList.$dirty}" >
+
+                <label for="policyList" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.policies">Policy List</label>
+
+                <div class="col-sm-6" >
+
+                    <ui-select ng-model="edit.selectedPolicy"  name="policyList" id="policyList" required>
+
+                        <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                        <ui-select-choices repeat="aPolicy in edit.policyList">
+                            <div ng-value="aPolicy" ng-bind="aPolicy.name"></div>
+                        </ui-select-choices>
+
+                    </ui-select>
+
+                    <div class="help-block" ng-show="edit.form.policyList.$dirty && edit.form.policyList.$invalid">
+                        <small class="error" ng-show="edit.form.policyList.$error.required" data-translate="moon.policy.rules.edit.action.add.check.policy.required">Policy is required</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div ng-if="!edit.selectedPolicy.meta_rules_values">
+                <div class="col-sm-6 col-sm-offset-3">
+                    <moon-loader></moon-loader>
+                </div>
+            </div>
+
+            <div ng-if="edit.selectedPolicy.meta_rules_values">
+
+                <!-- Select Meta Rules -->
+                <div class="form-group" ng-class="{'has-error': edit.form.metaRulesList.$invalid && edit.form.metaRulesList.$dirty}" >
+
+                    <label for="metaRulesList" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.metarules">MetaRules List</label>
+
+                    <div class="col-sm-6" >
+
+                        <ui-select ng-model="edit.selectedMetaRules" name="metaRulesList" id="metaRulesList" required>
+
+                            <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                            <ui-select-choices repeat="aMetaRules in edit.selectedPolicy.meta_rules_values">
+                                <div ng-value="aMetaRules" ng-bind="aMetaRules.name"></div>
+                            </ui-select-choices>
+
+                        </ui-select>
+
+                        <div class="help-block" ng-show="edit.form.metaRulesList.$dirty && edit.form.metaRulesList.$invalid">
+                            <small class="error" ng-show="edit.form.metaRulesList.$error.required" data-translate="moon.policy.rules.edit.action.add.check.metarules.required">A MetaRules is required</small>
+                        </div>
+
+                    </div>
+
+                    <div>
+                        <a href="" ng-if="edit.selectedMetaRules" ng-click="edit.showDetailselectedMetaRules = !edit.showDetailselectedMetaRules">
+
+                            <span ng-if="!edit.showDetailselectedMetaRules">
+                                <span data-translate="moon.policy.rules.edit.action.add.details.show">Show</span>
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                            </span>
+
+                            <span ng-if="edit.showDetailselectedMetaRules">
+                                <span data-translate="moon.policy.rules.edit.action.add.details.close">Close</span>
+                                <span class="glyphicon glyphicon-eye-close"></span>
+                            </span>
+
+                        </a>
+                    </div>
+
+                </div>
+
+                <div class="form-group" ng-if="edit.showDetailselectedMetaRules && edit.selectedMetaRules">
+                    <moon-meta-data-list edit-mode="edit.editMode" meta-rule="edit.selectedMetaRules" short-display="true"></moon-meta-data-list>
+                </div>
+
+                <!-- Select Data -->
+                <div class="form-group" ng-if="edit.selectedMetaRules">
+
+                    <div class="col-md-4">
+
+                        <div ng-if="edit.selectedMetaRules.subject_categories.length > 0">
+
+                            <div class="row">
+
+                                <div ng-if="!edit.data.loadingSubjects">
+
+                                    <label for="subjectsList" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.categories.subject" data-translate-values="{ number: edit.selectedMetaRules.subject_categories.length }">Select Subject(s)</label>
+
+                                    <div class="col-sm-7" >
+
+                                        <ui-select ng-model="edit.selectedSubject" name="subjectsList" id="subjectsList" required>
+
+                                            <ui-select-match placeholder="(None)" ng-bind="$select.selected.name"></ui-select-match>
+                                            <ui-select-choices repeat="aSubject in edit.data.subjectsToBeSelected">
+                                                <div ng-value="aSubject" ng-bind="aSubject.name"></div>
+                                            </ui-select-choices>
+
+                                        </ui-select>
+
+                                        <div class="help-block" ng-show="edit.form.subjectsList.$dirty && edit.form.subjectsList.$invalid || !edit.numberOfSelectedSubjectValid">
+                                            <small class="error" ng-show="edit.form.subjectsList.$error.required || !edit.numberOfSelectedSubjectValid" data-translate="moon.policy.rules.edit.action.add.check.subject.required" data-translate-values="{ number: edit.selectedMetaRules.subject_categories.length }">Some subject are required</small>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-2 text-center">
+                                        <a href="" ng-if="edit.selectedSubject && !edit.isNumberSelectedDataAtMaximum(edit.data.subjectCST)"
+                                           ng-click="edit.addDataToRules(edit.data.subjectCST)"><span style="font-size:1.5em; line-height: 1.5em;" class="glyphicon glyphicon-plus-sign"></span></a>
+                                    </div>
+
+                                </div>
+
+                                <div ng-if="edit.data.loadingSubjects">
+
+                                    <moon-loader></moon-loader>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row" ng-if="!edit.data.loadingSubjects">
+
+                                <div class="form-group">
+
+                                    <label class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.selectedSubjects">Selected Subjcet(s)</label>
+
+                                    <div class="col-sm-6">
+
+                                        <ul>
+
+                                            <li ng-repeat="(key, value) in edit.data.selectedSubjectsList">
+
+                                                <span ng-bind="value.name" ></span> <a href="" ng-click="edit.removeSelectedDataFromRules(value, edit.data.subjectCST)"><span style="font-size:1.5em; line-height: 1.5em" class="glyphicon glyphicon-remove"></span></a>
+
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div ng-if="edit.selectedMetaRules.subject_categories.length === 0">
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div ng-if="edit.selectedMetaRules.object_categories.length > 0">
+
+                            <div class="row">
+
+                                <div ng-if="!edit.data.loadingObjects">
+
+                                    <label for="objectsList" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.categories.object" data-translate-values="{ number: edit.selectedMetaRules.object_categories.length }">Select Object(s)</label>
+
+                                    <div class="col-sm-7" >
+
+                                        <ui-select ng-model="edit.selectedObject" name="objectsList" id="objectsList" required>
+
+                                            <ui-select-match placeholder="(None)" ng-bind="$select.selected.value.name"></ui-select-match>
+                                            <ui-select-choices repeat="aObject in edit.data.objectsToBeSelected">
+                                                <div ng-value="aObject" ng-bind="aObject.value.name"></div>
+                                            </ui-select-choices>
+
+                                        </ui-select>
+
+                                        <div class="help-block" ng-show="edit.form.objectsList.$dirty && edit.form.objectsList.$invalid || !edit.numberOfSelectedObjecttValid">
+                                            <small class="error" ng-show="edit.form.objectsList.$error.required  || !edit.numberOfSelectedObjecttValid" data-translate="moon.policy.rules.edit.action.add.check.object.required" data-translate-values="{ number: edit.selectedMetaRules.object_categories.length }">Some objects are required</small>
+                                        </div>
+
+                                    </div>
+
+                                    <div class="col-sm-2 text-center">
+                                        <a href="" ng-if="edit.selectedObject && !edit.isNumberSelectedDataAtMaximum(edit.data.objectCST)"
+                                           ng-click="edit.addDataToRules(edit.data.objectCST)"><span style="font-size:1.5em; line-height: 1.5em;" class="glyphicon glyphicon-plus-sign"></span></a>
+                                    </div>
+
+                                </div>
+
+                                <div ng-if="edit.data.loadingObjects">
+
+                                    <moon-loader></moon-loader>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row" ng-if="!edit.data.loadingObjects">
+
+                                <div class="form-group">
+
+                                    <label class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.selectedObjects">Selected Objcet(s)</label>
+
+                                    <div class="col-sm-6">
+
+                                        <ul>
+
+                                            <li ng-repeat="(key, value) in edit.data.selectedObjectsList">
+
+                                                <span ng-bind="value.value.name" ></span> <a href="" ng-click="edit.removeSelectedDataFromRules(value, edit.data.objectCST)"><span style="font-size:1.5em; line-height: 1.5em" class="glyphicon glyphicon-remove"></span></a>
+
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div ng-if="edit.selectedMetaRules.object_categories.length === 0">
+
+                        </div>
+
+                    </div>
+
+                    <div class="col-md-4">
+
+                        <div ng-if="edit.selectedMetaRules.action_categories.length > 0">
+
+                            <div class="row">
+
+                                <div ng-if="!edit.data.loadingActions">
+
+                                    <label for="actionsList" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.categories.action" data-translate-values="{ number: edit.selectedMetaRules.action_categories.length }">Select Action(s)</label>
+
+                                    <div class="col-sm-7" >
+
+                                        <ui-select ng-model="edit.selectedAction" name="actionsList" id="actionsList" required>
+
+                                            <ui-select-match placeholder="(None)" ng-bind="$select.selected.value.name"></ui-select-match>
+                                            <ui-select-choices repeat="aAction in edit.data.actionsToBeSelected">
+                                                <div ng-value="aAction" ng-bind="aAction.value.name"></div>
+                                            </ui-select-choices>
+
+                                        </ui-select>
+
+                                        <div class="help-block" ng-show="edit.form.actionsList.$dirty && edit.form.actionsList.$invalid || !edit.numberOfSelectedActionsValid">
+                                            <small class="error" ng-show="edit.form.actionsList.$error.required  || !edit.numberOfSelectedActionsValid" data-translate="moon.policy.rules.edit.action.add.check.action.required" data-translate-values="{ number: edit.selectedMetaRules.action_categories.length }">Some action are required</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-sm-2 text-center">
+                                        <a href="" ng-if="edit.selectedAction && !edit.isNumberSelectedDataAtMaximum(edit.data.actionCST)"
+                                           ng-click="edit.addDataToRules(edit.data.actionCST)"><span style="font-size:1.5em; line-height: 1.5em;" class="glyphicon glyphicon-plus-sign"></span></a>
+                                    </div>
+
+                                </div>
+
+                                <div ng-if="edit.data.loadingActions">
+
+                                    <moon-loader></moon-loader>
+
+                                </div>
+
+                            </div>
+
+                            <div class="row" ng-if="!edit.data.loadingActions">
+
+                                <div class="form-group">
+
+                                    <label class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.selectedActions">Selected Action(s)</label>
+
+                                    <div class="col-sm-6">
+
+                                        <ul>
+
+                                            <li ng-repeat="(key, value) in edit.data.selectedActionsList">
+
+                                                <span ng-bind="value.value.name" ></span> <a href="" ng-click="edit.removeSelectedDataFromRules(value, edit.data.actionCST)"><span style="font-size:1.5em; line-height: 1.5em" class="glyphicon glyphicon-remove"></span></a>
+
+                                            </li>
+
+                                        </ul>
+
+                                    </div>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div ng-if="edit.selectedMetaRules.action_categories.length === 0">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="form-group" ng-class="{'has-error': edit.form.instructions.$invalid && edit.form.instructions.$dirty || !edit.instructionsValid}">
+
+                    <label for="instructions" class="col-sm-3 control-label" data-translate="moon.policy.rules.edit.action.add.instructions">Instruction</label>
+
+                    <div class="col-sm-6">
+                        <textarea id="instructions" name="instructions" class="form-control" ng-model="edit.rules.instructions" rows="6" required></textarea>
+                        <div class="help-block" ng-show="edit.form.instructions.$dirty && edit.form.instructions.$invalid || !edit.instructionsValid ">
+                            <small class="error"  data-translate="moon.policy.rules.edit.action.add.check.instructions.required">An instructions is required</small>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group">
+
+                    <div class="pull-right">
+
+                        <a href="" ng-disabled="edit.loading" ng-click="edit.create()" class="btn btn-warning">
+                            <span class="glyphicon glyphicon-save"></span>
+                            <span data-translate="moon.policy.rules.edit.action.create">Create</span>
+                        </a>
+
+                        <moon-loader ng-if="edit.loading"></moon-loader>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
