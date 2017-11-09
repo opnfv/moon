@@ -30,8 +30,9 @@ def main():
         configuration.add_component(uuid="manager", name=hostname, port=port, bind=bind)
     LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
     server = HTTPServer(host=bind, port=port)
-    server.run()
+    return server
 
 
 if __name__ == '__main__':
-    main()
+    server = main()
+    server.run()
