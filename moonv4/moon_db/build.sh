@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VERSION=moon_db-1.1.0
+VERSION=moon_db-$(grep __version__ moon_db/__init__.py | cut -d "\"" -f 2)
 
 python3 setup.py sdist bdist_wheel
 
