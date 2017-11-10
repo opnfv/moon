@@ -1,114 +1,380 @@
-# Moon Version 4
+# Moon
+__Version 4.3__
 
-This directory contains all the modules for MoonV4
+This directory contains all the modules for running the Moon platform.
 
+**WARNING: this is a proof of concept, don't expect anymore...**
 
 ## Installation
-### Prerequisite
-```bash
-sudo apt install python3-dev python3-pip
-sudo pip3 install pip --upgrade
-sudo apt -y install docker-engine # ([Get Docker](https://docs.docker.com/engine/installation/))
-echo 127.0.0.1 messenger db keystone interface manager | sudo tee -a /etc/hosts
-```
+
+### kubeadm
+
+You must follow those explanations to install `kubeadm`:
+
+> https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+To summarize, you must install `docker`:
+
+    apt update
+    apt install -y docker.io
+
+And then, install `kubeadm`:
+
+    apt update && apt install -y apt-transport-https
+    curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+    deb http://apt.kubernetes.io/ kubernetes-xenial main
+    EOF
+    apt update
+    apt install -y kubelet kubeadm kubectl
 
 
-### Docker Engine Configuration
-```bash
-cat <<EOF | sudo tee /etc/docker/daemon.json
-{
-  "hosts": ["fd://", "tcp://0.0.0.0:2376"]
-}
-EOF
-sudo mv /lib/systemd/system/docker.service /lib/systemd/system/docker.service.bak
-sudo sed 's/ExecStart=\/usr\/bin\/dockerd -H fd:\/\//ExecStart=\/usr\/bin\/dockerd/' /lib/systemd/system/docker.service.bak | sudo tee /lib/systemd/system/docker.service
-sudo service docker restart
-# if you have a firewall:
-sudo ufw allow in from 172.88.88.0/16
-```
+### Moon
 
-## Before running containers
-### Cleanup
-Remove already running containers
-```bash
-docker container rm -f $(docker ps -a | grep moon | cut -d " " -f 1) 2>/dev/null
-docker container rm -f messenger db keystone consul 2>/dev/null
-```
+The Moon code is not necessary to start the platform but you need
+Kubernetes configuration files from the GIT repository. 
+
+The easy way is to clone the Moon code:
+
+    git clone https://git.opnfv.org/moon
+    cd moon/moonv4
+    export MOON=$(pwd)
 
 
-### Internal Network Creation
-Create an internal Docker network called `moon`
-```bash
-docker network create -d bridge --subnet=172.88.88.0/16 --gateway=172.88.88.1 moon
-```
+### OpenStack
 
-### Install Moon_DB
-Install the moon_db library
-```bash
-sudo pip3 install moon_db
-```
+You must have the following OpenStack components installed somewhere:
 
-## Starting containers manually
+- nova, see [Nova install](https://docs.openstack.org/mitaka/install-guide-ubuntu/nova-controller-install.html)
+- glance, see [Glance install](https://docs.openstack.org/glance/pike/install/)
 
-### MySql
-Run the standard `MySql` container in the `moon` network and configure it
-```bash
-docker container run -dti --net=moon --hostname db --name db -e MYSQL_ROOT_PASSWORD=p4sswOrd1 -e MYSQL_DATABASE=moon -e MYSQL_USER=moon -e MYSQL_PASSWORD=p4sswOrd1 -p 3306:3306 mysql:latest
-moon_db_manager upgrade
-```
+A Keystone component is automatically installed and configured in the Moon platform.
+After the Moon platform installation, the Keystone server will be available 
+at: http://localhost:30005 or http://\<servername\>:30005
 
-### moon_keystone
-Run the `keystone` container (created by the `Moon` project) in the `moon` network
-```bash
-docker container run -dti --net moon --hostname keystone  --name keystone  -e DB_HOST=db -e DB_PASSWORD_ROOT=p4sswOrd1 -p 35357:35357 -p 5000:5000 wukongsun/moon_keystone:ocata
-```
+You can also use your own Keystone server if you want.
 
-### Consul
-Run the standard `Consul` container in the `moon` network
-```bash
-docker run -d --net=moon --name=consul --hostname=consul -p 8500:8500 consul
-```
+## initialisation
 
-### Moon platform
+### kubeadm
 
-```bash
-docker container run -dti --net moon --hostname manager --name manager wukongsun/moon_manager:v4.1
-docker container run -dti --net moon --hostname interface --name interface wukongsun/moon_interface:v4.1
-```
+The `kubeadm` platform can be initialized with the following shell script:
 
-## Starting containers automatically
+    sh kubernetes/init_k8s.sh
+    
+Wait until all the kubeadm containers are in the `running` state:
 
-To start the `Moon` framework, you only have to run the `bootstrap` script
-```bash
-python3 bin/bootstrap.py
-```
-The script will ask you to start one or more Moon containers
+    watch kubectl get po --namespace=kube-system
+    
+You must see something like this:
 
-### Tests
-```bash
-sudo pip3 install pytest
-cd tests
-pytest
-```
+    $ kubectl get po --namespace=kube-system
+    NAME                                        READY     STATUS    RESTARTS   AGE
+    calico-etcd-7qgjb                           1/1       Running   0          1h
+    calico-node-f8zvm                           2/2       Running   1          1h
+    calico-policy-controller-59fc4f7888-ns9kv   1/1       Running   0          1h
+    etcd-varuna                                 1/1       Running   0          1h
+    kube-apiserver-varuna                       1/1       Running   0          1h
+    kube-controller-manager-varuna              1/1       Running   0          1h
+    kube-dns-bfbb49cd7-rgqxn                    3/3       Running   0          1h
+    kube-proxy-x88wg                            1/1       Running   0          1h
+    kube-scheduler-varuna                       1/1       Running   0          1h
 
-### Run scenario
-```bash
-sudo pip3 install requests
-cd tests 
-python3 populate_default_values.py -v scenario/rbac.py
-python3 send_authz.py -v scenario/rbac.py
-```
+### Moon
+
+The Moon platform is composed on the following components:
+
+* `consul`: a Consul configuration server
+* `db`: a MySQL database server
+* `keystone`: a Keystone authentication server
+* `gui`: a Moon web interface
+* `manager`: the Moon manager for the database
+* `orchestrator`: the Moon component that manage pods in te K8S platform
+* `wrapper`: the Moon endpoint where OpenStack component connect to.
+
+At this point, you must choose one of the following options:
+
+* Specific configuration
+* Generic configuration 
+
+#### Specific configuration
+
+Why using a specific configuration:
+
+1. The `db` and `keystone` can be installed by yourself but you must configure the 
+Moon platform to use them.
+2. You want to change the default passwords in the Moon platform
+
+Use the following commands:
+
+    TODO
+
+#### Generic configuration 
+
+Why using a specific configuration:
+
+1. You just want to test the platform
+2. You want to develop on the Moon platform
+
+The `Moon` platform can be initialized with the following shell script:
+
+    sh kubernetes/start_moon.sh
+    
+Wait until all the Moon containers are in the `running` state:
+
+    watch kubectl get po --namespace=moon
+
+You must see something like this:
+
+    $ kubectl get po --namespace=moon
+    NAME                                   READY     STATUS    RESTARTS   AGE
+    consul-57b6d66975-9qnfx                1/1       Running   0          52m
+    db-867f9c6666-bq8cf                    1/1       Running   0          52m
+    gui-bc9878b58-q288x                    1/1       Running   0          51m
+    keystone-7d9cdbb69f-bl6ln              1/1       Running   0          52m
+    manager-5bfbb96988-2nvhd               1/1       Running   0          51m
+    manager-5bfbb96988-fg8vj               1/1       Running   0          51m
+    manager-5bfbb96988-w9wnk               1/1       Running   0          51m
+    orchestrator-65d8fb4574-tnfx2          1/1       Running   0          51m
+    wrapper-astonishing-748b7dcc4f-ngsvp   1/1       Running   0          51m
 
 
+## configuration
 
-## Log
-### Get some logs
-```bash
-docker container ps
-docker logs db
-docker logs messenger
-docker logs keystone
-docker logs router
-docker logs manager
-docker logs interface
-```
+### Moon
+
+#### Introduction
+
+The Moon platform is already configured after the installation.
+If you want to see or modify the configuration, go with a web browser 
+to the following page: 
+
+> http://localhost:30006
+
+This is a consul server, you can update the configuration in the `KEY/VALUE` tab.
+There are some configuration items, lots of them are only read when a new K8S pod is started
+and not during its life cycle.
+
+**WARNING: some confidential information are put here in clear text.
+This is a known security issue.**
+
+#### Keystone
+
+If you have your own Keystone server, you can point Moon to your server in the 
+`openstack/keystone` element or through the link: 
+
+> http://localhost:30005/ui/#/dc1/kv/openstack/keystone/edit
+
+This configuration element is read every time Moon need it, specially when adding users.
+
+#### Database
+
+The database can also be modified here: 
+
+> http://varuna:30005/ui/#/dc1/kv/database/edit
+
+**WARNING: the password is in clear text, this is a known security issue.**
+
+If you want to use your own database server, change the configuration:
+
+    {"url": "mysql+pymysql://my_user:my_secret_password@my_server/moon", "driver": "sql"}
+
+Then you have to rebuild the database before using it. 
+This can be done with the following commands:
+
+    cd $MOON
+    kubectl delete -f kubernetes/templates/moon_configuration.yaml
+    kubectl create -f kubernetes/templates/moon_configuration.yaml
+
+
+### Openstack
+
+Before updating the configuration of the OpenStack platform, check that the platform 
+is working without Moon, use the following commands:
+    
+    # set authentication
+    openstack endpoint list
+    openstack user list
+    openstack server list
+
+In order to connect the OpenStack platform with the Moon platform, you must update some
+configuration files in Nova and Glance: 
+
+* `/etc/nova/policy.json`
+* `/etc/glance/policy.json`
+
+In some installed platform, the `/etc/nova/policy.json` can be absent so you have 
+to create one. You can find example files in those directory:
+
+> ${MOON}/moonv4/templates/nova/policy.json
+> ${MOON}/moonv4/templates/glance/policy.json
+
+Each line is mapped to an OpenStack API interface, for example, the following line
+allows the user to get details for every virtual machines in the cloud 
+(the corresponding shell command is `openstack server list`):
+
+    "os_compute_api:servers:detail": "",
+
+This lines indicates that there is no special authorisation to use this API,
+every users can use it. If you want that the Moon platform handles that authorisation, 
+update this line with:
+
+    "os_compute_api:servers:detail": "http://my_hostname:31001/authz"
+    
+1) by replacing `my_hostname` with the hostname (od the IP address) of the Moon platform.
+2) by updating the TCP port (default: 31001) with the good one.
+
+To find this TCP port, use the following command:
+
+    $ kubectl get services -n moon | grep wrapper | cut -d ":" -f 2 | cut -d " " -f 1
+    31002/TCP
+
+### Moon
+
+The Moon platform comes with a graphical user interface which can be used with 
+a web browser at this URL:
+
+> http://localhost:30002
+
+You will be asked to put a login and password. Those elements are the login and password 
+of the Keystone server, if you didn't modify the Keystone server, you will find the 
+login and password here:
+
+> http://varuna:30005/ui/#/dc1/kv/openstack/keystone/edit 
+
+**WARNING: the password is in clear text, this is a known security issue.**
+
+The Moon platform can also be requested through its API:
+
+> http://localhost:30001
+
+**WARNING: By default, no login/password will be needed because of 
+the configuration which is in DEV mode.**
+
+If you want more security, you have to update the configuration of the Keystone server here:
+
+> http://varuna:30005/ui/#/dc1/kv/openstack/keystone/edit 
+
+by modifying the `check_token` argument to `yes`.
+If you write this modification, your requests to Moon API must always include a valid token 
+taken from the Keystone server. This token must be place in the header of the request 
+(`X-Auth-Token`).
+
+## usage
+
+### tests the platform
+
+In order to know if the platform is healthy, here are some commands you can use.
+
+1) Check that all the K8S pods in the Moon namespace are in running state:
+
+    kubectl get pods -n moon
+    
+2) Check if the Manager API is running:
+
+    curl http://moon_hostname:30001
+    curl http://moon_hostname:30001/pdp
+    curl http://moon_hostname:30001/policies
+   
+    
+   If you configured the authentication in the Moon platform:
+
+    curl -i \
+      -H "Content-Type: application/json" \
+      -d '
+    { "auth": {
+        "identity": {
+          "methods": ["password"],
+          "password": {
+            "user": {
+              "name": "admin",
+              "domain": { "id": "default" },
+              "password": "<set_your_password_here>"
+            }
+          }
+        },
+        "scope": {
+          "project": {
+            "name": "admin",
+            "domain": { "id": "default" }
+          }
+        }
+      }
+    }' \
+      "http://moon_hostname:30006/v3/auth/tokens" ; echo
+      
+    curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001
+    curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/pdp
+    curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/policies
+
+3) Use a web browser to navigate to the GUI and enter the login and password of the keystone service:
+
+    firefox http://moon_hostname:30002
+    
+### GUI usage
+
+After authentication, you will see 4 tabs: Project, Models, Policies, PDP:
+
+* *Projects*: configure mapping between Keystone projects and PDP (Policy Decision Point)
+* *Models*: configure templates of policies (for example RBAC or MLS)
+* *Policies*: applied models or instantiated models ; 
+on one policy, you map a authorisation model and set subject, objects and action that will
+rely on that model
+* *PDP*: Policy Decision Point, this is the link between Policies and Keystone Project
+
+In the following paragraphs, we will add a new user in OpenStack and allow her to list 
+all VM on the OpenStack platform.
+
+First, add a new user and a new project in the OpenStack platform:
+
+      openstack user create --password-prompt demo_user
+      openstack project create demo
+      DEMO_USER=$(openstack user list | grep demo_user | cut -d " " -f 2)
+      DEMO_PROJECT=$(openstack project list | grep demo | cut -d " " -f 2)
+      openstack role add --user $DEMO_USER --project $DEMO_PROJECT admin
+      
+You have to add the same user in the Moon interface:
+
+1. go to the `Projects` tab in the Moon interface
+1. go to the line corresponding to the new project and click to the `Map to a PDP` link
+1. select in the combobox the MLS PDP and click `OK`
+1. in the Moon interface, go to the `Policy` tab
+1. go to the line corresponding to the MLS policy and click on the `actions->edit` button
+1. scroll to the `Perimeters` line and click on the `show` link to show the perimeter configuration
+1. go to the `Add a subject` line and click on `Add a new perimeter`
+1. set the name of that subject to `demo_user` (*the name must be strictly identical*)
+1. in the combobox named `Policy list` select the `MLS` policy and click on the `+` button
+1. click on the yellow `Add Perimeter` button
+1. go to the `Assignment` line and click on the `show` button
+1. under the `Add a Assignments Subject` select the MLS policy, 
+the new user (`demo_user`), the category `subject_category_level` 
+1. in the `Select a Data` line, choose the `High` scope and click on the `+` link 
+1. click on the yellow `Create Assignments` button 
+1. if you go to the OpenStack platform, the `demo_user` is now allow to connect 
+to the Nova component (test with `openstack server list` connected with the `demo_user`)
+
+
+## Annexes
+
+### connect to the OpenStack platform
+
+Here is a shell script to authenticate to the OpenStack platform as `admin`:
+
+    export OS_USERNAME=admin
+    export OS_PASSWORD=p4ssw0rd
+    export OS_REGION_NAME=Orange
+    export OS_TENANT_NAME=admin
+    export OS_AUTH_URL=http://moon_hostname:30006/v3
+    export OS_DOMAIN_NAME=Default
+    export OS_IDENTITY_API_VERSION=3
+
+For the `demo_user`, use:
+
+    export OS_USERNAME=demo_user
+    export OS_PASSWORD=your_secret_password
+    export OS_REGION_NAME=Orange
+    export OS_TENANT_NAME=demo
+    export OS_AUTH_URL=http://moon_hostname:30006/v3
+    export OS_DOMAIN_NAME=Default
+    export OS_IDENTITY_API_VERSION=3
+
