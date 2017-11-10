@@ -32,3 +32,7 @@ CHANGES
 -----
 - When adding a subject, check the existence of that user in the Keystone DB and
   create it if necessary
+
+1.2.0
+-----
+- Update the db_manager in order to use it for tests
