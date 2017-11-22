@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 
+populate_args=$*
+
 echo "Waiting for Consul (http://consul:8500)"
 while ! python -c "import requests; req = requests.get('http://consul:8500')" 2>/dev/null ; do
     sleep 5 ;
     echo "."
 done
 
-echo "Manager (http://consul:8500) is up."
+echo "Consul (http://consul:8500) is up."
 
 python3 /root/conf2consul.py /etc/moon/moon.conf
 
@@ -16,9 +18,17 @@ while ! python -c "import socket, sys; s = socket.socket(socket.AF_INET, socket.
     echo "."
 done
 
-echo "Manager (http://db:3306) is up."
+echo "Database (http://db:3306) is up."
 
 moon_db_manager upgrade
+
+echo "Waiting for Keystone (http://keystone:5000)"
+while ! python -c "import requests; req = requests.get('http://keystone:5000')" 2>/dev/null ; do
+    sleep 5 ;
+    echo "."
+done
+
+echo "Keystone (http://keystone:5000) is up."
 
 echo "Waiting for Manager (http://manager:8082)"
 while ! python -c "import requests; req = requests.get('http://manager:8082')" 2>/dev/null ; do
@@ -29,5 +39,6 @@ done
 echo "Manager (http://manager:8082) is up."
 
 cd /root
-python3 populate_default_values.py -v /root/conf/rbac.py
-python3 populate_default_values.py -v /root/conf/mls.py
+
+python3 populate_default_values.py $populate_args /root/conf/rbac.py
+python3 populate_default_values.py $populate_args /root/conf/mls.py
