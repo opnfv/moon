@@ -56,8 +56,13 @@ class PolicyManager(Managers):
             k_user = Managers.KeystoneManager.create_user(value)
         if not perimeter_id:
             try:
+                LOG.info("k_user={}".format(k_user))
                 perimeter_id = k_user['users'][0].get('id', uuid4().hex)
             except IndexError:
+                k_user = Managers.KeystoneManager.get_user_by_name(
+                    value.get('name'))
+                perimeter_id = uuid4().hex
+            except KeyError:
                 k_user = Managers.KeystoneManager.get_user_by_name(
                     value.get('name'))
                 perimeter_id = uuid4().hex
