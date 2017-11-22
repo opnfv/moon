@@ -13,7 +13,7 @@ spec:
       hostname: manager
       containers:
       - name: manager
-        image: wukongsun/moon_manager:v4.3
+        image: wukongsun/moon_manager:v4.3.1
         ports:
         - containerPort: 8082
 ---
