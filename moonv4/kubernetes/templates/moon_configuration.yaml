@@ -10,8 +10,10 @@ spec:
     spec:
       containers:
       - name: moonforming
-        image: asteroide/moonforming:v1.1
-        imagePullPolicy: Always
+        image: asteroide/moonforming:v1.2
+        env:
+        - name: POPULATE_ARGS
+          value: "--verbose" # debug mode: --debug
         volumeMounts:
         - name: config-volume
           mountPath: /etc/moon
