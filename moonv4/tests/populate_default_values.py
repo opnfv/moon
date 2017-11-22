@@ -32,7 +32,7 @@ requests_log = logging.getLogger("requests.packages.urllib3")
 requests_log.setLevel(logging.WARNING)
 requests_log.propagate = True
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("moonforming")
 
 if args.filename:
     print("Loading: {}".format(args.filename[0]))

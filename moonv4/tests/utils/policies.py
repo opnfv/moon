@@ -1,7 +1,9 @@
+import logging
 import requests
 import utils.config
 
 config = utils.config.get_config_data()
+logger = logging.getLogger("moonforming.utils.policies")
 
 URL = "http://{}:{}".format(config['components']['manager']['hostname'], config['components']['manager']['port'])
 URL = URL + "{}"
@@ -108,10 +110,13 @@ def delete_policy(policy_id):
 def add_subject(policy_id=None, name="test_subject"):
     subject_template['name'] = name
     if policy_id:
+        logger.debug(URL.format("/policies/{}/subjects".format(policy_id)))
         req = requests.post(URL.format("/policies/{}/subjects".format(policy_id)),
                             json=subject_template, headers=HEADERS)
     else:
+        logger.debug(URL.format("/subjects"))
         req = requests.post(URL.format("/subjects"), json=subject_template, headers=HEADERS)
+    logger.debug(req.text)
     assert req.status_code == 200
     result = req.json()
     assert "subjects" in result
