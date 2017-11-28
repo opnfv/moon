@@ -1,0 +1,10 @@
+kombu !=4.0.1,!=4.0.0
+oslo.messaging
+oslo.config
+oslo.log
+vine
+werkzeug
+flask
+requests
+pytest
+requests_mock
