@@ -27,36 +27,55 @@ def init():
     global logger, HOST, PORT, HOST_AUTHZ, PORT_AUTHZ, HOST_KEYSTONE, PORT_KEYSTONE
     parser = argparse.ArgumentParser()
     parser.add_argument('filename', help='scenario filename', nargs=1)
-    parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
-    parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
-    parser.add_argument("--dry-run", "-n", action='store_true', help="Dry run", dest="dry_run")
+    parser.add_argument("--verbose", "-v", action='store_true',
+                        help="verbose mode")
+    parser.add_argument("--debug", "-d", action='store_true',
+                        help="debug mode")
+    parser.add_argument("--dry-run", "-n", action='store_true',
+                        help="Dry run", dest="dry_run")
+    parser.add_argument("--destination",
+                        help="Set the type of output needed "
+                             "(default: wrapper, other possible type: "
+                             "interface).",
+                        default="wrapper")
     parser.add_argument("--host",
-                        help="Set the name of the host to test (default: 172.18.0.11).",
+                        help="Set the name of the host to test "
+                             "(default: 172.18.0.11).",
                         default="127.0.0.1")
     parser.add_argument("--port", "-p",
-                        help="Set the port of the host to test (default: 8082).",
+                        help="Set the port of the host to test "
+                             "(default: 8082).",
                         default="8082")
     parser.add_argument("--host-authz",
-                        help="Set the name of the host to test authorization (default: 172.18.0.11).",
+                        help="Set the name of the host to test authorization "
+                             "(default: 172.18.0.11).",
                         default="127.0.0.1",
                         dest="host_authz")
     parser.add_argument("--port-authz",
-                        help="Set the port of the host to test authorization (default: 8081).",
+                        help="Set the port of the host to test authorization "
+                             "(default: 8081).",
                         default="8081",
                         dest="port_authz")
     parser.add_argument("--host-keystone",
-                        help="Set the name of the Keystone host (default: 172.18.0.11).",
+                        help="Set the name of the Keystone host "
+                             "(default: 172.18.0.11).",
                         default="127.0.0.1")
     parser.add_argument("--port-keystone",
-                        help="Set the port of the Keystone host (default: 5000).",
+                        help="Set the port of the Keystone host "
+                             "(default: 5000).",
                         default="5000")
-    parser.add_argument("--stress-test", "-s", action='store_true', dest='stress_test',
-                        help="Execute stressing tests (warning delta measures will be false, implies -t)")
-    parser.add_argument("--write", "-w", help="Write test data to a JSON file", default="/tmp/data.json")
+    parser.add_argument("--stress-test", "-s", action='store_true',
+                        dest='stress_test',
+                        help="Execute stressing tests (warning delta measures "
+                             "will be false, implies -t)")
+    parser.add_argument("--write", "-w", help="Write test data to a JSON file",
+                        default="/tmp/data.json")
     parser.add_argument("--pdp", help="Test on pdp PDP")
-    parser.add_argument("--request-per-second", help="Number of requests per seconds",
+    parser.add_argument("--request-per-second",
+                        help="Number of requests per seconds",
                         type=int, dest="request_second", default=-1)
-    parser.add_argument("--limit", help="Limit request to LIMIT", type=int, default=500)
+    parser.add_argument("--limit", help="Limit request to LIMIT", type=int,
+                        default=500)
     args = parser.parse_args()
 
     FORMAT = '%(asctime)-15s %(levelname)s %(message)s'
@@ -115,7 +134,28 @@ def get_keystone_id(pdp_name):
     return keystone_project_id
 
 
-def _send(url, stress_test=False):
+def _construct_payload(creds, current_rule, enforcer, target):
+    # Convert instances of object() in target temporarily to
+    # empty dict to avoid circular reference detection
+    # errors in jsonutils.dumps().
+    temp_target = copy.deepcopy(target)
+    for key in target.keys():
+        element = target.get(key)
+        if type(element) is object:
+            temp_target[key] = {}
+    _data = _json = None
+    if enforcer:
+        _data = {'rule': json.dumps(current_rule),
+                 'target': json.dumps(temp_target),
+                 'credentials': json.dumps(creds)}
+    else:
+        _json = {'rule': current_rule,
+                 'target': temp_target,
+                 'credentials': creds}
+    return _data, _json
+
+
+def _send(url, data=None, stress_test=False):
     current_request = dict()
     current_request['url'] = url
     try:
@@ -128,7 +168,13 @@ def _send(url, stress_test=False):
         else:
             with lock:
                 current_request['start'] = time.time()
-                res = requests.get(url)
+                if data:
+                    data, _ = _construct_payload(data['credentials'], data['rule'], True, data['target'])
+                    res = requests.post(url, json=data,
+                                        headers={'content-type': "application/x-www-form-urlencode"}
+                                        )
+                else:
+                    res = requests.get(url)
                 current_request['end'] = time.time()
                 current_request['delta'] = current_request["end"] - current_request["start"]
     except requests.exceptions.ConnectionError:
@@ -160,7 +206,7 @@ def _send(url, stress_test=False):
 
 class AsyncGet(threading.Thread):
 
-    def __init__(self, url, semaphore=None, *args, **kwargs):
+    def __init__(self, url, semaphore=None, **kwargs):
         threading.Thread.__init__(self)
         self.url = url
         self.kwargs = kwargs
@@ -170,27 +216,36 @@ class AsyncGet(threading.Thread):
         self.index = kwargs.get("index", 0)
 
     def run(self):
-        self.result = _send(self.url, self.kwargs.get("stress_test", False))
+        self.result = _send(self.url,
+                            data=self.kwargs.get("data"),
+                            stress_test=self.kwargs.get("stress_test", False))
         self.result['index'] = self.index
 
 
 def send_requests(scenario, keystone_project_id, request_second=1, limit=500,
-                  dry_run=None, stress_test=False):
-    # sema = threading.BoundedSemaphore(value=request_second)
+                  dry_run=None, stress_test=False, destination="wrapper"):
     backgrounds = []
     time_data = list()
     start_timing = time.time()
     request_cpt = 0
-    indexes = []
-    # rules = itertools.product(scenario.subjects.keys(), scenario.objects.keys(), scenario.actions.keys())
     SUBJECTS = tuple(scenario.subjects.keys())
     OBJECTS = tuple(scenario.objects.keys())
     ACTIONS = tuple(scenario.actions.keys())
-    # for rule in rules:
     while request_cpt < limit:
         rule = (random.choice(SUBJECTS), random.choice(OBJECTS), random.choice(ACTIONS))
-        url = "http://{}:{}/authz/{}/{}".format(HOST_AUTHZ, PORT_AUTHZ, keystone_project_id, "/".join(rule))
-        indexes.append(url)
+        if destination.lower() == "wrapper":
+            url = "http://{}:{}/authz".format(HOST_AUTHZ, PORT_AUTHZ, keystone_project_id, "/".join(rule))
+            data = {
+                'target': {
+                    "user_id": random.choice(SUBJECTS),
+                    "target": {"name": random.choice(OBJECTS)}
+                },
+                'credentials': None,
+                'rule': random.choice(ACTIONS)
+            }
+        else:
+            url = "http://{}:{}/authz/{}/{}".format(HOST_AUTHZ, PORT_AUTHZ, keystone_project_id, "/".join(rule))
+            data = None
         if dry_run:
             logger.info(url)
             continue
@@ -198,11 +253,10 @@ def send_requests(scenario, keystone_project_id, request_second=1, limit=500,
         if stress_test:
             time_data.append(copy.deepcopy(_send(url, stress_test=stress_test)))
         else:
-            background = AsyncGet(url, stress_test=stress_test, index=request_cpt)
+            background = AsyncGet(url, stress_test=stress_test, data=data,
+                                  index=request_cpt)
             backgrounds.append(background)
             background.start()
-        # if limit and limit < request_cpt:
-        #     break
         if request_second > 0:
             if request_cpt % request_second == 0:
                 if time.time()-start_timing < 1:
@@ -242,7 +296,8 @@ def main():
         request_second=args.request_second,
         limit=args.limit,
         dry_run=args.dry_run,
-        stress_test=args.stress_test
+        stress_test=args.stress_test,
+        destination=args.destination
     )
     if not args.dry_run:
         save_data(args.write, time_data)
