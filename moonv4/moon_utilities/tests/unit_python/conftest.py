@@ -125,17 +125,19 @@ COMPONENTS = (
     "database",
     "slave",
     "components/manager",
+    "components/orchestrator",
+    "components/interface",
 )
 
 
 def get_b64_conf(component=None):
-    if component in CONF:
+    if component == "components":
+        return base64.b64encode(
+            json.dumps(CONF["components"]).encode('utf-8')+b"\n").decode('utf-8')
+    elif component in CONF:
         return base64.b64encode(
             json.dumps(
                 CONF[component]).encode('utf-8')+b"\n").decode('utf-8')
-    elif component == "components":
-        return base64.b64encode(
-            json.dumps(CONF["components"]).encode('utf-8')+b"\n").decode('utf-8')
     elif not component:
         return base64.b64encode(
             json.dumps(CONF).encode('utf-8')+b"\n").decode('utf-8')
@@ -158,7 +160,10 @@ def no_requests(monkeypatch):
                 )
         m.register_uri(
             'GET', 'http://consul:8500/v1/kv/components?recurse=true',
-            json=[{'Key': "components", 'Value': get_b64_conf("components")}]
+            json=[
+                {"Key": key, "Value": get_b64_conf(key)} for key in COMPONENTS
+            ],
+            # json={'Key': "components", 'Value': get_b64_conf("components")}
             )
         m.register_uri(
             'POST', 'http://keystone:5000/v3/auth/tokens',
