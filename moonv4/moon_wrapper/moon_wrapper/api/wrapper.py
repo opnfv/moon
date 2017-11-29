@@ -97,14 +97,17 @@ class Wrapper(Resource):
                                         "to a PDP.".format(project_id))
 
     def manage_data(self):
-        target = json.loads(request.form.get('target', {}))
-        credentials = json.loads(request.form.get('credentials', {}))
-        rule = request.form.get('rule', "")
+        data = request.form
+        if not dict(request.form):
+            data = json.loads(request.data.decode("utf-8"))
+        target = json.loads(data.get('target', {}))
+        credentials = json.loads(data.get('credentials', {}))
+        rule = data.get('rule', "")
         _subject = self.__get_subject(target, credentials)
         _object = self.__get_object(target, credentials)
         _project_id = self.__get_project_id(target, credentials)
         LOG.debug("POST with args project={} / "
-                 "subject={} - object={} - action={}".format(
+                  "subject={} - object={} - action={}".format(
                     _project_id, _subject, _object, rule))
         interface_url = self.get_interface_url(_project_id)
         LOG.debug("interface_url={}".format(interface_url))
