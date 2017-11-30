@@ -8,7 +8,7 @@ sed "s/{{KEYSTONE_HOST}}/$KEYSTONE_HOST/g" -i /root/static/app/moon.constants.js
 sed "s/{{KEYSTONE_PORT}}/$KEYSTONE_PORT/g" -i /root/static/app/moon.constants.js
 
 echo "--------------------------"
-grep varuna /root/static/app/moon.constants.js
+cat /root/static/app/moon.constants.js
 echo "--------------------------"
 
 gulp delivery
