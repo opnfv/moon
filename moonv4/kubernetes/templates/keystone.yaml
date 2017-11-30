@@ -13,10 +13,10 @@ spec:
       hostname: keystone
       containers:
       - name: keystone
-        image: asteroide/keystone:mitaka
+        image: asteroide/keystone:pike
         env:
         - name: KEYSTONE_HOSTNAME
-          value: "varuna"
+          value: "127.0.0.1"
         - name: KEYSTONE_PORT
           value: "30006"
         ports:
