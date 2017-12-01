@@ -4,4 +4,5 @@ RUN pip install pytest requests_mock requests --upgrade
 ADD requirements.txt /root
 RUN pip install -r /root/requirements.txt --upgrade
 
-CMD ["sh", "/data/tests/unit_python/run_tests.sh"]
+ADD run_tests.sh /root
+CMD ["sh", "/root/run_tests.sh"]
