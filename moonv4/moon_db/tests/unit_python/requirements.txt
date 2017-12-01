@@ -1,0 +1,5 @@
+sqlalchemy
+pymysql
+pytest
+requests_mock
+moon_utilities
