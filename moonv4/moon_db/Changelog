@@ -36,3 +36,11 @@ CHANGES
 1.2.0
 -----
 - Update the db_manager in order to use it for tests
+
+1.2.1
+-----
+- Update moon_db_manager in order to use it for unit tests
+
+1.2.2
+-----
+- Fix a bug in moon_db_manager
