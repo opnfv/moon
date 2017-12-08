@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: moonforming
-        image: asteroide/moonforming:v1.2
+        image: asteroide/moonforming:v1.3
         env:
         - name: POPULATE_ARGS
           value: "--verbose" # debug mode: --debug
