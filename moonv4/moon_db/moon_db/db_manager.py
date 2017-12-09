@@ -52,11 +52,7 @@ def init_engine():
     return create_engine(db_conf['url'])
 
 
-# def format_data(ext):
-#     return ext.name, ext.obj.upgrade()
-
-
-def run(command, logger, engine):
+def main(command, logger, engine):
     files = glob.glob(versions.__path__[0] + "/[0-9][0-9][0-9]*.py")
     for filename in files:
         filename = os.path.basename(filename).replace(".py", "")
@@ -75,7 +71,12 @@ def run(command, logger, engine):
         else:
             logger.critical("Cannot understand the command!")
 
-if __name__ == "__main__":
+
+def run():
     args, logger = init_args()
     engine = init_engine()
-    run(args.command[0], logger, engine)
+    main(args.command[0], logger, engine)
+
+
+if __name__ == "__main__":
+    run()
