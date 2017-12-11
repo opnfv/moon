@@ -41,7 +41,7 @@ def main():
             'keystone_project_id': keystone_project_id,
         }
     )
-    server.run()
+    return server
 
 
 if __name__ == '__main__':
