@@ -26,8 +26,9 @@ def main():
     server = HTTPServer(host=bind, port=port)
     # LOG.info("Starting server")
     # server = HTTPServer(host="0.0.0.0", port=8081)
-    server.run()
+    return server
 
 
 if __name__ == '__main__':
-    main()
+    server = main()
+    server.run()

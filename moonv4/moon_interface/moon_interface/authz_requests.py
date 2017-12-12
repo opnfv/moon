@@ -45,7 +45,6 @@ class AuthzRequest:
                 self.container_chaining[0]["port"],
             ), data=pickle.dumps(self.context))
             if req.status_code != 200:
-                # LOG.error("req={}".format(req))
                 raise exceptions.AuthzException(
                     "Receive bad response from Authz function "
                     "(with IP address - {})".format(
@@ -72,14 +71,13 @@ class AuthzRequest:
             except requests.exceptions.ConnectionError:
                 LOG.error("Cannot connect to {}".format(
                     "http://{}:{}/authz".format(
-                        self.container_chaining[0]["hostip"],
+                        self.container_chaining[0]["hostname"],
                         self.container_chaining[0]["port"]
                     )))
                 raise exceptions.AuthzException(
-                    "Cannot connect to Authz function with IP address")
+                    "Cannot connect to Authz function")
         self.context.set_cache(CACHE)
         if req and len(self.container_chaining) == 1:
-            # req.raw.decode_content = True
             self.result = pickle.loads(req.content)
 
     # def __exec_next_state(self, rule_found):
