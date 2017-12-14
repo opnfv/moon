@@ -73,10 +73,13 @@ class Wrapper(Resource):
 
     @staticmethod
     def __get_project_id(target, credentials):
+        LOG.info("__get_project_id {}".format(target))
         return target.get("project_id", "none")
 
     def get_interface_url(self, project_id):
+        LOG.info("project_id {}".format(project_id))
         for containers in self.CACHE.containers.values():
+            LOG.info("containers {}".format(containers))
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
                     if "interface" in container['name']:
