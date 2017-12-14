@@ -27,6 +27,7 @@
 - `git remote add gerrit ssh://<yourname>@gerrit.opnfv.org:29418/moon.git`
 - add the ssh public key to the Gerrit web
 - `git review –s`: test the Gerrit review connection
+- add Contributor Agreement, from settings/Agreement
 
 ### Gerrit-Review
 -	git add XXX
@@ -34,11 +35,12 @@
 -	git review
 
 ### Review Correction
--	`git clone https://git.openstack.org/openstack/oslo-specs`
--	`cd oslo-specs`
--	`git fetch https://git.openstack.org/openstack/oslo-specs refs/changes/43/492543/1 && git checkout FETCH_HEAD`
--	`git checkout -b 492543-1`
--	`vi specs/policy/external-pdp.rst`
+-	`git clone https://git.opnfv.org/moon`
+-	`cd moon`
+-   get the commit id from Gerrit dashboard
+-	`git checkout commit_id`
+-	`git checkout -b 48957-1` (where '48957' is the change number and '1' is the patch_number)
+-	do your changes ex:`vi specs/policy/external-pdp.rst`
 -	`git add specs/policy/external-pdp.rst`
 -	`git commit –amend`
 -	`git review`
