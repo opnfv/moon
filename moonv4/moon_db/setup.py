@@ -24,7 +24,7 @@ setup(
 
     description="This library is a helper to interact with the Moon database.",
 
-    long_description=open('README.rst').read(),
+    long_description=open('README.md').read(),
 
     install_requires=required,
 
