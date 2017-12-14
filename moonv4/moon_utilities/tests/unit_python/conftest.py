@@ -1,6 +1,7 @@
 import base64
 import json
 import logging
+import managers_mock as pdp_manager
 import pytest
 import requests_mock
 
@@ -187,6 +188,7 @@ def no_requests(monkeypatch):
                 "id": "1111111111111"
             }]}
         )
+        pdp_manager.mock_managers(m)
         print("End registering URI")
         # from moon_db.db_manager import init_engine, run
         # engine = init_engine()
