@@ -1,6 +1,50 @@
-# Build Python Packages and Docker Images
+# Developer Tutorial
 
-## Python Package
+## Gerrit Setup
+### Git Install
+- `sudo apt-get install git`
+- `git config --global user.email "example@wikimedia.org"`
+- `git config --global user.name "example"`
+
+### ssh key
+- `cd ~/.ssh`
+- `ssh-keygen -t rsa -C your_email@youremail.com`
+- `~/.ssh/id_rsa`: identification (private) key`
+- `~/.ssh/id_rsa.pub`: public key
+- copy the public key to Gerrit web
+- add Gerrit web上 entry to `~/.ssh/known_hosts`
+- eval `ssh-agent`: start ssh-agent
+- `ssh-add ~/.ssh/id_rsa`: add private key to ssh
+- `ssh -p 29418 <USERNAME>@gerrit.opnfv.org`: test
+
+### Gerrit clone
+- `git clone https://WuKong@gerrit.opnfv.org:29418/moon`
+- the password is dynamically generated on the Gerrit web
+
+### Gerrit Setting
+- `sudo apt-get install python-pip`
+- `sudo pip install git-review`
+- `git remote add gerrit ssh://<yourname>@gerrit.opnfv.org:29418/moon.git`
+- add the ssh public key to the Gerrit web
+- `git review –s`: test the Gerrit review connection
+
+### Gerrit-Review
+-	git add XXX
+-	git commit --signoff --all
+-	git review
+
+### Review Correction
+-	`git clone https://git.openstack.org/openstack/oslo-specs`
+-	`cd oslo-specs`
+-	`git fetch https://git.openstack.org/openstack/oslo-specs refs/changes/43/492543/1 && git checkout FETCH_HEAD`
+-	`git checkout -b 492543-1`
+-	`vi specs/policy/external-pdp.rst`
+-	`git add specs/policy/external-pdp.rst`
+-	`git commit –amend`
+-	`git review`
+
+
+## Build Python Package
 ### pre-requist
 Get the code
 ```bash
