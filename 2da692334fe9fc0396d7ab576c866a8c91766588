@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_58fe41af",
+        "filename": "moonv4/moon_utilities/tests/unit_python/data_mock.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-14T12:51:31Z",
+      "side": 1,
+      "message": "the component list is not complete",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 10
+      },
+      "revId": "2da692334fe9fc0396d7ab576c866a8c91766588",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
