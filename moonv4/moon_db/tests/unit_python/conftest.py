@@ -192,9 +192,9 @@ def set_consul_and_db(monkeypatch):
                 "id": "1111111111111"
             }]}
         )
-        from moon_db.db_manager import init_engine, run
+        from moon_db.db_manager import init_engine, main
         engine = init_engine()
-        run("upgrade", logging.getLogger("db_manager"), engine)
+        main("upgrade", logging.getLogger("db_manager"), engine)
         yield m
         os.unlink(CONF['database']['url'].replace("sqlite:///", ""))
 

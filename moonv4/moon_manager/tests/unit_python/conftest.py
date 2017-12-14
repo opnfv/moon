@@ -176,10 +176,10 @@ def no_requests(monkeypatch):
             }]}
         )
         print("Start populating the DB.")
-        from moon_db.db_manager import init_engine, run
+        from moon_db.db_manager import init_engine, main
         engine = init_engine()
         print("engine={}".format(engine))
-        run("upgrade", logging.getLogger("db_manager"), engine)
+        main("upgrade", logging.getLogger("db_manager"), engine)
         print("End populating the DB.")
         yield m
 
