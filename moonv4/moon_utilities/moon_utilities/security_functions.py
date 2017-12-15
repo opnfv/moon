@@ -294,6 +294,12 @@ class Context:
     #                     context["pdp_set"][meta_rule_id]["target"][act_cat].append(assign)
     #     # context["pdp_set"][meta_rule_id]["target"].update(result)
 
+    """build target from meta_rule
+    
+    Target is dict of categories as keys ; and the value of each category will be 
+    a list of assignments
+    
+    """
     def __add_target(self, meta_rule_id):
         result = dict()
         _subject = self.__current_request["subject"]
