@@ -1,11 +1,6 @@
 import base64
 import json
-import logging
-import os
-import pytest
-import requests_mock
-import mock_components
-import mock_keystone
+
 
 CONF = {
     "openstack": {
@@ -123,23 +118,19 @@ CONF = {
 }
 
 
-@pytest.fixture
-def db():
-    return CONF['database']
-
-
-@pytest.fixture(autouse=True)
-def set_consul_and_db(monkeypatch):
-    """ Modify the response from Requests module
-    """
-    with requests_mock.Mocker(real_http=True) as m:
-        mock_components.register_components(m)
-        mock_keystone.register_keystone(m)
-
-        from moon_db.db_manager import init_engine, main
-        engine = init_engine()
-        main("upgrade", logging.getLogger("db_manager"), engine)
-        yield m
-        os.unlink(CONF['database']['url'].replace("sqlite:///", ""))
-
-
+def get_b64_conf(component=None):
+    if component == "components":
+        return base64.b64encode(
+            json.dumps(CONF["components"]).encode('utf-8')+b"\n").decode('utf-8')
+    elif component in CONF:
+        return base64.b64encode(
+            json.dumps(
+                CONF[component]).encode('utf-8')+b"\n").decode('utf-8')
+    elif not component:
+        return base64.b64encode(
+            json.dumps(CONF).encode('utf-8')+b"\n").decode('utf-8')
+    elif "/" in component:
+        key1, _, key2 = component.partition("/")
+        return base64.b64encode(
+            json.dumps(
+                CONF[key1][key2]).encode('utf-8')+b"\n").decode('utf-8')
