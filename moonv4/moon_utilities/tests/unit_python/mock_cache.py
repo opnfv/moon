@@ -1,9 +1,4 @@
-COMPONENTS = {
-    "manager": {
-        "port": 8082,
-        "hostname": "manager"
-    }
-}
+from utilities import CONF
 
 pdp_mock = {
     "pdp_id1": {
@@ -53,6 +48,7 @@ policies_mock = {
         "description": "test",
     }
 }
+
 subject_mock = {
     "policy_id_1": {
         "subject_id": {
@@ -69,6 +65,7 @@ subject_mock = {
         }
     }
 }
+
 subject_assignment_mock = {
     "subject_id": {
         "policy_id": "ID of the policy",
@@ -77,6 +74,7 @@ subject_assignment_mock = {
         "assignments": [],
     }
 }
+
 object_mock = {
     "policy_id_1": {
         "object_id": {
@@ -171,3 +169,153 @@ rules_mock = {
         }
     }
 }
+
+
+def register_cache(m):
+    """ Modify the response from Requests module
+    """
+    register_pdp(m)
+    register_meta_rules(m)
+    register_policies(m)
+    register_models(m)
+    register_policy_subject(m, "policy_id_1")
+    register_policy_subject(m, "policy_id_2")
+    register_policy_object(m, "policy_id_1")
+    register_policy_object(m, "policy_id_2")
+    register_policy_action(m, "policy_id_1")
+    register_policy_action(m, "policy_id_2")
+    register_policy_subject_assignment(m, "policy_id_1", "subject_id")
+    # register_policy_subject_assignment_list(m1, "policy_id_1")
+    register_policy_subject_assignment(m, "policy_id_2", "subject_id")
+    # register_policy_subject_assignment_list(m1, "policy_id_2")
+    register_policy_object_assignment(m, "policy_id_1", "object_id")
+    # register_policy_object_assignment_list(m1, "policy_id_1")
+    register_policy_object_assignment(m, "policy_id_2", "object_id")
+    # register_policy_object_assignment_list(m1, "policy_id_2")
+    register_policy_action_assignment(m, "policy_id_1", "action_id")
+    # register_policy_action_assignment_list(m1, "policy_id_1")
+    register_policy_action_assignment(m, "policy_id_2", "action_id")
+    # register_policy_action_assignment_list(m1, "policy_id_2")
+    register_rules(m, "policy_id1")
+
+
+def register_pdp(m):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}'.format(CONF['components']['manager']['hostname'],
+                                        CONF['components']['manager']['port'], 'pdp'),
+        json={'pdps': pdp_mock}
+    )
+
+
+def register_meta_rules(m):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}'.format(CONF['components']['manager']['hostname'],
+                                        CONF['components']['manager']['port'], 'meta_rules'),
+        json={'meta_rules': meta_rules_mock}
+    )
+
+
+def register_policies(m):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}'.format(CONF['components']['manager']['hostname'],
+                                        CONF['components']['manager']['port'], 'policies'),
+        json={'policies': policies_mock}
+    )
+
+
+def register_models(m):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}'.format(CONF['components']['manager']['hostname'],
+                                        CONF['components']['manager']['port'], 'models'),
+        json={'models': models_mock}
+    )
+
+
+def register_policy_subject(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/subjects'.format(CONF['components']['manager']['hostname'],
+                                                    CONF['components']['manager']['port'], 'policies', policy_id),
+        json={'subjects': subject_mock[policy_id]}
+    )
+
+
+def register_policy_object(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/objects'.format(CONF['components']['manager']['hostname'],
+                                                   CONF['components']['manager']['port'], 'policies', policy_id),
+        json={'objects': object_mock[policy_id]}
+    )
+
+
+def register_policy_action(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/actions'.format(CONF['components']['manager']['hostname'],
+                                                   CONF['components']['manager']['port'], 'policies', policy_id),
+        json={'actions': action_mock[policy_id]}
+    )
+
+
+def register_policy_subject_assignment(m, policy_id, subj_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/subject_assignments/{}'.format(CONF['components']['manager']['hostname'],
+                                                                  CONF['components']['manager']['port'], 'policies',
+                                                                  policy_id,
+                                                                  subj_id),
+        json={'subject_assignments': subject_assignment_mock}
+    )
+
+
+def register_policy_subject_assignment_list(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/subject_assignments'.format(CONF['components']['manager']['hostname'],
+                                                               CONF['components']['manager']['port'], 'policies',
+                                                               policy_id),
+        json={'subject_assignments': subject_assignment_mock}
+    )
+
+
+def register_policy_object_assignment(m, policy_id, obj_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/object_assignments/{}'.format(CONF['components']['manager']['hostname'],
+                                                                 CONF['components']['manager']['port'], 'policies',
+                                                                 policy_id,
+                                                                 obj_id),
+        json={'object_assignments': object_assignment_mock}
+    )
+
+
+def register_policy_object_assignment_list(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/object_assignments'.format(CONF['components']['manager']['hostname'],
+                                                              CONF['components']['manager']['port'], 'policies',
+                                                              policy_id),
+        json={'object_assignments': object_assignment_mock}
+    )
+
+
+def register_policy_action_assignment(m, policy_id, action_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/action_assignments/{}'.format(CONF['components']['manager']['hostname'],
+                                                                 CONF['components']['manager']['port'], 'policies',
+                                                                 policy_id,
+                                                                 action_id),
+        json={'action_assignments': action_assignment_mock}
+    )
+
+
+def register_policy_action_assignment_list(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/action_assignments'.format(CONF['components']['manager']['hostname'],
+                                                              CONF['components']['manager']['port'], 'policies',
+                                                              policy_id),
+        json={'action_assignments': action_assignment_mock}
+    )
+
+
+def register_rules(m, policy_id):
+    m.register_uri(
+        'GET', 'http://{}:{}/{}/{}/{}'.format(CONF['components']['manager']['hostname'],
+                                              CONF['components']['manager']['port'], 'policies',
+                                              policy_id, 'rules'),
+        json={'rules': rules_mock}
+    )
