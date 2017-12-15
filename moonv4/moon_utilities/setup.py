@@ -17,11 +17,11 @@ setup(
 
     packages=find_packages(),
 
-    author="Thomas Duval",
+    author='Thomas Duval',
 
-    author_email="thomas.duval@orange.com",
+    author_email='thomas.duval@orange.com',
 
-    description="Some utilities for all the Moon components",
+    description='Some utilities for all the Moon components',
 
     long_description=open('README.md').read(),
 
@@ -32,12 +32,11 @@ setup(
     url='https://git.opnfv.org/cgit/moon',
 
     classifiers=[
-        "Programming Language :: Python",
-        "Development Status :: 1 - Planning",
-        "License :: OSI Approved",
-        "Natural Language :: French",
-        "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3",
+        'Programming Language :: Python :: 3',
+        'Development Status :: 1 - Planning',
+        'License :: OSI Approved',
+        'Natural Language :: English',
+        'Operating System :: OS Independent',
     ],
 
 )

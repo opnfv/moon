@@ -1,7 +1,7 @@
 import base64
 import json
 import logging
-import managers_mock as pdp_manager
+import mock_cache_manager as pdp_manager
 import pytest
 import requests_mock
 
@@ -190,20 +190,6 @@ def no_requests(monkeypatch):
         )
         pdp_manager.mock_managers(m)
         print("End registering URI")
-        # from moon_db.db_manager import init_engine, run
-        # engine = init_engine()
-        # print("engine={}".format(engine))
-        # run("upgrade", logging.getLogger("db_manager"), engine)
-        # print("End populating the DB.")
         yield m
-
-
-# @pytest.fixture(autouse=True, scope="session")
-# def manage_database():
-#     from moon_db.db_manager import init_engine, run
-#     engine = init_engine()
-#     run("upgrade", logging.getLogger("db_manager"), engine)
-#     yield
-#     print("Will close the DB")
 
 
