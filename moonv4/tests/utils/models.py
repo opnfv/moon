@@ -2,13 +2,8 @@ import requests
 import copy
 import utils.config
 
-config = utils.config.get_config_data()
-
-URL = "http://{}:{}".format(
-    config['components']['manager']['hostname'],
-    config['components']['manager']['port'])
-URL = URL + "{}"
-HEADERS = {"content-type": "application/json"}
+URL = None
+HEADERS = None
 
 model_template = {
     "name": "test_model",
@@ -27,6 +22,16 @@ meta_rule_template = {
     "object_categories": [],
     "action_categories": []
 }
+
+
+def init(consul_host, consul_port):
+    conf_data = utils.config.get_conf_data(consul_host, consul_port)
+    global URL, HEADERS
+    URL = "http://{}:{}".format(
+        conf_data['manager_hostname'],
+        conf_data['manager_port'])
+    URL = URL + "{}"
+    HEADERS = {"content-type": "application/json"}
 
 
 def check_model(model_id=None, check_model_name=True):

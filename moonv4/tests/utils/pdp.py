@@ -2,17 +2,16 @@ import logging
 import requests
 import utils.config
 
-config = utils.config.get_config_data()
 logger = logging.getLogger("moonforming.utils.policies")
+URL = None
+HEADER = None
+KEYSTONE_USER = None
+KEYSTONE_PASSWORD = None
+KEYSTONE_PROJECT = None
+KEYSTONE_SERVER = None
 
-URL = "http://{}:{}".format(
-    config['components']['manager']['hostname'],
-    config['components']['manager']['port'])
-HEADERS = {"content-type": "application/json"}
-KEYSTONE_USER = config['openstack']['keystone']['user']
-KEYSTONE_PASSWORD = config['openstack']['keystone']['password']
-KEYSTONE_PROJECT = config['openstack']['keystone']['project']
-KEYSTONE_SERVER = config['openstack']['keystone']['url']
+config = utils.config.get_config_data()
+
 
 pdp_template = {
     "name": "test_pdp",
@@ -20,6 +19,20 @@ pdp_template = {
     "keystone_project_id": None,
     "description": "test",
 }
+
+
+def init(consul_host, consul_port):
+    conf_data = utils.config.get_conf_data(consul_host, consul_port)
+    global URL, HEADER, KEYSTONE_USER, KEYSTONE_PASSWORD, KEYSTONE_PROJECT, KEYSTONE_SERVER
+    URL = "http://{}:{}".format(
+        conf_data['manager_hostname'],
+        conf_data['manager_port'])
+    URL = URL + "{}"
+    HEADER = {"content-type": "application/json"}
+    KEYSTONE_USER = conf_data['keystone_user']
+    KEYSTONE_PASSWORD = conf_data['keystone_password']
+    KEYSTONE_PROJECT = conf_data['keystone_project']
+    KEYSTONE_SERVER = conf_data['keystone_host']
 
 
 def get_keystone_projects():
