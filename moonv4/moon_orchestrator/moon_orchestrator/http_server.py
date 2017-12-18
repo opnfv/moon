@@ -206,12 +206,11 @@ class HTTPServer(Server):
         security function in all context (ie, in all slaves)
         :return: None
         """
-        # LOG.info(self.driver.get_pods())
         for key, value in self.driver.get_pods().items():
             for _pod in value:
                 if _pod.get('keystone_project_id') == keystone_project_id:
                     LOG.warning("A pod for this Keystone project {} "
-                                   "already exists.".format(keystone_project_id))
+                                "already exists.".format(keystone_project_id))
                     return
 
         plugins = configuration.get_plugins()

@@ -152,8 +152,6 @@ class K8S(Driver):
         pod = self.__create_pod(client=ext_client, data=data)
         service = self.__create_service(client=_client, data=data[0],
                                         expose=expose)
-        # logger.info("load_pod data={}".format(data))
-        # logger.info("pod.metadata.uid={}".format(pod.metadata.uid))
         self.cache[pod.metadata.uid] = data
 
     def delete_pod(self, uuid=None, name=None):
