@@ -18,6 +18,7 @@ def test_authz_true(context):
     client = server.app.test_client()
     CACHE = Cache()
     CACHE.update()
+    print(CACHE.pdp)
     _context = Context(context, CACHE)
     req = client.post("/authz", data=pickle.dumps(_context))
     assert req.status_code == 200
