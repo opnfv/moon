@@ -81,7 +81,14 @@ class Pods(Resource):
             manager_data=request.json,
             active_context=None,
             active_context_name=None)
-        return {"pods": self.driver.get_pods(request.json.get("pdp_id"))}
+        pods = {}
+        for _pod_key, _pod_values in self.driver.get_pods().items():
+            pods[_pod_key] = []
+            for _pod_value in _pod_values:
+                if _pod_value['namespace'] != "moon":
+                    continue
+                pods[_pod_key].append(_pod_value)
+        return {"pods": pods}
 
     @check_auth
     def delete(self, uuid=None, user_id=None):
