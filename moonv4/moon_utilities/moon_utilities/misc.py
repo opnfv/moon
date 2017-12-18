@@ -11,13 +11,11 @@ LOG = logging.getLogger(__name__)
 
 
 def get_uuid_from_name(name, elements, **kwargs):
-    LOG.error("get_uuid_from_name {} {} {}".format(name, elements, kwargs))
     for element in elements:
         if type(elements[element]) is dict and elements[element].get('name') == name:
             if kwargs:
                 for args in kwargs:
                     if elements[element].get(args) != kwargs[args]:
-                        LOG.error("get_uuid_from_name2 {} {} {}".format(args, elements[element].get(args), kwargs[args]))
                         return
                 else:
                     return element

@@ -1,7 +1,6 @@
 import requests
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import options  # noqa
 from moon_utilities import exceptions
 
 CONF = cfg.CONF

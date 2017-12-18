@@ -17,8 +17,6 @@ CONSUL_HOST = "consul"
 CONSUL_PORT = "8500"
 
 DATABASE = "database"
-SLAVE = "slave"
-MESSENGER = "messenger"
 KEYSTONE = "keystone"
 DOCKER = "docker"
 COMPONENTS = "components"

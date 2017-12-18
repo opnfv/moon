@@ -138,26 +138,6 @@ class ModelExisting(MoonError):
     logger = "Error"
 
 
-class RootExtensionUnknown(IntraExtensionUnknown):
-    description = _("The root_extension is unknown.")
-    code = 400
-    title = 'Root Extension Unknown'
-    logger = "Error"
-
-
-class RootPDPNotInitialized(IntraExtensionException):
-    description = _("The root_extension is not initialized.")
-    code = 400
-    title = 'Root Extension Not Initialized'
-    logger = "Error"
-
-
-class IntraExtensionCreationError(IntraExtensionException):
-    description = _("The arguments for the creation of this Extension were malformed.")
-    code = 400
-    title = 'Intra Extension Creation Error'
-
-
 # Authz exceptions
 
 class AuthzException(MoonError):

@@ -19,8 +19,7 @@ from moon_utilities import configuration
 LOG = logging.getLogger("moon.utilities." + __name__)
 
 keystone_config = configuration.get_configuration("openstack/keystone")["openstack/keystone"]
-# slave = configuration.get_configuration(configuration.SLAVE)["slave"]
-
+TOKENS = {}
 __targets = {}
 
 
@@ -294,13 +293,13 @@ class Context:
     #                     context["pdp_set"][meta_rule_id]["target"][act_cat].append(assign)
     #     # context["pdp_set"][meta_rule_id]["target"].update(result)
 
-    """build target from meta_rule
-    
-    Target is dict of categories as keys ; and the value of each category will be 
-    a list of assignments
-    
-    """
     def __add_target(self, meta_rule_id):
+        """build target from meta_rule
+
+        Target is dict of categories as keys ; and the value of each category
+        will be a list of assignments
+
+        """
         result = dict()
         _subject = self.__current_request["subject"]
         _object = self.__current_request["object"]
@@ -425,7 +424,8 @@ pdp_set: {pdp_set}
     @current_request.setter
     def current_request(self, value):
         self.__current_request = copy.deepcopy(value)
-        # Note (asteroide): if the current request is modified, we must update the PDP Set.
+        # Note (asteroide): if the current request is modified,
+        # we must update the PDP Set.
         self.__init_pdp_set()
 
     @current_request.deleter
@@ -468,8 +468,6 @@ pdp_set: {pdp_set}
     @pdp_set.deleter
     def pdp_set(self):
         self.__pdp_set = {}
-
-TOKENS = {}
 
 
 def check_token(token, url=None):

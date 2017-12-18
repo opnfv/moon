@@ -59,3 +59,7 @@ CHANGES
 -----
 - Add a waiting loop when the Keystone server is not currently available
 
+1.4.1
+-----
+- Cleanup moon_utilities code
+
