@@ -46,7 +46,6 @@ setup(
             [
                 "sql = moon_db.backends.sql:SQLConnector",
                 "flat = moon_db.backends.flat:LogConnector",
-                "memory = moon_db.backends.memory:ConfigurationConnector",
             ],
         'console_scripts': [
             'moon_db_manager = moon_db.db_manager:run',

@@ -44,3 +44,7 @@ CHANGES
 1.2.2
 -----
 - Fix a bug in moon_db_manager
+
+1.2.3
+-----
+- Cleanup moon_db code
