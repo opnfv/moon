@@ -2,13 +2,10 @@ import logging
 import requests
 import utils.config
 
-config = utils.config.get_config_data()
-logger = logging.getLogger("moonforming.utils.policies")
-
-URL = "http://{}:{}".format(config['components']['manager']['hostname'], config['components']['manager']['port'])
-URL = URL + "{}"
-HEADERS = {"content-type": "application/json"}
+URL = None
+HEADERS = None
 FILE = open("/tmp/test.log", "w")
+logger = logging.getLogger("utils.policies")
 
 policy_template = {
     "name": "test_policy",
@@ -54,6 +51,16 @@ subject_assignment_template = {
     "category_id": "",
     "scope_id": ""
 }
+
+
+def init(consul_host, consul_port):
+    conf_data = utils.config.get_config_data(consul_host, consul_port)
+    global URL, HEADERS
+    URL = "http://{}:{}".format(
+        conf_data['manager_host'],
+        conf_data['manager_port'])
+    URL = URL + "{}"
+    HEADERS = {"content-type": "application/json"}
 
 
 def check_policy(policy_id=None):
