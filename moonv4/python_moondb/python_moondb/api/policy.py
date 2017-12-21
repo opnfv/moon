@@ -5,8 +5,8 @@
 
 from uuid import uuid4
 import logging
-from moon_utilities.security_functions import enforce
-from moon_db.api.managers import Managers
+from python_moonutilities.security_functions import enforce
+from python_moondb.api.managers import Managers
 
 LOG = logging.getLogger("moon.db.api.policy")
 

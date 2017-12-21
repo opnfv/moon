@@ -5,9 +5,9 @@
 
 from uuid import uuid4
 from oslo_log import log as logging
-from moon_utilities import exceptions
-from moon_utilities.security_functions import filter_input, enforce
-from moon_db.api.managers import Managers
+from python_moonutilities import exceptions
+from python_moonutilities.security_functions import filter_input, enforce
+from python_moondb.api.managers import Managers
 
 
 LOG = logging.getLogger("moon.db.api.model")

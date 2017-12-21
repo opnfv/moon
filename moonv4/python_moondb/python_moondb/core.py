@@ -6,8 +6,8 @@
 from oslo_log import log as logging
 from oslo_config import cfg
 from stevedore.driver import DriverManager
-from moon_utilities import configuration
-from moon_db.api import model, policy, pdp, keystone
+from python_moonutilities import configuration
+from python_moondb.api import model, policy, pdp, keystone
 
 CONF = cfg.CONF
 LOG = logging.getLogger("moon.db")

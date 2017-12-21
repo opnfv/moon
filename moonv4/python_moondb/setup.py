@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from setuptools import setup, find_packages
-import moon_db
+import python_moondb
 
 
 with open('requirements.txt') as f:
@@ -12,9 +12,9 @@ with open('requirements.txt') as f:
 
 setup(
 
-    name='moon_db',
+    name='python-moondb',
 
-    version=moon_db.__version__,
+    version=python_moondb.__version__,
 
     packages=find_packages(),
 
@@ -44,11 +44,11 @@ setup(
     entry_points={
         "moon_db.driver":
             [
-                "sql = moon_db.backends.sql:SQLConnector",
-                "flat = moon_db.backends.flat:LogConnector",
+                "sql = python_moondb.backends.sql:SQLConnector",
+                "flat = python_moondb.backends.flat:LogConnector",
             ],
         'console_scripts': [
-            'moon_db_manager = moon_db.db_manager:run',
+            'moon_db_manager = python_moondb.db_manager:run',
         ],
     }
 

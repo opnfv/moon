@@ -5,7 +5,7 @@
 
 import logging
 import time
-from moon_db.core import LogDriver
+from python_moondb.core import LogDriver
 
 
 class LogConnector(LogDriver):

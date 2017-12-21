@@ -11,8 +11,8 @@ import importlib
 import argparse
 import logging
 from sqlalchemy import create_engine
-from moon_db.migrate_repo import versions
-from moon_utilities import configuration
+from python_moonutilities import configuration
+from python_moondb.migrate_repo import versions
 
 
 def init_args():

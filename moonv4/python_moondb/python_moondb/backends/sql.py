@@ -6,8 +6,6 @@
 import copy
 import json
 from uuid import uuid4
-from moon_utilities.exceptions import *
-from moon_db.core import PDPDriver, PolicyDriver, ModelDriver
 import sqlalchemy as sql
 import logging
 from sqlalchemy.orm import sessionmaker
@@ -15,8 +13,9 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from contextlib import contextmanager
 from sqlalchemy import types as sql_types
-from moon_utilities import configuration
-
+from python_moonutilities import configuration
+from python_moonutilities.exceptions import *
+from python_moondb.core import PDPDriver, PolicyDriver, ModelDriver
 
 LOG = logging.getLogger("moon.db.driver.sql")
 Base = declarative_base()
