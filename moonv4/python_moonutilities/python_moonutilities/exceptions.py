@@ -5,6 +5,7 @@
 
 from oslo_log import log as logging
 from werkzeug.exceptions import HTTPException
+
 LOG = logging.getLogger("moon.utilities.exceptions")
 _ = str
 

@@ -9,7 +9,7 @@ import time
 from functools import wraps
 from flask import request
 from oslo_log import log as logging
-from moon_utilities import exceptions, configuration
+from python_moonutilities import exceptions, configuration
 
 
 LOG = logging.getLogger(__name__)

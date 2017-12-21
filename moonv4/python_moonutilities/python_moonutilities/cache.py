@@ -2,7 +2,7 @@ import logging
 import time
 import requests
 from uuid import uuid4
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 
 LOG = logging.getLogger("moon.utilities.cache")
 

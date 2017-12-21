@@ -4,16 +4,16 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from setuptools import setup, find_packages
-import moon_utilities
+import python_moonutilities
 
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
 setup(
 
-    name='moon_utilities',
+    name='python-moonutilities',
 
-    version=moon_utilities.__version__,
+    version=python_moonutilities.__version__,
 
     packages=find_packages(),
 

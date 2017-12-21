@@ -13,8 +13,7 @@ import time
 from functools import wraps
 from flask import request
 import logging
-from moon_utilities import exceptions
-from moon_utilities import configuration
+from python_moonutilities import exceptions, configuration
 
 LOG = logging.getLogger("moon.utilities." + __name__)
 

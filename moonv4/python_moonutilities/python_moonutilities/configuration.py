@@ -9,7 +9,7 @@ import json
 import requests
 import logging
 import logging.config
-from moon_utilities import exceptions
+from python_moonutilities import exceptions
 
 LOG = logging.getLogger("moon.utilities")
 
