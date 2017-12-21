@@ -1,5 +1,5 @@
-from utils.policies import *
-from utils.models import *
+from python_moonclient.policies import *
+from python_moonclient.models import *
 
 
 def test_policies():

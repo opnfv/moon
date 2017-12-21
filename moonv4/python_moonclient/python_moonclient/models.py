@@ -1,6 +1,10 @@
+import logging
 import requests
 import copy
-import utils.config
+from . import config
+
+logger = logging.getLogger("moonclient.models")
+
 
 URL = None
 HEADERS = None
@@ -25,7 +29,7 @@ meta_rule_template = {
 
 
 def init(consul_host, consul_port):
-    conf_data = utils.config.get_config_data(consul_host, consul_port)
+    conf_data = config.get_config_data(consul_host, consul_port)
     global URL, HEADERS
     URL = "http://{}:{}".format(
         conf_data['manager_host'],
@@ -273,3 +277,43 @@ def add_meta_rule_to_model(model_id, meta_rule_id):
             assert result["result"]
         assert "meta_rules" in result['models'][model_id]
         assert meta_rule_list == result['models'][model_id]["meta_rules"]
+
+
+def create_model(scenario, model_id=None):
+    logger.info("Creating model {}".format(scenario.model_name))
+    if not model_id:
+        logger.info("Add model")
+        model_id = add_model(name=scenario.model_name)
+    logger.info("Add subject categories")
+    for cat in scenario.subject_categories:
+        scenario.subject_categories[cat] = add_subject_category(name=cat)
+    logger.info("Add object categories")
+    for cat in scenario.object_categories:
+        scenario.object_categories[cat] = add_object_category(name=cat)
+    logger.info("Add action categories")
+    for cat in scenario.action_categories:
+        scenario.action_categories[cat] = add_action_category(name=cat)
+    sub_cat = []
+    ob_cat = []
+    act_cat = []
+    meta_rule_list = []
+    for item_name, item_value in scenario.meta_rule.items():
+        for item in item_value["value"]:
+            if item in scenario.subject_categories:
+                sub_cat.append(scenario.subject_categories[item])
+            elif item in scenario.object_categories:
+                ob_cat.append(scenario.object_categories[item])
+            elif item in scenario.action_categories:
+                act_cat.append(scenario.action_categories[item])
+        meta_rules = check_meta_rule(meta_rule_id=None)
+        for _meta_rule_id, _meta_rule_value in meta_rules['meta_rules'].items():
+            if _meta_rule_value['name'] == item_name:
+                meta_rule_id = _meta_rule_id
+                break
+        else:
+            logger.info("Add meta rule")
+            meta_rule_id = add_meta_rule(item_name, sub_cat, ob_cat, act_cat)
+        item_value["id"] = meta_rule_id
+        if meta_rule_id not in meta_rule_list:
+            meta_rule_list.append(meta_rule_id)
+    return model_id, meta_rule_list

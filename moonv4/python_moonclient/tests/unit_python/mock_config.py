@@ -1,4 +1,4 @@
-import utilities
+from . import utilities
 
 
 components_manager_mock = {
