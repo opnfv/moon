@@ -1,3 +1,4 @@
+import sys
 import logging
 import requests
 import utils.config
@@ -83,6 +84,22 @@ def get_keystone_projects():
         req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
     assert req.status_code in (200, 201)
     return req.json()
+
+
+def get_keystone_id(pdp_name):
+    keystone_project_id = None
+    for pdp_key, pdp_value in check_pdp()["pdps"].items():
+        if pdp_name:
+            if pdp_name != pdp_value["name"]:
+                continue
+        if pdp_value['security_pipeline'] and pdp_value["keystone_project_id"]:
+            logger.debug("Found pdp with keystone_project_id={}".format(pdp_value["keystone_project_id"]))
+            keystone_project_id = pdp_value["keystone_project_id"]
+
+    if not keystone_project_id:
+        logger.error("Cannot find PDP with keystone project ID")
+        sys.exit(1)
+    return keystone_project_id
 
 
 def check_pdp(pdp_id=None, keystone_project_id=None, moon_url=None):
@@ -173,3 +190,22 @@ def delete_pdp(pdp_id):
     assert type(result) is dict
     assert "result" in result
     assert result["result"]
+
+
+def create_pdp(scenario, policy_id=None, project_id=None):
+    logger.info("Creating PDP {}".format(scenario.pdp_name))
+    projects = get_keystone_projects()
+    if not project_id:
+        for _project in projects['projects']:
+            if _project['name'] == "admin":
+                project_id = _project['id']
+    assert project_id
+    pdps = check_pdp()["pdps"]
+    for pdp_id, pdp_value in pdps.items():
+        if scenario.pdp_name == pdp_value["name"]:
+            update_pdp(pdp_id, policy_id=policy_id)
+            logger.debug("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
+            return pdp_id
+    _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
+    map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)
+    return _pdp_id

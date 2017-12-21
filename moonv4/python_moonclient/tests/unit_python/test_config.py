@@ -1,5 +1,5 @@
 import pytest
-import utilities
+from . import utilities
 
 
 def test_authz_request():

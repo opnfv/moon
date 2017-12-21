@@ -1,4 +1,4 @@
-from utils.pdp import *
+from python_moonclient.pdp import *
 
 
 def test_pdp():
