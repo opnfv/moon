@@ -1,0 +1,8 @@
+import pytest
+import utilities
+
+
+def test_authz_request():
+    from python_moonclient import config
+    conf_data = config.get_config_data("consul", 8500)
+    assert isinstance(conf_data, dict)
