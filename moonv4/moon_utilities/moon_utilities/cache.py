@@ -9,6 +9,12 @@ LOG = logging.getLogger("moon.utilities.cache")
 
 class Cache(object):
     # TODO (asteroide): set cache integer in CONF file
+    '''
+        [NOTE] Propose to define the following variables inside the init method
+        as defining them out side the init, will be treated as private static variables
+        and keep tracks with any changes done anywhere
+        for more info : you can check https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables
+    '''
     __UPDATE_INTERVAL = 10
 
     __CONTAINERS = {}
@@ -196,6 +202,15 @@ class Cache(object):
     def get_subject_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.subject_assignments:
             self.update_subject_assignments(policy_id, perimeter_id)
+        ''' 
+            [NOTE] invalid condition for testing existence of policy_id
+            because update_subject_assignments function already add an empty object 
+            with the given policy_id and then assign the response to it
+            as mentioned in these lines of code (line 191,192)
+
+            Note: the same condition applied for the object,action assignment
+            line 234, 260
+        '''
         if policy_id not in self.subject_assignments:
             raise Exception("Cannot found the policy {}".format(policy_id))
         for key, value in self.subject_assignments[policy_id].items():
