@@ -1,6 +1,8 @@
 import logging
 import requests
-import utils.config
+from . import config, models
+
+logger = logging.getLogger("moonclient.models")
 
 URL = None
 HEADERS = None
@@ -54,7 +56,7 @@ subject_assignment_template = {
 
 
 def init(consul_host, consul_port):
-    conf_data = utils.config.get_config_data(consul_host, consul_port)
+    conf_data = config.get_config_data(consul_host, consul_port)
     global URL, HEADERS
     URL = "http://{}:{}".format(
         conf_data['manager_host'],
@@ -640,3 +642,122 @@ def delete_rule(policy_id, rule_id):
         if rule_id == item["id"]:
             found_rule = True
     assert not found_rule
+
+
+def create_policy(scenario, model_id, meta_rule_list):
+    logger.info("Creating policy {}".format(scenario.policy_name))
+    _policies = check_policy()
+    for _policy_id, _policy_value in _policies["policies"].items():
+        if _policy_value['name'] == scenario.policy_name:
+            policy_id = _policy_id
+            break
+    else:
+        policy_id = add_policy(name=scenario.policy_name, genre=scenario.policy_genre)
+
+    update_policy(policy_id, model_id)
+
+    for meta_rule_id in meta_rule_list:
+        logger.debug("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
+        models.add_meta_rule_to_model(model_id, meta_rule_id)
+
+    logger.info("Add subject data")
+    for subject_cat_name in scenario.subject_data:
+        for subject_data_name in scenario.subject_data[subject_cat_name]:
+            data_id = scenario.subject_data[subject_cat_name][subject_data_name] = add_subject_data(
+                policy_id=policy_id,
+                category_id=scenario.subject_categories[subject_cat_name], name=subject_data_name)
+            scenario.subject_data[subject_cat_name][subject_data_name] = data_id
+    logger.info("Add object data")
+    for object_cat_name in scenario.object_data:
+        for object_data_name in scenario.object_data[object_cat_name]:
+            data_id = scenario.object_data[object_cat_name][object_data_name] = add_object_data(
+                policy_id=policy_id,
+                category_id=scenario.object_categories[object_cat_name], name=object_data_name)
+            scenario.object_data[object_cat_name][object_data_name] = data_id
+    logger.info("Add action data")
+    for action_cat_name in scenario.action_data:
+        for action_data_name in scenario.action_data[action_cat_name]:
+            data_id = scenario.action_data[action_cat_name][action_data_name] = add_action_data(
+                policy_id=policy_id,
+                category_id=scenario.action_categories[action_cat_name], name=action_data_name)
+            scenario.action_data[action_cat_name][action_data_name] = data_id
+
+    logger.info("Add subjects")
+    for name in scenario.subjects:
+        scenario.subjects[name] = add_subject(policy_id, name=name)
+    logger.info("Add objects")
+    for name in scenario.objects:
+        scenario.objects[name] = add_object(policy_id, name=name)
+    logger.info("Add actions")
+    for name in scenario.actions:
+        scenario.actions[name] = add_action(policy_id, name=name)
+
+    logger.info("Add subject assignments")
+    for subject_name in scenario.subject_assignments:
+        if type(scenario.subject_assignments[subject_name]) in (list, tuple):
+            for items in scenario.subject_assignments[subject_name]:
+                for subject_category_name in items:
+                    subject_id = scenario.subjects[subject_name]
+                    subject_cat_id = scenario.subject_categories[subject_category_name]
+                    for data in scenario.subject_assignments[subject_name]:
+                        subject_data_id = scenario.subject_data[subject_category_name][data[subject_category_name]]
+                        add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id)
+        else:
+            for subject_category_name in scenario.subject_assignments[subject_name]:
+                subject_id = scenario.subjects[subject_name]
+                subject_cat_id = scenario.subject_categories[subject_category_name]
+                subject_data_id = scenario.subject_data[subject_category_name][scenario.subject_assignments[subject_name][subject_category_name]]
+                add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id)
+
+    logger.info("Add object assignments")
+    for object_name in scenario.object_assignments:
+        if type(scenario.object_assignments[object_name]) in (list, tuple):
+            for items in scenario.object_assignments[object_name]:
+                for object_category_name in items:
+                    object_id = scenario.objects[object_name]
+                    object_cat_id = scenario.object_categories[object_category_name]
+                    for data in scenario.object_assignments[object_name]:
+                        object_data_id = scenario.object_data[object_category_name][data[object_category_name]]
+                        add_object_assignments(policy_id, object_id, object_cat_id, object_data_id)
+        else:
+            for object_category_name in scenario.object_assignments[object_name]:
+                object_id = scenario.objects[object_name]
+                object_cat_id = scenario.object_categories[object_category_name]
+                object_data_id = scenario.object_data[object_category_name][scenario.object_assignments[object_name][object_category_name]]
+                add_object_assignments(policy_id, object_id, object_cat_id, object_data_id)
+
+    logger.info("Add action assignments")
+    for action_name in scenario.action_assignments:
+        if type(scenario.action_assignments[action_name]) in (list, tuple):
+            for items in scenario.action_assignments[action_name]:
+                for action_category_name in items:
+                    action_id = scenario.actions[action_name]
+                    action_cat_id = scenario.action_categories[action_category_name]
+                    for data in scenario.action_assignments[action_name]:
+                        action_data_id = scenario.action_data[action_category_name][data[action_category_name]]
+                        add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
+        else:
+            for action_category_name in scenario.action_assignments[action_name]:
+                action_id = scenario.actions[action_name]
+                action_cat_id = scenario.action_categories[action_category_name]
+                action_data_id = scenario.action_data[action_category_name][scenario.action_assignments[action_name][action_category_name]]
+                add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
+
+    logger.info("Add rules")
+    for meta_rule_name in scenario.rules:
+        meta_rule_value = scenario.meta_rule[meta_rule_name]
+        for rule in scenario.rules[meta_rule_name]:
+            data_list = []
+            _meta_rule = list(meta_rule_value["value"])
+            for data_name in rule["rule"]:
+                category_name = _meta_rule.pop(0)
+                if category_name in scenario.subject_categories:
+                    data_list.append(scenario.subject_data[category_name][data_name])
+                elif category_name in scenario.object_categories:
+                    data_list.append(scenario.object_data[category_name][data_name])
+                elif category_name in scenario.action_categories:
+                    data_list.append(scenario.action_data[category_name][data_name])
+            instructions = rule["instructions"]
+            add_rule(policy_id, meta_rule_value["id"], data_list, instructions)
+    return policy_id
+

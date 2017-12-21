@@ -1,8 +1,5 @@
-from utils import pdp
-from utils import parse
-from utils import models
-from utils import policies
-from utils import pdp
+from python_moonclient import parse, models, policies, pdp
+
 
 if __name__ == "__main__":
     args = parse.parse()

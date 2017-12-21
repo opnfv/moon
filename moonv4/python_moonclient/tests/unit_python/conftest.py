@@ -1,6 +1,6 @@
 import pytest
 import requests_mock
-import mock_config
+from . import mock_config
 
 
 @pytest.fixture(autouse=True)
