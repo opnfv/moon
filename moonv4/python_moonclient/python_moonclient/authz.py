@@ -27,7 +27,7 @@ def _construct_payload(creds, current_rule, enforcer, target):
             temp_target[key] = {}
     _data = _json = None
     if enforcer:
-        _data = {'rule': json.dumps(current_rule),
+        _data = {'rule': current_rule,
                  'target': json.dumps(temp_target),
                  'credentials': json.dumps(creds)}
     else:
