@@ -13,7 +13,7 @@ spec:
       hostname: keystone
       containers:
       - name: keystone
-        image: asteroide/keystone:pike
+        image: asteroide/keystone:pike-cors
         env:
         - name: KEYSTONE_HOSTNAME
           value: "127.0.0.1"
