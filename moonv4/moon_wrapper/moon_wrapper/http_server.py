@@ -4,14 +4,13 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from flask import Flask, jsonify
-from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 import logging
 from moon_wrapper import __version__
 from moon_wrapper.api.generic import Status, Logs, API
 from moon_wrapper.api.wrapper import Wrapper
-from moon_utilities.cache import Cache
-from moon_utilities import configuration, exceptions
+from python_moonutilities.cache import Cache
+from python_moonutilities import configuration, exceptions
 
 logger = logging.getLogger("moon.wrapper.http")
 

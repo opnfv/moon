@@ -6,7 +6,7 @@ For any other information, refer to the parent project:
 
     https://git.opnfv.org/moon
 
-moon_utilities is a common Python lib for other Moon Python packages
+python_moonutilities is a common Python lib for other Moon Python packages
 
 ## Build
 ### Build Python Package

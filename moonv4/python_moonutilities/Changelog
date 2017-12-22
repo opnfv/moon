@@ -62,3 +62,7 @@ CHANGES
 1.4.1
 -----
 - Cleanup moon_utilities code
+
+1.4.2
+-----
+- Update the name of the library (from moon_utilities)

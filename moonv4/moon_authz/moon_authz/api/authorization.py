@@ -8,7 +8,7 @@ import itertools
 import pickle
 from uuid import uuid4
 import logging
-from moon_utilities import exceptions
+from python_moonutilities import exceptions
 import flask
 from flask import request
 from flask_restful import Resource

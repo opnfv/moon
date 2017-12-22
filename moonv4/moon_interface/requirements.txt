@@ -1,4 +1,4 @@
 flask
 flask_restful
 flask_cors
-moon_utilities
+python_moonutilities

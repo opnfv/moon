@@ -12,11 +12,11 @@ from flask_restful import Resource
 import logging
 import requests
 import time
-from moon_utilities.security_functions import check_auth
-from moon_db.core import PDPManager
-from moon_db.core import PolicyManager
-from moon_db.core import ModelManager
-from moon_utilities import configuration
+from python_moonutilities.security_functions import check_auth
+from python_moondb.core import PDPManager
+from python_moondb.core import PolicyManager
+from python_moondb.core import ModelManager
+from python_moonutilities import configuration
 
 __version__ = "0.1.0"
 

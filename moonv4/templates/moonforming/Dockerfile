@@ -1,6 +1,6 @@
 FROM python:3
 WORKDIR /usr/src/app
-RUN pip install --no-cache-dir --upgrade requests pyyaml moon_utilities moon_db
+RUN pip install --no-cache-dir --upgrade requests pyyaml python_moonutilities python_moondb
 
 ENV POPULATE_ARGS "-v"
 

@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import logging
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 from moon_interface.http_server import HTTPServer
 
 LOG = logging.getLogger("moon.interface")

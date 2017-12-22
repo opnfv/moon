@@ -2,4 +2,4 @@ flask
 flask_restful
 flask_cors
 werkzeug
-moon_utilities
+python_moonutilities

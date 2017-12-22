@@ -48,3 +48,8 @@ CHANGES
 1.2.3
 -----
 - Cleanup moon_db code
+
+1.2.4
+-----
+- Update the name of the library (from moon_db)
+

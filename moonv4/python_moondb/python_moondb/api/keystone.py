@@ -8,7 +8,7 @@ import requests
 import json
 from uuid import uuid4
 from oslo_log import log as logging
-from moon_utilities import exceptions, configuration
+from python_moonutilities import exceptions, configuration
 from python_moonutilities.security_functions import filter_input, login, logout
 from python_moondb.api.managers import Managers
 

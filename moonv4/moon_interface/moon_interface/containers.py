@@ -8,7 +8,7 @@ import logging
 import re
 import requests
 import time
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 
 __version__ = "0.1.0"
 

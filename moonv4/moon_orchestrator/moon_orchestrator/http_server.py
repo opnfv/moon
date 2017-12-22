@@ -14,8 +14,8 @@ import time
 from moon_orchestrator import __version__
 from moon_orchestrator.api.pods import Pods
 from moon_orchestrator.api.generic import Logs, Status
-from moon_utilities import configuration, exceptions
-from moon_utilities.misc import get_random_name
+from python_moonutilities import configuration, exceptions
+from python_moonutilities.misc import get_random_name
 from moon_orchestrator.drivers import get_driver
 
 LOG = logging.getLogger("moon.orchestrator.http")

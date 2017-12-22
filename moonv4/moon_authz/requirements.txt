@@ -1,8 +1,5 @@
-kombu !=4.0.1,!=4.0.0
-oslo.log
 flask
-oslo.config
 flask_restful
 flask_cors
-moon_db
-moon_utilities
+python_moondb
+python_moonutilities

@@ -21,8 +21,8 @@ from moon_manager.api.data import SubjectData, ObjectData, ActionData
 from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
 from moon_manager.api.rules import Rules
 # from moon_manager.api.containers import Container
-from moon_utilities import configuration, exceptions
-from moon_db.core import PDPManager
+from python_moonutilities import configuration, exceptions
+from python_moondb.core import PDPManager
 
 
 LOG = logging.getLogger("moon.manager.http")

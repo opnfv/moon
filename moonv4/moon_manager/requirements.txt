@@ -1,6 +1,6 @@
 flask
 flask_restful
 flask_cors
-moon_utilities
-moon_db
+python_moonutilities
+python_moondb
 docker-py

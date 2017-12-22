@@ -2,13 +2,13 @@ import pytest
 
 
 def test_authz_request():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     c = cache.Cache()
     assert isinstance(c.authz_requests, dict)
 
 
 def test_get_subject_success():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'subject_name'
@@ -17,7 +17,7 @@ def test_get_subject_success():
 
 
 def test_get_subject_failure():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'invalid name'
@@ -27,7 +27,7 @@ def test_get_subject_failure():
 
 
 def test_get_object_success():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'object_name'
@@ -36,7 +36,7 @@ def test_get_object_success():
 
 
 def test_get_object_failure():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'invalid name'
@@ -46,7 +46,7 @@ def test_get_object_failure():
 
 
 def test_get_action_success():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'action_name'
@@ -55,7 +55,7 @@ def test_get_action_success():
 
 
 def test_get_action_failure():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     policy_id = 'policy_id_1'
     name = 'invalid name'
@@ -65,7 +65,7 @@ def test_get_action_failure():
 
 
 def test_cache_manager():
-    from moon_utilities import cache
+    from python_moonutilities import cache
     cache_obj = cache.Cache()
     assert cache_obj.pdp is not None
     assert cache_obj.meta_rules is not None

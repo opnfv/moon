@@ -5,7 +5,7 @@
 
 import os
 import logging
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 from moon_orchestrator.http_server import HTTPServer
 
 LOG = logging.getLogger("moon.orchestrator")

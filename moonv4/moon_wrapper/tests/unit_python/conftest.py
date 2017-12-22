@@ -206,8 +206,8 @@ def set_env_variables():
 
 
 def get_pickled_context():
-    from moon_utilities.security_functions import Context
-    from moon_utilities.cache import Cache
+    from python_moonutilities.security_functions import Context
+    from python_moonutilities.cache import Cache
     CACHE = Cache()
     CACHE.update()
     _context = Context(context(), CACHE)

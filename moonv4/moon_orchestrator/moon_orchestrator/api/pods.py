@@ -5,7 +5,7 @@
 
 from flask import request
 from flask_restful import Resource
-from moon_utilities.security_functions import check_auth
+from python_moonutilities.security_functions import check_auth
 import logging
 
 LOG = logging.getLogger("moon.orchestrator.api.pods")

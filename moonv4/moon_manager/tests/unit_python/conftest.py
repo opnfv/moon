@@ -176,7 +176,7 @@ def no_requests(monkeypatch):
             }]}
         )
         print("Start populating the DB.")
-        from moon_db.db_manager import init_engine, main
+        from python_moondb.db_manager import init_engine, main
         engine = init_engine()
         print("engine={}".format(engine))
         main("upgrade", logging.getLogger("db_manager"), engine)

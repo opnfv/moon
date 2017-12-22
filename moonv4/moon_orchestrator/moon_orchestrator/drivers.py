@@ -6,7 +6,7 @@
 from kubernetes import client, config
 import logging
 import urllib3.exceptions
-from moon_utilities import configuration
+from python_moonutilities import configuration
 
 LOG = logging.getLogger("moon.orchestrator.drivers")
 

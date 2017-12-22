@@ -6,7 +6,7 @@
 import os
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 from moon_manager.http_server import HTTPServer
 
 LOG = logging.getLogger("moon.manager")

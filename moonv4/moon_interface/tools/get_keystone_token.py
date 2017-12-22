@@ -1,7 +1,7 @@
 import requests
 from oslo_config import cfg
 from oslo_log import log as logging
-from moon_utilities import exceptions
+from python_moonutilities import exceptions
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)

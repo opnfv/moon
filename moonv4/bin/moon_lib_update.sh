@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 
-# usage: moon_update.sh {build,upload,copy} {db,utilities} <GPG_ID>
+# usage: moon_update.sh {build,upload,copy} {python_moondb,python_moonutilities} <GPG_ID>
 
 CMD=$1
 COMPONENT=$2
 GPG_ID=$3
 
-VERSION=moon_${COMPONENT}-$(grep __version__ moon_${COMPONENT}/moon_${COMPONENT}/__init__.py | cut -d "\"" -f 2)
+VERSION=${COMPONENT}-$(grep __version__ ${COMPONENT}/${COMPONENT}/__init__.py | cut -d "\"" -f 2)
 
-cd moon_${COMPONENT}
+cd ${COMPONENT}
 
 python3 setup.py sdist bdist_wheel
 
@@ -16,16 +16,16 @@ if [ "$CMD" = "upload" ]; then
     # Instead of "A0A96E75", use your own GPG ID
     rm dist/*.asc 2>/dev/null
     gpg --detach-sign -u "${GPG_ID}" -a dist/${VERSION}-py3-none-any.whl
-    gpg --detach-sign -u "${GPG_ID}" -a dist/${VERSION}.tar.gz
+    gpg --detach-sign -u "${GPG_ID}" -a dist/${VERSION/_/-}.tar.gz
     twine upload dist/${VERSION}-py3-none-any.whl dist/${VERSION}-py3-none-any.whl.asc
-    twine upload dist/${VERSION}.tar.gz dist/${VERSION}.tar.gz.asc
+    twine upload dist/${VERSION/_/-}.tar.gz dist/${VERSION/_/-}.tar.gz.asc
 fi
 
-rm -f ../moon_manager/dist/moon_${COMPONENT}*
-rm -f ../moon_orchestrator/dist/moon_${COMPONENT}*
-rm -f ../moon_wrapper/dist/moon_${COMPONENT}*
-rm -f ../moon_interface/dist/moon_${COMPONENT}*
-rm -f ../moon_authz/dist/moon_${COMPONENT}*
+rm -f ../moon_manager/dist/${COMPONENT}*
+rm -f ../moon_orchestrator/dist/${COMPONENT}*
+rm -f ../moon_wrapper/dist/${COMPONENT}*
+rm -f ../moon_interface/dist/${COMPONENT}*
+rm -f ../moon_authz/dist/${COMPONENT}*
 
 
 if [ "$CMD" = "copy" ]; then

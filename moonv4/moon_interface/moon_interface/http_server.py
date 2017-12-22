@@ -11,7 +11,7 @@ from moon_interface import __version__
 from moon_interface.api.generic import Status, Logs, API
 from moon_interface.api.authz import Authz
 from moon_interface.authz_requests import CACHE
-from moon_utilities import configuration, exceptions
+from python_moonutilities import configuration, exceptions
 
 logger = logging.getLogger("moon.interface.http")
 

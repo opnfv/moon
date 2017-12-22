@@ -7,10 +7,10 @@ from flask import Flask, request
 # from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api, reqparse
 import logging
-from moon_utilities import exceptions
 from moon_authz import __version__
 from moon_authz.api.authorization import Authz
-from moon_utilities.cache import Cache
+from python_moonutilities.cache import Cache
+from python_moonutilities import exceptions
 
 logger = logging.getLogger("moon." + __name__)
 

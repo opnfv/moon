@@ -6,7 +6,7 @@
 import os
 from oslo_log import log as logging
 from moon_authz.http_server import HTTPServer as Server
-from moon_utilities import configuration
+from python_moonutilities import configuration
 
 LOG = logging.getLogger("moon.server")
 DOMAIN = "moon_authz"

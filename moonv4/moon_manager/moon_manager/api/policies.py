@@ -10,8 +10,8 @@ Policies are instances of security models and implement security policies
 from flask import request
 from flask_restful import Resource
 from oslo_log import log as logging
-from moon_utilities.security_functions import check_auth
-from moon_db.core import PolicyManager
+from python_moonutilities.security_functions import check_auth
+from python_moondb.core import PolicyManager
 
 __version__ = "0.1.0"
 

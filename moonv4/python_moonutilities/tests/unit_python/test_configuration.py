@@ -1,5 +1,5 @@
 
 def test_get_components():
-    from moon_utilities import configuration
+    from python_moonutilities import configuration
     assert isinstance(configuration.get_components(), dict)
 

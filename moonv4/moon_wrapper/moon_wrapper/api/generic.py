@@ -9,7 +9,7 @@ Those API are helping API used to manage the Moon platform.
 from flask_restful import Resource, request
 from oslo_log import log as logging
 import moon_wrapper.api
-from moon_utilities.security_functions import check_auth
+from python_moonutilities.security_functions import check_auth
 
 __version__ = "0.1.0"
 

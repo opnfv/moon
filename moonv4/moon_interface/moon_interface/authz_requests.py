@@ -7,9 +7,9 @@ import logging
 import itertools
 import pickle
 import requests
-from moon_utilities import configuration, exceptions
-from moon_utilities.security_functions import Context
-from moon_utilities.cache import Cache
+from python_moonutilities import configuration, exceptions
+from python_moonutilities.security_functions import Context
+from python_moonutilities.cache import Cache
 
 LOG = logging.getLogger("moon.interface.authz_requests")
 
