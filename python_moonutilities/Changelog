@@ -66,3 +66,7 @@ CHANGES
 1.4.2
 -----
 - Update the name of the library (from moon_utilities)
+
+1.4.3
+-----
+- Fix a bug in MANIFEST.in
