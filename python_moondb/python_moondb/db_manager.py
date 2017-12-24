@@ -57,15 +57,15 @@ def main(command, logger, engine):
     for filename in files:
         filename = os.path.basename(filename).replace(".py", "")
         o = importlib.import_module(
-            "moon_db.migrate_repo.versions.{}".format(filename))
+            "python_moondb.migrate_repo.versions.{}".format(filename))
         logger.info("Command is {}".format(command))
         if command in ("upgrade", "u", "up"):
             logger.info(
-                "upgrading moon_db.migrate_repo.versions.{}".format(filename))
+                "upgrading python_moondb.migrate_repo.versions.{}".format(filename))
             o.upgrade(engine)
         elif command in ("downgrade", "d", "down"):
             logger.info(
-                "downgrading moon_db.migrate_repo.versions.{}".format(
+                "downgrading python_moondb.migrate_repo.versions.{}".format(
                     filename))
             o.downgrade(engine)
         else:

@@ -136,7 +136,7 @@ def set_consul_and_db(monkeypatch):
         mock_components.register_components(m)
         mock_keystone.register_keystone(m)
 
-        from moon_db.db_manager import init_engine, main
+        from python_moondb.db_manager import init_engine, main
         engine = init_engine()
         main("upgrade", logging.getLogger("db_manager"), engine)
         yield m

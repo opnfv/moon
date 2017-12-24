@@ -5,12 +5,12 @@
 
 
 def get_policies():
-    from moon_db.core import PolicyManager
+    from python_moondb.core import PolicyManager
     return PolicyManager.get_policies("admin")
 
 
 def add_policies(value=None):
-    from moon_db.core import PolicyManager
+    from python_moondb.core import PolicyManager
     if not value:
         value = {
             "name": "test_policiy",
@@ -22,7 +22,7 @@ def add_policies(value=None):
 
 
 def delete_policies(uuid=None, name=None):
-    from moon_db.core import PolicyManager
+    from python_moondb.core import PolicyManager
     if not uuid:
         for policy_id, policy_value in get_policies():
             if name == policy_value['name']:
