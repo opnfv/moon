@@ -570,8 +570,8 @@ class Cache(object):
                         model_id = self.__POLICIES[policy_id]['model_id']
                         for meta_rule_id in self.__MODELS[model_id]["meta_rules"]:
                             for container_id, container_value in self.get_containers_from_keystone_project_id(
-                                    keystone_project_id,
-                                    meta_rule_id
+                                keystone_project_id,
+                                meta_rule_id
                             ):
                                 _raw = requests.get("{}/pods/{}".format(
                                     self.orchestrator_url, container_value["name"])
