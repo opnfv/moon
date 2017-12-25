@@ -25,18 +25,28 @@ def init_logging():
     config = get_configuration("logging")
     logging.config.dictConfig(config['logging'])
 
-
+'''
+    [Note 1] components_port_start as a key not following the same url pattern, 
+    i suggest it should be components/port_start, also according to the mock data that 
+    you build for mock component [components_utilities.py] will work with that pattern [components/port_start]
+    
+    [General Note]
+    i think any request calling should be between try and catch in order to avoid any failure cause system to behave 
+    in unexpected way 
+'''
 def increment_port():
-    components_port_start = int(get_configuration("components_port_start")['components_port_start'])
+    components_port_start = int(get_configuration("components/port_start")['port_start'])
     components_port_start += 1
-    url = "http://{}:{}/v1/kv/components_port_start".format(CONSUL_HOST, CONSUL_PORT)
+    url = "http://{}:{}/v1/kv/components/port_start".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.put(url, json=str(components_port_start))
     if req.status_code != 200:
         logger.info("url={}".format(url))
         raise exceptions.ConsulError
     return components_port_start
 
-
+'''
+    [Note] Access data/item object with "Key" and "Value" keys without validating if there are already exist or not 
+'''
 def get_configuration(key):
     url = "http://{}:{}/v1/kv/{}".format(CONSUL_HOST, CONSUL_PORT, key)
     req = requests.get(url)
@@ -53,7 +63,10 @@ def get_configuration(key):
             for item in data
         ]
 
-
+'''
+    [Note] add_component function return get_configuration
+    and get_configuration funcation may raise exception , so add component may throw an exception 
+'''
 def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra=None, container=None):
     data = {
         "hostname": name,
@@ -75,7 +88,9 @@ def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra
     logger.info("Add component {}".format(req.text))
     return configuration.get_configuration("components/"+uuid)
 
-
+'''
+[Note] the same as increment_port comments
+'''
 def get_plugins():
     url = "http://{}:{}/v1/kv/plugins?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)
@@ -92,7 +107,9 @@ def get_plugins():
             for item in data
         }
 
-
+'''
+[Note] the same as increment_port comments
+'''
 def get_components():
     url = "http://{}:{}/v1/kv/components?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)
