@@ -5,7 +5,7 @@ import requests_mock
 
 def test_get_configuration_success():
     from python_moonutilities import configuration
-    assert configuration.get_configuration("components/port_start")["components/port_start"] == comp_util.CONF["components"]["port_start"]
+    assert configuration.get_configuration("components/port_start")["port_start"] == comp_util.CONF["components"]["port_start"]
 
 
 @requests_mock.Mocker(kw='mock')
@@ -25,8 +25,8 @@ def test_get_configuration_not_found(**kwargs):
 def test_get_configuration_invalid_response(**kwargs):
     from python_moonutilities import configuration
 
-    kwargs['mock'].get('http://consul:8500/v1/kv/components_port_start', json=[
-        {"components_port_start":'components_port_start', 'Value': comp_util.get_b64_conf("components/port_start")}
+    kwargs['mock'].get('http://consul:8500/v1/kv/components/port_start', json=[
+        {"port_start":'port_start', 'Value': comp_util.get_b64_conf("components/port_start")}
     ])
     # with pytest.raises(Exception) as exception_info:
     # configuration.get_configuration("components_port_start")
@@ -36,9 +36,9 @@ def test_get_configuration_invalid_response(**kwargs):
 @requests_mock.Mocker(kw='mock')
 def test_put_increment_port_failure(**kwargs):
     from python_moonutilities import configuration
-    kwargs['mock'].put('http://consul:8500/v1/kv/components_port_start', json=[], status_code=400)
-    kwargs['mock'].get('http://consul:8500/v1/kv/components_port_start', json=[
-        {'Key': 'components_port_start', 'Value': comp_util.get_b64_conf("components/port_start")}
+    kwargs['mock'].put('http://consul:8500/v1/kv/components/port_start', json=[], status_code=400)
+    kwargs['mock'].get('http://consul:8500/v1/kv/components/port_start', json=[
+        {'Key': 'port_start', 'Value': comp_util.get_b64_conf("components/port_start")}
     ], status_code=200)
     with pytest.raises(Exception) as exception_info:
         configuration.increment_port()

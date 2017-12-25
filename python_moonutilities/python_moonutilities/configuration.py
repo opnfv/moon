@@ -6,7 +6,7 @@
 
 import base64
 import json
-import requests
+import python_moonutilities.request_wrapper as requests
 import logging.config
 from python_moonutilities import exceptions
 
@@ -25,18 +25,19 @@ def init_logging():
     config = get_configuration("logging")
     logging.config.dictConfig(config['logging'])
 
-
 def increment_port():
-    components_port_start = int(get_configuration("components_port_start")['components_port_start'])
+    components_port_start = int(get_configuration("components/port_start")['port_start'])
     components_port_start += 1
-    url = "http://{}:{}/v1/kv/components_port_start".format(CONSUL_HOST, CONSUL_PORT)
+    url = "http://{}:{}/v1/kv/components/port_start".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.put(url, json=str(components_port_start))
     if req.status_code != 200:
         logger.info("url={}".format(url))
         raise exceptions.ConsulError
     return components_port_start
 
-
+'''
+    [Note] Access data/item object with "Key" and "Value" keys without validating if there are already exist or not 
+'''
 def get_configuration(key):
     url = "http://{}:{}/v1/kv/{}".format(CONSUL_HOST, CONSUL_PORT, key)
     req = requests.get(url)
@@ -53,7 +54,10 @@ def get_configuration(key):
             for item in data
         ]
 
-
+'''
+    [Note] add_component function return get_configuration
+    and get_configuration funcation may raise exception , so add component may throw an exception 
+'''
 def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra=None, container=None):
     data = {
         "hostname": name,
@@ -75,7 +79,9 @@ def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra
     logger.info("Add component {}".format(req.text))
     return configuration.get_configuration("components/"+uuid)
 
-
+'''
+[Note] the same as increment_port comments
+'''
 def get_plugins():
     url = "http://{}:{}/v1/kv/plugins?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)
@@ -92,7 +98,9 @@ def get_plugins():
             for item in data
         }
 
-
+'''
+[Note] the same as increment_port comments
+'''
 def get_components():
     url = "http://{}:{}/v1/kv/components?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)

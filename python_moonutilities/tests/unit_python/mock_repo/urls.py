@@ -9,11 +9,11 @@ def register_components(m):
             json=[{'Key': component, 'Value': comp_util.get_b64_conf(component)}]
         )
     m.register_uri(
-        'GET', 'http://consul:8500/v1/kv/components_port_start',
-        json=[{'Key': 'components_port_start', 'Value': comp_util.get_b64_conf("components/port_start")}]
+        'GET', 'http://consul:8500/v1/kv/components/port_start',
+        json=[{'Key': 'port_start', 'Value': comp_util.get_b64_conf("components/port_start")}]
     )
     m.register_uri(
-        'PUT', 'http://consul:8500/v1/kv/components_port_start',
+        'PUT', 'http://consul:8500/v1/kv/components/port_start',
         json=[]
     )
 
