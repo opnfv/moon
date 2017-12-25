@@ -55,7 +55,7 @@ def test_get_object_failure():
     name = 'invalid name'
     with pytest.raises(Exception) as exception_info:
         cache_obj.get_object(data_mock.shared_ids["policy"]["policy_id_1"], name)
-    assert str(exception_info.value) == '400: Subject Unknown'
+    assert str(exception_info.value) == '400: Object Unknown'
 
 
 def test_get_action_success():
@@ -72,7 +72,7 @@ def test_get_action_failure():
     name = 'invalid name'
     with pytest.raises(Exception) as exception_info:
         cache_obj.get_action(data_mock.shared_ids["policy"]["policy_id_1"], name)
-    assert str(exception_info.value) == '400: Subject Unknown'
+    assert str(exception_info.value) == '400: Action Unknown'
 
 
 # ====================================================================================================
