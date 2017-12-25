@@ -10,7 +10,7 @@ LOG = logging.getLogger("moon.utilities.cache")
 class Cache(object):
     # TODO (asteroide): set cache integer in CONF file
     '''
-        [NOTE] Propose to define the following variables inside the init method
+        [NOTE 1] Propose to define the following variables inside the init method
         as defining them out side the init, will be treated as private static variables
         and keep tracks with any changes done anywhere
         for more info : you can check https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables
@@ -67,6 +67,11 @@ class Cache(object):
             configuration.get_components()['orchestrator']['port']
         )
 
+    '''
+        [NOTE 2] we notice that update() used after each init for the Cache, so why not calling it inside init()
+        in order to avoid calling it after each time initialize new cache
+        and also to avoid forgetting to call it with each initialize 
+    '''
     def update(self):
         self.__update_container()
         self.__update_pdp()
@@ -86,67 +91,88 @@ class Cache(object):
     def subjects(self):
         return self.__SUBJECTS
 
-    def update_subjects(self, policy_id=None):
-        req = requests.get("{}/policies/{}/subjects".format(
-            self.manager_url, policy_id))
-        self.__SUBJECTS[policy_id] = req.json()['subjects']
+    def __update_subjects(self, policy_id=None):
+        response = requests.get("{}/policies/{}/subjects".format(self.manager_url, policy_id))
+        if 'subjects' in response.json():
+            self.__SUBJECTS[policy_id] = response.json()['subjects']
+        else:
+            raise exceptions.SubjectUnknown("Cannot find subject within policy_id {}".format(policy_id))
 
     def get_subject(self, policy_id, name):
-        try:
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
+
+        if policy_id in self.subjects:
             for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
-                if _subject_dict["name"] == name:
+                if "name" in _subject_dict and _subject_dict["name"] == name:
                     return _subject_id
-        except KeyError:
-            pass
-        self.update_subjects(policy_id)
-        for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
-            if _subject_dict["name"] == name:
-                return _subject_id
+
+        self.__update_subjects(policy_id)
+
+        if policy_id in self.subjects:
+            for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
+                if "name" in _subject_dict and _subject_dict["name"] == name:
+                    return _subject_id
+
         raise exceptions.SubjectUnknown("Cannot find subject {}".format(name))
 
     @property
     def objects(self):
         return self.__OBJECTS
 
-    def update_objects(self, policy_id=None):
-        req = requests.get("{}/policies/{}/objects".format(
-            self.manager_url, policy_id))
-        self.__OBJECTS[policy_id] = req.json()['objects']
+    def __update_objects(self, policy_id=None):
+        response = requests.get("{}/policies/{}/objects".format(self.manager_url, policy_id))
+        if 'objects' in response.json():
+            self.__OBJECTS[policy_id] = response.json()['objects']
+        else:
+            raise exceptions.ObjectUnknown("Cannot find object within policy_id {}".format(policy_id))
 
     def get_object(self, policy_id, name):
-        try:
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
+
+        if policy_id in self.objects:
             for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
-                if _object_dict["name"] == name:
+                if "name" in _object_dict and _object_dict["name"] == name:
                     return _object_id
-        except KeyError:
-            pass
-        self.update_objects(policy_id)
-        for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
-            if _object_dict["name"] == name:
-                return _object_id
-        raise exceptions.SubjectUnknown("Cannot find object {}".format(name))
+
+        self.__update_objects(policy_id)
+
+        if policy_id in self.objects:
+            for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
+                if "name" in _object_dict and _object_dict["name"] == name:
+                    return _object_id
+
+        raise exceptions.ObjectUnknown("Cannot find object {}".format(name))
 
     @property
     def actions(self):
         return self.__ACTIONS
 
-    def update_actions(self, policy_id=None):
-        req = requests.get("{}/policies/{}/actions".format(
-            self.manager_url, policy_id))
-        self.__ACTIONS[policy_id] = req.json()['actions']
+    def __update_actions(self, policy_id=None):
+        response = requests.get("{}/policies/{}/actions".format(self.manager_url, policy_id))
+
+        if 'actions' in response.json():
+            self.__ACTIONS[policy_id] = response.json()['actions']
+        else:
+            raise exceptions.ObjectUnknown("Cannot find action within policy_id {}".format(policy_id))
 
     def get_action(self, policy_id, name):
-        try:
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
+
+        if policy_id in self.actions:
             for _action_id, _action_dict in self.__ACTIONS[policy_id].items():
-                if _action_dict["name"] == name:
+                if "name" in _action_dict and _action_dict["name"] == name:
                     return _action_id
-        except KeyError:
-            pass
-        self.update_actions(policy_id)
+
+        self.__update_actions(policy_id)
+
         for _action_id, _action_dict in self.__ACTIONS[policy_id].items():
-            if _action_dict["name"] == name:
+            if "name" in _action_dict and _action_dict["name"] == name:
                 return _action_id
-        raise exceptions.SubjectUnknown("Cannot find action {}".format(name))
+
+        raise exceptions.ActionUnknown("Cannot find action {}".format(name))
 
     # meta_rule functions
 
@@ -159,8 +185,12 @@ class Cache(object):
         return self.__META_RULES
 
     def __update_meta_rules(self):
-        req = requests.get("{}/meta_rules".format(self.manager_url))
-        self.__META_RULES = req.json()['meta_rules']
+        response = requests.get("{}/meta_rules".format(self.manager_url))
+
+        if 'meta_rules' in response.json():
+            self.__META_RULES = response.json()['meta_rules']
+        else:
+            raise exceptions.MetaRuleUnknown("Cannot find meta rules")
 
     # rule functions
 
@@ -173,12 +203,17 @@ class Cache(object):
         return self.__RULES
 
     def __update_rules(self):
-        for policy_id in self.__POLICIES:
+        for policy_id in self.policies:
             LOG.info("Get {}".format("{}/policies/{}/rules".format(
                 self.manager_url, policy_id)))
-            req = requests.get("{}/policies/{}/rules".format(
+
+            response = request.get("{}/policies/{}/rules".format(
                 self.manager_url, policy_id))
-            self.__RULES[policy_id] = req.json()['rules']
+            if 'rules' in response.json():
+                self.__RULES[policy_id] = response.json()['rules']
+            else:
+                LOG.warning(" no 'rules' found within policy_id: {}".format(policy_id))
+
         LOG.info("UPDATE RULES {}".format(self.__RULES))
 
     # assignment functions
@@ -187,87 +222,111 @@ class Cache(object):
     def subject_assignments(self):
         return self.__SUBJECT_ASSIGNMENTS
 
-    def update_subject_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_subject_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
-            req = requests.get("{}/policies/{}/subject_assignments/{}".format(
+            response = requests.get("{}/policies/{}/subject_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/subject_assignments".format(
+            response = requests.get("{}/policies/{}/subject_assignments".format(
                 self.manager_url, policy_id))
-        if policy_id not in self.__SUBJECT_ASSIGNMENTS:
-            self.__SUBJECT_ASSIGNMENTS[policy_id] = {}
-        self.__SUBJECT_ASSIGNMENTS[policy_id].update(
-            req.json()['subject_assignments'])
+
+        if 'subject_assignments' in response.json():
+            if policy_id not in self.subject_assignments:
+                self.__SUBJECT_ASSIGNMENTS[policy_id] = {}
+
+            self.__SUBJECT_ASSIGNMENTS[policy_id].update(response.json()['subject_assignments'])
+        else:
+            raise exceptions.SubjectAssignmentUnknown(
+                "Cannot find subject assignment within policy_id {}".format(policy_id))
 
     def get_subject_assignments(self, policy_id, perimeter_id, category_id):
-        if policy_id not in self.subject_assignments:
-            self.update_subject_assignments(policy_id, perimeter_id)
-        ''' 
-            [NOTE] invalid condition for testing existence of policy_id
-            because update_subject_assignments function already add an empty object 
-            with the given policy_id and then assign the response to it
-            as mentioned in these lines of code (line 191,192)
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
 
-            Note: the same condition applied for the object,action assignment
-            line 234, 260
-        '''
         if policy_id not in self.subject_assignments:
-            raise Exception("Cannot found the policy {}".format(policy_id))
+            self.__update_subject_assignments(policy_id, perimeter_id)
+
         for key, value in self.subject_assignments[policy_id].items():
-            if perimeter_id == value['subject_id'] and category_id == value['category_id']:
-                return value['assignments']
+            if "subject_id" and "category_id" and "assignments" in value:
+                if perimeter_id == value['subject_id'] and category_id == value['category_id']:
+                    return value['assignments']
+            else:
+                LOG.warning("'subject_id' or 'category_id' or'assignments'"
+                            " keys are not found in subject_assignments")
         return []
 
     @property
     def object_assignments(self):
         return self.__OBJECT_ASSIGNMENTS
 
-    def update_object_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_object_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
-            req = requests.get("{}/policies/{}/object_assignments/{}".format(
+            response = requests.get("{}/policies/{}/object_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/object_assignments".format(
+            response = requests.get("{}/policies/{}/object_assignments".format(
                 self.manager_url, policy_id))
-        if policy_id not in self.__OBJECT_ASSIGNMENTS:
-            self.__OBJECT_ASSIGNMENTS[policy_id] = {}
-        self.__OBJECT_ASSIGNMENTS[policy_id].update(
-            req.json()['object_assignments'])
+
+        if 'object_assignments' in response.json():
+            if policy_id not in self.object_assignments:
+                self.__OBJECT_ASSIGNMENTS[policy_id] = {}
+
+            self.__OBJECT_ASSIGNMENTS[policy_id].update(response.json()['object_assignments'])
+        else:
+            raise exceptions.ObjectAssignmentUnknown(
+                "Cannot find object assignment within policy_id {}".format(policy_id))
 
     def get_object_assignments(self, policy_id, perimeter_id, category_id):
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
+
         if policy_id not in self.object_assignments:
-            self.update_object_assignments(policy_id, perimeter_id)
-        if policy_id not in self.object_assignments:
-            raise Exception("Cannot found the policy {}".format(policy_id))
+            self.__update_object_assignments(policy_id, perimeter_id)
+
         for key, value in self.object_assignments[policy_id].items():
-            if perimeter_id == value['object_id'] and category_id == value['category_id']:
-                return value['assignments']
+            if "object_id" and "category_id" and "assignments" in value:
+                if perimeter_id == value['object_id'] and category_id == value['category_id']:
+                    return value['assignments']
+            else:
+                LOG.warning("'object_id' or 'category_id' or'assignments'"
+                            " keys are not found in object_assignments")
         return []
 
     @property
     def action_assignments(self):
         return self.__ACTION_ASSIGNMENTS
 
-    def update_action_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_action_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
-            req = requests.get("{}/policies/{}/action_assignments/{}".format(
+            response = requests.get("{}/policies/{}/action_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
         else:
-            req = requests.get("{}/policies/{}/action_assignments".format(
+            response = requests.get("{}/policies/{}/action_assignments".format(
                 self.manager_url, policy_id))
-        if policy_id not in self.__ACTION_ASSIGNMENTS:
-            self.__ACTION_ASSIGNMENTS[policy_id] = {}
-        self.__ACTION_ASSIGNMENTS[policy_id].update(
-            req.json()['action_assignments'])
+
+        if 'action_assignments' in response.json():
+            if policy_id not in self.__ACTION_ASSIGNMENTS:
+                self.__ACTION_ASSIGNMENTS[policy_id] = {}
+
+            self.__ACTION_ASSIGNMENTS[policy_id].update(response.json()['action_assignments'])
+        else:
+            raise exceptions.ActionAssignmentUnknown(
+                "Cannot find action assignment within policy_id {}".format(policy_id))
 
     def get_action_assignments(self, policy_id, perimeter_id, category_id):
+        if not policy_id:
+            raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
+
         if policy_id not in self.action_assignments:
-            self.update_action_assignments(policy_id, perimeter_id)
-        if policy_id not in self.action_assignments:
-            raise Exception("Cannot found the policy {}".format(policy_id))
+            self.__update_action_assignments(policy_id, perimeter_id)
+
         for key, value in self.action_assignments[policy_id].items():
-            if perimeter_id == value['action_id'] and category_id == value['category_id']:
-                return value['assignments']
+            if "action_id" and "category_id" and "assignments" in value:
+                if perimeter_id == value['action_id'] and category_id == value['category_id']:
+                    return value['assignments']
+            else:
+                LOG.warning("'action_id' or 'category_id' or'assignments'"
+                            " keys are not found in action_assignments")
         return []
 
     # category functions
@@ -281,9 +340,13 @@ class Cache(object):
         return self.__SUBJECT_CATEGORIES
 
     def __update_subject_categories(self):
-        req = requests.get("{}/policies/subject_categories".format(
+        response = requests.get("{}/policies/subject_categories".format(
             self.manager_url))
-        self.__SUBJECT_CATEGORIES.update(req.json()['subject_categories'])
+
+        if 'subject_categories' in response.json():
+            self.__SUBJECT_CATEGORIES.update(response.json()['subject_categories'])
+        else:
+            raise exceptions.SubjectCategoryUnknown("Cannot find subject category")
 
     @property
     def object_categories(self):
@@ -294,9 +357,12 @@ class Cache(object):
         return self.__OBJECT_CATEGORIES
 
     def __update_object_categories(self):
-        req = requests.get("{}/policies/object_categories".format(
-            self.manager_url))
-        self.__OBJECT_CATEGORIES.update(req.json()['object_categories'])
+        response = requests.get("{}/policies/object_categories".format(self.manager_url))
+
+        if 'object_categories' in response.json():
+            self.__OBJECT_CATEGORIES.update(response.json()['object_categories'])
+        else:
+            raise exceptions.ObjectCategoryUnknown("Cannot find object category")
 
     @property
     def action_categories(self):
@@ -307,22 +373,29 @@ class Cache(object):
         return self.__ACTION_CATEGORIES
 
     def __update_action_categories(self):
-        req = requests.get("{}/policies/action_categories".format(
-            self.manager_url))
-        self.__ACTION_CATEGORIES.update(req.json()['action_categories'])
+        response = requests.get("{}/policies/action_categories".format(self.manager_url))
+
+        if 'action_categories' in response.json():
+            self.__ACTION_CATEGORIES.update(response.json()['action_categories'])
+        else:
+            raise exceptions.ActionCategoryUnknown("Cannot find action category")
 
     # PDP functions
 
     def __update_pdp(self):
-        req = requests.get("{}/pdp".format(self.manager_url))
-        pdp = req.json()
-        for _pdp in pdp["pdps"].values():
-            if _pdp['keystone_project_id'] not in self.__CONTAINER_CHAINING:
-                self.__CONTAINER_CHAINING[_pdp['keystone_project_id']] = {}
-                # Note (asteroide): force update of chaining
-                self.__update_container_chaining(_pdp['keystone_project_id'])
-        for key, value in pdp["pdps"].items():
-            self.__PDP[key] = value
+        response = requests.get("{}/pdp".format(self.manager_url))
+        pdp = response.json()
+        if 'pdps' in pdp:
+            for _pdp in pdp["pdps"].values():
+                if "keystone_project_id" in _pdp and _pdp['keystone_project_id'] not in self.__CONTAINER_CHAINING:
+                    self.__CONTAINER_CHAINING[_pdp['keystone_project_id']] = {}
+                    # Note (asteroide): force update of chaining
+                    self.__update_container_chaining(_pdp['keystone_project_id'])
+            for key, value in pdp["pdps"].items():
+                self.__PDP[key] = value
+
+        else:
+            raise exceptions.PDPNotFound("Cannot find 'pdps' key")
 
     @property
     def pdp(self):
@@ -349,10 +422,14 @@ class Cache(object):
 
     # policy functions
     def __update_policies(self):
-        req = requests.get("{}/policies".format(self.manager_url))
-        policies = req.json()
-        for key, value in policies["policies"].items():
-            self.__POLICIES[key] = value
+        response = requests.get("{}/policies".format(self.manager_url))
+        policies = response.json()
+
+        if 'policies' in policies:
+            for key, value in policies["policies"].items():
+                self.__POLICIES[key] = value
+        else:
+            raise exceptions.PolicytNotFound("Cannot find 'policies' key")
 
     @property
     def policies(self):
@@ -365,10 +442,13 @@ class Cache(object):
     # model functions
 
     def __update_models(self):
-        req = requests.get("{}/models".format(self.manager_url))
-        models = req.json()
-        for key, value in models["models"].items():
-            self.__MODELS[key] = value
+        response = requests.get("{}/models".format(self.manager_url))
+        models = response.json()
+        if 'models' in models:
+            for key, value in models["models"].items():
+                self.__MODELS[key] = value
+        else:
+            raise exceptions.ModelNotFound("Cannot find 'models' key")
 
     @property
     def models(self):
@@ -382,20 +462,32 @@ class Cache(object):
 
     def get_policy_from_meta_rules(self, meta_rule_id):
         for pdp_key, pdp_value in self.pdp.items():
-            for policy_id in pdp_value["security_pipeline"]:
-                model_id = self.policies[policy_id]["model_id"]
-                if meta_rule_id in self.models[model_id]["meta_rules"]:
-                    return policy_id
+            if "security_pipeline" in pdp_value:
+                for policy_id in pdp_value["security_pipeline"]:
+                    if policy_id in self.policies and "model_id" in self.policies[policy_id]:
+                        model_id = self.policies[policy_id]["model_id"]
+                        if model_id in self.models and "meta_rules" in self.models[model_id]:
+                            if meta_rule_id in self.models[model_id]["meta_rules"]:
+                                return policy_id
+                        else:
+                            LOG.warning("Cannot find model_id: {} within models and 'meta_rules' key".format(model_id))
+                    else:
+                        LOG.warning("Cannot find policy_id: {} within policies and 'model_id' key".format(policy_id))
+            else:
+                LOG.warning("Cannot find 'security_pipeline' key within pdp ")
 
     def get_pdp_from_keystone_project(self, keystone_project_id):
         for pdp_key, pdp_value in self.pdp.items():
-            if keystone_project_id == pdp_value["keystone_project_id"]:
+            if "keystone_project_id" in pdp_value and keystone_project_id == pdp_value["keystone_project_id"]:
                 return pdp_key
 
     def get_keystone_project_id_from_policy_id(self, policy_id):
         for pdp_key, pdp_value in self.pdp.items():
-            if policy_id in pdp_value["security_pipeline"]:
-                return pdp_value["keystone_project_id"]
+            if "security_pipeline" in pdp_value and "keystone_project_id" in pdp_value:
+                if policy_id in pdp_value["security_pipeline"]:
+                    return pdp_value["keystone_project_id"]
+            else:
+                LOG.warning(" 'security_pipeline','keystone_project_id' key not in pdp {}".format(pdp_value))
             # for policy_id in pdp_value["security_pipeline"]:
             #     model_id = self.policies[policy_id]["model_id"]
             #     if meta_rule_id in self.models[model_id]["meta_rules"]:
@@ -410,21 +502,28 @@ class Cache(object):
                 if container_value['keystone_project_id'] == keystone_project_id:
                     if not meta_rule_id:
                         yield container_id, container_value
-                    elif container_value.get('meta_rule_id') == meta_rule_id:
+                    elif "meta_rule_id" in container_value and container_value.get('meta_rule_id') == meta_rule_id:
                         yield container_id, container_value
                         break
 
     # containers functions
 
     def __update_container(self):
-        req = requests.get("{}/pods".format(self.orchestrator_url))
-        pods = req.json()
-        for key, value in pods["pods"].items():
-            # if key not in self.__CONTAINERS:
-            self.__CONTAINERS[key] = value
-            # else:
-            #     for container in value:
-            #         self.__CONTAINERS[key].update(value)
+        response = requests.get("{}/pods".format(self.orchestrator_url))
+        pods = response.json()
+        if "pods" in pods:
+            for key, value in pods["pods"].items():
+                # if key not in self.__CONTAINERS:
+                self.__CONTAINERS[key] = value
+                # else:
+                #     for container in value:
+                #         self.__CONTAINERS[key].update(value)
+        else:
+            raise exceptions.PodError("Cannot find 'pods' key")
+
+    '''
+       [NOTE] unused function
+    '''
 
     def add_container(self, container_data):
         """Add a new container in the cache
@@ -450,24 +549,31 @@ class Cache(object):
 
         :return:
         """
-        self.__CONTAINERS[uuid4().hex] = {
-            "keystone_project_id": container_data['keystone_project_id'],
-            "name": container_data['name'],
-            "container_id": container_data['container_id'],
-            "hostname": container_data['name'],
-            "policy_id": container_data['policy_id'],
-            "meta_rule_id": container_data['meta_rule_id'],
-            "port": [
-                {
-                    "PublicPort": container_data['port']["PublicPort"],
-                    "Type": container_data['port']["Type"],
-                    "IP": container_data['port']["IP"],
-                    "PrivatePort": container_data['port']["PrivatePort"]
-                }
-            ],
-            "genre": container_data['plugin_name']
-        }
-        self.__update_container_chaining(self.get_keystone_project_id_from_policy_id(container_data['policy_id']))
+        if "keystone_project_id" and "name" and "container_id" and "policy_id" and "meta_rule_id" \
+                and "port" in container_data \
+                and "PublicPort" in container_data['port'] and "Type" in container_data['port'] \
+                and "IP" in container_data['port'] and "PrivatePort" in container_data['port']:
+
+            self.__CONTAINERS[uuid4().hex] = {
+                "keystone_project_id": container_data['keystone_project_id'],
+                "name": container_data['name'],
+                "container_id": container_data['container_id'],
+                "hostname": container_data['name'],
+                "policy_id": container_data['policy_id'],
+                "meta_rule_id": container_data['meta_rule_id'],
+                "port": [
+                    {
+                        "PublicPort": container_data['port']["PublicPort"],
+                        "Type": container_data['port']["Type"],
+                        "IP": container_data['port']["IP"],
+                        "PrivatePort": container_data['port']["PrivatePort"]
+                    }
+                ],
+                "genre": container_data['plugin_name']
+            }
+            self.__update_container_chaining(self.get_keystone_project_id_from_policy_id(container_data['policy_id']))
+        else:
+            raise exceptions.ContainerError("Cannot find 'container' parameters key")
 
     @property
     def containers(self):
@@ -484,6 +590,10 @@ class Cache(object):
             self.__update_container()
         self.__CONTAINERS_UPDATE = current_time
         return self.__CONTAINERS
+
+    '''
+        [NOTE] unused function
+    '''
 
     @property
     def container_chaining(self):
@@ -504,10 +614,14 @@ class Cache(object):
         """
         current_time = time.time()
         if self.__CONTAINER_CHAINING_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__CONTAINER_CHAINING_UPDATE = current_time
             for key, value in self.pdp.items():
-                if not value["keystone_project_id"]:
-                    continue
-                self.__update_container_chaining(value["keystone_project_id"])
+                if "keystone_project_id" in value:
+                    if not value["keystone_project_id"]:
+                        continue
+                    self.__update_container_chaining(value["keystone_project_id"])
+                else:
+                    LOG.warning("no 'keystone_project_id' found")
         self.__CONTAINER_CHAINING_UPDATE = current_time
         LOG.info(self.__CONTAINER_CHAINING_UPDATE)
         return self.__CONTAINER_CHAINING
@@ -516,28 +630,45 @@ class Cache(object):
         container_ids = []
         for pdp_id, pdp_value, in self.__PDP.items():
             if pdp_value:
-                if pdp_value["keystone_project_id"] == keystone_project_id:
+                if "keystone_project_id" and "security_pipeline" in pdp_value \
+                        and pdp_value["keystone_project_id"] == keystone_project_id:
                     for policy_id in pdp_value["security_pipeline"]:
-                        model_id = self.__POLICIES[policy_id]['model_id']
-                        for meta_rule_id in self.__MODELS[model_id]["meta_rules"]:
-                            for container_id, container_value in self.get_containers_from_keystone_project_id(
-                                keystone_project_id,
-                                meta_rule_id
-                            ):
-                                _raw = requests.get("{}/pods/{}".format(
-                                    self.orchestrator_url, container_value["name"])
-                                )
-                                LOG.debug("_raw={}".format(_raw.text))
-                                container_ids.append(
-                                    {
-                                        "container_id": container_value["name"],
-                                        "genre": container_value["genre"],
-                                        "policy_id": policy_id,
-                                        "meta_rule_id": meta_rule_id,
-                                        "hostname": container_value["name"],
-                                        "hostip": "127.0.0.1",
-                                        "port": container_value["port"],
-                                    }
-                                )
-        self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
+                        if policy_id in self.policies and "model_id" in self.policies[policy_id]:
+                            model_id = self.policies[policy_id]['model_id']
+                            if model_id in self.models and "meta_rules" in self.models[model_id]:
+                                for meta_rule_id in self.models[model_id]["meta_rules"]:
+                                    for container_id, container_value in self.get_containers_from_keystone_project_id(
+                                            keystone_project_id,
+                                            meta_rule_id
+                                    ):
+                                        if "name" in container_value:
+                                            _raw = requests.get("{}/pods/{}".format(
+                                                self.orchestrator_url, container_value["name"])
+                                            )
+                                            LOG.debug("_raw={}".format(_raw.text))
+                                            if "genre" and "port" in container_value:
+                                                container_ids.append(
+                                                    {
+                                                        "container_id": container_value["name"],
+                                                        "genre": container_value["genre"],
+                                                        "policy_id": policy_id,
+                                                        "meta_rule_id": meta_rule_id,
+                                                        "hostname": container_value["name"],
+                                                        "hostip": "127.0.0.1",
+                                                        "port": container_value["port"],
+                                                    }
+                                                )
+                                            else:
+                                                LOG.warning("Container content keys not found {}", container_value)
+                                        else:
+                                            LOG.warning("Container content keys not found {}", container_value)
+                            else:
+                                raise exceptions.ModelUnknown("Cannot find model_id: {} in models and "
+                                                              "may not contains 'meta_rules' key".format(model_id))
+                        else:
+                            raise exceptions.PolicyUnknown("Cannot find policy within policy_id: {}, "
+                                                           "and may not contains 'model_id' key".format(policy_id))
+                else:
+                    raise exceptions.PDPError("Cannot find 'keystone_project_id','security_pipeline' pdp keys")
 
+        self.__CONTAINER_CHAINING[keystone_project_id] = container_ids

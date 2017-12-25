@@ -131,11 +131,30 @@ class ModelUnknown(MoonError):
     title = 'Model Unknown'
     logger = "Error"
 
+class ModelNotFound(MoonError):
+    description = _("The model key is not found.")
+    code = 400
+    title = 'Model error'
+    logger = "Error"
+
 
 class ModelExisting(MoonError):
     description = _("The model already exists.")
     code = 409
     title = 'Model Error'
+    logger = "Error"
+
+
+class PDPNotFound(MoonError):
+    description = _("The pdps key is not found.")
+    code = 400
+    title = 'Pdp error'
+    logger = "Error"
+
+class PDPError(MoonError):
+    description = _("The pdp content keys is not found.")
+    code = 500
+    title = 'Pdp error'
     logger = "Error"
 
 
@@ -456,6 +475,18 @@ class RuleUnknown(AdminRule):
     logger = "ERROR"
 
 
+class PolicyUnknown(AdminPerimeter):
+    description = _("The given policy id is unknown.")
+    code = 400
+    title = 'PolicyID Unknown'
+    logger = "ERROR"
+
+class PolicytNotFound(AdminPerimeter):
+    description = _("The policies key is not found.")
+    code = 400
+    title = 'Policies error'
+    logger = "ERROR"
+
 # Keystone exceptions
 
 
@@ -520,3 +551,14 @@ class ContainerMissing(DockerError):
     title = 'Container missing'
     logger = "ERROR"
 
+class ContainerError(MoonError):
+    description = _("The container key is not found.")
+    code = 400
+    title = 'container error'
+    logger = "ERROR"
+
+class PodError(MoonError):
+    description = _("The pods key is not found.")
+    code = 400
+    title = 'pod error'
+    logger = "ERROR"
