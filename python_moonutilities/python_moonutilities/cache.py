@@ -10,7 +10,7 @@ LOG = logging.getLogger("moon.utilities.cache")
 class Cache(object):
     # TODO (asteroide): set cache integer in CONF file
     '''
-        [NOTE] Propose to define the following variables inside the init method
+        [NOTE 1] Propose to define the following variables inside the init method
         as defining them out side the init, will be treated as private static variables
         and keep tracks with any changes done anywhere
         for more info : you can check https://docs.python.org/3/tutorial/classes.html#class-and-instance-variables
@@ -67,6 +67,11 @@ class Cache(object):
             configuration.get_components()['orchestrator']['port']
         )
 
+    '''
+        [NOTE 2] we notice that update() used after each init for the Cache, so why not calling it inside init()
+        in order to avoid calling it after each time initialize new cache
+        and also to avoid forgetting to call it with each initialize 
+    '''
     def update(self):
         self.__update_container()
         self.__update_pdp()
@@ -86,6 +91,10 @@ class Cache(object):
     def subjects(self):
         return self.__SUBJECTS
 
+    '''
+        [Note 3] missing validation condition for accessing 'subject' key from the response obj
+        to check if 'subject' key exists in the response object or not
+    '''
     def update_subjects(self, policy_id=None):
         req = requests.get("{}/policies/{}/subjects".format(
             self.manager_url, policy_id))
@@ -108,6 +117,9 @@ class Cache(object):
     def objects(self):
         return self.__OBJECTS
 
+    '''
+       the same as [Note 3] for key 'objects'
+    '''
     def update_objects(self, policy_id=None):
         req = requests.get("{}/policies/{}/objects".format(
             self.manager_url, policy_id))
@@ -130,6 +142,9 @@ class Cache(object):
     def actions(self):
         return self.__ACTIONS
 
+    '''
+        the same as [Note 3] for key 'actions'
+    '''
     def update_actions(self, policy_id=None):
         req = requests.get("{}/policies/{}/actions".format(
             self.manager_url, policy_id))
@@ -158,6 +173,9 @@ class Cache(object):
         self.__META_RULES_UPDATE = current_time
         return self.__META_RULES
 
+    '''
+        the same as [Note 3] for key 'meta_rules'
+    '''
     def __update_meta_rules(self):
         req = requests.get("{}/meta_rules".format(self.manager_url))
         self.__META_RULES = req.json()['meta_rules']
@@ -172,6 +190,9 @@ class Cache(object):
         self.__RULES_UPDATE = current_time
         return self.__RULES
 
+    '''
+        the same as [Note 3] for key 'rules'
+    '''
     def __update_rules(self):
         for policy_id in self.__POLICIES:
             LOG.info("Get {}".format("{}/policies/{}/rules".format(
@@ -187,6 +208,9 @@ class Cache(object):
     def subject_assignments(self):
         return self.__SUBJECT_ASSIGNMENTS
 
+    '''
+        the same as [Note 3] for key 'subject_assignments'
+    '''
     def update_subject_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
             req = requests.get("{}/policies/{}/subject_assignments/{}".format(
@@ -248,6 +272,9 @@ class Cache(object):
     def action_assignments(self):
         return self.__ACTION_ASSIGNMENTS
 
+    '''
+        the same as [Note 3] for key 'action_assignments'
+    '''
     def update_action_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
             req = requests.get("{}/policies/{}/action_assignments/{}".format(
@@ -280,6 +307,9 @@ class Cache(object):
         self.__SUBJECT_CATEGORIES_UPDATE = current_time
         return self.__SUBJECT_CATEGORIES
 
+    '''
+         the same as [Note 3] for key 'subject_categories'
+    '''
     def __update_subject_categories(self):
         req = requests.get("{}/policies/subject_categories".format(
             self.manager_url))
@@ -293,6 +323,9 @@ class Cache(object):
         self.__OBJECT_CATEGORIES_UPDATE = current_time
         return self.__OBJECT_CATEGORIES
 
+    '''
+         the same as [Note 3] for key 'object_categories'
+    '''
     def __update_object_categories(self):
         req = requests.get("{}/policies/object_categories".format(
             self.manager_url))
@@ -306,6 +339,9 @@ class Cache(object):
         self.__ACTION_CATEGORIES_UPDATE = current_time
         return self.__ACTION_CATEGORIES
 
+    '''
+         the same as [Note 3] for key 'action_categories'
+    '''
     def __update_action_categories(self):
         req = requests.get("{}/policies/action_categories".format(
             self.manager_url))
@@ -380,6 +416,11 @@ class Cache(object):
 
     # helper functions
 
+    '''
+    [Note] missing condition check if policy_id key exists in policies object 
+    and also check if model_id exists in policies[policy_id]
+    '''
+
     def get_policy_from_meta_rules(self, meta_rule_id):
         for pdp_key, pdp_value in self.pdp.items():
             for policy_id in pdp_value["security_pipeline"]:
@@ -425,6 +466,10 @@ class Cache(object):
             # else:
             #     for container in value:
             #         self.__CONTAINERS[key].update(value)
+
+    '''
+       [NOTE] unused function
+    '''
 
     def add_container(self, container_data):
         """Add a new container in the cache
@@ -485,6 +530,10 @@ class Cache(object):
         self.__CONTAINERS_UPDATE = current_time
         return self.__CONTAINERS
 
+    '''
+        [NOTE] unused function
+    '''
+
     @property
     def container_chaining(self):
         """Cache for mapping Keystone Project ID with meta_rule ID and container ID
@@ -521,8 +570,8 @@ class Cache(object):
                         model_id = self.__POLICIES[policy_id]['model_id']
                         for meta_rule_id in self.__MODELS[model_id]["meta_rules"]:
                             for container_id, container_value in self.get_containers_from_keystone_project_id(
-                                keystone_project_id,
-                                meta_rule_id
+                                    keystone_project_id,
+                                    meta_rule_id
                             ):
                                 _raw = requests.get("{}/pods/{}".format(
                                     self.orchestrator_url, container_value["name"])
@@ -540,4 +589,3 @@ class Cache(object):
                                     }
                                 )
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
-
