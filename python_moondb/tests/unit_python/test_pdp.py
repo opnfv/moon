@@ -1,0 +1,69 @@
+def update_pdp(pdp_id, value):
+    from python_moondb.core import PDPManager
+    return PDPManager.update_pdp("", pdp_id, value)
+
+
+def delete_pdp(pdp_id):
+    from python_moondb.core import PDPManager
+    PDPManager.delete_pdp("", pdp_id)
+
+
+def add_pdp(pdp_id=None, value=None):
+    from python_moondb.core import PDPManager
+    return PDPManager.add_pdp("", pdp_id, value)
+
+
+def get_pdp(pdp_id=None):
+    from python_moondb.core import PDPManager
+    return PDPManager.get_pdp("", pdp_id)
+
+
+def test_update_pdp(db):
+    pdp_id = "pdp_id1"
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    add_pdp(pdp_id, value)
+    pdp = update_pdp(pdp_id, value)
+    assert pdp
+
+
+def test_delete_pdp(db):
+    pdp_id = "pdp_id1"
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    add_pdp(pdp_id, value)
+    delete_pdp(pdp_id)
+    assert len(get_pdp(pdp_id)) == 0
+
+
+def test_add_pdp(db):
+    pdp_id = "pdp_id1"
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    pdp = add_pdp(pdp_id, value)
+    assert pdp
+
+
+def test_get_pdp(db):
+    pdp_id = "pdp_id1"
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    add_pdp(pdp_id, value)
+    pdp = get_pdp(pdp_id)
+    assert len(pdp) == 1
