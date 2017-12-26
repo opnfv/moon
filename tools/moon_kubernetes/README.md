@@ -28,11 +28,10 @@ apt-get install -y kubelet kubeadm kubectl
 ```
 
 ## Moon Deployment
-### Creation
-Execute the script : `init_k8s.sh`
+### Initiate K8S
 ```bash
+cd $MOON_HOME/tools/moon_kubernes
 sudo bash init_k8s.sh
-watch kubectl get po --namespace=kube-system
 ```
 
 Wait until all the kubeadm containers are in the `running` state:
@@ -55,11 +54,10 @@ You must see something like this:
     kube-scheduler-varuna                       1/1       Running   0          1h
 
 
-### Execution
-Execute the script : `start_moon.sh`
+### Deploy Moon
 ```bash
+cd $MOON_HOME/tools/moon_kubernes
 sudo bash start_moon.sh
-watch kubectl get po --namespace=moon
 ```
 
 Wait until all the Moon containers are in the `running` state:
@@ -80,3 +78,29 @@ You must see something like this:
     manager-5bfbb96988-w9wnk               1/1       Running   0          51m
     orchestrator-65d8fb4574-tnfx2          1/1       Running   0          51m
     wrapper-astonishing-748b7dcc4f-ngsvp   1/1       Running   0          51m
+    
+### Docker-K8S Port Mapping
+```yamlex
+manager:
+    port: 8082
+    kport: 30001
+gui:
+    port: 3000
+    kport: 30002
+orchestrator:
+    port: 8083
+    kport: 30003
+consul:
+    port: 8500
+    kport: 30005
+keystone:
+    port: 5000
+    kport: 30006
+wrapper:
+    port: 8080
+    kport: 30010
+interface:
+    port: 8080
+authz:
+    port: 8081
+```

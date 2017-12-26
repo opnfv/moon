@@ -114,8 +114,10 @@ Check the Consul service for
 }
 ```
 
-Launch functional [test scenario](tests/functional/scenario) : 
+Launch functional [test scenario](tests/functional/scenario_enabled) : 
 ```bash
-python3 populate_default_values.py --consul-host=$MOON_HOST --consul-port=30005 -v scenario/rbac_large.py
-python3 send_authz.py --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$MOON_HOST --authz-port=31002 -v scenario/rbac_large.py
+cd $MOON_HOME/tests/functional/scenario_enabled
+docker run -ti -v $(pwd):/data wukongsun/moon_forming:latest /bin/bash
+moon_populate_values --consul-host=$MOON_HOST --consul-port=30005 -v /data/rbac_large.py
+moon_send_authz --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$MOON_HOST --authz-port=31002 -v /data/rbac_large.py
 ```

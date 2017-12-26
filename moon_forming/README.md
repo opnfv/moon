@@ -35,8 +35,8 @@ If you want to use your own database server, change the configuration:
 Then you have to rebuild the database before using it. 
 This can be done with the following commands:
 ```bash
-kubectl delete -f $MOON/tools/moon_kubernetes/templates/moon_configuration.yaml
-kubectl create -f $MOON/tools/moon_kubernetes/templates/moon_configuration.yaml
+kubectl delete -f $MOON_HOME/tools/moon_kubernetes/templates/moon_forming.yaml
+kubectl create -f $MOON_HOME/tools/moon_kubernetes/templates/moon_forming.yaml
 ```
 
 

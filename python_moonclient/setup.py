@@ -39,4 +39,12 @@ setup(
         'Operating System :: OS Independent',
     ],
 
+    entry_points={
+        'console_scripts': [
+            'moon_get_keystone_projects = python_moonclient.scripts:get_keystone_projects',
+            'moon_populate_values = python_moonclient.scripts:populate_values',
+            'moon_send_authz = python_moonclient.scripts:send_authz',
+        ],
+    }
+
 )

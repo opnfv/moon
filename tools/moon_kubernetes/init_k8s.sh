@@ -6,8 +6,8 @@ sudo kubeadm reset
 
 sudo swapoff -a
 
-sudo kubeadm init --pod-network-cidr=192.168.0.0/16
-#sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16 # network for Calico
+#sudo kubeadm init --pod-network-cidr=10.244.0.0/16 # network for Canal
 
 mkdir -p $HOME/.kube
 sudo cp -f /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -22,7 +22,7 @@ kubectl apply -f http://docs.projectcalico.org/v2.4/getting-started/kubernetes/i
 kubectl delete deployment kube-dns --namespace=kube-system
 kubectl apply -f kubernetes/templates/kube-dns.yaml
 
-kubectl taint nodes --all node-role.kubernetes.io/master-
+kubectl taint nodes --all node-role.kubernetes.io/master- # make the master also as a node
 
 kubectl proxy&
 sleep 5

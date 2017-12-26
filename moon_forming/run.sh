@@ -7,7 +7,6 @@ while ! python -c "import requests; req = requests.get('http://consul:8500')" 2>
     sleep 5 ;
     echo "."
 done
-
 echo "Consul (http://consul:8500) is up."
 
 python3 /root/conf2consul.py /etc/moon/moon.conf
@@ -17,7 +16,6 @@ while ! python -c "import socket, sys; s = socket.socket(socket.AF_INET, socket.
     sleep 5 ;
     echo "."
 done
-
 echo "Database (http://db:3306) is up."
 
 moon_db_manager upgrade
@@ -27,7 +25,6 @@ while ! python -c "import requests; req = requests.get('http://keystone:5000')" 
     sleep 5 ;
     echo "."
 done
-
 echo "Keystone (http://keystone:5000) is up."
 
 echo "Waiting for Manager (http://manager:8082)"
@@ -35,10 +32,8 @@ while ! python -c "import requests; req = requests.get('http://manager:8082')" 2
     sleep 5 ;
     echo "."
 done
-
 echo "Manager (http://manager:8082) is up."
 
-cd /root
-
-python3 populate_default_values.py $populate_args /root/conf/rbac.py
-python3 populate_default_values.py $populate_args /root/conf/mls.py
+for i in /data/*.py ; do
+    moon_populate_values $populate_args --consul-host=consul --consul-port=8500 $i
+done
