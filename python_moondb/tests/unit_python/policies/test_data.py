@@ -1,4 +1,4 @@
-import data_utilities.mock_data as mock_data
+import policies.mock_data as mock_data
 import pytest
 
 
@@ -511,11 +511,3 @@ def test_get_available_metadata_empty_model(db):
     policy_id = list(policy.keys())[0]
     metadata = get_available_metadata(policy_id)
     assert metadata
-
-# This test fails cause the policy_id in invalid see get_available_metadata function
-# def test_get_available_metadata_failure(db):
-#     metadata = get_available_metadata("invalid")
-#     assert metadata
-#     assert metadata['object'][0] == "object_category_id1"
-#     assert metadata['subject'][0] == "subject_category_id1"
-#     assert metadata['subject'][1] == "subject_category_id2"
