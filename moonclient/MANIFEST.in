@@ -1,5 +1,0 @@
-include README.rst
-include Changelog
-include LICENSE
-include requirements.txt
-graft moonclient/tests
