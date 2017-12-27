@@ -10,22 +10,21 @@ spec:
     spec:
       containers:
       - name: forming
-        image: wukongsun/moon_forming:v1.3
+        image: wukongsun/moon_forming:latest
         env:
         - name: POPULATE_ARGS
           value: "--verbose" # debug mode: --debug
         volumeMounts:
         - name: config-volume
           mountPath: /etc/moon
-        - name: test-volume
+        - name: templates-volume
           mountPath: /data
       volumes:
       - name: config-volume
         configMap:
           name: moon-config
-      - name: test-volume
-        hostPath:
-          path: tests/functional/scenario_enabled
-          type: Directory
+      - name: templates-volume
+        configMap:
+          name: moon-policy-templates
       restartPolicy: Never
       #backoffLimit: 4
