@@ -90,8 +90,14 @@ Launch functional [test scenario](tests/functional/scenario_enabled) :
 sudo pip install python_moonclient --upgrade
 cd $MOON_HOME/tests/functional/scenario_tests
 moon_populate_values --consul-host=$MOON_HOST --consul-port=30005 -v rbac_large.py
-moon_send_authz --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$AUTHZ_HOST --authz-port=$AUTHZ_PORT -v rbac_large.py
+moon_send_authz --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$WRAPPER_HOST --authz-port=$WRAPPER_PORT -v rbac_large.py
 ```
+
+To retrieve the wrapper information, use the following command:
+```bash
+kubectl get -n moon services | grep wrapper
+```
+
 
 ## Annexe
 ### Authentication
