@@ -21,17 +21,36 @@ def get_configuration(consul_host, consul_port, key):
 
 def get_config_data(consul_host, consul_port):
     conf_data = dict()
-    conf_data['manager_host'] = get_configuration(consul_host, consul_port,
-                                                  'components/manager')['components/manager']['external']['hostname']
-    conf_data['manager_port'] = get_configuration(consul_host, consul_port,
-                                                  'components/manager')['components/manager']['external']['port']
-    # conf_data['authz_host'] = get_configuration(consul_host, consul_port,
-    #                                             'components/interface')['components/interface']['external']['hostname']
-    # conf_data['authz_port'] = get_configuration(consul_host, consul_port,
-    #                                             'components/interface')['components/interface']['external']['port']
-    conf_data['keystone_host'] = get_configuration(consul_host, consul_port,
-                                                   'openstack/keystone')['openstack/keystone']['external']['url']
-    # conf_data['keystone_port'] = '5000'
+    conf_data['manager_host'] = get_configuration(
+        consul_host, consul_port,
+        'components/manager')['components/manager']['external']['hostname']
+    conf_data['manager_port'] = get_configuration(
+        consul_host, consul_port,
+        'components/manager')['components/manager']['external']['port']
+    try:
+        requests.get("http://{}:{}/".format(
+                conf_data['manager_host'],
+                conf_data['manager_port']
+            ),
+            timeout=2)
+    except requests.exceptions.ConnectionError:
+        conf_data['manager_host'] = get_configuration(consul_host, consul_port,
+                                                      'components/manager')[
+            'components/manager']['hostname']
+        conf_data['manager_port'] = get_configuration(consul_host, consul_port,
+                                                      'components/manager')[
+            'components/manager']['port']
+
+    conf_data['keystone_host'] = get_configuration(
+        consul_host, consul_port,
+        'openstack/keystone')['openstack/keystone']['external']['url']
+    try:
+        requests.get(conf_data['keystone_host'], timeout=2)
+    except requests.exceptions.ConnectionError:
+        conf_data['keystone_host'] = get_configuration(
+            consul_host, consul_port,
+            'openstack/keystone')['openstack/keystone']['url']
+
     conf_data['keystone_user'] = get_configuration(consul_host, consul_port,
                                                    'openstack/keystone')['openstack/keystone']['user']
     conf_data['keystone_password'] = get_configuration(consul_host, consul_port,
@@ -39,6 +58,3 @@ def get_config_data(consul_host, consul_port):
     conf_data['keystone_project'] = get_configuration(consul_host, consul_port,
                                                       'openstack/keystone')['openstack/keystone']['project']
     return conf_data
-
-# get_conf_data('88.88.88.2', '30005')
-# get_conf_data('127.0.0.1', 8082)
