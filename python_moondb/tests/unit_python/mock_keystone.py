@@ -21,3 +21,13 @@ def register_keystone(m):
             "id": "1111111111111"
         }]}
     )
+    m.register_uri(
+        'POST', 'http://keystone:5000/v3/projects/',
+        json={
+            "description": "test_project",
+            "domain_id": ['domain_id_1'],
+            "enabled": True,
+            "is_domain": False,
+            "name": 'project_1'
+        }
+    )
