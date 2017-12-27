@@ -2,7 +2,7 @@
 
 set +x
 
-kubectl delete -n moon -f kubernetes/templates/moon_orchestrator.yaml
+kubectl delete -n moon -f tools/moon_kubernetes/templates/moon_orchestrator.yaml
 for i in $(kubectl get deployments -n moon | grep wrapper | cut -d  " " -f 1 | xargs); do
     kubectl delete deployments/$i -n moon;
 done
