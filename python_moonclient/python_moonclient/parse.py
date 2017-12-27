@@ -2,18 +2,16 @@ import logging
 import argparse
 
 
-logger = None
+logger = logging.getLogger("python_moonclient.utils.parse")
 
 
 def parse():
-    global logger
-    logger = logging.getLogger(__name__)
     requests_log = logging.getLogger("requests.packages.urllib3")
     requests_log.setLevel(logging.WARNING)
     requests_log.propagate = True
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('filename', help='scenario filename', nargs=1)
+    parser.add_argument('filename', help='scenario filename', nargs="*")
     parser.add_argument("--verbose", "-v", action='store_true',
                         help="verbose mode")
     parser.add_argument("--debug", "-d", action='store_true',
@@ -31,8 +29,8 @@ def parse():
                         default="127.0.0.1")
     parser.add_argument("--consul-port",
                         help="Set the port of the consult server"
-                             "(default: 8082).",
-                        default="8082")
+                             "(default: 30005).",
+                        default="30005")
     parser.add_argument("--authz-host",
                         help="Set the name of the authz server to test"
                              "(default: 127.0.0.1).",
