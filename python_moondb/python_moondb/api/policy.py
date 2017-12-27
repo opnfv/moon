@@ -235,6 +235,8 @@ class PolicyManager(Managers):
             "action": []
         }
         policy = self.driver.get_policies(policy_id=policy_id)
+        # When there 're no policies in the database so policy return empty dict when
+        # trying accessing the policy policy[policy_id] it raises exception
         model_id = policy[policy_id]["model_id"]
         model = Managers.ModelManager.get_models(user_id=user_id, model_id=model_id)
         try:
