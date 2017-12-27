@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_ea4c88ca",
+        "filename": "python_moondb/python_moondb/api/policy.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 238,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-27T09:21:38Z",
+      "side": 1,
+      "message": "please add the fix of this bug in the same commit with patchset2.",
+      "range": {
+        "startLine": 238,
+        "startChar": 0,
+        "endLine": 238,
+        "endChar": 85
+      },
+      "revId": "44204f4b3058056085451ecfab156b5d4fa586e8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
