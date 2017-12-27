@@ -18,3 +18,15 @@ CHANGES
 1.0.1
 -----
 - Fix a bug in configuration
+
+1.1.0
+-----
+- Add some commands:
+    - moon_get_pdp
+    - moon_delete_pdp
+    - moon_delete_policy
+    - moon_map_pdp_to_project
+- Update some commands:
+    - moon_create_pdp
+    - moon_send_authz_to_wrapper
+- Fix a bug in pdp library

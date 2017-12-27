@@ -3,9 +3,9 @@ import logging
 import requests
 from python_moonclient import config
 
-logger = logging.getLogger("moonforming.utils.policies")
+logger = logging.getLogger("python_moonclient.utils.pdp")
 URL = None
-HEADER = None
+HEADERS = None
 KEYSTONE_USER = None
 KEYSTONE_PASSWORD = None
 KEYSTONE_PROJECT = None
@@ -24,12 +24,12 @@ pdp_template = {
 
 def init(consul_host, consul_port):
     conf_data = config.get_config_data(consul_host, consul_port)
-    global URL, HEADER, KEYSTONE_USER, KEYSTONE_PASSWORD, KEYSTONE_PROJECT, KEYSTONE_SERVER
+    global URL, HEADERS, KEYSTONE_USER, KEYSTONE_PASSWORD, KEYSTONE_PROJECT, KEYSTONE_SERVER
     URL = "http://{}:{}".format(
         conf_data['manager_host'],
         conf_data['manager_port'])
     # URL = URL + "{}"
-    HEADER = {"content-type": "application/json"}
+    HEADERS = {"content-type": "application/json"}
     KEYSTONE_USER = conf_data['keystone_user']
     KEYSTONE_PASSWORD = conf_data['keystone_password']
     KEYSTONE_PROJECT = conf_data['keystone_project']
@@ -170,7 +170,8 @@ def update_pdp(pdp_id, policy_id=None):
 
 
 def map_to_keystone(pdp_id, keystone_project_id):
-    req = requests.patch(URL + "/pdp/{}".format(pdp_id), json={"keystone_project_id": keystone_project_id},
+    req = requests.patch(URL + "/pdp/{}".format(pdp_id),
+                         json={"keystone_project_id": keystone_project_id},
                          headers=HEADERS)
     assert req.status_code == 200
     result = req.json()
@@ -178,8 +179,8 @@ def map_to_keystone(pdp_id, keystone_project_id):
     if "result" in result:
         assert result["result"]
     assert pdp_id in result['pdps']
-    assert "name" in result['pdps'][pdp_id]
-    assert pdp_template["name"] == result['pdps'][pdp_id]["name"]
+    # assert "name" in result['pdps'][pdp_id]
+    # assert pdp_template["name"] == result['pdps'][pdp_id]["name"]
     return pdp_id
 
 
@@ -195,11 +196,11 @@ def delete_pdp(pdp_id):
 def create_pdp(scenario, policy_id=None, project_id=None):
     logger.info("Creating PDP {}".format(scenario.pdp_name))
     projects = get_keystone_projects()
-    if not project_id:
-        for _project in projects['projects']:
-            if _project['name'] == "admin":
-                project_id = _project['id']
-    assert project_id
+    # if not project_id:
+    #     for _project in projects['projects']:
+    #         if _project['name'] == "admin":
+    #             project_id = _project['id']
+    # assert project_id
     pdps = check_pdp()["pdps"]
     for pdp_id, pdp_value in pdps.items():
         if scenario.pdp_name == pdp_value["name"]:
@@ -207,5 +208,5 @@ def create_pdp(scenario, policy_id=None, project_id=None):
             logger.debug("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
             return pdp_id
     _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
-    map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)
+    # map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)
     return _pdp_id

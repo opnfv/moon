@@ -3,7 +3,7 @@ from importlib.machinery import SourceFileLoader
 from . import parse, models, policies, pdp, authz
 
 
-logger = logging.getLogger("moonclient.scripts")
+logger = logging.getLogger("python_moonclient.scripts")
 
 
 def get_keystone_projects():
@@ -18,10 +18,10 @@ def get_keystone_projects():
     projects = pdp.get_keystone_projects()
 
     for _project in projects['projects']:
-        print("{} {}".format(_project['id'], _project['name']))
+        print("    {} {}".format(_project['id'], _project['name']))
 
 
-def populate_values():
+def create_pdp():
     requests_log = logging.getLogger("requests.packages.urllib3")
     requests_log.setLevel(logging.WARNING)
     requests_log.propagate = True
@@ -29,14 +29,14 @@ def populate_values():
     args = parse.parse()
     consul_host = args.consul_host
     consul_port = args.consul_port
-    project_id = args.keystone_pid
+    # project_id = args.keystone_pid
 
     models.init(consul_host, consul_port)
     policies.init(consul_host, consul_port)
     pdp.init(consul_host, consul_port)
 
     if args.filename:
-        print("Loading: {}".format(args.filename[0]))
+        logger.info("Loading: {}".format(args.filename[0]))
     m = SourceFileLoader("scenario", args.filename[0])
     scenario = m.load_module()
 
@@ -50,10 +50,10 @@ def populate_values():
     else:
         model_id, meta_rule_list = models.create_model(scenario)
     policy_id = policies.create_policy(scenario, model_id, meta_rule_list)
-    pdp_id = pdp.create_pdp(scenario, policy_id=policy_id, project_id=project_id)
+    pdp_id = pdp.create_pdp(scenario, policy_id=policy_id)
 
 
-def send_authz():
+def send_authz_to_wrapper():
     args = parse.parse()
     consul_host = args.consul_host
     consul_port = args.consul_port
@@ -63,7 +63,7 @@ def send_authz():
     pdp.init(consul_host, consul_port)
 
     if args.filename:
-        print("Loading: {}".format(args.filename[0]))
+        logger.info("Loading: {}".format(args.filename[0]))
     m = SourceFileLoader("scenario", args.filename[0])
     scenario = m.load_module()
 
@@ -81,3 +81,83 @@ def send_authz():
     )
     if not args.dry_run:
         authz.save_data(args.write, time_data)
+
+
+def get_pdp():
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+
+    pdps = pdp.check_pdp()
+    for _pdp_key, _pdp_value in pdps["pdps"].items():
+        print("    {} {} ({})".format(_pdp_key, _pdp_value['name'],
+                                      _pdp_value['keystone_project_id']))
+
+
+def delete_pdp():
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+
+    if args.filename:
+        logger.info("Deleting: {}".format(args.filename[0]))
+        _search = args.filename[0]
+        pdps = pdp.check_pdp()
+        for _pdp_key, _pdp_value in pdps["pdps"].items():
+            if _pdp_key == _search or _pdp_value['name'] == _search:
+                logger.info("Found {}".format(_pdp_key))
+                pdp.delete_pdp(_pdp_key)
+        pdps = pdp.check_pdp()
+        logger.info("Listing all PDP:")
+        for _pdp_key, _pdp_value in pdps["pdps"].items():
+            print("    {} {}".format(_pdp_key, _pdp_value['name']))
+            if _pdp_key == _search or _pdp_value['name'] == _search:
+                logger.error("Error in deleting {}".format(_search))
+
+
+def delete_policy():
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+
+    if args.filename:
+        logger.info("Deleting: {}".format(args.filename[0]))
+        _search = args.filename[0]
+        _policies = policies.check_policy()
+        for _policy_key, _policy_value in _policies["policies"].items():
+            if _policy_key == _search or _policy_value['name'] == _search:
+                logger.info("Found {}".format(_policy_key))
+                pdp.delete_pdp(_policy_key)
+        _policies = policies.check_policy()
+        logger.info("Listing all Policies:")
+        for _policy_key, _policy_value in _policies["policies"].items():
+            print("    {} {}".format(_policy_key, _policy_value['name']))
+            if _policy_key == _search or _policy_value['name'] == _search:
+                logger.error("Error in deleting {}".format(_search))
+
+
+def map_pdp_to_project():
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+
+    if args.filename and len(args.filename) == 2:
+        logger.info("Mapping: {}=>{}".format(args.filename[0], args.filename[1]))
+        # TODO: check if pdp_id and keystone_project_id exist
+        pdp.map_to_keystone(pdp_id=args.filename[0], keystone_project_id=args.filename[1])
