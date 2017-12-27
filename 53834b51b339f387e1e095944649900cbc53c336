@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_6df25207",
+        "filename": "python_moonutilities/python_moonutilities/configuration.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-27T15:27:49Z",
+      "side": 1,
+      "message": "ok for components/port_start",
+      "range": {
+        "startLine": 30,
+        "startChar": 0,
+        "endLine": 30,
+        "endChar": 80
+      },
+      "revId": "53834b51b339f387e1e095944649900cbc53c336",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4df78ef5",
+        "filename": "python_moonutilities/python_moonutilities/configuration.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-27T15:27:49Z",
+      "side": 1,
+      "message": "ok for all this kind of comments",
+      "range": {
+        "startLine": 35,
+        "startChar": 0,
+        "endLine": 35,
+        "endChar": 117
+      },
+      "revId": "53834b51b339f387e1e095944649900cbc53c336",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
