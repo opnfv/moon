@@ -10,3 +10,11 @@ CHANGES
 0.1.0
 -----
 - First version of the python-moonclient
+
+1.0.0
+-----
+- First public version of the python-moonclient
+
+1.0.1
+-----
+- Fix a bug in configuration
