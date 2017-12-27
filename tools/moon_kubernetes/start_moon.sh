@@ -5,6 +5,7 @@ set -x
 kubectl create namespace moon
 kubectl create configmap moon-config --from-file conf/moon.conf -n moon
 kubectl create configmap config --from-file ~/.kube/config -n moon
+kubectl create configmap moon-policy-templates --from-file ../../tests/functional/scenario_enabled -n moon
 kubectl create secret generic mysql-root-pass --from-file=conf/password_root.txt -n moon
 kubectl create secret generic mysql-pass --from-file=conf/password_moon.txt -n moon
 
