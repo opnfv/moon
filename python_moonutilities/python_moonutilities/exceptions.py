@@ -14,7 +14,7 @@ class MoonErrorMetaClass(type):
 
     def __init__(cls, name, bases, dct):
         super(MoonErrorMetaClass, cls).__init__(name, bases, dct)
-        cls.hierarchy += "/"+str(name)
+        cls.hierarchy += "/" + str(name)
 
 
 class MoonError(HTTPException):
@@ -108,6 +108,7 @@ class TenantNoIntraAuthzExtension(TenantNoIntraExtension):
     code = 400
     title = 'Tenant No Intra_Admin_Extension'
     logger = "ERROR"
+
 
 # Exceptions for IntraExtension
 
@@ -520,3 +521,16 @@ class ContainerMissing(DockerError):
     title = 'Container missing'
     logger = "ERROR"
 
+
+class PdpUnknown(MoonError):
+    description = _("The pdp is unknown.")
+    code = 400
+    title = 'Pdp Unknown'
+    logger = "Error"
+
+
+class PdpExisting(MoonError):
+    description = _("The pdp already exists.")
+    code = 409
+    title = 'Pdp Error'
+    logger = "Error"
