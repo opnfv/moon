@@ -1,69 +1,80 @@
-# Moon Yardstick and Bottlenecks Performance Tests
+# Moon Yardstick/Bottlenecks Performance Tests
 
 The main objective of this document is to describe the performance tests for the Moon project/module. 
-Moon is a security managment platform which provides a set of security functions to project the underlying OPNFV infrastructure and/or VNFs. 
-Moon is consisted of 2 parts: a master and a set of slaves. The master holds all security-related information and each slave only fetches and holds 
-related informations for its local usage from master. 
+Moon is a security management platform which provides a set of security functions to project the underlying OPNFV infrastructure and/or VNFs. 
+It is consisted of 2 parts: a master and a set of slaves. The master holds all security-related information and each slave only fetches and holds 
+related information for its local usage from master. 
 
-## Moon Master Performance Tests
-In this test, we should: 
+## Master Performance Tests
+### Pre-requisite
 - setup a Moon master service on a physical server 
-- create a tenant/scope through the Moon master service
-- create a MSL security policy with 4 subject security levels and 4 object security levels for this tenant
+- create a project in OpenStack/Keystone
+- create a MSL PDP with a model of 4 subject security levels and 4 object security levels, the MLS policy will be defined later
 
-- increase N to find the limit of the security policy (implemented in format of a Docker)
-  - create N users and N resources (VMs in our case) in this tenant
-  - simulate 2 operation requests per user per second to Moon's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages
-  - throught the iteration, determine the capacity limit for one Docker
+### Policy Size Test
+Increase the number of users and resources N to find the limit of the security policy
+- create N users and N resources (VMs in our case) in this MLS security policy
+- sends 5 authz requests/second
+- gather performance metrics like CPU, memory, network usages
+Through the iteration, determine the maximal number of N to support 5 requests/second 
   
-- setup 20 user and 20 resources (VMs in our case) for one tenant
-  - increase the number of tenants to test the maximal number of tenants on the server
+### PDP Number Test  
+- setup 20 user and 20 resources (VMs in our case) for each MLS PDP
+- sends 5 authz requests/second for each MLS PDP
+- increase the number of PDP to test the maximal number of PDP on the master
   
-- setup 5 tenants of N users and N resources (VMs in our case) in each tenant
-  - increase N by simulating 2 operation requests per user per second to the Moon's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages
-  - throught the iteration, dermine the maximal user/resource number of these 5 tenants/Dockers on the server
+### Policy Size Test for 5 PDPs
+- setup 5 PDPs of N users and N resources (VMs in our case)
+- sends 5 authz requests/second for each MLS PDP
+- gather performance metrics like CPU, memory, network usages
+Through the iteration, determine the maximal user/resource number of these 5 PDPs
 
-- setup 10 tenants of N users and N resources (VMs in our case) in each tenant
-  - increase N by simulating 2 operation requests per user per second to the Moon's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages
-  - throught the iteration, dermine the maximal user/resource number of these 10 tenants/Dockers on the server 
+### Policy Size Test for 10 PDPs
+- setup 10 PDPs of N users and N resources (VMs in our case)
+- sends 5 authz requests/second for each MLS PDP
+- gather performance metrics like CPU, memory, network usages
+Through the iteration, determine the maximal user/resource number of these 10 PDPs
 
-- setup 20 tenants of N users and N resources (VMs in our case) in each tenant
-  - increase N by simulating 2 operation requests per user per second to the Moon's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages
-  - throught the iteration, dermine the maximal user/resource number of these 20 tenants/Dockers on the server
-  
-## Moon Slave Performace Tests
-In this test, we should: 
-- setup a Moon master service on a physical server 
-- setup a Moon slave service on a physical server 
-- create a tenant/scope through the Moon master service
-- create a MSL security policy with 4 subject security levels and 4 object security levels for this tenant through the Moon master service
-
-- increase N to find the limit of the security policy (implemented in format of a Docker)
-  - create N users and N resources (VMs in our case) in this tenant
-  - simulate 2 operation requests per user per second to Moon slave's authorizatoin endpoint
-  - gather performance metrics like CPU, memory, network usages of Moon slave
-  - throught the iteration, dermine the capacity limit for one Docker of Moon slave
-  
-- setup 20 user and 20 resources (VMs in our case) for one tenant through the Moon slave service
-  - increate the number of tenants to test the maximal number of tenants on the server of the Moon slave 
-  
-- setup 5 tenants of N users and N resources (VMs in our case) in each tenant through the Moon master service
-  - increate N by simulating 2 operation requests per user per second to the Moon slave's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages of both Moon master and Moon slave
-  - throught the iteration, dermine the maximal user/resource number of these 5 tenants/Dockers on the server of Moon slave
-
-- setup 10 tenants of N users and N resources (VMs in our case) in each tenant through the Moon master service
-  - increate N by simulating 2 operation requests per user per second to the Moon slave's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages of both Moon master and slave
-  - throught the iteration, dermine the maximal user/resource number of these 10 tenants/Dockers on the server of the Moon slave
-
-- setup 20 tenants of N users and N resources (VMs in our case) in each tenant through the Moon master service
-  - increate N by simulating 2 operation requests per user per second to the Moon slave's authorization endpoint
-  - gather performance metrics like CPU, memory, network usages of both Moon master and slave
-  - throught the iteration, dermine the maximal user/resource number of these 20 tenants/Dockers on the server of the Moon slave
+### Policy Size Test for 20 PDPs
+- setup 20 PDPs of N users and N resources (VMs in our case)
+- sends 5 authz requests/second for each MLS PDP
+- gather performance metrics like CPU, memory, network usages
+Through the iteration, determine the maximal user/resource number of these 20 PDPs
 
 
+## Master-Slave Performance Tests
+### Pre-requisite
+- setup a Moon master on a physical server 
+- setup a Moon slave on a physical server 
+- create a project in OpenStack/Keystone
+- create a MSL PDP with a model of 4 subject security levels and 4 object security levels, the MLS policy will be defined later on the master
+
+### Slave Policy Size Test
+Increase the number of users and resources N to find the limit of the security policy
+- create N users and N resources (VMs in our case) in this MLS security policy on the master
+- sends 5 authz requests/second to the slave
+- gather performance metrics like CPU, memory, network usages of the slave
+Through the iteration, determine the maximal number of N to support 5 requests/second of the slave 
+
+### Slave PDP Number Test  
+- setup 20 user and 20 resources (VMs in our case) for each MLS PDP on the master
+- sends 5 authz requests/second for each MLS PDP to the slave
+Through the iteration, determine the maximal number of PDP to support 5 requests/second of the slave
+
+### Slave Policy Size Test for 5 PDPs
+- setup 5 PDPs of N users and N resources (VMs in our case) on the master
+- sends 5 authz requests/second for each MLS PDP to the slave
+- gather performance metrics like CPU, memory, network usages of the slave
+Through the iteration, determine the maximal user/resource number of these 5 PDPs
+
+### Slave Policy Size Test for 10 PDPs
+- setup 10 PDPs of N users and N resources (VMs in our case) on the master
+- sends 5 authz requests/second for each MLS PDP to the slave
+- gather performance metrics like CPU, memory, network usages of the slave
+Through the iteration, determine the maximal user/resource number of these 10 PDPs
+
+### Slave Policy Size Test for 20 PDPs
+- setup 20 PDPs of N users and N resources (VMs in our case) on the master
+- sends 5 authz requests/second for each MLS PDP to the slave
+- gather performance metrics like CPU, memory, network usages of the slave
+Through the iteration, determine the maximal user/resource number of these 20 PDPs
