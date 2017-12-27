@@ -8,7 +8,6 @@ from oslo_log import log as logging
 from python_moonutilities.security_functions import filter_input, enforce
 from python_moondb.api.managers import Managers
 
-
 LOG = logging.getLogger("moon.db.api.pdp")
 
 
@@ -22,10 +21,12 @@ class PDPManager(Managers):
     def update_pdp(self, user_id, pdp_id, value):
         return self.driver.update_pdp(pdp_id=pdp_id, value=value)
 
+    # Delete pdp that doesn't exist raise sql error
     @enforce(("read", "write"), "pdp")
     def delete_pdp(self, user_id, pdp_id):
         return self.driver.delete_pdp(pdp_id=pdp_id)
 
+    # Adding pdp with the same id raise sql exception
     @enforce(("read", "write"), "pdp")
     def add_pdp(self, user_id, pdp_id=None, value=None):
         if not pdp_id:
@@ -35,4 +36,3 @@ class PDPManager(Managers):
     @enforce("read", "pdp")
     def get_pdp(self, user_id, pdp_id=None):
         return self.driver.get_pdp(pdp_id=pdp_id)
-
