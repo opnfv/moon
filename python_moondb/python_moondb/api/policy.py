@@ -7,6 +7,7 @@ from uuid import uuid4
 import logging
 from python_moonutilities.security_functions import enforce
 from python_moondb.api.managers import Managers
+from python_moonutilities import exceptions
 
 logger = logging.getLogger("moon.db.api.policy")
 
@@ -22,21 +23,31 @@ class PolicyManager(Managers):
         models = self.ModelManager.get_models("admin")
         for pdp_key, pdp_value in self.PDPManager.get_pdp(user_id).items():
             for policy_id in pdp_value["security_pipeline"]:
+                if not policies:
+                    raise exceptions.PolicyUnknown
                 model_id = policies[policy_id]["model_id"]
+                if not models:
+                    raise exceptions.ModelUnknown
                 if meta_rule_id in models[model_id]["meta_rules"]:
                     return policy_id
 
     @enforce(("read", "write"), "policies")
     def update_policy(self, user_id, policy_id, value):
+        if policy_id not in self.driver.get_policies(policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.update_policy(policy_id=policy_id, value=value)
 
     @enforce(("read", "write"), "policies")
     def delete_policy(self, user_id, policy_id):
         # TODO (asteroide): unmap PDP linked to that policy
+        if policy_id not in self.driver.get_policies(policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.delete_policy(policy_id=policy_id)
 
     @enforce(("read", "write"), "policies")
     def add_policy(self, user_id, policy_id=None, value=None):
+        if policy_id in self.driver.get_policies(policy_id=policy_id):
+            raise exceptions.PolicyExisting
         if not policy_id:
             policy_id = uuid4().hex
         return self.driver.add_policy(policy_id=policy_id, value=value)
@@ -235,6 +246,8 @@ class PolicyManager(Managers):
             "action": []
         }
         policy = self.driver.get_policies(policy_id=policy_id)
+        if not policy:
+            raise exceptions.PolicyUnknown
         model_id = policy[policy_id]["model_id"]
         model = Managers.ModelManager.get_models(user_id=user_id, model_id=model_id)
         try:
