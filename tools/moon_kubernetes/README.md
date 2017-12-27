@@ -31,7 +31,7 @@ apt-get install -y kubelet kubeadm kubectl
 ### Initiate K8S
 ```bash
 cd $MOON_HOME
-bash tools/moon_kubernes/init_k8s.sh
+bash tools/moon_kubernetes/init_k8s.sh
 ```
 
 Wait until all the kubeadm containers are in the `running` state:
@@ -57,7 +57,7 @@ You must see something like this:
 ### Deploy Moon
 ```bash
 cd $MOON_HOME
-sudo bash tools/moon_kubernes/start_moon.sh
+sudo bash tools/moon_kubernetes/start_moon.sh
 ```
 
 Wait until all the Moon containers are in the `running` state:

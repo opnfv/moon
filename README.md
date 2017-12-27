@@ -52,38 +52,8 @@ curl http://$MOON_HOST:30001
 curl http://$MOON_HOST:30001/pdp
 curl http://$MOON_HOST:30001/policies
 ```
-    
-If you configured the authentication in the Moon platform:
-```bash
-curl -i \
-  -H "Content-Type: application/json" \
-  -d '
-{ "auth": {
-    "identity": {
-      "methods": ["password"],
-      "password": {
-        "user": {
-          "name": "admin",
-          "domain": { "id": "default" },
-          "password": "<set_your_password_here>"
-        }
-      }
-    },
-    "scope": {
-      "project": {
-        "name": "admin",
-        "domain": { "id": "default" }
-      }
-    }
-  }
-}' \
-  "http://moon_hostname:30006/v3/auth/tokens" ; echo
-  
-curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001
-curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/pdp
-curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/policies
-```
-    
+
+### Consul Check
 Check the Consul service for 
 - *Components/Manager*, e.g. 
 ```json
@@ -114,10 +84,44 @@ Check the Consul service for
 }
 ```
 
+### Tests
 Launch functional [test scenario](tests/functional/scenario_enabled) : 
 ```bash
-cd $MOON_HOME/tests/functional/scenario_enabled
-docker run -ti -v $(pwd):/data wukongsun/moon_forming:latest /bin/bash
-moon_populate_values --consul-host=$MOON_HOST --consul-port=30005 -v /data/rbac_large.py
-moon_send_authz --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$MOON_HOST --authz-port=31002 -v /data/rbac_large.py
+sudo pip install python_moonclient --upgrade
+cd $MOON_HOME/tests/functional/scenario_tests
+moon_populate_values --consul-host=$MOON_HOST --consul-port=30005 -v rbac_large.py
+moon_send_authz --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$AUTHZ_HOST --authz-port=$AUTHZ_PORT -v rbac_large.py
+```
+
+## Annexe
+### Authentication
+If you configured the authentication in the Moon platform:
+```bash
+curl -i \
+  -H "Content-Type: application/json" \
+  -d '
+{ "auth": {
+    "identity": {
+      "methods": ["password"],
+      "password": {
+        "user": {
+          "name": "admin",
+          "domain": { "id": "default" },
+          "password": "<set_your_password_here>"
+        }
+      }
+    },
+    "scope": {
+      "project": {
+        "name": "admin",
+        "domain": { "id": "default" }
+      }
+    }
+  }
+}' \
+  "http://moon_hostname:30006/v3/auth/tokens" ; echo
+  
+curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001
+curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/pdp
+curl --header "X-Auth-Token: <token_retrieve_from_keystone>" http://moon_hostname:30001/policies
 ```
