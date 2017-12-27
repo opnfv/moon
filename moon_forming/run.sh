@@ -38,6 +38,6 @@ done
 echo "."
 echo "Manager (http://manager:8082) is up."
 
-for i in /data/*.py ; do
-    moon_populate_values $populate_args --consul-host=consul --consul-port=8500 $i
-done
+#for i in /data/*.py ; do
+#    moon_populate_values $populate_args --consul-host=consul --consul-port=8500 $i
+#done
