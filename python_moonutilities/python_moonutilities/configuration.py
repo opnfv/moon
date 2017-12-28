@@ -7,11 +7,10 @@
 import base64
 import json
 import requests
-import logging
 import logging.config
 from python_moonutilities import exceptions
 
-LOG = logging.getLogger("moon.utilities")
+logger = logging.getLogger("moon.utilities.configuration")
 
 CONSUL_HOST = "consul"
 CONSUL_PORT = "8500"
@@ -33,7 +32,7 @@ def increment_port():
     url = "http://{}:{}/v1/kv/components_port_start".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.put(url, json=str(components_port_start))
     if req.status_code != 200:
-        LOG.info("url={}".format(url))
+        logger.info("url={}".format(url))
         raise exceptions.ConsulError
     return components_port_start
 
@@ -42,7 +41,7 @@ def get_configuration(key):
     url = "http://{}:{}/v1/kv/{}".format(CONSUL_HOST, CONSUL_PORT, key)
     req = requests.get(url)
     if req.status_code != 200:
-        LOG.error("url={}".format(url))
+        logger.error("url={}".format(url))
         raise exceptions.ConsulComponentNotFound("error={}: {}".format(req.status_code, req.text))
     data = req.json()
     if len(data) == 1:
@@ -70,18 +69,18 @@ def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra
         json=data
     )
     if req.status_code != 200:
-        LOG.debug("url={}".format("http://{}:{}/v1/kv/components/{}".format(CONSUL_HOST, CONSUL_PORT, uuid)))
-        LOG.debug("data={}".format(data))
+        logger.debug("url={}".format("http://{}:{}/v1/kv/components/{}".format(CONSUL_HOST, CONSUL_PORT, uuid)))
+        logger.debug("data={}".format(data))
         raise exceptions.ConsulError
-    LOG.info("Add component {}".format(req.text))
-    return get_configuration("components/"+uuid)
+    logger.info("Add component {}".format(req.text))
+    return configuration.get_configuration("components/"+uuid)
 
 
 def get_plugins():
     url = "http://{}:{}/v1/kv/plugins?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)
     if req.status_code != 200:
-        LOG.info("url={}".format(url))
+        logger.info("url={}".format(url))
         raise exceptions.ConsulError
     data = req.json()
     if len(data) == 1:
@@ -98,7 +97,7 @@ def get_components():
     url = "http://{}:{}/v1/kv/components?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
     req = requests.get(url)
     if req.status_code != 200:
-        LOG.info("url={}".format(url))
+        logger.info("url={}".format(url))
         raise exceptions.ConsulError
     data = req.json()
     if len(data) == 1:

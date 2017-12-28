@@ -70,3 +70,7 @@ CHANGES
 1.4.3
 -----
 - Fix a bug in MANIFEST.in
+
+1.4.4
+-----
+- Code cleaning

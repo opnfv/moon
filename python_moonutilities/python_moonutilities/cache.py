@@ -4,7 +4,7 @@ import requests
 from uuid import uuid4
 from python_moonutilities import configuration, exceptions
 
-LOG = logging.getLogger("moon.utilities.cache")
+logger = logging.getLogger("moon.utilities.cache")
 
 
 class Cache(object):
@@ -174,12 +174,12 @@ class Cache(object):
 
     def __update_rules(self):
         for policy_id in self.__POLICIES:
-            LOG.info("Get {}".format("{}/policies/{}/rules".format(
+            logger.info("Get {}".format("{}/policies/{}/rules".format(
                 self.manager_url, policy_id)))
             req = requests.get("{}/policies/{}/rules".format(
                 self.manager_url, policy_id))
             self.__RULES[policy_id] = req.json()['rules']
-        LOG.info("UPDATE RULES {}".format(self.__RULES))
+        logger.info("UPDATE RULES {}".format(self.__RULES))
 
     # assignment functions
 
@@ -509,7 +509,7 @@ class Cache(object):
                     continue
                 self.__update_container_chaining(value["keystone_project_id"])
         self.__CONTAINER_CHAINING_UPDATE = current_time
-        LOG.info(self.__CONTAINER_CHAINING_UPDATE)
+        logger.info(self.__CONTAINER_CHAINING_UPDATE)
         return self.__CONTAINER_CHAINING
 
     def __update_container_chaining(self, keystone_project_id):
@@ -527,7 +527,7 @@ class Cache(object):
                                 _raw = requests.get("{}/pods/{}".format(
                                     self.orchestrator_url, container_value["name"])
                                 )
-                                LOG.debug("_raw={}".format(_raw.text))
+                                logger.debug("_raw={}".format(_raw.text))
                                 container_ids.append(
                                     {
                                         "container_id": container_value["name"],

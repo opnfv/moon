@@ -6,7 +6,7 @@
 from oslo_log import log as logging
 from werkzeug.exceptions import HTTPException
 
-LOG = logging.getLogger("moon.utilities.exceptions")
+logger = logging.getLogger("moon.utilities.exceptions")
 _ = str
 
 
@@ -40,30 +40,30 @@ class MoonError(HTTPException):
         message = "{} ({}) {}".format(self.hierarchy, self.description, self.payload)
         if self.logger == "ERROR":
             try:
-                LOG.error(message)
+                logger.error(message)
             except AttributeError:
-                LOG.error(message)
+                logger.error(message)
         elif self.logger == "WARNING":
             try:
-                LOG.warning(message)
+                logger.warning(message)
             except AttributeError:
-                LOG.warning(message)
+                logger.warning(message)
         elif self.logger == "CRITICAL":
             try:
-                LOG.critical(message)
+                logger.critical(message)
             except AttributeError:
-                LOG.critical(message)
+                logger.critical(message)
         elif self.logger == "AUTHZ":
             try:
-                LOG.authz(self.hierarchy)
-                LOG.error(message)
+                logger.authz(self.hierarchy)
+                logger.error(message)
             except AttributeError:
-                LOG.error(message)
+                logger.error(message)
         else:
             try:
-                LOG.info(message)
+                logger.info(message)
             except AttributeError:
-                LOG.info(message)
+                logger.info(message)
 
     # def to_dict(self):
     #     rv = dict(self.payload or ())

@@ -3,10 +3,10 @@ import pytest
 import requests_mock
 
 
-
 def test_get_configuration_success():
     from python_moonutilities import configuration
     assert configuration.get_configuration("components/port_start")["components/port_start"] == comp_util.CONF["components"]["port_start"]
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_configuration_not_found(**kwargs):
@@ -17,6 +17,7 @@ def test_get_configuration_not_found(**kwargs):
     with pytest.raises(Exception) as exception_info:
         configuration.get_configuration("components/port_start_wrong")
     assert str(exception_info.value) == '500: Consul error'
+
 
 # [TODO] this test used to test the invalid response
 # it should be un commented and run after refactoring the related part
@@ -31,6 +32,7 @@ def test_get_configuration_invalid_response(**kwargs):
     # configuration.get_configuration("components_port_start")
     # assert str(exception_info.value) == '500: Consul error'
 
+
 @requests_mock.Mocker(kw='mock')
 def test_put_increment_port_failure(**kwargs):
     from python_moonutilities import configuration
@@ -41,6 +43,7 @@ def test_put_increment_port_failure(**kwargs):
     with pytest.raises(Exception) as exception_info:
         configuration.increment_port()
     assert str(exception_info.value) == '400: Consul error'
+
 
 def test_increment_port_success():
     from python_moonutilities import configuration
