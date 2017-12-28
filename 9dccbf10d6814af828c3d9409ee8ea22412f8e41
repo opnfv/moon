@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_200851d9",
+        "filename": "python_moondb/python_moondb/api/pdp.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-28T14:28:12Z",
+      "side": 1,
+      "message": "pdp_id in ? or pdp_id not in ?",
+      "range": {
+        "startLine": 27,
+        "startChar": 0,
+        "endLine": 27,
+        "endChar": 56
+      },
+      "revId": "9dccbf10d6814af828c3d9409ee8ea22412f8e41",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
