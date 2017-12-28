@@ -12,7 +12,7 @@ from moon_authz.api.authorization import Authz
 from python_moonutilities.cache import Cache
 from python_moonutilities import exceptions
 
-logger = logging.getLogger("moon." + __name__)
+logger = logging.getLogger("moon.authz.http_server")
 
 CACHE = Cache()
 CACHE.update()

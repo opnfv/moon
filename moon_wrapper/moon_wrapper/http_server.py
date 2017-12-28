@@ -8,14 +8,18 @@ from flask_restful import Resource, Api
 import logging
 from moon_wrapper import __version__
 from moon_wrapper.api.generic import Status, Logs, API
-from moon_wrapper.api.wrapper import Wrapper
+from moon_wrapper.api.oslowrapper import OsloWrapper
 from python_moonutilities.cache import Cache
 from python_moonutilities import configuration, exceptions
 
-logger = logging.getLogger("moon.wrapper.http")
+logger = logging.getLogger("moon.wrapper.http_server")
 
 
 CACHE = Cache()
+
+__API__ = (
+    Status, Logs, API
+ )
 
 
 class Server:
@@ -60,10 +64,6 @@ class Server:
 
     def run(self):
         raise NotImplementedError()
-
-__API__ = (
-    Status, Logs, API
- )
 
 
 class Root(Resource):
@@ -127,7 +127,7 @@ class HTTPServer(Server):
 
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
-        self.api.add_resource(Wrapper, *Wrapper.__urls__,
+        self.api.add_resource(OsloWrapper, *OsloWrapper.__urls__,
                               resource_class_kwargs={
                                   "orchestrator_url": self.orchestrator_url,
                                   "cache": CACHE,
@@ -136,5 +136,4 @@ class HTTPServer(Server):
 
     def run(self):
         self.app.run(host=self._host, port=self._port)  # nosec
-        # self.app.run(debug=True, host=self._host, port=self._port)  # nosec
 

@@ -3,15 +3,14 @@ import logging
 import requests
 from python_moonclient import config
 
-logger = logging.getLogger("python_moonclient.utils.pdp")
+logger = logging.getLogger("python_moonclient.pdp")
+
 URL = None
 HEADERS = None
 KEYSTONE_USER = None
 KEYSTONE_PASSWORD = None
 KEYSTONE_PROJECT = None
 KEYSTONE_SERVER = None
-
-# config = utils.config.get_config_data()
 
 
 pdp_template = {

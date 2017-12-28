@@ -212,6 +212,7 @@ class KeystoneDriver(Driver):
 
 
 conf = configuration.get_configuration("database")['database']
+
 KeystoneManager = keystone.KeystoneManager(
     KeystoneDriver(conf['driver'], conf['url'])
 )
@@ -227,71 +228,3 @@ PolicyManager = policy.PolicyManager(
 PDPManager = pdp.PDPManager(
     PDPDriver(conf['driver'], conf['url'])
 )
-
-
-# class LogDriver(object):
-#
-#     def authz(self, message):
-#         """Log authorization message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def debug(self, message):
-#         """Log debug message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def info(self, message):
-#         """Log informational message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def warning(self, message):
-#         """Log warning message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def error(self, message):
-#         """Log error message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def critical(self, message):
-#         """Log critical message
-#
-#         :param message: the message to log
-#         :type message: string
-#         :return: None
-#         """
-#         raise NotImplementedError()  # pragma: no cover
-#
-#     def get_logs(self, options):
-#         """Get logs
-#
-#         :param options: options to filter log events
-#         :type options: string eg: "event_number=10,from=2014-01-01-10:10:10,to=2014-01-01-12:10:10,filter=expression"
-#         :return: a list of log events
-#
-#         TIME_FORMAT is '%Y-%m-%d-%H:%M:%S'
-#         """
-#         raise NotImplementedError()  # pragma: no cover

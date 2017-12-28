@@ -8,10 +8,8 @@ import logging
 from python_moonutilities import configuration, exceptions
 from moon_orchestrator.http_server import HTTPServer
 
-LOG = logging.getLogger("moon.orchestrator")
+LOG = logging.getLogger("moon.orchestrator.server")
 DOMAIN = "moon_orchestrator"
-
-__CWD__ = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
@@ -27,8 +25,7 @@ def main():
         port = 80
         configuration.add_component(uuid="orchestrator", name=hostname, port=port, bind=bind)
     LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
-    server = HTTPServer(host=bind, port=port)
-    return server
+    return HTTPServer(host=bind, port=port)
 
 
 if __name__ == '__main__':

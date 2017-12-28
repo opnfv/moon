@@ -7,7 +7,7 @@ import logging
 from python_moonutilities import configuration, exceptions
 from moon_wrapper.http_server import HTTPServer
 
-LOG = logging.getLogger("moon.wrapper")
+LOG = logging.getLogger("moon.wrapper.server")
 
 
 def main():
@@ -24,8 +24,7 @@ def main():
         port = 80
         configuration.add_component(uuid="wrapper", name=hostname, port=port, bind=bind)
     LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
-    server = HTTPServer(host=bind, port=port)
-    return server
+    return HTTPServer(host=bind, port=port)
 
 
 if __name__ == '__main__':

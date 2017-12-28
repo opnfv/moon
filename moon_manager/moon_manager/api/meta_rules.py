@@ -23,10 +23,12 @@ class MetaRules(Resource):
     Endpoint for meta rules requests
     """
 
-    __urls__ = ("/meta_rules",
-                "/meta_rules/",
-                "/meta_rules/<string:meta_rule_id>",
-                "/meta_rules/<string:meta_rule_id>/")
+    __urls__ = (
+        "/meta_rules",
+        "/meta_rules/",
+        "/meta_rules/<string:meta_rule_id>",
+        "/meta_rules/<string:meta_rule_id>/"
+    )
 
     @check_auth
     def get(self, meta_rule_id=None, user_id=None):

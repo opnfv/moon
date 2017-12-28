@@ -18,7 +18,11 @@ from python_moonutilities import configuration, exceptions
 from python_moonutilities.misc import get_random_name
 from moon_orchestrator.drivers import get_driver
 
-LOG = logging.getLogger("moon.orchestrator.http")
+LOG = logging.getLogger("moon.orchestrator.http_server")
+
+__API__ = (
+    Status, Logs
+ )
 
 
 class Server:
@@ -63,10 +67,6 @@ class Server:
 
     def run(self):
         raise NotImplementedError()
-
-__API__ = (
-    Status, Logs
- )
 
 
 class Root(Resource):

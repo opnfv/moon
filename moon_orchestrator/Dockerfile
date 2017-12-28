@@ -1,15 +1,8 @@
-FROM ubuntu:latest
-
-ENV CONSUL_HOST=consul
-ENV CONSUL_PORT=8500
-
-RUN apt update && apt install python3.5 python3-pip python3-mysql.connector -y
-RUN pip3 install pip --upgrade
+FROM python:3
 
 ADD . /root
 WORKDIR /root/
-RUN pip3 install -r requirements.txt --upgrade
-#RUN pip3 install /root/dist/* --upgrade
-RUN pip3 install . --upgrade
+RUN pip3 install -r requirements.txt
+RUN pip3 install .
 
 CMD ["python3", "-m", "moon_orchestrator"]

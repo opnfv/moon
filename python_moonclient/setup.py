@@ -9,6 +9,7 @@ import python_moonclient
 with open('requirements.txt') as f:
     required = f.read().splitlines()
 
+
 setup(
 
     name='python-moonclient',
@@ -42,12 +43,12 @@ setup(
     entry_points={
         'console_scripts': [
             'moon_get_keystone_projects = python_moonclient.scripts:get_keystone_projects',
-            'moon_create_pdp = python_moonclient.scripts:create_pdp',
             'moon_get_pdp = python_moonclient.scripts:get_pdp',
-            'moon_send_authz_to_wrapper = python_moonclient.scripts:send_authz_to_wrapper',
+            'moon_create_pdp = python_moonclient.scripts:create_pdp',
             'moon_delete_pdp = python_moonclient.scripts:delete_pdp',
             'moon_delete_policy = python_moonclient.scripts:delete_policy',
-            'moon_map_pdp_to_project = python_moonclient.scripts:map_pdp_to_project'
+            'moon_map_pdp_to_project = python_moonclient.scripts:map_pdp_to_project',
+            'moon_send_authz_to_wrapper = python_moonclient.scripts:send_authz_to_wrapper'
         ],
     }
 

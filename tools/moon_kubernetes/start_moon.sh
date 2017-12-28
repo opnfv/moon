@@ -33,4 +33,6 @@ kubectl create -n moon -f tools/moon_kubernetes/templates/moon_orchestrator.yaml
 
 kubectl create -n moon -f tools/moon_kubernetes/templates/moon_gui.yaml
 
+# load moon_wrapper on both master and slaves
+# moon_create_wrapper
 

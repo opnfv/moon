@@ -19,20 +19,20 @@ from flask_restful import Resource
 # - call the next security function
 # - call the master if an element is absent
 
-LOG = logging.getLogger("moon.api." + __name__)
+LOG = logging.getLogger("moon.authz.api." + __name__)
 
 
 class Authz(Resource):
     """
     Endpoint for authz requests
     """
+    __version__ = "0.1.0"
 
     __urls__ = (
         "/authz",
         "/authz/",
-        "/authz/<string:uuid>/<string:subject_name>/<string:object_name>/<string:action_name>",
     )
-    __version__ = "0.1.0"
+
     pdp_id = None
     meta_rule_id = None
     keystone_project_id = None
@@ -47,13 +47,11 @@ class Authz(Resource):
         self.cache = kwargs.get("cache")
         self.context = None
 
-    def post(self, uuid=None, subject_name=None, object_name=None, action_name=None):
+    def post(self):
         """Get a response on an authorization request
 
-        :param uuid: uuid of a tenant or an intra_extension
-        :param subject_name: name of the subject or the request
-        :param object_name: name of the object
-        :param action_name: name of the action
+        :request:  
+        
         :return: {
             "args": {},
             "ctx": {
@@ -255,47 +253,47 @@ class Authz(Resource):
                         self.context.current_state = "passed"
         LOG.info("__exec_instructions False {}".format(self.context.current_state))
 
-    def __update_current_request(self):
-        index = self.payload["authz_context"]["index"]
-        current_header_id = self.payload["authz_context"]['headers'][index]
-        previous_header_id = self.payload["authz_context"]['headers'][index - 1]
-        current_policy_id = PolicyManager.get_policy_from_meta_rules("admin", current_header_id)
-        previous_policy_id = PolicyManager.get_policy_from_meta_rules("admin", previous_header_id)
-        # FIXME (asteroide): must change those lines to be ubiquitous against any type of policy
-        if self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules']['name'] == "session":
-            subject = self.payload["authz_context"]['current_request'].get("subject")
-            subject_category_id = None
-            role_names = []
-            for category_id, category_value in ModelManager.get_subject_categories("admin").items():
-                if category_value["name"] == "role":
-                    subject_category_id = category_id
-                    break
-            for assignment_id, assignment_value in PolicyManager.get_subject_assignments(
-                    "admin", previous_policy_id, subject, subject_category_id).items():
-                for data_id in assignment_value["assignments"]:
-                    data = PolicyManager.get_subject_data("admin", previous_policy_id, data_id, subject_category_id)
-                    for _data in data:
-                        for key, value in _data["data"].items():
-                            role_names.append(value["name"])
-            new_role_ids = []
-            for perimeter_id, perimeter_value in PolicyManager.get_objects("admin", current_policy_id).items():
-                if perimeter_value["name"] in role_names:
-                    new_role_ids.append(perimeter_id)
-                    break
-            perimeter_id = None
-            for perimeter_id, perimeter_value in PolicyManager.get_actions("admin", current_policy_id).items():
-                if perimeter_value["name"] == "*":
-                    break
-
-            self.payload["authz_context"]['current_request']['object'] = new_role_ids[0]
-            self.payload["authz_context"]['current_request']['action'] = perimeter_id
-        elif self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules']['name'] == "rbac":
-            self.payload["authz_context"]['current_request']['subject'] = \
-                self.payload["authz_context"]['initial_request']['subject']
-            self.payload["authz_context"]['current_request']['object'] = \
-                self.payload["authz_context"]['initial_request']['object']
-            self.payload["authz_context"]['current_request']['action'] = \
-                self.payload["authz_context"]['initial_request']['action']
+    # def __update_current_request(self):
+    #     index = self.payload["authz_context"]["index"]
+    #     current_header_id = self.payload["authz_context"]['headers'][index]
+    #     previous_header_id = self.payload["authz_context"]['headers'][index - 1]
+    #     current_policy_id = PolicyManager.get_policy_from_meta_rules("admin", current_header_id)
+    #     previous_policy_id = PolicyManager.get_policy_from_meta_rules("admin", previous_header_id)
+    #     # FIXME (asteroide): must change those lines to be ubiquitous against any type of policy
+    #     if self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules']['name'] == "session":
+    #         subject = self.payload["authz_context"]['current_request'].get("subject")
+    #         subject_category_id = None
+    #         role_names = []
+    #         for category_id, category_value in ModelManager.get_subject_categories("admin").items():
+    #             if category_value["name"] == "role":
+    #                 subject_category_id = category_id
+    #                 break
+    #         for assignment_id, assignment_value in PolicyManager.get_subject_assignments(
+    #                 "admin", previous_policy_id, subject, subject_category_id).items():
+    #             for data_id in assignment_value["assignments"]:
+    #                 data = PolicyManager.get_subject_data("admin", previous_policy_id, data_id, subject_category_id)
+    #                 for _data in data:
+    #                     for key, value in _data["data"].items():
+    #                         role_names.append(value["name"])
+    #         new_role_ids = []
+    #         for perimeter_id, perimeter_value in PolicyManager.get_objects("admin", current_policy_id).items():
+    #             if perimeter_value["name"] in role_names:
+    #                 new_role_ids.append(perimeter_id)
+    #                 break
+    #         perimeter_id = None
+    #         for perimeter_id, perimeter_value in PolicyManager.get_actions("admin", current_policy_id).items():
+    #             if perimeter_value["name"] == "*":
+    #                 break
+    #
+    #         self.payload["authz_context"]['current_request']['object'] = new_role_ids[0]
+    #         self.payload["authz_context"]['current_request']['action'] = perimeter_id
+    #     elif self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules']['name'] == "rbac":
+    #         self.payload["authz_context"]['current_request']['subject'] = \
+    #             self.payload["authz_context"]['initial_request']['subject']
+    #         self.payload["authz_context"]['current_request']['object'] = \
+    #             self.payload["authz_context"]['initial_request']['object']
+    #         self.payload["authz_context"]['current_request']['action'] = \
+    #             self.payload["authz_context"]['initial_request']['action']
 
     def get_authz(self):
         # self.keystone_project_id = payload["id"]

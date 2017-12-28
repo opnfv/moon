@@ -21,7 +21,11 @@ class Status(Resource):
     Endpoint for status requests
     """
 
-    __urls__ = ("/status", "/status/", "/status/<string:component_id>")
+    __urls__ = (
+        "/status",
+        "/status/",
+        "/status/<string:component_id>"
+    )
 
     def get(self, component_id=None):
         """Retrieve status of all components
@@ -43,7 +47,11 @@ class Logs(Resource):
     Endpoint for logs requests
     """
 
-    __urls__ = ("/logs", "/logs/", "/logs/<string:component_id>")
+    __urls__ = (
+        "/logs",
+        "/logs/",
+        "/logs/<string:component_id>"
+    )
 
     def get(self, component_id=None):
         """Get logs from the Moon platform
@@ -83,7 +91,8 @@ class API(Resource):
         "/api/",
         "/api/<string:group_id>",
         "/api/<string:group_id>/",
-        "/api/<string:group_id>/<string:endpoint_id>")
+        "/api/<string:group_id>/<string:endpoint_id>"
+    )
 
     @check_auth
     def get(self, group_id="", endpoint_id="", user_id=""):

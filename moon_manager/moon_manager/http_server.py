@@ -20,12 +20,20 @@ from moon_manager.api.perimeter import Subjects, Objects, Actions
 from moon_manager.api.data import SubjectData, ObjectData, ActionData
 from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
 from moon_manager.api.rules import Rules
-# from moon_manager.api.containers import Container
 from python_moonutilities import configuration, exceptions
 from python_moondb.core import PDPManager
 
 
-LOG = logging.getLogger("moon.manager.http")
+LOG = logging.getLogger("moon.manager.http_server")
+
+__API__ = (
+    Status, Logs, API,
+    MetaRules, SubjectCategories, ObjectCategories, ActionCategories,
+    Subjects, Objects, Actions, Rules,
+    SubjectAssignments, ObjectAssignments, ActionAssignments,
+    SubjectData, ObjectData, ActionData,
+    Models, Policies, PDP
+ )
 
 
 class Server:
@@ -71,16 +79,6 @@ class Server:
     def run(self):
         raise NotImplementedError()
 
-__API__ = (
-    Status, Logs, API,
-    MetaRules, SubjectCategories, ObjectCategories, ActionCategories,
-    Subjects, Objects, Actions,
-    SubjectAssignments, ObjectAssignments, ActionAssignments,
-    SubjectData, ObjectData, ActionData,
-    Rules, #Container,
-    Models, Policies, PDP
- )
-
 
 class Root(Resource):
     """
@@ -113,7 +111,7 @@ class HTTPServer(Server):
         conf = configuration.get_configuration("components/manager")
         self.manager_hostname = conf["components/manager"].get("hostname", "manager")
         self.manager_port = conf["components/manager"].get("port", 80)
-        #Todo : specify only few urls instead of *
+        # TODO : specify only few urls instead of *
         CORS(self.app)
         self.api = Api(self.app)
         self.__set_route()
@@ -133,8 +131,8 @@ class HTTPServer(Server):
     def __set_route(self):
         self.api.add_resource(Root, '/')
 
-        for api in __API__:
-            self.api.add_resource(api, *api.__urls__)
+        for _api in __API__:
+            self.api.add_resource(_api, *_api.__urls__)
 
     @staticmethod
     def __check_if_db_is_up():
@@ -154,4 +152,3 @@ class HTTPServer(Server):
     def run(self):
         self.__check_if_db_is_up()
         self.app.run(debug=True, host=self._host, port=self._port)  # nosec
-

@@ -19,24 +19,20 @@ __version__ = "0.1.0"
 LOG = logging.getLogger("moon.wrapper.api." + __name__)
 
 
-class Wrapper(Resource):
+class OsloWrapper(Resource):
     """
     Endpoint for authz requests
     """
 
     __urls__ = (
-        "/authz",
-        "/authz/",
+        "/authz/oslo",
+        "/authz/oslo/",
     )
 
     def __init__(self, **kwargs):
         self.port = kwargs.get("port")
         self.CACHE = kwargs.get("cache", {})
         self.TIMEOUT = 5
-
-    # def get(self):
-    #     LOG.info("GET")
-    #     return self.manage_data()
 
     def post(self):
         LOG.debug("POST {}".format(request.form))
@@ -101,6 +97,7 @@ class Wrapper(Resource):
         rule = data.get('rule', "")
         _subject = self.__get_subject(target, credentials)
         _object = self.__get_object(target, credentials)
+        _action = rule
         _project_id = self.__get_project_id(target, credentials)
         LOG.debug("POST with args project={} / "
                   "subject={} - object={} - action={}".format(
@@ -112,7 +109,7 @@ class Wrapper(Resource):
             _project_id,
             _subject,
             _object,
-            rule
+            _action
         ))
         LOG.debug("Get interface {}".format(req.text))
         if req.status_code == 200:

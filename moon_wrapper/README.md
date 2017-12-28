@@ -1,5 +1,4 @@
-Wrapper module for the Moon project
-===================================
+# moon_wrapper
 
 This package contains the core module for the Moon project
 It is designed to provide authorization features to all OpenStack components.

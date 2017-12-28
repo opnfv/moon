@@ -2,12 +2,10 @@ import logging
 import requests
 from . import config, models
 
-logger = logging.getLogger("moonclient.models")
+logger = logging.getLogger("moonclient.policies")
 
 URL = None
 HEADERS = None
-FILE = open("/tmp/test.log", "w")
-logger = logging.getLogger("utils.policies")
 
 policy_template = {
     "name": "test_policy",

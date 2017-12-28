@@ -3,4 +3,3 @@ flask_restful
 flask_cors
 python_moonutilities
 python_moondb
-docker-py

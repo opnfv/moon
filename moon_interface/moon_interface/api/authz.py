@@ -18,7 +18,7 @@ from moon_interface.authz_requests import AuthzRequest
 
 __version__ = "0.1.0"
 
-LOG = logging.getLogger("moon.interface.api." + __name__)
+LOG = logging.getLogger("moon.interface.api.authz." + __name__)
 
 
 def pdp_in_cache(cache, uuid):
@@ -43,39 +43,6 @@ def pdp_in_manager(cache, uuid):
     """
     cache.update()
     return pdp_in_cache(cache, uuid)
-
-
-def container_exist(cache, uuid):
-    """Check if a PDP exist with this Keystone Project ID in the Manager component
-
-    :param cache: Cache to use
-    :param uuid: Keystone Project ID
-    :return: True or False
-    """
-    for key, value in cache.containers.items():
-        if "keystone_project_id" not in value:
-            continue
-        if value["keystone_project_id"] == uuid:
-            try:
-                req = requests.head("http://{}:{}/".format(
-                    value.get("hostname"),
-                    value.get("port")[0].get("PublicPort")))
-                LOG.info("container_exist {}".format(req.status_code))
-                if req.status_code in (200, 201):
-                    return value
-                return
-            except requests.exceptions.ConnectionError:
-                pass
-            # maybe hostname is not working so trying with IP address
-            try:
-                req = requests.head("http://{}:{}/".format(
-                    value.get("ip"),
-                    value.get("port")[0].get("PublicPort")))
-                if req.status_code in (200, 201):
-                    return value
-                return
-            except requests.exceptions.ConnectionError:
-                return
 
 
 def create_authz_request(cache, interface_name, manager_url, uuid, subject_name, object_name, action_name):

@@ -13,7 +13,7 @@ HOST_KEYSTONE = None
 PORT_KEYSTONE = None
 
 lock = threading.Lock()
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("moonclient.authz")
 
 
 def _construct_payload(creds, current_rule, enforcer, target):
@@ -122,7 +122,7 @@ def send_requests(scenario, authz_host, authz_port, keystone_project_id, request
     while request_cpt < limit:
         rule = (random.choice(SUBJECTS), random.choice(OBJECTS), random.choice(ACTIONS))
         if destination.lower() == "wrapper":
-            url = "http://{}:{}/authz".format(authz_host, authz_port)
+            url = "http://{}:{}/authz/oslo".format(authz_host, authz_port)
             data = {
                 'target': {
                     "user_id": random.choice(SUBJECTS),

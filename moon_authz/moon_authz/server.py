@@ -8,20 +8,19 @@ from oslo_log import log as logging
 from moon_authz.http_server import HTTPServer as Server
 from python_moonutilities import configuration
 
-LOG = logging.getLogger("moon.server")
+LOG = logging.getLogger("moon.authz.server")
 DOMAIN = "moon_authz"
-
-__CWD__ = os.path.dirname(os.path.abspath(__file__))
 
 
 def main():
+    configuration.init_logging()
+
     component_id = os.getenv("UUID")
     component_type = os.getenv("TYPE")
     tcp_port = os.getenv("PORT")
     pdp_id = os.getenv("PDP_ID")
     meta_rule_id = os.getenv("META_RULE_ID")
     keystone_project_id = os.getenv("KEYSTONE_PROJECT_ID")
-    configuration.init_logging()
     LOG.info("component_type={}".format(component_type))
     conf = configuration.get_configuration("plugins/{}".format(component_type))
     conf["plugins/{}".format(component_type)]['id'] = component_id

@@ -3,7 +3,7 @@ from importlib.machinery import SourceFileLoader
 from . import parse, models, policies, pdp, authz
 
 
-logger = logging.getLogger("python_moonclient.scripts")
+logger = logging.getLogger("moonclient.scripts")
 
 
 def get_keystone_projects():

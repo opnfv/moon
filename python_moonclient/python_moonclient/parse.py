@@ -2,7 +2,7 @@ import logging
 import argparse
 
 
-logger = logging.getLogger("python_moonclient.utils.parse")
+logger = logging.getLogger("python_moonclient.parse")
 
 
 def parse():

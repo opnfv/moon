@@ -15,6 +15,10 @@ from python_moonutilities import configuration, exceptions
 
 logger = logging.getLogger("moon.interface.http")
 
+__API__ = (
+    Status, Logs, API
+ )
+
 
 class Server:
     """Base class for HTTP server"""
@@ -58,10 +62,6 @@ class Server:
 
     def run(self):
         raise NotImplementedError()
-
-__API__ = (
-    Status, Logs, API
- )
 
 
 class Root(Resource):
@@ -132,5 +132,3 @@ class HTTPServer(Server):
 
     def run(self):
         self.app.run(host=self._host, port=self._port)  # nosec
-        # self.app.run(debug=True, host=self._host, port=self._port)  # nosec
-
