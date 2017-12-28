@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_ea180820",
+        "filename": "python_moonutilities/python_moonutilities/cache.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2017-12-28T10:48:35Z",
+      "side": 1,
+      "message": "i notice some methods that assign None as a default value for policy_id and i think that\u0027s not correct\nso i suggest to remove this default value for policy_id\nand check if policy_id is None, through an exception",
+      "range": {
+        "startLine": 148,
+        "startChar": 8,
+        "endLine": 148,
+        "endChar": 22
+      },
+      "revId": "1a3e7727ce0e4d6d25ed312b54e20215af33dd5a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_ca1544e6",
+        "filename": "python_moonutilities/python_moonutilities/cache.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2017-12-28T10:48:35Z",
+      "side": 1,
+      "message": "update function used to accumulate the result in the dict\nfor ex, if you have dict[1] \u003d {\u0027x\u0027:\u00271\u0027} and then make update dict[1].update({\u0027y\u0027:\u00271\u0027})\nthe result will be {\u0027x\u0027:\u00271\u0027,\u0027y\u0027:\u00271\u0027}\n\nif call again dict[1].update({\u0027y\u0027:\u00275\u0027}) , y-value will be replaced with the new \u00275\u0027\nthe result will be {\u0027x\u0027:\u00271\u0027,\u0027y\u0027:\u00275\u0027}\n\nso update function replaces the key with the new value if it exists and append others if not exists\n\nis that what it should be to accumulate new keys and replace the current keys with the new values, or it should replace the whole dict to be only {\u0027y\u0027:\u00271\u0027} in order not to keep old keys",
+      "range": {
+        "startLine": 287,
+        "startChar": 8,
+        "endLine": 287,
+        "endChar": 12
+      },
+      "revId": "1a3e7727ce0e4d6d25ed312b54e20215af33dd5a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
