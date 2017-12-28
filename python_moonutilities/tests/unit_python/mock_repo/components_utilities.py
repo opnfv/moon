@@ -55,7 +55,7 @@ CONF = {
     "logging": {
         "handlers": {
             "file": {
-                "filename": "C:/moon.log",
+                "filename": "/tmp/moon.log",
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "DEBUG",
                 "formatter": "custom",
