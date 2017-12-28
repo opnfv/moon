@@ -4,12 +4,12 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from uuid import uuid4
-from oslo_log import log as logging
-from python_moonutilities.security_functions import filter_input, enforce
+import logging
+from python_moonutilities.security_functions import enforce
 from python_moondb.api.managers import Managers
 
 
-LOG = logging.getLogger("moon.db.api.pdp")
+logger = logging.getLogger("moon.db.api.pdp")
 
 
 class PDPManager(Managers):

@@ -7,12 +7,12 @@ import os
 import requests
 import json
 from uuid import uuid4
-from oslo_log import log as logging
+import logging
 from python_moonutilities import exceptions, configuration
 from python_moonutilities.security_functions import filter_input, login, logout
 from python_moondb.api.managers import Managers
 
-LOG = logging.getLogger("moon.db.api.keystone")
+logger = logging.getLogger("moon.db.api.keystone")
 
 
 class KeystoneManager(Managers):
@@ -37,7 +37,7 @@ class KeystoneManager(Managers):
         _headers = login()
         req = requests.get("{}{}".format(self.__url, endpoint), headers=_headers, verify=False)
         if req.status_code not in (200, 201):
-            LOG.error(req.text)
+            logger.error(req.text)
             raise _exception
         data = req.json()
         logout(_headers)
@@ -49,10 +49,10 @@ class KeystoneManager(Managers):
                             data=json.dumps(data),
                             headers=_headers, verify=False)
         if req.status_code == 409:
-            LOG.warning(req.text)
+            logger.warning(req.text)
             raise exceptions.KeystoneUserConflict
         if req.status_code not in (200, 201):
-            LOG.error(req.text)
+            logger.error(req.text)
             raise _exception
         data = req.json()
         logout(_headers)

@@ -45,7 +45,6 @@ setup(
         "moon_db.driver":
             [
                 "sql = python_moondb.backends.sql:SQLConnector",
-                "flat = python_moondb.backends.flat:LogConnector",
             ],
         'console_scripts': [
             'moon_db_manager = python_moondb.db_manager:run',

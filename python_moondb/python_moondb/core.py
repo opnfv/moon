@@ -3,20 +3,18 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from oslo_log import log as logging
-from oslo_config import cfg
+import logging
 from stevedore.driver import DriverManager
 from python_moonutilities import configuration
 from python_moondb.api import model, policy, pdp, keystone
 
-CONF = cfg.CONF
-LOG = logging.getLogger("moon.db")
+logger = logging.getLogger("moon.db")
 
 
 class Driver(DriverManager):
 
     def __init__(self, driver_name, engine_name):
-        LOG.info("initialization of Driver {}".format(driver_name))
+        logger.info("initialization of Driver {}".format(driver_name))
         super(Driver, self).__init__(
             namespace='moon_db.driver',
             name=driver_name,

@@ -4,13 +4,13 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from uuid import uuid4
-from oslo_log import log as logging
+import logging
 from python_moonutilities import exceptions
 from python_moonutilities.security_functions import filter_input, enforce
 from python_moondb.api.managers import Managers
 
 
-LOG = logging.getLogger("moon.db.api.model")
+logger = logging.getLogger("moon.db.api.model")
 
 
 class ModelManager(Managers):
@@ -60,7 +60,7 @@ class ModelManager(Managers):
             raise exceptions.MetaRuleExisting
         if not meta_rule_id:
             meta_rule_id = uuid4().hex
-            LOG.info("add_meta_rule {}".format(value))
+            logger.info("add_meta_rule {}".format(value))
         return self.driver.set_meta_rule(meta_rule_id=meta_rule_id, value=value)
 
     @enforce(("read", "write"), "meta_rules")
