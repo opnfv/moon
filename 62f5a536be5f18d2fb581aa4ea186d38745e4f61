@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_ed2dc2a9",
+        "filename": "python_moonutilities/python_moonutilities/__init__.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-28T10:59:24Z",
+      "side": 1,
+      "message": "let\u0027s go back to the previous, simplest solution for log",
+      "range": {
+        "startLine": 9,
+        "startChar": 0,
+        "endLine": 9,
+        "endChar": 0
+      },
+      "revId": "62f5a536be5f18d2fb581aa4ea186d38745e4f61",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_cd2a7e8f",
+        "filename": "python_moonutilities/python_moonutilities/configuration.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1335
+      },
+      "writtenOn": "2017-12-28T10:59:24Z",
+      "side": 1,
+      "message": "change to logger, and add the following at the module level:\nconfig \u003d get_configuration(\"logging\")\nlogging.config.dictConfig(config[\u0027logging\u0027])",
+      "range": {
+        "startLine": 14,
+        "startChar": 0,
+        "endLine": 14,
+        "endChar": 3
+      },
+      "revId": "62f5a536be5f18d2fb581aa4ea186d38745e4f61",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
