@@ -12,7 +12,7 @@ from oslo_log import log as logging
 from python_moonutilities import exceptions, configuration
 
 
-LOG = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 KEYSTONE_CONFIG = configuration.get_configuration("openstack/keystone")["openstack/keystone"]
 TOKENS = {}
 
@@ -52,13 +52,13 @@ def check_token(token, url=None):
                 TOKENS[token]["expires_at"] = time.strptime(token_time[0], "%Y-%m-%dT%H:%M:%S")
                 TOKENS[token]["user"] = req.json().get("token").get("user").get("id")
                 return TOKENS[token]["user"]
-            LOG.error("{} - {}".format(req.status_code, req.text))
+            logger.error("{} - {}".format(req.status_code, req.text))
             raise exceptions.KeystoneError
     elif KEYSTONE_CONFIG['check_token'].lower() == "strict":
         req = requests.head("{}/auth/tokens".format(url), headers=headers, verify=_verify)
         if req.status_code in (200, 201):
             return token
-        LOG.error("{} - {}".format(req.status_code, req.text))
+        logger.error("{} - {}".format(req.status_code, req.text))
         raise exceptions.KeystoneError
     raise exceptions.KeystoneError
 
