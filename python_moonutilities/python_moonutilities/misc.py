@@ -7,33 +7,7 @@
 import logging
 import random
 
-LOG = logging.getLogger(__name__)
-
-
-def get_uuid_from_name(name, elements, **kwargs):
-    for element in elements:
-        if type(elements[element]) is dict and elements[element].get('name') == name:
-            if kwargs:
-                for args in kwargs:
-                    if elements[element].get(args) != kwargs[args]:
-                        return
-                else:
-                    return element
-            else:
-                return element
-
-
-def get_name_from_uuid(uuid, elements, **kwargs):
-    for element in elements:
-        if element == uuid:
-            if kwargs:
-                for args in kwargs:
-                    if elements[element].get(args) != kwargs[args]:
-                        return
-                else:
-                    return elements[element].get('name')
-            else:
-                return elements[element].get('name')
+LOG = logging.getLogger("moon.utilities.misc")
 
 
 def get_random_name():

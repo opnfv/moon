@@ -9,7 +9,7 @@ import json
 import requests
 import logging
 import logging.config
-from python_moonutilities import exceptions
+from python_moonutilities import exceptions, configuration
 
 LOG = logging.getLogger("moon.utilities")
 
@@ -20,11 +20,6 @@ DATABASE = "database"
 KEYSTONE = "keystone"
 DOCKER = "docker"
 COMPONENTS = "components"
-
-
-def init_logging():
-    config = get_configuration("logging")
-    logging.config.dictConfig(config['logging'])
 
 
 def increment_port():
@@ -74,7 +69,7 @@ def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra
         LOG.debug("data={}".format(data))
         raise exceptions.ConsulError
     LOG.info("Add component {}".format(req.text))
-    return get_configuration("components/"+uuid)
+    return configuration.get_configuration("components/"+uuid)
 
 
 def get_plugins():
@@ -109,6 +104,3 @@ def get_components():
             item["Key"].replace("components/", ""): json.loads(base64.b64decode(item["Value"]).decode("utf-8"))
             for item in data
         }
-
-
-init_logging()
