@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from uuid import uuid4
-from oslo_log import log as logging
+import logging
 from python_moonutilities import exceptions
 from python_moonutilities.security_functions import filter_input, enforce
 from python_moondb.api.managers import Managers
