@@ -8,7 +8,7 @@ import logging
 from python_moonutilities.security_functions import enforce
 from python_moondb.api.managers import Managers
 
-LOG = logging.getLogger("moon.db.api.policy")
+logger = logging.getLogger("moon.db.api.policy")
 
 
 class PolicyManager(Managers):
@@ -56,7 +56,7 @@ class PolicyManager(Managers):
             k_user = Managers.KeystoneManager.create_user(value)
         if not perimeter_id:
             try:
-                LOG.info("k_user={}".format(k_user))
+                logger.info("k_user={}".format(k_user))
                 perimeter_id = k_user['users'][0].get('id', uuid4().hex)
             except IndexError:
                 k_user = Managers.KeystoneManager.get_user_by_name(

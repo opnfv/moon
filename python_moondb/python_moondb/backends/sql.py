@@ -17,7 +17,7 @@ from python_moonutilities import configuration
 from python_moonutilities.exceptions import *
 from python_moondb.core import PDPDriver, PolicyDriver, ModelDriver
 
-LOG = logging.getLogger("moon.db.driver.sql")
+logger = logging.getLogger("moon.db.driver.sql")
 Base = declarative_base()
 DEBUG = True if configuration.get_configuration("logging")['logging']['loggers']['moon']['level'] == "DEBUG" else False
 
@@ -648,7 +648,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                     session.delete(_action)
 
     def get_subject_data(self, policy_id, data_id=None, category_id=None):
-        LOG.info("driver {} {} {}".format(policy_id, data_id, category_id))
+        logger.info("driver {} {} {}".format(policy_id, data_id, category_id))
         with self.get_session_for_read() as session:
             query = session.query(SubjectData)
             if data_id:
@@ -656,7 +656,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             else:
                 query = query.filter_by(policy_id=policy_id, category_id=category_id)
             ref_list = query.all()
-            LOG.info("ref_list={}".format(ref_list))
+            logger.info("ref_list={}".format(ref_list))
             return {
                 "policy_id": policy_id,
                 "category_id": category_id,
@@ -982,7 +982,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             ref_list = query.all()
             rules = list(map(lambda x: x.rule, ref_list))
             if not rules or value not in rules:
-                LOG.info("add_rule IN IF")
+                logger.info("add_rule IN IF")
                 ref = Rule.from_dict(
                     {
                         "id": uuid4().hex,
