@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_6356e307",
+        "filename": "python_moonutilities/python_moonutilities/cache.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2017-12-29T12:49:35Z",
+      "side": 1,
+      "message": "Actually i don\u0027t know if the variables should be private static so that each module create an instance from Cache, don\u0027t have to fetch update for all in case they have already been updated before from another module and the time not expired yet\n\nwhich behavior you \u0027d prefer in that",
+      "parentUuid": "9a3d3df0_c08b6566",
+      "range": {
+        "startLine": 18,
+        "startChar": 4,
+        "endLine": 18,
+        "endChar": 21
+      },
+      "revId": "1a3e7727ce0e4d6d25ed312b54e20215af33dd5a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_20ecd129",
         "filename": "python_moonutilities/python_moonutilities/cache.py",
         "patchSetId": 1
@@ -366,6 +390,30 @@
       "writtenOn": "2017-12-28T23:15:44Z",
       "side": 1,
       "message": "Done",
+      "parentUuid": "9a3d3df0_a04d8140",
+      "range": {
+        "startLine": 287,
+        "startChar": 8,
+        "endLine": 287,
+        "endChar": 12
+      },
+      "revId": "1a3e7727ce0e4d6d25ed312b54e20215af33dd5a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_035557fa",
+        "filename": "python_moonutilities/python_moonutilities/cache.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 287,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2017-12-29T12:49:35Z",
+      "side": 1,
+      "message": "Agree with you, it means the request should contain the element to be updated only , not retrieving all the elements per each request\n- but in that case, if you want to remove some expired key you won\u0027t be able to do that,right ?",
       "parentUuid": "9a3d3df0_a04d8140",
       "range": {
         "startLine": 287,
