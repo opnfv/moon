@@ -7,7 +7,7 @@ from uuid import uuid4
 import logging
 from python_moonutilities.security_functions import enforce
 from python_moondb.api.managers import Managers
-
+from python_moonutilities import exceptions
 
 logger = logging.getLogger("moon.db.api.pdp")
 
@@ -24,10 +24,14 @@ class PDPManager(Managers):
 
     @enforce(("read", "write"), "pdp")
     def delete_pdp(self, user_id, pdp_id):
+        if pdp_id not in self.driver.get_pdp(pdp_id=pdp_id):
+            raise exceptions.PdpUnknown
         return self.driver.delete_pdp(pdp_id=pdp_id)
 
     @enforce(("read", "write"), "pdp")
     def add_pdp(self, user_id, pdp_id=None, value=None):
+        if pdp_id in self.driver.get_pdp(pdp_id=pdp_id):
+            raise exceptions.PdpExisting
         if not pdp_id:
             pdp_id = uuid4().hex
         return self.driver.add_pdp(pdp_id=pdp_id, value=value)
@@ -35,4 +39,3 @@ class PDPManager(Managers):
     @enforce("read", "pdp")
     def get_pdp(self, user_id, pdp_id=None):
         return self.driver.get_pdp(pdp_id=pdp_id)
-
