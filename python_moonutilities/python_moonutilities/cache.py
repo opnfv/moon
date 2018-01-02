@@ -1,6 +1,6 @@
 import logging
 import time
-import requests
+import python_moonutilities.request_wrapper as requests
 from uuid import uuid4
 from python_moonutilities import configuration, exceptions
 
@@ -178,6 +178,7 @@ class Cache(object):
     def meta_rules(self):
         current_time = time.time()
         if self.__META_RULES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__META_RULES_UPDATE = current_time
             self.__update_meta_rules()
         self.__META_RULES_UPDATE = current_time
         return self.__META_RULES
@@ -196,6 +197,7 @@ class Cache(object):
     def rules(self):
         current_time = time.time()
         if self.__RULES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__RULES_UPDATE = current_time
             self.__update_rules()
         self.__RULES_UPDATE = current_time
         return self.__RULES
@@ -333,6 +335,7 @@ class Cache(object):
     def subject_categories(self):
         current_time = time.time()
         if self.__SUBJECT_CATEGORIES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__SUBJECT_CATEGORIES_UPDATE = current_time
             self.__update_subject_categories()
         self.__SUBJECT_CATEGORIES_UPDATE = current_time
         return self.__SUBJECT_CATEGORIES
@@ -350,6 +353,7 @@ class Cache(object):
     def object_categories(self):
         current_time = time.time()
         if self.__OBJECT_CATEGORIES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__OBJECT_CATEGORIES_UPDATE = current_time
             self.__update_object_categories()
         self.__OBJECT_CATEGORIES_UPDATE = current_time
         return self.__OBJECT_CATEGORIES
@@ -366,6 +370,7 @@ class Cache(object):
     def action_categories(self):
         current_time = time.time()
         if self.__ACTION_CATEGORIES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__ACTION_CATEGORIES_UPDATE = current_time
             self.__update_action_categories()
         self.__ACTION_CATEGORIES_UPDATE = current_time
         return self.__ACTION_CATEGORIES
@@ -385,7 +390,7 @@ class Cache(object):
         pdp = response.json()
         if 'pdps' in pdp:
             for _pdp in pdp["pdps"].values():
-                if "keystone_project_id" in _pdp and _pdp['keystone_project_id'] not in self.__CONTAINER_CHAINING:
+                if "keystone_project_id" in _pdp and _pdp['keystone_project_id'] not in self.container_chaining:
                     self.__CONTAINER_CHAINING[_pdp['keystone_project_id']] = {}
                     # Note (asteroide): force update of chaining
                     self.__update_container_chaining(_pdp['keystone_project_id'])
@@ -414,6 +419,7 @@ class Cache(object):
         """
         current_time = time.time()
         if self.__PDP_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__PDP_UPDATE = current_time
             self.__update_pdp()
         self.__PDP_UPDATE = current_time
         return self.__PDP
@@ -433,6 +439,7 @@ class Cache(object):
     def policies(self):
         current_time = time.time()
         if self.__POLICIES_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__POLICIES_UPDATE = current_time
             self.__update_policies()
         self.__POLICIES_UPDATE = current_time
         return self.__POLICIES
@@ -452,6 +459,7 @@ class Cache(object):
     def models(self):
         current_time = time.time()
         if self.__MODELS_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__MODELS_UPDATE = current_time
             self.__update_models()
         self.__MODELS_UPDATE = current_time
         return self.__MODELS
@@ -581,6 +589,7 @@ class Cache(object):
         """
         current_time = time.time()
         if self.__CONTAINERS_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__CONTAINERS_UPDATE = current_time
             self.__update_container()
         self.__CONTAINERS_UPDATE = current_time
         return self.__CONTAINERS
@@ -604,6 +613,7 @@ class Cache(object):
         """
         current_time = time.time()
         if self.__CONTAINER_CHAINING_UPDATE + self.__UPDATE_INTERVAL < current_time:
+            self.__CONTAINER_CHAINING_UPDATE = current_time
             for key, value in self.pdp.items():
                 if "keystone_project_id" in value:
                     if not value["keystone_project_id"]:
@@ -617,7 +627,7 @@ class Cache(object):
 
     def __update_container_chaining(self, keystone_project_id):
         container_ids = []
-        for pdp_id, pdp_value, in self.__PDP.items():
+        for pdp_id, pdp_value, in self.pdp.items():
             if pdp_value:
                 if "keystone_project_id" and "security_pipeline" in pdp_value \
                         and pdp_value["keystone_project_id"] == keystone_project_id:
