@@ -86,7 +86,7 @@ class Cache(object):
     def subjects(self):
         return self.__SUBJECTS
 
-    def update_subjects(self, policy_id=None):
+    def __update_subjects(self, policy_id=None):
         req = requests.get("{}/policies/{}/subjects".format(
             self.manager_url, policy_id))
         self.__SUBJECTS[policy_id] = req.json()['subjects']
@@ -98,7 +98,7 @@ class Cache(object):
                     return _subject_id
         except KeyError:
             pass
-        self.update_subjects(policy_id)
+        self.__update_subjects(policy_id)
         for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
             if _subject_dict["name"] == name:
                 return _subject_id
@@ -108,7 +108,7 @@ class Cache(object):
     def objects(self):
         return self.__OBJECTS
 
-    def update_objects(self, policy_id=None):
+    def __update_objects(self, policy_id=None):
         req = requests.get("{}/policies/{}/objects".format(
             self.manager_url, policy_id))
         self.__OBJECTS[policy_id] = req.json()['objects']
@@ -120,7 +120,7 @@ class Cache(object):
                     return _object_id
         except KeyError:
             pass
-        self.update_objects(policy_id)
+        self.__update_objects(policy_id)
         for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
             if _object_dict["name"] == name:
                 return _object_id
@@ -130,7 +130,7 @@ class Cache(object):
     def actions(self):
         return self.__ACTIONS
 
-    def update_actions(self, policy_id=None):
+    def __update_actions(self, policy_id=None):
         req = requests.get("{}/policies/{}/actions".format(
             self.manager_url, policy_id))
         self.__ACTIONS[policy_id] = req.json()['actions']
@@ -142,7 +142,7 @@ class Cache(object):
                     return _action_id
         except KeyError:
             pass
-        self.update_actions(policy_id)
+        self.__update_actions(policy_id)
         for _action_id, _action_dict in self.__ACTIONS[policy_id].items():
             if _action_dict["name"] == name:
                 return _action_id
@@ -187,7 +187,7 @@ class Cache(object):
     def subject_assignments(self):
         return self.__SUBJECT_ASSIGNMENTS
 
-    def update_subject_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_subject_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
             req = requests.get("{}/policies/{}/subject_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
@@ -201,7 +201,7 @@ class Cache(object):
 
     def get_subject_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.subject_assignments:
-            self.update_subject_assignments(policy_id, perimeter_id)
+            self.__update_subject_assignments(policy_id, perimeter_id)
         ''' 
             [NOTE] invalid condition for testing existence of policy_id
             because update_subject_assignments function already add an empty object 
@@ -222,7 +222,7 @@ class Cache(object):
     def object_assignments(self):
         return self.__OBJECT_ASSIGNMENTS
 
-    def update_object_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_object_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
             req = requests.get("{}/policies/{}/object_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
@@ -236,7 +236,7 @@ class Cache(object):
 
     def get_object_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.object_assignments:
-            self.update_object_assignments(policy_id, perimeter_id)
+            self.__update_object_assignments(policy_id, perimeter_id)
         if policy_id not in self.object_assignments:
             raise Exception("Cannot found the policy {}".format(policy_id))
         for key, value in self.object_assignments[policy_id].items():
@@ -248,7 +248,7 @@ class Cache(object):
     def action_assignments(self):
         return self.__ACTION_ASSIGNMENTS
 
-    def update_action_assignments(self, policy_id=None, perimeter_id=None):
+    def __update_action_assignments(self, policy_id=None, perimeter_id=None):
         if perimeter_id:
             req = requests.get("{}/policies/{}/action_assignments/{}".format(
                 self.manager_url, policy_id, perimeter_id))
@@ -262,7 +262,7 @@ class Cache(object):
 
     def get_action_assignments(self, policy_id, perimeter_id, category_id):
         if policy_id not in self.action_assignments:
-            self.update_action_assignments(policy_id, perimeter_id)
+            self.__update_action_assignments(policy_id, perimeter_id)
         if policy_id not in self.action_assignments:
             raise Exception("Cannot found the policy {}".format(policy_id))
         for key, value in self.action_assignments[policy_id].items():
