@@ -52,10 +52,13 @@ def get_configuration(key):
             return {data["Key"]: json.loads(base64.b64decode(data["Value"]).decode("utf-8"))}
         raise exceptions.ConsulComponentContentError("error={}".format(data))
     else:
+        for item in data:
+            if not all(k in item for k in ("Key", "Value")):
+                logger.warning("invalidate content {}".format(item))
+                raise exceptions.ConsulComponentContentError("error={}".format(data))
         return [
             {
                 item["Key"]: json.loads(base64.b64decode(item["Value"]).decode("utf-8"))
-                if all(k in item for k in ("Key", "Value")) else logger.warning("invalidate content {}".format(item))
             } for item in data
         ]
 
@@ -93,9 +96,12 @@ def get_plugins():
             return {data["Key"].replace("plugins/", ""): json.loads(base64.b64decode(data["Value"]).decode("utf-8"))}
         raise exceptions.ConsulComponentContentError("error={}".format(data))
     else:
+        for item in data:
+            if not all(k in item for k in ("Key", "Value")):
+                logger.warning("invalidate content {}".format(item))
+                raise exceptions.ConsulComponentContentError("error={}".format(data))
         return {
             item["Key"].replace("plugins/", ""): json.loads(base64.b64decode(item["Value"]).decode("utf-8"))
-            if all(k in item for k in ("Key", "Value")) else logger.warning("invalidate content {}".format(item))
             for item in data
         }
 
@@ -112,9 +118,12 @@ def get_components():
             return {data["Key"].replace("components/", ""): json.loads(base64.b64decode(data["Value"]).decode("utf-8"))}
         raise exceptions.ConsulComponentContentError("error={}".format(data))
     else:
+        for item in data:
+            if not all(k in item for k in ("Key", "Value")):
+                logger.warning("invalidate content {}".format(item))
+                raise exceptions.ConsulComponentContentError("error={}".format(data))
         return {
             item["Key"].replace("components/", ""): json.loads(base64.b64decode(item["Value"]).decode("utf-8"))
-            if all(k in item for k in ("Key", "Value")) else logger.warning("invalidate content {}".format(item))
             for item in data
         }
 
