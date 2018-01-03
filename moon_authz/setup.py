@@ -40,7 +40,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_authz = moon_authz.server:main',
+            'moon_authz = moon_authz.server:run',
         ],
     }
 

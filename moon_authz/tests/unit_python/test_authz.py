@@ -12,9 +12,9 @@ def get_json(data):
 
 def test_authz_true(context):
     import moon_authz.server
-    from python_moonutilities.security_functions import Context
+    from python_moonutilities.context import Context
     from python_moonutilities.cache import Cache
-    server = moon_authz.server.main()
+    server = moon_authz.server.create_server()
     client = server.app.test_client()
     CACHE = Cache()
     CACHE.update()
@@ -33,9 +33,9 @@ def test_authz_true(context):
 
 def test_user_not_allowed(context):
     import moon_authz.server
-    from python_moonutilities.security_functions import Context
+    from python_moonutilities.context import Context
     from python_moonutilities.cache import Cache
-    server = moon_authz.server.main()
+    server = moon_authz.server.create_server()
     client = server.app.test_client()
     CACHE = Cache()
     CACHE.update()
