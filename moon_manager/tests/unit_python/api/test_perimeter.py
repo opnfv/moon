@@ -1,16 +1,13 @@
 # import moon_manager
 # import moon_manager.api
 import json
-
-
-def get_json(data):
-    return json.loads(data.decode("utf-8"))
+import api.utilities as utilities
 
 
 def get_subjects(client):
     req = client.get("/subjects")
     assert req.status_code == 200
-    subjects = get_json(req.data)
+    subjects = utilities.get_json(req.data)
     assert isinstance(subjects, dict)
     assert "subjects" in subjects
     return subjects
@@ -26,7 +23,7 @@ def add_subjects(client, name):
     req = client.post("/subjects", data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     assert req.status_code == 200
-    subjects = get_json(req.data)
+    subjects = utilities.get_json(req.data)
     assert isinstance(subjects, dict)
     key = list(subjects["subjects"].keys())[0]
     value = list(subjects["subjects"].values())[0]
@@ -63,9 +60,7 @@ def delete_subject(client, name):
 
 
 def test_subject():
-    import moon_manager.server
-    server = moon_manager.server.main()
-    client = server.app.test_client()
+    client = utilities.register_client()
     get_subjects(client)
     add_subjects(client, "testuser")
     add_subjects_without_name(client, "")
@@ -75,7 +70,7 @@ def test_subject():
 def get_objects(client):
     req = client.get("/objects")
     assert req.status_code == 200
-    objects = get_json(req.data)
+    objects = utilities.get_json(req.data)
     assert isinstance(objects, dict)
     assert "objects" in objects
     return objects
@@ -89,7 +84,7 @@ def add_objects(client, name):
     req = client.post("/objects", data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     assert req.status_code == 200
-    objects = get_json(req.data)
+    objects = utilities.get_json(req.data)
     assert isinstance(objects, dict)
     key = list(objects["objects"].keys())[0]
     value = list(objects["objects"].values())[0]
@@ -111,9 +106,7 @@ def delete_objects(client, name):
 
 
 def test_objects():
-    import moon_manager.server
-    server = moon_manager.server.main()
-    client = server.app.test_client()
+    client = utilities.register_client()
     get_objects(client)
     add_objects(client, "testuser")
     delete_objects(client, "testuser")
@@ -122,7 +115,7 @@ def test_objects():
 def get_actions(client):
     req = client.get("/actions")
     assert req.status_code == 200
-    actions = get_json(req.data)
+    actions = utilities.get_json(req.data)
     assert isinstance(actions, dict)
     assert "actions" in actions
     return actions
@@ -136,7 +129,7 @@ def add_actions(client, name):
     req = client.post("/actions", data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     assert req.status_code == 200
-    actions = get_json(req.data)
+    actions = utilities.get_json(req.data)
     assert isinstance(actions, dict)
     key = list(actions["actions"].keys())[0]
     value = list(actions["actions"].values())[0]
@@ -158,9 +151,7 @@ def delete_actions(client, name):
 
 
 def test_actions():
-    import moon_manager.server
-    server = moon_manager.server.main()
-    client = server.app.test_client()
+    client = utilities.register_client()
     get_actions(client)
     add_actions(client, "testuser")
     delete_actions(client, "testuser")
