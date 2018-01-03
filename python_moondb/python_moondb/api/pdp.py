@@ -20,6 +20,8 @@ class PDPManager(Managers):
 
     @enforce(("read", "write"), "pdp")
     def update_pdp(self, user_id, pdp_id, value):
+        if pdp_id not in self.driver.get_pdp(pdp_id=pdp_id):
+            raise exceptions.PdpUnknown
         return self.driver.update_pdp(pdp_id=pdp_id, value=value)
 
     @enforce(("read", "write"), "pdp")
