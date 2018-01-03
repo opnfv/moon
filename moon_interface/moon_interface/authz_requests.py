@@ -7,11 +7,11 @@ import logging
 import itertools
 import pickle
 import requests
-from python_moonutilities import configuration, exceptions
-from python_moonutilities.security_functions import Context
+from python_moonutilities import exceptions
+from python_moonutilities.context import Context
 from python_moonutilities.cache import Cache
 
-LOG = logging.getLogger("moon.interface.authz_requests")
+logger = logging.getLogger("moon.interface.authz_requests")
 
 
 CACHE = Cache()
@@ -51,7 +51,7 @@ class AuthzRequest:
                         req.status_code
                     ))
         except requests.exceptions.ConnectionError:
-            LOG.error("Cannot connect to {}".format(
+            logger.error("Cannot connect to {}".format(
                 "http://{}:{}/authz".format(
                     self.container_chaining[0]["hostip"],
                     self.container_chaining[0]["port"]
@@ -69,7 +69,7 @@ class AuthzRequest:
                             req.status_code
                         ))
             except requests.exceptions.ConnectionError:
-                LOG.error("Cannot connect to {}".format(
+                logger.error("Cannot connect to {}".format(
                     "http://{}:{}/authz".format(
                         self.container_chaining[0]["hostname"],
                         self.container_chaining[0]["port"]
@@ -152,8 +152,3 @@ class AuthzRequest:
                 return True
         self.final_result = "Deny"
         return True
-
-    # def notify(self, request_id, container_id, payload):
-    #     LOG.info("notify {} {} {}".format(request_id, container_id, payload))
-    #     # TODO: send the notification and wait for the result
-    #     # req = requests.get()

@@ -5,7 +5,6 @@ import pickle
 import pytest
 import requests_mock
 from uuid import uuid4
-from requests.packages.urllib3.response import HTTPResponse
 
 CONF = {
     "openstack": {
@@ -205,7 +204,7 @@ def set_env_variables():
 
 
 def get_pickled_context():
-    from python_moonutilities.security_functions import Context
+    from python_moonutilities.context import Context
     from python_moonutilities.cache import Cache
     CACHE = Cache()
     CACHE.update()

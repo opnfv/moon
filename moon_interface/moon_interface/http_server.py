@@ -4,19 +4,18 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from flask import Flask, jsonify
-from flask_cors import CORS, cross_origin
 from flask_restful import Resource, Api
 import logging
 from moon_interface import __version__
-from moon_interface.api.generic import Status, Logs, API
+from moon_interface.api.generic import Status, API
 from moon_interface.api.authz import Authz
 from moon_interface.authz_requests import CACHE
 from python_moonutilities import configuration, exceptions
 
-logger = logging.getLogger("moon.interface.http")
+logger = logging.getLogger("moon.interface.http_server")
 
 __API__ = (
-    Status, Logs, API
+    Status, API
  )
 
 
@@ -72,7 +71,8 @@ class Root(Resource):
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
-        tree = {"/": {"methods": ("get",), "description": "List all methods for that service."}}
+        tree = {"/": {"methods": ("get",),
+                      "description": "List all methods for that service."}}
         for item in __API__:
             tree[item.__name__] = {"urls": item.__urls__}
             _methods = []
@@ -94,10 +94,9 @@ class HTTPServer(Server):
         self.app = Flask(__name__)
         self.port = port
         conf = configuration.get_configuration("components/manager")
-        self.manager_hostname = conf["components/manager"].get("hostname", "manager")
+        self.manager_hostname = conf["components/manager"].get("hostname",
+                                                               "manager")
         self.manager_port = conf["components/manager"].get("port", 80)
-        #Todo : specify only few urls instead of *
-        CORS(self.app)
         self.api = Api(self.app)
         self.__set_route()
         self.__hook_errors()
@@ -126,7 +125,9 @@ class HTTPServer(Server):
                               resource_class_kwargs={
                                   "cache": CACHE,
                                   "interface_name": self.host,
-                                  "manager_url": "http://{}:{}".format(self.manager_hostname, self.manager_port),
+                                  "manager_url": "http://{}:{}".format(
+                                      self.manager_hostname,
+                                      self.manager_port),
                               }
                               )
 

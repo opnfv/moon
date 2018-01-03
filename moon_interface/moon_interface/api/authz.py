@@ -10,15 +10,14 @@ from flask import request
 from flask_restful import Resource
 import logging
 import pickle
-import requests
 import time
 from uuid import uuid4
 
 from moon_interface.authz_requests import AuthzRequest
 
-__version__ = "0.1.0"
+__version__ = "4.3.1"
 
-LOG = logging.getLogger("moon.interface.api.authz." + __name__)
+logger = logging.getLogger("moon.interface.api.authz." + __name__)
 
 
 def pdp_in_cache(cache, uuid):
@@ -70,6 +69,10 @@ def create_authz_request(cache, interface_name, manager_url, uuid, subject_name,
     }
     cache.authz_requests[req_id] = AuthzRequest(ctx)
     return cache.authz_requests[req_id]
+
+
+def delete_authz_request(cache, req_id):
+    cache.authz_requests.pop(req_id)
 
 
 class Authz(Resource):
@@ -134,11 +137,14 @@ class Authz(Resource):
         cpt = 0
         while True:
             if cpt > self.TIMEOUT*10:
+                delete_authz_request(self.CACHE, authz_request.request_id)
                 return {"result": False,
                         "message": "Authz request had timed out."}, 500
             if authz_request.is_authz():
                 if authz_request.final_result == "Grant":
+                    delete_authz_request(self.CACHE, authz_request.request_id)
                     return {"result": True, "message": ""}, 200
+                delete_authz_request(self.CACHE, authz_request.request_id)
                 return {"result": False, "message": ""}, 401
             cpt += 1
             time.sleep(0.1)

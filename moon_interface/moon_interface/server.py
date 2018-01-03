@@ -7,10 +7,10 @@ import logging
 from python_moonutilities import configuration, exceptions
 from moon_interface.http_server import HTTPServer
 
-LOG = logging.getLogger("moon.interface.server")
+logger = logging.getLogger("moon.interface.server")
 
 
-def main():
+def create_server():
     configuration.init_logging()
     try:
         conf = configuration.get_configuration("components/interface")
@@ -21,11 +21,19 @@ def main():
         hostname = "interface"
         bind = "127.0.0.1"
         port = 80
-        configuration.add_component(uuid="interface", name=hostname, port=port, bind=bind)
-    LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
+        configuration.add_component(uuid="interface",
+                                    name=hostname,
+                                    port=port,
+                                    bind=bind)
+    logger.info("Starting server with IP {} on port {} bind to {}".format(
+        hostname, port, bind))
     return HTTPServer(host=bind, port=port)
 
 
-if __name__ == '__main__':
-    server = main()
+def run():
+    server = create_server()
     server.run()
+
+
+if __name__ == '__main__':
+    run()
