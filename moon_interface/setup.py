@@ -40,7 +40,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_interface = moon_interface.server:main',
+            'moon_interface = moon_interface.server:run',
         ],
     }
 
