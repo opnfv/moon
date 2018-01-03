@@ -4,15 +4,14 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import os
-from oslo_log import log as logging
+import logging
 from moon_authz.http_server import HTTPServer as Server
 from python_moonutilities import configuration
 
-LOG = logging.getLogger("moon.authz.server")
-DOMAIN = "moon_authz"
+logger = logging.getLogger("moon.authz.server")
 
 
-def main():
+def create_server():
     configuration.init_logging()
 
     component_id = os.getenv("UUID")
@@ -21,14 +20,16 @@ def main():
     pdp_id = os.getenv("PDP_ID")
     meta_rule_id = os.getenv("META_RULE_ID")
     keystone_project_id = os.getenv("KEYSTONE_PROJECT_ID")
-    LOG.info("component_type={}".format(component_type))
+    logger.info("component_type={}".format(component_type))
     conf = configuration.get_configuration("plugins/{}".format(component_type))
     conf["plugins/{}".format(component_type)]['id'] = component_id
-    hostname = conf["plugins/{}".format(component_type)].get('hostname', component_id)
+    hostname = conf["plugins/{}".format(component_type)].get('hostname',
+                                                             component_id)
     port = conf["plugins/{}".format(component_type)].get('port', tcp_port)
     bind = conf["plugins/{}".format(component_type)].get('bind', "0.0.0.0")
 
-    LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
+    logger.info("Starting server with IP {} on port {} bind to {}".format(
+        hostname, port, bind))
     server = Server(
         host=bind,
         port=int(port),
@@ -43,5 +44,10 @@ def main():
     return server
 
 
+def run():
+    server = create_server()
+    server.run()
+
+
 if __name__ == '__main__':
-    main()
+    run()

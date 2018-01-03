@@ -3,9 +3,8 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from flask import Flask, request
-# from flask_cors import CORS, cross_origin
-from flask_restful import Resource, Api, reqparse
+from flask import Flask
+from flask_restful import Resource, Api
 import logging
 from moon_authz import __version__
 from moon_authz.api.authorization import Authz
@@ -61,6 +60,7 @@ class Server:
     def run(self):
         raise NotImplementedError()
 
+
 __API__ = (
     Authz,
  )
@@ -74,7 +74,8 @@ class Root(Resource):
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
-        tree = {"/": {"methods": ("get",), "description": "List all methods for that service."}}
+        tree = {"/": {"methods": ("get",),
+                      "description": "List all methods for that service."}}
         for item in __API__:
             tree[item.__name__] = {"urls": item.__urls__}
             _methods = []
@@ -101,8 +102,6 @@ class HTTPServer(Server):
         self.app = Flask(__name__)
         self._port = port
         self._host = host
-        # Todo : specify only few urls instead of *
-        # CORS(self.app)
         self.component_id = kwargs.get("component_id")
         self.keystone_project_id = kwargs.get("keystone_project_id")
         self.container_chaining = kwargs.get("container_chaining")

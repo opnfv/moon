@@ -10,15 +10,15 @@ pdp_mock = {
         "keystone_project_id": "a64beb1cc224474fb4badd43173e7101"
     },
     "pdp_id1": {
-        "name": "...",
+        "name": "pdp_id1",
         "security_pipeline": ["policy_id_1", "policy_id_2"],
         "keystone_project_id": "keystone_project_id1",
         "description": "...",
     },
     "pdp_id12": {
-        "name": "...",
+        "name": "pdp_id2",
         "security_pipeline": ["policy_id_1", "policy_id_2"],
-        "keystone_project_id": "keystone_project_id1",
+        "keystone_project_id": "keystone_project_id2",
         "description": "...",
     }
 }
@@ -100,7 +100,7 @@ subject_mock = {
     "policy_id_2": {
         "subject_id": {
             "name": "subject_name",
-            "keystone_id": "keystone_project_id1",
+            "keystone_id": "keystone_project_id2",
             "description": "a description"
         }
     }

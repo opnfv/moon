@@ -3,30 +3,21 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import binascii
 import itertools
 import pickle
-from uuid import uuid4
 import logging
-from python_moonutilities import exceptions
 import flask
 from flask import request
 from flask_restful import Resource
 
-# TODO (asteroide):
-# - end the dev of the context
-# - rebuild the authorization function according to the context
-# - call the next security function
-# - call the master if an element is absent
-
-LOG = logging.getLogger("moon.authz.api." + __name__)
+logger = logging.getLogger("moon.authz.api." + __name__)
 
 
 class Authz(Resource):
     """
     Endpoint for authz requests
     """
-    __version__ = "0.1.0"
+    __version__ = "4.3.1"
 
     __urls__ = (
         "/authz",
@@ -82,7 +73,7 @@ class Authz(Resource):
         return response
 
     def run(self):
-        LOG.info("self.context.pdp_set={}".format(self.context.pdp_set))
+        logger.info("self.context.pdp_set={}".format(self.context.pdp_set))
         result, message = self.__check_rules()
         if result:
             return self.__exec_instructions(result)
@@ -108,10 +99,10 @@ class Authz(Resource):
         for item in itertools.product(*scopes_list):
             req = list(item)
             for rule in self.cache.rules[self.context.current_policy_id]["rules"]:
-                LOG.info("rule={}".format(rule))
+                logger.info("rule={}".format(rule))
                 if req == rule['rule']:
                     return rule['instructions'], ""
-        LOG.warning("No rule match the request...")
+        logger.warning("No rule match the request...")
         return False, "No rule match the request..."
 
     def __update_subject_category_in_policy(self, operation, target):
@@ -119,7 +110,7 @@ class Authz(Resource):
         try:
             policy_name, category_name, data_name = target.split(":")
         except ValueError:
-            LOG.error("Cannot understand value in instruction ({})".format(target))
+            logger.error("Cannot understand value in instruction ({})".format(target))
             return False
         # pdp_set = self.payload["authz_context"]['pdp_set']
         for meta_rule_id in self.context.pdp_set:
@@ -131,7 +122,7 @@ class Authz(Resource):
                         subject_category_id = category_id
                         break
                 else:
-                    LOG.error("Cannot understand category in instruction ({})".format(target))
+                    logger.error("Cannot understand category in instruction ({})".format(target))
                     return False
                 subject_data_id = None
                 for data in PolicyManager.get_subject_data("admin", policy_id, category_id=subject_category_id):
@@ -142,7 +133,7 @@ class Authz(Resource):
                     if subject_data_id:
                         break
                 else:
-                    LOG.error("Cannot understand data in instruction ({})".format(target))
+                    logger.error("Cannot understand data in instruction ({})".format(target))
                     return False
                 if operation == "add":
                     self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][subject_category_id].append(
@@ -152,7 +143,7 @@ class Authz(Resource):
                         self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][subject_category_id].remove(
                             subject_data_id)
                     except ValueError:
-                        LOG.warning("Cannot remove role {} from target".format(data_name))
+                        logger.warning("Cannot remove role {} from target".format(data_name))
                 result = True
                 break
         return result
@@ -234,7 +225,7 @@ class Authz(Resource):
                 if key == "decision":
                     if instruction["decision"] == "grant":
                         self.context.current_state = "grant"
-                        LOG.info("__exec_instructions True {}".format(
+                        logger.info("__exec_instructions True {}".format(
                             self.context.current_state))
                         return True
                     else:
@@ -251,7 +242,7 @@ class Authz(Resource):
                         self.context.current_state = "deny"
                     else:
                         self.context.current_state = "passed"
-        LOG.info("__exec_instructions False {}".format(self.context.current_state))
+        logger.info("__exec_instructions False {}".format(self.context.current_state))
 
     # def __update_current_request(self):
     #     index = self.payload["authz_context"]["index"]
@@ -360,15 +351,15 @@ class Authz(Resource):
                     "args": self.payload}
         except Exception as e:
             try:
-                LOG.error(self.payload["authz_context"])
+                logger.error(self.payload["authz_context"])
             except KeyError:
-                LOG.error("Cannot find \"authz_context\" in context")
-            LOG.error(e, exc_info=True)
+                logger.error("Cannot find \"authz_context\" in context")
+            logger.error(e, exc_info=True)
             return {"authz": False,
                     "error": str(e),
                     "pdp_id": self.pdp_id,
                     "args": self.payload}
 
     def head(self, uuid=None, subject_name=None, object_name=None, action_name=None):
-        LOG.info("HEAD request")
+        logger.info("HEAD request")
         return "", 200
