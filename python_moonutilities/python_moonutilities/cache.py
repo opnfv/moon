@@ -247,7 +247,7 @@ class Cache(object):
             self.__update_subject_assignments(policy_id, perimeter_id)
 
         for key, value in self.subject_assignments[policy_id].items():
-            if "subject_id" and "category_id" and "assignments" in value:
+            if all(k in value for k in ("subject_id", "category_id", "assignments")):
                 if perimeter_id == value['subject_id'] and category_id == value['category_id']:
                     return value['assignments']
             else:
@@ -284,7 +284,7 @@ class Cache(object):
             self.__update_object_assignments(policy_id, perimeter_id)
 
         for key, value in self.object_assignments[policy_id].items():
-            if "object_id" and "category_id" and "assignments" in value:
+            if all(k in value for k in ("object_id", "category_id", "assignments")):
                 if perimeter_id == value['object_id'] and category_id == value['category_id']:
                     return value['assignments']
             else:
@@ -321,7 +321,7 @@ class Cache(object):
             self.__update_action_assignments(policy_id, perimeter_id)
 
         for key, value in self.action_assignments[policy_id].items():
-            if "action_id" and "category_id" and "assignments" in value:
+            if all(k in value for k in ("action_id", "category_id", "assignments")):
                 if perimeter_id == value['action_id'] and category_id == value['category_id']:
                     return value['assignments']
             else:
@@ -551,10 +551,9 @@ class Cache(object):
 
         :return:
         """
-        if "keystone_project_id" and "name" and "container_id" and "policy_id" and "meta_rule_id" \
-                and "port" in container_data \
-                and "PublicPort" in container_data['port'] and "Type" in container_data['port'] \
-                and "IP" in container_data['port'] and "PrivatePort" in container_data['port']:
+        if all(k in container_data for k in ("keystone_project_id", "name", "container_id", "policy_id",
+                                             "meta_rule_id", "port")) \
+                and all(k in container_data['port'] for k in ("PublicPort", "Type", "IP", "PrivatePort")):
 
             self.__CONTAINERS[uuid4().hex] = {
                 "keystone_project_id": container_data['keystone_project_id'],
@@ -629,7 +628,7 @@ class Cache(object):
         container_ids = []
         for pdp_id, pdp_value, in self.pdp.items():
             if pdp_value:
-                if "keystone_project_id" and "security_pipeline" in pdp_value \
+                if all(k in pdp_value for k in ("keystone_project_id", "security_pipeline")) \
                         and pdp_value["keystone_project_id"] == keystone_project_id:
                     for policy_id in pdp_value["security_pipeline"]:
                         if policy_id in self.policies and "model_id" in self.policies[policy_id]:
@@ -645,7 +644,7 @@ class Cache(object):
                                                 self.orchestrator_url, container_value["name"])
                                             )
                                             logger.debug("_raw={}".format(_raw.text))
-                                            if "genre" and "port" in container_value:
+                                            if all(k in container_value for k in ("genre", "port")):
                                                 container_ids.append(
                                                     {
                                                         "container_id": container_value["name"],
