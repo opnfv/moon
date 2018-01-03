@@ -534,3 +534,18 @@ class PdpExisting(MoonError):
     code = 409
     title = 'Pdp Error'
     logger = "Error"
+
+
+class PolicyUnknown(MoonError):
+    description = _("The policy is unknown.")
+    code = 400
+    title = 'Policy Unknown'
+    logger = "Error"
+
+
+class PolicyExisting(MoonError):
+    description = _("The policy already exists.")
+    code = 409
+    title = 'Policy Error'
+    logger = "Error"
+
