@@ -134,3 +134,5 @@ def get_b64_conf(component=None):
         return base64.b64encode(
             json.dumps(
                 CONF[key1][key2]).encode('utf-8')+b"\n").decode('utf-8')
+    else:
+        return base64.b64encode(component.encode('utf-8')+b"\n").decode('utf-8')

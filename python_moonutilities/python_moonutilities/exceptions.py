@@ -507,7 +507,7 @@ class ConsulComponentNotFound(ConsulError):
 class ConsulComponentContentError(ConsulError):
     description = _("invalid content of component .")
     code = 500
-    title = 'Consul error'
+    title = 'Consul Content error'
     logger = "WARNING"
 
 # Containers exceptions
