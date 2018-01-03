@@ -1,4 +1,4 @@
-from moon_orchestrator.server import main
+from moon_orchestrator.server import create_server
 
-server = main()
+server = create_server()
 server.run()

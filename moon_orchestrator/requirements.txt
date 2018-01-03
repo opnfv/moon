@@ -3,6 +3,5 @@ flask_restful
 flask_cors
 werkzeug
 python_moonutilities
-python_moondb
 kubernetes
 pyaml

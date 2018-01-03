@@ -11,9 +11,9 @@ import logging
 import moon_orchestrator.api
 from python_moonutilities.security_functions import check_auth
 
-__version__ = "0.1.0"
+__version__ = "4.3.1"
 
-LOG = logging.getLogger("moon.orchestrator.api." + __name__)
+logger = logging.getLogger("moon.orchestrator.api." + __name__)
 
 
 class Status(Resource):
@@ -35,41 +35,6 @@ class Status(Resource):
           }
         }
         """
-        raise NotImplemented
-
-
-class Logs(Resource):
-    """
-    Endpoint for logs requests
-    """
-
-    __urls__ = ("/logs", "/logs/", "/logs/<string:component_id>")
-
-    def get(self, component_id=None):
-        """Get logs from the Moon platform
-
-        :param component_id: the ID of the component your are looking for (optional)
-        :return: [
-            "2015-04-15-13:45:20
-            "2015-04-15-13:45:21
-            "2015-04-15-13:45:22
-            "2015-04-15-13:45:23
-        ]
-        """
-        filter_str = request.args.get('filter', '')
-        from_str = request.args.get('from', '')
-        to_str = request.args.get('to', '')
-        event_number = request.args.get('event_number', '')
-        try:
-            event_number = int(event_number)
-        except ValueError:
-            event_number = None
-        args = dict()
-        args["filter"] = filter_str
-        args["from"] = from_str
-        args["to"] = to_str
-        args["event_number"] = event_number
-
         raise NotImplemented
 
 
@@ -125,7 +90,7 @@ class API(Resource):
             if endpoint_id in api_desc[group_id]:
                 return {group_id: {endpoint_id: api_desc[group_id][endpoint_id]}}
             elif len(endpoint_id) > 0:
-                LOG.error("Unknown endpoint_id {}".format(endpoint_id))
+                logger.error("Unknown endpoint_id {}".format(endpoint_id))
                 return {"error": "Unknown endpoint_id {}".format(endpoint_id)}
             return {group_id: api_desc[group_id]}
         return api_desc

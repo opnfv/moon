@@ -7,7 +7,7 @@ def test_get_pods(context, monkeypatch):
     patch_k8s(monkeypatch)
 
     import moon_orchestrator.server
-    server = moon_orchestrator.server.main()
+    server = moon_orchestrator.server.create_server()
     _client = server.app.test_client()
     req = _client.get("/pods")
     assert req.status_code == 200
@@ -21,7 +21,7 @@ def test_add_pods(context, monkeypatch):
     patch_k8s(monkeypatch)
 
     import moon_orchestrator.server
-    server = moon_orchestrator.server.main()
+    server = moon_orchestrator.server.create_server()
     _client = server.app.test_client()
     data = {
         "keystone_project_id": context.get('project_id'),

@@ -8,14 +8,14 @@ import logging
 import urllib3.exceptions
 from python_moonutilities import configuration
 
-LOG = logging.getLogger("moon.orchestrator.drivers")
+logger = logging.getLogger("moon.orchestrator.drivers")
 
 
 def get_driver():
     try:
         return K8S()
     except urllib3.exceptions.MaxRetryError as e:
-        LOG.exception(e)
+        logger.exception(e)
         return Docker()
 
 
@@ -60,12 +60,12 @@ class K8S(Driver):
         if name:
             pods = self.client.list_pod_for_all_namespaces(watch=False)
             for pod in pods.items:
-                LOG.info("get_pods {}".format(pod.metadata.name))
+                logger.debug("get_pods {}".format(pod.metadata.name))
                 if name in pod.metadata.name:
                     return pod
             else:
                 return None
-        LOG.info("get_pods cache={}".format(self.cache))
+        logger.debug("get_pods cache={}".format(self.cache))
         return self.cache
 
     @staticmethod
@@ -109,9 +109,7 @@ class K8S(Driver):
             )
         resp = client.create_namespaced_deployment(body=pod_manifest,
                                                    namespace='moon')
-        LOG.info("Pod {} created!".format(data[0].get('name')))
-        # logger.info(yaml.dump(pod_manifest, sys.stdout))
-        # logger.info(resp)
+        logger.info("Pod {} created!".format(data[0].get('name')))
         return resp
 
     @staticmethod
@@ -144,18 +142,18 @@ class K8S(Driver):
             service_manifest['spec']['type'] = "NodePort"
         resp = client.create_namespaced_service(namespace="moon",
                                                 body=service_manifest)
-        LOG.info("Service {} created!".format(data.get('name')))
+        logger.info("Service {} created!".format(data.get('name')))
         return resp
 
     def load_pod(self, data, api_client=None, ext_client=None, expose=False):
         _client = api_client if api_client else self.client
         pod = self.__create_pod(client=ext_client, data=data)
-        service = self.__create_service(client=_client, data=data[0],
+        self.__create_service(client=_client, data=data[0],
                                         expose=expose)
         self.cache[pod.metadata.uid] = data
 
     def delete_pod(self, uuid=None, name=None):
-        LOG.info("Deleting pod {}".format(uuid))
+        logger.info("Deleting pod {}".format(uuid))
         # TODO: delete_namespaced_deployment
         # https://github.com/kubernetes-incubator/client-python/blob/master/kubernetes/client/apis/extensions_v1beta1_api.py
 
@@ -167,9 +165,9 @@ class K8S(Driver):
 class Docker(Driver):
 
     def load_pod(self, data, api_client=None, ext_client=None):
-        LOG.info("Creating pod {}".format(data[0].get('name')))
+        logger.info("Creating pod {}".format(data[0].get('name')))
         raise NotImplementedError
 
     def delete_pod(self, uuid=None, name=None):
-        LOG.info("Deleting pod {}".format(uuid))
+        logger.info("Deleting pod {}".format(uuid))
         raise NotImplementedError

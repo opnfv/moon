@@ -3,31 +3,37 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import os
 import logging
 from python_moonutilities import configuration, exceptions
 from moon_orchestrator.http_server import HTTPServer
 
-LOG = logging.getLogger("moon.orchestrator.server")
-DOMAIN = "moon_orchestrator"
+logger = logging.getLogger("moon.orchestrator.server")
 
 
-def main():
+def create_server():
     configuration.init_logging()
     try:
         conf = configuration.get_configuration("components/orchestrator")
-        hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
+        hostname = conf["components/orchestrator"].get("hostname",
+                                                       "orchestrator")
         port = conf["components/orchestrator"].get("port", 80)
         bind = conf["components/orchestrator"].get("bind", "127.0.0.1")
     except exceptions.ConsulComponentNotFound:
         hostname = "orchestrator"
         bind = "127.0.0.1"
         port = 80
-        configuration.add_component(uuid="orchestrator", name=hostname, port=port, bind=bind)
-    LOG.info("Starting server with IP {} on port {} bind to {}".format(hostname, port, bind))
+        configuration.add_component(uuid="orchestrator", name=hostname,
+                                    port=port, bind=bind)
+    logger.info("Starting server with IP {} on port {} bind to {}".format(
+        hostname, port, bind))
     return HTTPServer(host=bind, port=port)
 
 
+def run():
+    server = create_server()
+    server.run()
+
+
 if __name__ == '__main__':
-    server = main()
+    server = create_server()
     server.run()

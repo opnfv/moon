@@ -8,13 +8,15 @@ from flask_restful import Resource
 from python_moonutilities.security_functions import check_auth
 import logging
 
-LOG = logging.getLogger("moon.orchestrator.api.pods")
+logger = logging.getLogger("moon.orchestrator.api.pods")
 
 
 class Pods(Resource):
     """
     Endpoint for pdp requests
     """
+
+    __version__ = "4.3.1"
 
     __urls__ = (
         "/pods",
@@ -25,7 +27,7 @@ class Pods(Resource):
 
     def __init__(self, **kwargs):
         self.driver = kwargs.get("driver")
-        self.create_security_function = kwargs.get("create_security_function_hook")
+        self.create_pipeline = kwargs.get("create_pipeline_hook")
 
     @check_auth
     def get(self, uuid=None, user_id=None):
@@ -43,7 +45,6 @@ class Pods(Resource):
         :internal_api: get_pdp
         """
         pods = {}
-        # LOG.info("pods={}".format(self.driver.get_pods()))
         if uuid:
             return {"pods": self.driver.get_pods(uuid)}
         for _pod_key, _pod_values in self.driver.get_pods().items():
@@ -73,8 +74,8 @@ class Pods(Resource):
             }
         }
         """
-        LOG.info("POST param={}".format(request.json))
-        self.create_security_function(
+        logger.debug("POST param={}".format(request.json))
+        self.create_pipeline(
             request.json.get("keystone_project_id"),
             request.json.get("pdp_id"),
             request.json.get("security_pipeline"),
