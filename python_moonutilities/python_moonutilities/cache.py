@@ -204,7 +204,7 @@ class Cache(object):
 
     def __update_rules(self):
         for policy_id in self.policies:
-            logger.info("Get {}".format("{}/policies/{}/rules".format(
+            logger.debug("Get {}".format("{}/policies/{}/rules".format(
                 self.manager_url, policy_id)))
 
             response = requests.get("{}/policies/{}/rules".format(
@@ -214,7 +214,7 @@ class Cache(object):
             else:
                 logger.warning(" no 'rules' found within policy_id: {}".format(policy_id))
 
-        logger.info("UPDATE RULES {}".format(self.__RULES))
+        logger.debug("UPDATE RULES {}".format(self.__RULES))
 
     # assignment functions
 
@@ -252,7 +252,7 @@ class Cache(object):
                     return value['assignments']
             else:
                 logger.warning("'subject_id' or 'category_id' or'assignments'"
-                            " keys are not found in subject_assignments")
+                               " keys are not found in subject_assignments")
         return []
 
     @property
@@ -289,7 +289,7 @@ class Cache(object):
                     return value['assignments']
             else:
                 logger.warning("'object_id' or 'category_id' or'assignments'"
-                            " keys are not found in object_assignments")
+                               " keys are not found in object_assignments")
         return []
 
     @property
@@ -326,7 +326,7 @@ class Cache(object):
                     return value['assignments']
             else:
                 logger.warning("'action_id' or 'category_id' or'assignments'"
-                            " keys are not found in action_assignments")
+                               " keys are not found in action_assignments")
         return []
 
     # category functions
@@ -398,7 +398,7 @@ class Cache(object):
                 self.__PDP[key] = value
 
         else:
-            raise exceptions.PDPNotFound("Cannot find 'pdps' key")
+            raise exceptions.PdpError("Cannot find 'pdps' key")
 
     @property
     def pdp(self):
@@ -476,24 +476,33 @@ class Cache(object):
                             if meta_rule_id in self.models[model_id]["meta_rules"]:
                                 return policy_id
                         else:
-                            logger.warning("Cannot find model_id: {} within models and 'meta_rules' key".format(model_id))
+                            logger.warning(
+                                "Cannot find model_id: {} within "
+                                "models and 'meta_rules' key".format(model_id))
                     else:
-                        logger.warning("Cannot find policy_id: {} within policies and 'model_id' key".format(policy_id))
+                        logger.warning(
+                            "Cannot find policy_id: {} "
+                            "within policies and 'model_id' key".format(
+                                policy_id))
             else:
-                logger.warning("Cannot find 'security_pipeline' key within pdp ")
+                logger.warning("Cannot find 'security_pipeline' "
+                               "key within pdp ")
 
     def get_pdp_from_keystone_project(self, keystone_project_id):
         for pdp_key, pdp_value in self.pdp.items():
-            if "keystone_project_id" in pdp_value and keystone_project_id == pdp_value["keystone_project_id"]:
+            if "keystone_project_id" in pdp_value and \
+                    keystone_project_id == pdp_value["keystone_project_id"]:
                 return pdp_key
 
     def get_keystone_project_id_from_policy_id(self, policy_id):
         for pdp_key, pdp_value in self.pdp.items():
-            if "security_pipeline" in pdp_value and "keystone_project_id" in pdp_value:
+            if "security_pipeline" in pdp_value and \
+                    "keystone_project_id" in pdp_value:
                 if policy_id in pdp_value["security_pipeline"]:
                     return pdp_value["keystone_project_id"]
             else:
-                logger.warning(" 'security_pipeline','keystone_project_id' key not in pdp {}".format(pdp_value))
+                logger.warning(" 'security_pipeline','keystone_project_id' "
+                               "key not in pdp {}".format(pdp_value))
                 # for policy_id in pdp_value["security_pipeline"]:
                 #     model_id = self.policies[policy_id]["model_id"]
                 #     if meta_rule_id in self.models[model_id]["meta_rules"]:
@@ -508,7 +517,8 @@ class Cache(object):
                 if container_value['keystone_project_id'] == keystone_project_id:
                     if not meta_rule_id:
                         yield container_id, container_value
-                    elif "meta_rule_id" in container_value and container_value.get('meta_rule_id') == meta_rule_id:
+                    elif "meta_rule_id" in container_value and \
+                            container_value.get('meta_rule_id') == meta_rule_id:
                         yield container_id, container_value
                         break
 
@@ -622,12 +632,11 @@ class Cache(object):
                 else:
                     logger.warning("no 'keystone_project_id' found")
         self.__CONTAINER_CHAINING_UPDATE = current_time
-        logger.info(self.__CONTAINER_CHAINING_UPDATE)
         return self.__CONTAINER_CHAINING
 
     def __update_container_chaining(self, keystone_project_id):
         container_ids = []
-        for pdp_id, pdp_value, in self.pdp.items():
+        for pdp_id, pdp_value, in self.__PDP.items():
             if pdp_value:
                 if "keystone_project_id" and "security_pipeline" in pdp_value \
                         and pdp_value["keystone_project_id"] == keystone_project_id:
@@ -641,10 +650,6 @@ class Cache(object):
                                             meta_rule_id
                                     ):
                                         if "name" in container_value:
-                                            _raw = requests.get("{}/pods/{}".format(
-                                                self.orchestrator_url, container_value["name"])
-                                            )
-                                            logger.debug("_raw={}".format(_raw.text))
                                             if "genre" and "port" in container_value:
                                                 container_ids.append(
                                                     {
@@ -667,8 +672,6 @@ class Cache(object):
                         else:
                             raise exceptions.PolicyUnknown("Cannot find policy within policy_id: {}, "
                                                            "and may not contains 'model_id' key".format(policy_id))
-                else:
-                    raise exceptions.PDPError("Cannot find 'keystone_project_id','security_pipeline' pdp keys")
 
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
 
