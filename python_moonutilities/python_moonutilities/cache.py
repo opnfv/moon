@@ -153,7 +153,7 @@ class Cache(object):
         if 'actions' in response.json():
             self.__ACTIONS[policy_id] = response.json()['actions']
         else:
-            raise exceptions.ObjectUnknown("Cannot find action within policy_id {}".format(policy_id))
+            raise exceptions.ActionUnknown("Cannot find action within policy_id {}".format(policy_id))
 
     def get_action(self, policy_id, name):
         if not policy_id:

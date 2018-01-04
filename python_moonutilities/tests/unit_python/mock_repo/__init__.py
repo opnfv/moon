@@ -15,8 +15,12 @@ def register_cache(m):
 
     register_urls.register_policy_subject(m, data_mock.shared_ids["policy"]["policy_id_1"])
     register_urls.register_policy_subject_invalid_response(m, data_mock.shared_ids["policy"]["policy_id_invalid_response"])
+
     register_urls.register_policy_object(m, data_mock.shared_ids["policy"]["policy_id_1"])
+    register_urls.register_policy_object_invalid_response(m, data_mock.shared_ids["policy"]["policy_id_invalid_response"])
+
     register_urls.register_policy_action(m, data_mock.shared_ids["policy"]["policy_id_1"])
+    register_urls.register_policy_action_invalid_response(m, data_mock.shared_ids["policy"]["policy_id_invalid_response"])
 
     register_urls.register_policy_subject_assignment(m, data_mock.shared_ids["policy"]["policy_id_1"], data_mock.shared_ids["perimeter"]["perimeter_id_1"])
 

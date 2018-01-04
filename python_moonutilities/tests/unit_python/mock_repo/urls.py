@@ -106,8 +106,14 @@ def register_policy_subject_invalid_response(m, policy_id):
 def register_policy_object(m, policy_id):
     register_policy_any(m, policy_id, 'objects', data_mock.object_mock[policy_id])
 
+def register_policy_object_invalid_response(m, policy_id):
+    register_policy_any(m, policy_id, 'objects', data_mock.subject_mock[policy_id],'objects_invalid_key')
+
 def register_policy_action(m, policy_id):
     register_policy_any(m, policy_id, 'actions', data_mock.action_mock[policy_id])
+
+def register_policy_action_invalid_response(m, policy_id):
+    register_policy_any(m, policy_id, 'actions', data_mock.subject_mock[policy_id],'actions_invalid_key')
 
 def register_policy_subject_assignment_list(m, policy_id):
     register_policy_any(m, policy_id, 'subject_assignments', data_mock.subject_assignment_mock)
