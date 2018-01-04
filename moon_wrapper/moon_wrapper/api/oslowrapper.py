@@ -16,7 +16,7 @@ from python_moonutilities import exceptions
 
 __version__ = "0.1.0"
 
-LOG = logging.getLogger("moon.wrapper.api." + __name__)
+logger = logging.getLogger("moon.wrapper.api." + __name__)
 
 
 class OsloWrapper(Resource):
@@ -35,7 +35,7 @@ class OsloWrapper(Resource):
         self.TIMEOUT = 5
 
     def post(self):
-        LOG.debug("POST {}".format(request.form))
+        logger.debug("POST {}".format(request.form))
         response = flask.make_response("False")
         if self.manage_data():
             response = flask.make_response("True")
@@ -62,16 +62,16 @@ class OsloWrapper(Resource):
 
     @staticmethod
     def __get_project_id(target, credentials):
-        LOG.info("__get_project_id {}".format(target))
+        logger.info("__get_project_id {}".format(target))
         return target.get("project_id", "none")
 
     def get_interface_url(self, project_id):
-        LOG.info("project_id {}".format(project_id))
+        logger.debug("project_id {}".format(project_id))
         for containers in self.CACHE.containers.values():
-            LOG.info("containers {}".format(containers))
+            logger.info("containers {}".format(containers))
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "interface" in container['name']:
+                    if "pipeline" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])
@@ -80,7 +80,7 @@ class OsloWrapper(Resource):
         for containers in self.CACHE.containers.values():
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "interface" in container['name']:
+                    if "pipeline" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])
@@ -99,11 +99,11 @@ class OsloWrapper(Resource):
         _object = self.__get_object(target, credentials)
         _action = rule
         _project_id = self.__get_project_id(target, credentials)
-        LOG.debug("POST with args project={} / "
+        logger.debug("POST with args project={} / "
                   "subject={} - object={} - action={}".format(
                     _project_id, _subject, _object, rule))
         interface_url = self.get_interface_url(_project_id)
-        LOG.debug("interface_url={}".format(interface_url))
+        logger.debug("interface_url={}".format(interface_url))
         req = requests.get("{}/authz/{}/{}/{}/{}".format(
             interface_url,
             _project_id,
@@ -111,7 +111,7 @@ class OsloWrapper(Resource):
             _object,
             _action
         ))
-        LOG.debug("Get interface {}".format(req.text))
+        logger.debug("Get interface {}".format(req.text))
         if req.status_code == 200:
             if req.json().get("result", False):
                 return True

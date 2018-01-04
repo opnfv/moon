@@ -4,21 +4,19 @@ set +x
 
 kubectl delete -n moon -f tools/moon_kubernetes/templates/moon_orchestrator.yaml
 for i in $(kubectl get deployments -n moon | grep wrapper | cut -d  " " -f 1 | xargs); do
+    echo deleting $i
     kubectl delete deployments/$i -n moon;
 done
-for i in $(kubectl get deployments -n moon | grep interface | cut -d  " " -f 1 | xargs); do
-    kubectl delete deployments/$i -n moon;
-done
-for i in $(kubectl get deployments -n moon | grep authz | cut -d  " " -f 1 | xargs); do
+for i in $(kubectl get deployments -n moon | grep pipeline | cut -d  " " -f 1 | xargs); do
+    echo deleting $i
     kubectl delete deployments/$i -n moon;
 done
 for i in $(kubectl get services -n moon | grep wrapper | cut -d  " " -f 1 | xargs); do
+    echo deleting $i
     kubectl delete services/$i -n moon;
 done
-for i in $(kubectl get services -n moon | grep interface | cut -d  " " -f 1 | xargs); do
-    kubectl delete services/$i -n moon;
-done
-for i in $(kubectl get services -n moon | grep authz | cut -d  " " -f 1 | xargs); do
+for i in $(kubectl get services -n moon | grep pipeline | cut -d  " " -f 1 | xargs); do
+    echo deleting $i
     kubectl delete services/$i -n moon;
 done
 

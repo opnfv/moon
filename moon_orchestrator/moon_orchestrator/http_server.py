@@ -179,7 +179,6 @@ class HTTPServer(Server):
             logger.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
             ext_client = client.ExtensionsV1beta1Api(_config)
-            # TODO: get data from consul
             data = [{
                 "name": hostname + "-" + get_random_name(),
                 "container": container,
@@ -217,15 +216,15 @@ class HTTPServer(Server):
                     return
 
         plugins = configuration.get_plugins()
-        conf = configuration.get_configuration("components/interface")
-        i_hostname = conf["components/interface"].get("hostname", "interface")
-        i_port = conf["components/interface"].get("port", 80)
-        i_container = conf["components/interface"].get(
+        conf = configuration.get_configuration("components/pipeline")
+        # i_hostname = conf["components/pipeline"].get("interface").get("hostname", "interface")
+        i_port = conf["components/pipeline"].get("interface").get("port", 80)
+        i_container = conf["components/pipeline"].get("interface").get(
             "container",
             "wukongsun/moon_interface:v4.3")
         data = [
             {
-                "name": i_hostname + "-" + get_random_name(),
+                "name": "pipeline-" + get_random_name(),
                 "container": i_container,
                 "port": i_port,
                 'pdp_id': pdp_id,

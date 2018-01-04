@@ -13,15 +13,16 @@ logger = logging.getLogger("moon.interface.server")
 def create_server():
     configuration.init_logging()
     try:
-        conf = configuration.get_configuration("components/interface")
-        hostname = conf["components/interface"].get("hostname", "interface")
-        port = conf["components/interface"].get("port", 80)
-        bind = conf["components/interface"].get("bind", "127.0.0.1")
+        conf = configuration.get_configuration("components/pipeline").get(
+            "components/pipeline", {}).get("interface", {})
+        hostname = conf.get("hostname", "pipeline")
+        port = conf.get("port", 80)
+        bind = conf.get("bind", "127.0.0.1")
     except exceptions.ConsulComponentNotFound:
         hostname = "interface"
         bind = "127.0.0.1"
         port = 80
-        configuration.add_component(uuid="interface",
+        configuration.add_component(uuid="pipeline",
                                     name=hostname,
                                     port=port,
                                     bind=bind)

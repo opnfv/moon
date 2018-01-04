@@ -73,7 +73,7 @@ class Authz(Resource):
         return response
 
     def run(self):
-        logger.info("self.context.pdp_set={}".format(self.context.pdp_set))
+        logger.debug("self.context.pdp_set={}".format(self.context.pdp_set))
         result, message = self.__check_rules()
         if result:
             return self.__exec_instructions(result)

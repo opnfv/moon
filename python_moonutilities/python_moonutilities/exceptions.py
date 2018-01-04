@@ -3,7 +3,7 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-from oslo_log import log as logging
+import logging
 from werkzeug.exceptions import HTTPException
 
 logger = logging.getLogger("moon.utilities.exceptions")

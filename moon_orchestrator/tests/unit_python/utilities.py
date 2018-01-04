@@ -144,7 +144,7 @@ COMPONENTS = (
     "slave",
     "components/manager",
     "components/orchestrator",
-    "components/interface",
+    "components/pipeline",
     "components/wrapper",
 )
 

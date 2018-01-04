@@ -7,13 +7,13 @@ Those API are helping API used to manage the Moon platform.
 """
 
 from flask_restful import Resource, request
-from oslo_log import log as logging
+import logging
 import moon_wrapper.api
 from python_moonutilities.security_functions import check_auth
 
 __version__ = "0.1.0"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Status(Resource):
@@ -125,7 +125,7 @@ class API(Resource):
             if endpoint_id in api_desc[group_id]:
                 return {group_id: {endpoint_id: api_desc[group_id][endpoint_id]}}
             elif len(endpoint_id) > 0:
-                LOG.error("Unknown endpoint_id {}".format(endpoint_id))
+                logger.error("Unknown endpoint_id {}".format(endpoint_id))
                 return {"error": "Unknown endpoint_id {}".format(endpoint_id)}
             return {group_id: api_desc[group_id]}
         return api_desc

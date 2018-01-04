@@ -25,10 +25,11 @@ def init_logging():
     config = get_configuration("logging")
     logging.config.dictConfig(config['logging'])
 
+
 def increment_port():
     components_object = get_configuration("components/port_start")
-    if 'port_start' in components_object:
-        components_port_start = int(get_configuration("components/port_start")['port_start'])
+    if 'components/port_start' in components_object:
+        components_port_start = int(components_object['components/port_start'])
         components_port_start += 1
     else:
         raise exceptions.ConsulComponentContentError("error={}".format(components_object))
@@ -38,6 +39,7 @@ def increment_port():
         logger.info("url={}".format(url))
         raise exceptions.ConsulError
     return components_port_start
+
 
 def get_configuration(key):
     url = "http://{}:{}/v1/kv/{}".format(CONSUL_HOST, CONSUL_PORT, key)
@@ -62,6 +64,7 @@ def get_configuration(key):
             } for item in data
         ]
 
+
 def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra=None, container=None):
     data = {
         "hostname": name,
@@ -81,29 +84,16 @@ def add_component(name, uuid, port=None, bind="127.0.0.1", keystone_id="", extra
         logger.debug("data={}".format(data))
         raise exceptions.ConsulError
     logger.info("Add component {}".format(req.text))
-    return configuration.get_configuration("components/"+uuid)
+    return get_configuration("components/"+uuid)
+
 
 def get_plugins():
-    url = "http://{}:{}/v1/kv/plugins?recurse=true".format(CONSUL_HOST, CONSUL_PORT)
-    req = requests.get(url)
-    if req.status_code != 200:
-        logger.info("url={}".format(url))
-        raise exceptions.ConsulError
-    data = req.json()
-    if len(data) == 1:
-        data = data[0]
-        if all(k in data for k in ("Key", "Value")):
-            return {data["Key"].replace("plugins/", ""): json.loads(base64.b64decode(data["Value"]).decode("utf-8"))}
-        raise exceptions.ConsulComponentContentError("error={}".format(data))
-    else:
-        for item in data:
-            if not all(k in item for k in ("Key", "Value")):
-                logger.warning("invalidate content {}".format(item))
-                raise exceptions.ConsulComponentContentError("error={}".format(data))
-        return {
-            item["Key"].replace("plugins/", ""): json.loads(base64.b64decode(item["Value"]).decode("utf-8"))
-            for item in data
-        }
+    pipeline = get_configuration("components/pipeline")
+    logger.debug("pipeline={}".format(pipeline))
+    components = pipeline.get("components/pipeline")
+    components.pop('interface')
+    return components
+
 
 def get_components():
     url = "http://{}:{}/v1/kv/components?recurse=true".format(CONSUL_HOST, CONSUL_PORT)

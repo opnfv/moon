@@ -6,7 +6,7 @@
 import os
 import logging
 from moon_authz.http_server import HTTPServer as Server
-from python_moonutilities import configuration
+from python_moonutilities import configuration, exceptions
 
 logger = logging.getLogger("moon.authz.server")
 
@@ -21,12 +21,15 @@ def create_server():
     meta_rule_id = os.getenv("META_RULE_ID")
     keystone_project_id = os.getenv("KEYSTONE_PROJECT_ID")
     logger.info("component_type={}".format(component_type))
-    conf = configuration.get_configuration("plugins/{}".format(component_type))
-    conf["plugins/{}".format(component_type)]['id'] = component_id
-    hostname = conf["plugins/{}".format(component_type)].get('hostname',
-                                                             component_id)
-    port = conf["plugins/{}".format(component_type)].get('port', tcp_port)
-    bind = conf["plugins/{}".format(component_type)].get('bind', "0.0.0.0")
+    conf = configuration.get_plugins()
+    # conf = configuration.get_configuration("plugins/{}".format(component_type))
+    # conf["plugins/{}".format(component_type)]['id'] = component_id
+    if component_type not in conf:
+        raise exceptions.ConsulComponentNotFound("{} not found".format(
+            component_type))
+    hostname = conf[component_type].get('hostname', component_id)
+    port = conf[component_type].get('port', tcp_port)
+    bind = conf[component_type].get('bind', "0.0.0.0")
 
     logger.info("Starting server with IP {} on port {} bind to {}".format(
         hostname, port, bind))
