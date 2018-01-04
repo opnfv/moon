@@ -30,6 +30,16 @@ def create_policy(model_id):
     return value
 
 
+def create_pdp(pdp_ids):
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": pdp_ids,
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    return value
+
+
 def get_policy_id():
     import policies.test_policies as test_policies
     import models.test_models as test_models
@@ -39,7 +49,7 @@ def get_policy_id():
     model = test_models.add_model(value=create_model(meta_rule_id))
     model_id = list(model.keys())[0]
     value = create_policy(model_id)
-    policy = test_policies.add_policies(value)
+    policy = test_policies.add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
     return policy_id

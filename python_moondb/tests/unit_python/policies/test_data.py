@@ -495,7 +495,7 @@ def test_delete_subject_with_invalid_perimeter_id(db):
 
 def test_get_available_metadata(db):
     policy_id = mock_data.get_policy_id()
-    metadata = get_available_metadata(policy_id)
+    metadata = get_available_metadata(policy_id=policy_id)
     assert metadata
     assert metadata['object'][0] == "object_category_id1"
     assert metadata['subject'][0] == "subject_category_id1"
@@ -504,10 +504,15 @@ def test_get_available_metadata(db):
 
 def test_get_available_metadata_empty_model(db):
     import policies.test_policies as test_policies
-    policy_id = mock_data.get_policy_id()
     value = mock_data.create_policy("invalid")
-    policy = test_policies.add_policies(value)
+    policy = test_policies.add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
-    metadata = get_available_metadata(policy_id)
+    metadata = get_available_metadata(policy_id=policy_id)
     assert metadata
+
+
+def test_get_available_metadata_with_invalid_policy_id(db):
+    with pytest.raises(Exception) as exception_info:
+        get_available_metadata(policy_id='invalid')
+    assert '400: Policy Unknown' == str(exception_info.value)
