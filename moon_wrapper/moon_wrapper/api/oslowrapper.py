@@ -99,14 +99,12 @@ class OsloWrapper(Resource):
         _object = self.__get_object(target, credentials)
         _action = rule
         _project_id = self.__get_project_id(target, credentials)
-        logger.debug("POST with args project={} / "
-                  "subject={} - object={} - action={}".format(
-                    _project_id, _subject, _object, rule))
+        _pdp_id = self.CACHE.get_pdp_from_keystone_project(_project_id)
         interface_url = self.get_interface_url(_project_id)
         logger.debug("interface_url={}".format(interface_url))
         req = requests.get("{}/authz/{}/{}/{}/{}".format(
             interface_url,
-            _project_id,
+            _pdp_id,
             _subject,
             _object,
             _action

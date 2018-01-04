@@ -503,10 +503,14 @@ class Cache(object):
             else:
                 logger.warning(" 'security_pipeline','keystone_project_id' "
                                "key not in pdp {}".format(pdp_value))
-                # for policy_id in pdp_value["security_pipeline"]:
-                #     model_id = self.policies[policy_id]["model_id"]
-                #     if meta_rule_id in self.models[model_id]["meta_rules"]:
-                #         return pdp_value["keystone_project_id"]
+
+    def get_keystone_project_id_from_pdp_id(self, pdp_id):
+        if pdp_id in self.pdp:
+            pdp_value = self.pdp.get(pdp_id)
+            if "security_pipeline" in pdp_value and \
+                    "keystone_project_id" in pdp_value:
+                return pdp_value["keystone_project_id"]
+        logger.warning("Unknown PDP ID".format(pdp_id))
 
     def get_containers_from_keystone_project_id(self, keystone_project_id,
                                                 meta_rule_id=None):

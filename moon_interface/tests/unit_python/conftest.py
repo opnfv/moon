@@ -39,21 +39,19 @@ CONF = {
             "container": "wukongsun/moon_orchestrator:v4.3",
             "hostname": "orchestrator"
         },
-        "interface": {
-            "bind": "0.0.0.0",
-            "port": 8080,
-            "container": "wukongsun/moon_interface:v4.3",
-            "hostname": "interface"
-        }
-    },
-    "plugins": {
-        "session": {
-            "port": 8082,
-            "container": "asteroide/session:latest"
-        },
-        "authz": {
-            "port": 8081,
-            "container": "wukongsun/moon_authz:v4.3"
+        "pipeline": {
+            "interface": {
+                "bind": "0.0.0.0",
+                "port": 8080,
+                "container": "wukongsun/moon_interface:v4.3",
+                "hostname": "interface"
+            },
+            "authz": {
+                "bind": "0.0.0.0",
+                "port": 8081,
+                "container": "wukongsun/moon_authz:v4.3",
+                "hostname": "authz"
+            },
         }
     },
     "logging": {
@@ -128,10 +126,11 @@ COMPONENTS = (
     "slave",
     "components/manager",
     "components/orchestrator",
-    "components/interface",
+    "components/pipeline",
 )
 
 CONTEXT = {
+        "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
         "project_id": "a64beb1cc224474fb4badd43173e7101",
         "subject_name": "testuser",
         "object_name": "vm1",

@@ -10,7 +10,7 @@ def test_authz_true(context):
     server = moon_interface.server.create_server()
     client = server.app.test_client()
     req = client.get("/authz/{p_id}/{s_id}/{o_id}/{a_id}".format(
-        p_id=context["project_id"],
+        p_id=context["pdp_id"],
         s_id=context["subject_name"],
         o_id=context["object_name"],
         a_id=context["action_name"],

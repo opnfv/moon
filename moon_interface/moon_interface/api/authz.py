@@ -20,45 +20,46 @@ __version__ = "4.3.1"
 logger = logging.getLogger("moon.interface.api.authz." + __name__)
 
 
-def pdp_in_cache(cache, uuid):
-    """Check if a PDP exist with this Keystone Project ID in the cache of this component
+def get_pdp_from_cache(cache, uuid):
+    """Check if a PDP exist with this ID in the cache of this component
 
     :param cache: Cache to use
     :param uuid: Keystone Project ID
     :return: True or False
     """
-    for item_uuid, item_value in cache.pdp.items():
-        if uuid == item_value['keystone_project_id']:
-            return item_uuid, item_value
-    return None, None
+    if uuid in cache.pdp:
+        return cache.pdp.get(uuid)
+    return None
 
 
-def pdp_in_manager(cache, uuid):
-    """Check if a PDP exist with this Keystone Project ID in the Manager component
+def get_pdp_from_manager(cache, uuid):
+    """Check if a PDP exist with this ID in the Manager component
 
     :param cache: Cache to use
     :param uuid: Keystone Project ID
     :return: True or False
     """
     cache.update()
-    return pdp_in_cache(cache, uuid)
+    return get_pdp_from_cache(cache, uuid)
 
 
-def create_authz_request(cache, interface_name, manager_url, uuid, subject_name, object_name, action_name):
+def create_authz_request(cache, interface_name, manager_url, pdp_id, subject_name, object_name, action_name):
     """Create the authorization request and make the first call to the Authz function
 
     :param cache: Cache to use
     :param interface_name: hostname of the interface
     :param manager_url: URL of the manager
-    :param uuid: Keystone Project ID
+    :param pdp_id: Keystone Project ID
     :param subject_name: name of the subject
     :param object_name: name of the object
     :param action_name: name of the action
     :return: Authorisation request
     """
     req_id = uuid4().hex
+    keystone_project_id = cache.get_keystone_project_id_from_pdp_id(pdp_id)
+    logger.info("keystone_project_id={}".format(keystone_project_id))
     ctx = {
-        "project_id": uuid,
+        "project_id": keystone_project_id,
         "subject_name": subject_name,
         "object_name": object_name,
         "action_name": action_name,
@@ -81,8 +82,8 @@ class Authz(Resource):
     """
 
     __urls__ = (
-        "/authz/<string:uuid>",
-        "/authz/<string:uuid>/<string:subject_name>/<string:object_name>/<string:action_name>",
+        "/authz/<string:pdp_id>",
+        "/authz/<string:pdp_id>/<string:subject_name>/<string:object_name>/<string:action_name>",
     )
 
     def __init__(self, **kwargs):
@@ -91,10 +92,10 @@ class Authz(Resource):
         self.MANAGER_URL = kwargs.get("manager_url", "http://manager:8080")
         self.TIMEOUT = 5
 
-    def get(self, uuid=None, subject_name=None, object_name=None, action_name=None):
+    def get(self, pdp_id=None, subject_name=None, object_name=None, action_name=None):
         """Get a response on an authorization request
 
-        :param uuid: uuid of a tenant or an intra_extension
+        :param pdp_id: uuid of a tenant or an intra_extension
         :param subject_name: name of the subject or the request
         :param object_name: name of the object
         :param action_name: name of the action
@@ -118,17 +119,16 @@ class Authz(Resource):
         }
         :internal_api: authz
         """
-        pdp_id, pdp_value = pdp_in_cache(self.CACHE, uuid)
+        pdp_value = get_pdp_from_cache(self.CACHE, pdp_id)
         if not pdp_id:
-            pdp_id, pdp_value = pdp_in_manager(self.CACHE, uuid)
+            pdp_value = get_pdp_from_manager(self.CACHE, pdp_id)
             if not pdp_id:
                 return {
-                           "result": False,
-                           "message": "Unknown Project ID or "
-                                      "Project ID is not bind to a PDP."}, 403
+                   "result": False,
+                   "message": "Unknown PDP ID."}, 403
         authz_request = create_authz_request(
             cache=self.CACHE,
-            uuid=uuid,
+            pdp_id=pdp_id,
             interface_name=self.INTERFACE_NAME,
             manager_url=self.MANAGER_URL,
             subject_name=subject_name,
