@@ -35,6 +35,24 @@ shared_ids = {
     },
     "model": {
         "model_id_1": "model_id_1"
+    },
+    "subject": {
+        "subject_id_1": "subject_id_1",
+        "invalid_subject_id": "invalid_subject_id",
+        "invalid_category_id": "invalid_category_id",
+        "invalid_assignment_id": "invalid_assignment_id"
+    },
+    "object": {
+        "object_id_1": "object_id_1",
+        "invalid_object_id": "invalid_object_id",
+        "invalid_category_id": "invalid_category_id",
+        "invalid_assignment_id": "invalid_assignment_id"
+    },
+    "action": {
+        "action_id_1": "action_id_1",
+        "invalid_action_id": "invalid_action_id",
+        "invalid_category_id": "invalid_category_id",
+        "invalid_assignment_id": "invalid_assignment_id"
     }
 }
 
@@ -94,11 +112,38 @@ subject_mock = {
 }
 
 subject_assignment_mock = {
-    "subject_id_1": {
+    shared_ids["subject"]["subject_id_1"]: {
         "policy_id": shared_ids["policy"]["policy_id_1"],
         "subject_id": "subject_id_1",
         "category_id": shared_ids["category"]["category_id_1"],
         "assignments": ["data_id_1, data_id_2"],
+    }
+}
+
+subject_assignment_mock_invalid_subject_id = {
+    shared_ids["subject"]["invalid_subject_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "subject_id_invalid": "subject_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"],
+    }
+}
+
+subject_assignment_mock_invalid_category_id = {
+    shared_ids["subject"]["invalid_category_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "subject_id": "subject_id_1",
+        "category_id_invalid": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"],
+    }
+}
+
+subject_assignment_mock_invalid_assignment_id = {
+    shared_ids["subject"]["invalid_assignment_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "subject_id": "subject_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments_invalid": ["data_id_1, data_id_2"],
     }
 }
 
@@ -112,11 +157,38 @@ object_mock = {
 }
 
 object_assignment_mock = {
-    "object_id_1": {
+    shared_ids["object"]["object_id_1"]: {
         "policy_id": shared_ids["policy"]["policy_id_1"],
         "object_id": "object_id_1",
         "category_id": shared_ids["category"]["category_id_1"],
-        "assignments": ["data_id_1, data_id_2"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
+object_assignment_mock_invalid_object_id = {
+    shared_ids["object"]["invalid_object_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "object_id": "object_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
+object_assignment_mock_invalid_category_id = {
+    shared_ids["object"]["invalid_category_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "object_id": "object_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
+object_assignment_mock_invalid_assignment_id = {
+    shared_ids["object"]["invalid_assignment_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "object_id": "object_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
     }
 }
 
@@ -130,13 +202,41 @@ action_mock = {
 }
 
 action_assignment_mock = {
-    "action_id_1": {
+    shared_ids["action"]["action_id_1"]: {
         "policy_id": shared_ids["policy"]["policy_id_1"],
         "action_id": "action_id_1",
         "category_id": shared_ids["category"]["category_id_1"],
-        "assignments": ["data_id_1, data_id_2"],
+        "assignments": ["data_id_1, data_id_2"]
     }
 }
+
+action_assignment_mock_invalid_action_id = {
+    shared_ids["action"]["invalid_action_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "action_id": "action_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
+action_assignment_mock_invalid_category_id = {
+    shared_ids["action"]["invalid_category_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "action_id": "action_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
+action_assignment_mock_invalid_assignment_id = {
+    shared_ids["action"]["invalid_assignment_id"]: {
+        "policy_id": shared_ids["policy"]["policy_id_1"],
+        "action_id": "action_id_1",
+        "category_id": shared_ids["category"]["category_id_1"],
+        "assignments": ["data_id_1, data_id_2"]
+    }
+}
+
 
 models_mock = {
     shared_ids["model"]["model_id_1"]: {

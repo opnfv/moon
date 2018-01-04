@@ -1,5 +1,7 @@
 import pytest
 import mock_repo.data as data_mock
+import mock_repo.urls as register_urls
+import requests_mock
 
 
 def test_authz_request():
@@ -8,7 +10,7 @@ def test_authz_request():
     assert isinstance(c.authz_requests, dict)
 
 
-# tests for get (subject, object, action) in cache
+# tests for get (subject) in cache
 # ================================================
 def test_get_subject_success():
     from python_moonutilities import cache
@@ -17,30 +19,31 @@ def test_get_subject_success():
     subject_id = cache_obj.get_subject(data_mock.shared_ids["policy"]["policy_id_1"], name)
     assert subject_id is not None
 
-
-def test_get_subject_not_found():
+def test_get_subject_no_policy():
     from python_moonutilities import cache
-    cache_obj2 = cache.Cache()
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_subject(None, "")
+    assert str(exception_info.value) == '400: Policy Unknown'
+
+def test_get_subject_invalid_name():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
     name = 'invalid name'
     with pytest.raises(Exception) as exception_info:
-        cache_obj2.get_subject(data_mock.shared_ids["policy"]["policy_id_1"], name)
+        cache_obj.get_subject(data_mock.shared_ids["policy"]["policy_id_1"], name)
     assert str(exception_info.value) == '400: Subject Unknown'
 
-
-# [TODO] this test used to test the invalid response
-# it should be un commented and run after refactoring the related part
 def test_get_subject_invalid_response():
     from python_moonutilities import cache
-    cache_obj2 = cache.Cache()
-    # policy_id = 'policy_id_invalid_response'
-    name = 'invalid name'
+    cache_obj = cache.Cache()
+    name = 'policy_id_invalid_response'
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_subject(data_mock.shared_ids["policy"]["policy_id_invalid_response"], name)
+    assert str(exception_info.value) == '400: Subject Unknown'
 
-
-#   with pytest.raises(Exception) as exception_info:
-#       cache_obj2.get_subject(data_mock.shared_ids["policy"]["policy_id_invalid_response"], name)
-#   assert str(exception_info.value) == '400: Subject Unknown'
-
-
+# tests for get (object) in cache
+# ================================================
 def test_get_object_success():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
@@ -48,8 +51,14 @@ def test_get_object_success():
     object_id = cache_obj.get_object(data_mock.shared_ids["policy"]["policy_id_1"], name)
     assert object_id is not None
 
+def test_get_object_no_policy():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_object(None, "")
+    assert str(exception_info.value) == '400: Policy Unknown'
 
-def test_get_object_failure():
+def test_get_object_invalid_name():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
     name = 'invalid name'
@@ -57,7 +66,16 @@ def test_get_object_failure():
         cache_obj.get_object(data_mock.shared_ids["policy"]["policy_id_1"], name)
     assert str(exception_info.value) == '400: Object Unknown'
 
+def test_get_object_invalid_response():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    name = 'policy_id_invalid_response'
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_object(data_mock.shared_ids["policy"]["policy_id_invalid_response"], name)
+    assert str(exception_info.value) == '400: Object Unknown'
 
+# tests for get (action) in cache
+# ================================================
 def test_get_action_success():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
@@ -66,7 +84,14 @@ def test_get_action_success():
     assert action_id is not None
 
 
-def test_get_action_failure():
+def test_get_action_no_policy():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_action(None, "")
+    assert str(exception_info.value) == '400: Policy Unknown'
+
+def test_get_action_invalid_name():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
     name = 'invalid name'
@@ -74,10 +99,17 @@ def test_get_action_failure():
         cache_obj.get_action(data_mock.shared_ids["policy"]["policy_id_1"], name)
     assert str(exception_info.value) == '400: Action Unknown'
 
+def test_get_action_invalid_response():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    name = 'policy_id_invalid_response'
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_action(data_mock.shared_ids["policy"]["policy_id_invalid_response"], name)
+    assert str(exception_info.value) == '400: Action Unknown'
 
 # ====================================================================================================
 
-# tests for get (subject_assignment, object_assignment, action_assignment) in cache
+# tests for get (subject_assignment) in cache
 # =================================================================================
 
 def test_get_subject_assignment_success():
@@ -88,12 +120,74 @@ def test_get_subject_assignment_success():
                                                             data_mock.shared_ids["category"]["category_id_1"])
     assert subject_assignments is not None
 
+def test_get_subject_assignment_no_policy():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_subject_assignments(None,
+                                                        data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert str(exception_info.value) == '400: Policy Unknown'
 
-def test_get_subject_assignment_failure():
+
+@requests_mock.Mocker(kw='mock')
+def test_get_subject_assignment_invalid_subject_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+
+    kwargs['mock'].get('http://manager:8082/policies/{}/subject_assignments/{}'
+                       .format(data_mock.shared_ids["subject"]["invalid_subject_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'subject_assignments': data_mock.subject_assignment_mock_invalid_subject_id}
+                       )
+    cache_obj = cache.Cache()
+    subject_assignments = cache_obj.get_subject_assignments(data_mock.shared_ids["subject"]["invalid_subject_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(subject_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_subject_assignment_invalid_category_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/subject_assignments/{}'
+                       .format(data_mock.shared_ids["subject"]["invalid_category_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'subject_assignments': data_mock.subject_assignment_mock_invalid_category_id}
+                       )
+    cache_obj = cache.Cache()
+    subject_assignments = cache_obj.get_subject_assignments(data_mock.shared_ids["subject"]["invalid_category_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(subject_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_subject_assignment_invalid_assignment_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/subject_assignments/{}'
+                       .format(data_mock.shared_ids["subject"]["invalid_assignment_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'subject_assignments': data_mock.subject_assignment_mock_invalid_assignment_id}
+                       )
+
+    cache_obj = cache.Cache()
+    subject_assignments = cache_obj.get_subject_assignments(data_mock.shared_ids["subject"]["invalid_assignment_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(subject_assignments) == 0
+
+
+def test_get_subject_assignment_empty_perimeter():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
     subject_assignments = cache_obj.get_subject_assignments(data_mock.shared_ids["policy"]["policy_id_2"],
-                                                            '',
+                                                            None,
                                                             data_mock.shared_ids["category"]["category_id_1"])
     assert len(subject_assignments) == 0
 
@@ -106,7 +200,8 @@ def test_get_subject_assignment_invalid_category_failure():
                                                             data_mock.shared_ids["category"]["invalid_category_id_1"])
     assert len(subject_assignments) == 0
 
-
+# tests for get (object_assignment) in cache
+# ==========================================
 def test_get_object_assignment_success():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
@@ -116,11 +211,72 @@ def test_get_object_assignment_success():
     assert object_assignments is not None
 
 
-def test_get_object_assignment_failure():
+def test_get_object_assignment_no_policy():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_object_assignments(None, data_mock.shared_ids["perimeter"]["perimeter_id_2"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert str(exception_info.value) == '400: Policy Unknown'
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_object_assignment_invalid_object_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+
+    kwargs['mock'].get('http://manager:8082/policies/{}/object_assignments/{}'
+                       .format(data_mock.shared_ids["object"]["invalid_object_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'object_assignments': data_mock.object_assignment_mock_invalid_object_id}
+                       )
+    cache_obj = cache.Cache()
+    object_assignments = cache_obj.get_object_assignments(data_mock.shared_ids["object"]["invalid_object_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(object_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_object_assignment_invalid_category_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/object_assignments/{}'
+                       .format(data_mock.shared_ids["object"]["invalid_category_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'object_assignments': data_mock.object_assignment_mock_invalid_category_id}
+                       )
+    cache_obj = cache.Cache()
+    object_assignments = cache_obj.get_object_assignments(data_mock.shared_ids["object"]["invalid_category_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(object_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_object_assignment_invalid_assignment_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/object_assignments/{}'
+                       .format(data_mock.shared_ids["object"]["invalid_assignment_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'object_assignments': data_mock.object_assignment_mock_invalid_assignment_id}
+                       )
+
+    cache_obj = cache.Cache()
+    object_assignments = cache_obj.get_object_assignments(data_mock.shared_ids["object"]["invalid_assignment_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(object_assignments) == 0
+
+def test_get_object_assignment_none_perimeter():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
     object_assignments = cache_obj.get_object_assignments(data_mock.shared_ids["policy"]["policy_id_2"],
-                                                          '',
+                                                          None,
                                                           data_mock.shared_ids["category"]["category_id_1"])
     assert len(object_assignments) == 0
 
@@ -133,7 +289,8 @@ def test_get_object_assignment_invalid_category_failure():
                                                           data_mock.shared_ids["category"]["invalid_category_id_1"])
     assert len(object_assignments) == 0
 
-
+# tests for get (action_assignment) in cache
+# ==========================================
 def test_get_action_assignment_success():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
@@ -143,11 +300,72 @@ def test_get_action_assignment_success():
     assert action_assignments is not None
 
 
-def test_get_action_assignment_failure():
+def test_get_action_assignment_no_policy():
+    from python_moonutilities import cache
+    cache_obj = cache.Cache()
+    with pytest.raises(Exception) as exception_info:
+        cache_obj.get_action_assignments(None, data_mock.shared_ids["perimeter"]["perimeter_id_2"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert str(exception_info.value) == '400: Policy Unknown'
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_action_assignment_invalid_object_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+
+    kwargs['mock'].get('http://manager:8082/policies/{}/action_assignments/{}'
+                       .format(data_mock.shared_ids["action"]["invalid_action_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'action_assignments': data_mock.action_assignment_mock_invalid_action_id}
+                       )
+    cache_obj = cache.Cache()
+    action_assignments = cache_obj.get_action_assignments(data_mock.shared_ids["action"]["invalid_action_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(action_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_action_assignment_invalid_category_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/action_assignments/{}'
+                       .format(data_mock.shared_ids["action"]["invalid_category_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'action_assignments': data_mock.action_assignment_mock_invalid_category_id}
+                       )
+    cache_obj = cache.Cache()
+    action_assignments = cache_obj.get_action_assignments(data_mock.shared_ids["action"]["invalid_category_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(action_assignments) == 0
+
+
+@requests_mock.Mocker(kw='mock')
+def test_get_action_assignment_invalid_assignment_id(**kwargs):
+    from python_moonutilities import cache
+
+    register_urls.register_components(kwargs['mock'])
+    kwargs['mock'].get('http://manager:8082/policies/{}/action_assignments/{}'
+                       .format(data_mock.shared_ids["action"]["invalid_assignment_id"],
+                               data_mock.shared_ids["perimeter"]["perimeter_id_1"]),
+                       json={'action_assignments': data_mock.action_assignment_mock_invalid_assignment_id}
+                       )
+
+    cache_obj = cache.Cache()
+    action_assignments = cache_obj.get_action_assignments(data_mock.shared_ids["action"]["invalid_assignment_id"],
+                                                            data_mock.shared_ids["perimeter"]["perimeter_id_1"],
+                                                            data_mock.shared_ids["category"]["category_id_1"])
+    assert len(action_assignments) == 0
+
+def test_get_action_assignment_none_perimeter():
     from python_moonutilities import cache
     cache_obj = cache.Cache()
     action_assignments = cache_obj.get_action_assignments(data_mock.shared_ids["policy"]["policy_id_2"],
-                                                          '',
+                                                          None,
                                                           data_mock.shared_ids["category"]["category_id_1"])
     assert len(action_assignments) == 0
 
