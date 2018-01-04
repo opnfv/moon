@@ -86,14 +86,13 @@ def main():
     # put("slave", data_config["slave"])
     # put("docker", data_config["docker"])
     put("logging", data_config["logging"])
-    put("components_port_start", data_config["components"]["port_start"])
+    # put("components_port_start", data_config["components"]["port_start"])
 
     for _key, _value in data_config["components"].items():
-        if type(_value) is dict:
-            put("components/{}".format(_key), data_config["components"][_key])
+        put("components/{}".format(_key), data_config["components"][_key])
 
-    for _key, _value in data_config["plugins"].items():
-        put("plugins/{}".format(_key), data_config["plugins"][_key])
+    # for _key, _value in data_config["plugins"].items():
+    #     put("plugins/{}".format(_key), data_config["plugins"][_key])
 
     for _key, _value in data_config["openstack"].items():
         put("openstack/{}".format(_key), data_config["openstack"][_key])
