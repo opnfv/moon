@@ -14,9 +14,7 @@ import requests
 import time
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PDPManager
-from python_moondb.core import PolicyManager
-from python_moondb.core import ModelManager
-from python_moonutilities import configuration
+from python_moonutilities import configuration, exceptions
 
 __version__ = "4.3.2"
 
@@ -49,6 +47,14 @@ def add_pod(uuid, data):
         else:
             break
     logger.info(req.text)
+
+
+def check_keystone_pid(k_pid):
+    data = PDPManager.get_pdp(user_id="admin")
+    for pdp_key, pdp_value in data.items():
+        logger.info("pdp={}".format(pdp_value))
+        if pdp_value["keystone_project_id"] == k_pid:
+            return True
 
 
 class PDP(Resource):
@@ -113,6 +119,9 @@ class PDP(Resource):
             data = dict(request.json)
             if not data.get("keystone_project_id"):
                 data["keystone_project_id"] = None
+            else:
+                if check_keystone_pid(data.get("keystone_project_id")):
+                    raise exceptions.PdpKeystoneMappingConflict
             data = PDPManager.add_pdp(
                 user_id=user_id, pdp_id=None, value=request.json)
             uuid = list(data.keys())[0]
@@ -166,6 +175,9 @@ class PDP(Resource):
             _data = dict(request.json)
             if not _data.get("keystone_project_id"):
                 _data["keystone_project_id"] = None
+            else:
+                if check_keystone_pid(_data.get("keystone_project_id")):
+                    raise exceptions.PdpKeystoneMappingConflict
             data = PDPManager.update_pdp(
                 user_id=user_id, pdp_id=uuid, value=_data)
             logger.debug("data={}".format(data))

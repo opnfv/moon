@@ -504,6 +504,7 @@ class ConsulComponentNotFound(ConsulError):
     title = 'Consul error'
     logger = "WARNING"
 
+
 class ConsulComponentContentError(ConsulError):
     description = _("invalid content of component .")
     code = 500
@@ -538,6 +539,13 @@ class PdpExisting(MoonError):
     description = _("The pdp already exists.")
     code = 409
     title = 'Pdp Error'
+    logger = "Error"
+
+
+class PdpKeystoneMappingConflict(MoonError):
+    description = _("A pdp is already mapped to that Keystone project.")
+    code = 409
+    title = 'Pdp Mapping Error'
     logger = "Error"
 
 

@@ -74,3 +74,7 @@ CHANGES
 1.4.4
 -----
 - Code cleaning
+
+1.4.5
+-----
+- Add PdpKeystoneMappingConflict exception
