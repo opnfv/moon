@@ -14,13 +14,11 @@ import requests
 import time
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PDPManager
-from python_moondb.core import PolicyManager
-from python_moondb.core import ModelManager
-from python_moonutilities import configuration
+from python_moonutilities import configuration, exceptions
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 def delete_pod(uuid):
@@ -30,11 +28,9 @@ def delete_pod(uuid):
 def add_pod(uuid, data):
     if not data.get("keystone_project_id"):
         return
-    LOG.info("Add a new pod {}".format(data))
+    logger.info("Add a new pod {}".format(data))
     if "pdp_id" not in data:
         data["pdp_id"] = uuid
-    data['policies'] = PolicyManager.get_policies(user_id="admin")
-    data['models'] = ModelManager.get_models(user_id="admin")
     conf = configuration.get_configuration("components/orchestrator")
     hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
     port = conf["components/orchestrator"].get("port", 80)
@@ -46,11 +42,19 @@ def add_pod(uuid, data):
                 json=data,
                 headers={"content-type": "application/json"})
         except requests.exceptions.ConnectionError:
-            LOG.warning("Orchestrator is not ready, standby...")
+            logger.warning("Orchestrator is not ready, standby...")
             time.sleep(1)
         else:
             break
-    LOG.info(req.text)
+    logger.info(req.text)
+
+
+def check_keystone_pid(k_pid):
+    data = PDPManager.get_pdp(user_id="admin")
+    for pdp_key, pdp_value in data.items():
+        logger.info("pdp={}".format(pdp_value))
+        if pdp_value["keystone_project_id"] == k_pid:
+            return True
 
 
 class PDP(Resource):
@@ -84,7 +88,7 @@ class PDP(Resource):
         try:
             data = PDPManager.get_pdp(user_id=user_id, pdp_id=uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"pdps": data}
@@ -115,14 +119,17 @@ class PDP(Resource):
             data = dict(request.json)
             if not data.get("keystone_project_id"):
                 data["keystone_project_id"] = None
+            else:
+                if check_keystone_pid(data.get("keystone_project_id")):
+                    raise exceptions.PdpKeystoneMappingConflict
             data = PDPManager.add_pdp(
                 user_id=user_id, pdp_id=None, value=request.json)
             uuid = list(data.keys())[0]
-            LOG.info("data={}".format(data))
-            LOG.info("uuid={}".format(uuid))
+            logger.debug("data={}".format(data))
+            logger.debug("uuid={}".format(uuid))
             add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"pdps": data}
@@ -143,7 +150,7 @@ class PDP(Resource):
             data = PDPManager.delete_pdp(user_id=user_id, pdp_id=uuid)
             delete_pod(uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -168,13 +175,16 @@ class PDP(Resource):
             _data = dict(request.json)
             if not _data.get("keystone_project_id"):
                 _data["keystone_project_id"] = None
+            else:
+                if check_keystone_pid(_data.get("keystone_project_id")):
+                    raise exceptions.PdpKeystoneMappingConflict
             data = PDPManager.update_pdp(
                 user_id=user_id, pdp_id=uuid, value=_data)
-            LOG.info("data={}".format(data))
-            LOG.info("uuid={}".format(uuid))
+            logger.debug("data={}".format(data))
+            logger.debug("uuid={}".format(uuid))
             add_pod(uuid=uuid, data=data[uuid])
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"pdps": data}
