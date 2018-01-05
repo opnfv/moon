@@ -5,7 +5,7 @@ components = (
     "slave",
     "components/manager",
     "components/orchestrator",
-    "components/interface",
+    "components/pipeline",
     "components/port_start"
 )
 

@@ -5,7 +5,8 @@ import requests_mock
 
 def test_get_configuration_success():
     from python_moonutilities import configuration
-    assert configuration.get_configuration("components/port_start")["port_start"] == comp_util.CONF["components"]["port_start"]
+    assert configuration.get_configuration("components/port_start")["components/port_start"] == comp_util.CONF["components"]["port_start"]
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_configuration_mutliple_list_success(**kwargs):
@@ -19,6 +20,7 @@ def test_get_configuration_mutliple_list_success(**kwargs):
                        )
 
     assert len(configuration.get_configuration("components/port_start")) == 2
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_configuration_mutliple_list_failure(**kwargs):
@@ -34,6 +36,7 @@ def test_get_configuration_mutliple_list_failure(**kwargs):
         configuration.get_configuration("components/port_start")
     assert str(exception_info.value) == '500: Consul Content error'
 
+
 @requests_mock.Mocker(kw='mock')
 def test_get_configuration_not_found(**kwargs):
     from python_moonutilities import configuration
@@ -43,6 +46,7 @@ def test_get_configuration_not_found(**kwargs):
     with pytest.raises(Exception) as exception_info:
         configuration.get_configuration("components/port_start_wrong")
     assert str(exception_info.value) == '500: Consul error'
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_configuration_invalid_response(**kwargs):
@@ -54,6 +58,7 @@ def test_get_configuration_invalid_response(**kwargs):
     with pytest.raises(Exception) as exception_info:
         configuration.get_configuration("components/port_start")
     assert str(exception_info.value) == '500: Consul Content error'
+
 
 ################################ increment_port ####################################
 @requests_mock.Mocker(kw='mock')
@@ -67,6 +72,7 @@ def test_put_increment_port_invalidkey_failure(**kwargs):
         configuration.increment_port()
     assert str(exception_info.value) == '500: Consul Content error'
 
+
 @requests_mock.Mocker(kw='mock')
 def test_put_increment_port_failure(**kwargs):
     from python_moonutilities import configuration
@@ -76,14 +82,15 @@ def test_put_increment_port_failure(**kwargs):
     ], status_code=200)
     with pytest.raises(Exception) as exception_info:
         configuration.increment_port()
-    assert str(exception_info.value) == '400: Consul error'
+    assert str(exception_info.value) == '500: Consul Content error'
 
 
 def test_increment_port_success():
     from python_moonutilities import configuration
     cur_port = comp_util.CONF["components"]["port_start"]
     incremented_port = configuration.increment_port()
-    assert incremented_port  == cur_port + 1
+    assert incremented_port == cur_port + 1
+
 
 ################################ plugin ####################################
 def test_get_plugins_success():
@@ -91,59 +98,12 @@ def test_get_plugins_success():
     plugin = configuration.get_plugins()
     assert plugin is not None
 
-@requests_mock.Mocker(kw='mock')
-def test_get_plugins_mutliple_list_success(**kwargs):
-    from python_moonutilities import configuration
-
-    kwargs['mock'].get('http://consul:8500/v1/kv/plugins?recurse=true',
-                       json=[
-                           {'Key': 'plugins/authz', 'Value': 'eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0='},
-                           {'Key': 'plugins/authz', 'Value': 'eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0='}
-                             ]
-                       )
-
-    res = configuration.get_plugins()
-    assert bool(res)
-
-@requests_mock.Mocker(kw='mock')
-def test_get_plugins_mutliple_list_failure(**kwargs):
-    from python_moonutilities import configuration
-
-    kwargs['mock'].get('http://consul:8500/v1/kv/plugins?recurse=true',
-                       json=[
-                           {'Key': 'plugins/authz', 'Value': "eyJjb250YWluZXIiOiAid3Vrb25"},
-                           {'invalidKey': 'plugins/authz', 'Value': "eyJjb250YWluZXIiOiAid3Vrb25"}
-                             ]
-                       )
-    with pytest.raises(Exception) as exception_info:
-        configuration.get_plugins()
-    assert str(exception_info.value) == '500: Consul Content error'
-
-@requests_mock.Mocker(kw='mock')
-def test_get_plugins_not_found(**kwargs):
-    from python_moonutilities import configuration
-
-    kwargs['mock'].get('http://consul:8500/v1/kv/plugins?recurse=true', json=[
-    ], status_code=500)
-    with pytest.raises(Exception) as exception_info:
-        configuration.get_plugins()
-    assert str(exception_info.value) == '400: Consul error'
-
-@requests_mock.Mocker(kw='mock')
-def test_get_plugins_invalid_response(**kwargs):
-    from python_moonutilities import configuration
-
-    kwargs['mock'].get('http://consul:8500/v1/kv/plugins?recurse=true', json=[
-        {"invalidKey":'invalid', 'Value': "jb250"}
-    ])
-    with pytest.raises(Exception) as exception_info:
-        configuration.get_plugins()
-    assert str(exception_info.value) == '500: Consul Content error'
 
 ################################ component ####################################
 def test_get_components():
     from python_moonutilities import configuration
     assert isinstance(configuration.get_components(), dict)
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_components_mutliple_list_success(**kwargs):
@@ -159,6 +119,7 @@ def test_get_components_mutliple_list_success(**kwargs):
     res = configuration.get_components()
     assert bool(res)
 
+
 @requests_mock.Mocker(kw='mock')
 def test_get_components_mutliple_list_failure(**kwargs):
     from python_moonutilities import configuration
@@ -173,6 +134,7 @@ def test_get_components_mutliple_list_failure(**kwargs):
         configuration.get_components()
     assert str(exception_info.value) == '500: Consul Content error'
 
+
 @requests_mock.Mocker(kw='mock')
 def test_get_components_not_found(**kwargs):
     from python_moonutilities import configuration
@@ -182,6 +144,7 @@ def test_get_components_not_found(**kwargs):
     with pytest.raises(Exception) as exception_info:
         configuration.get_components()
     assert str(exception_info.value) == '400: Consul error'
+
 
 @requests_mock.Mocker(kw='mock')
 def test_get_components_invalid_response(**kwargs):
