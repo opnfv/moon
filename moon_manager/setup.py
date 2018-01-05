@@ -40,7 +40,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_manager = moon_manager.server:main',
+            'moon_manager = moon_manager.server:create_server',
         ],
     }
 

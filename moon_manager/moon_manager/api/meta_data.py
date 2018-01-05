@@ -9,13 +9,13 @@ Meta Data are elements used to create Meta data (skeleton of security policies)
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
 
-__version__ = "0.2.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class SubjectCategories(Resource):
@@ -47,7 +47,7 @@ class SubjectCategories(Resource):
             data = ModelManager.get_subject_categories(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_categories": data}
@@ -74,7 +74,7 @@ class SubjectCategories(Resource):
             data = ModelManager.add_subject_category(
                 user_id=user_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_categories": data}
@@ -95,7 +95,7 @@ class SubjectCategories(Resource):
             data = ModelManager.delete_subject_category(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -130,7 +130,7 @@ class ObjectCategories(Resource):
             data = ModelManager.get_object_categories(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_categories": data}
@@ -157,7 +157,7 @@ class ObjectCategories(Resource):
             data = ModelManager.add_object_category(
                 user_id=user_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_categories": data}
@@ -178,7 +178,7 @@ class ObjectCategories(Resource):
             data = ModelManager.delete_object_category(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -213,7 +213,7 @@ class ActionCategories(Resource):
             data = ModelManager.get_action_categories(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_categories": data}
@@ -240,7 +240,7 @@ class ActionCategories(Resource):
             data = ModelManager.add_action_category(
                 user_id=user_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_categories": data}
@@ -261,7 +261,7 @@ class ActionCategories(Resource):
             data = ModelManager.delete_action_category(
                 user_id=user_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}

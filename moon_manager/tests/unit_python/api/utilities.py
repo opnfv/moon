@@ -7,6 +7,6 @@ def get_json(data):
 
 def register_client():
     import moon_manager.server
-    server = moon_manager.server.main()
+    server = moon_manager.server.create_server()
     client = server.app.test_client()
     return client

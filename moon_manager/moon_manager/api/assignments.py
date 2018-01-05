@@ -9,13 +9,13 @@ Assignments allow to connect data with elements of perimeter
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 
-__version__ = "0.2.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class SubjectAssignments(Resource):
@@ -32,7 +32,8 @@ class SubjectAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
+            data_id=None, user_id=None):
         """Retrieve all subject assignments or a specific one for a given policy
 
         :param uuid: uuid of the policy
@@ -50,21 +51,19 @@ class SubjectAssignments(Resource):
         }
         :internal_api: get_subject_assignments
         """
-        # return call(ctx={"id": uuid, "method": "get_subject_assignments", "perimeter_id": perimeter_id, "category_id": category_id, "user_id": user_id},
-        #             args={"data_id": data_id})
         try:
-            # if "perimeter_name" in ctx:
-            #     ctx["perimeter_id"] = self.__get_subject_id(ctx, ctx['perimeter_name'])
-            data = PolicyManager.get_subject_assignments(user_id=user_id, policy_id=uuid,
-                                                         subject_id=perimeter_id, category_id=category_id)
+            data = PolicyManager.get_subject_assignments(
+                user_id=user_id, policy_id=uuid,
+                subject_id=perimeter_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
+             data_id=None, user_id=None):
         """Create a subject assignment.
 
         :param uuid: uuid of the policy
@@ -91,17 +90,19 @@ class SubjectAssignments(Resource):
             data_id = request.json.get("data_id")
             category_id = request.json.get("category_id")
             perimeter_id = request.json.get("id")
-            data = PolicyManager.add_subject_assignment(user_id=user_id, policy_id=uuid,
-                                                        subject_id=perimeter_id, category_id=category_id,
-                                                        data_id=data_id)
+            data = PolicyManager.add_subject_assignment(
+                user_id=user_id, policy_id=uuid,
+                subject_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+               data_id=None, user_id=None):
         """Delete a subject assignment for a given policy
 
         :param uuid: uuid of the policy
@@ -116,11 +117,12 @@ class SubjectAssignments(Resource):
         :internal_api: delete_subject_assignment
         """
         try:
-            data = PolicyManager.delete_subject_assignment(user_id=user_id, policy_id=uuid,
-                                                           subject_id=perimeter_id, category_id=category_id,
-                                                           data_id=data_id)
+            data = PolicyManager.delete_subject_assignment(
+                user_id=user_id, policy_id=uuid,
+                subject_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -140,7 +142,8 @@ class ObjectAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
+            data_id=None, user_id=None):
         """Retrieve all object assignment or a specific one for a given policy
 
         :param uuid: uuid of the policy
@@ -159,16 +162,18 @@ class ObjectAssignments(Resource):
         :internal_api: get_object_assignments
         """
         try:
-            data = PolicyManager.get_object_assignments(user_id=user_id, policy_id=uuid,
-                                                        object_id=perimeter_id, category_id=category_id)
+            data = PolicyManager.get_object_assignments(
+                user_id=user_id, policy_id=uuid,
+                object_id=perimeter_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
+             data_id=None, user_id=None):
         """Create an object assignment.
 
         :param uuid: uuid of the policy
@@ -195,17 +200,19 @@ class ObjectAssignments(Resource):
             data_id = request.json.get("data_id")
             category_id = request.json.get("category_id")
             perimeter_id = request.json.get("id")
-            data = PolicyManager.add_object_assignment(user_id=user_id, policy_id=uuid,
-                                                       object_id=perimeter_id, category_id=category_id,
-                                                       data_id=data_id)
+            data = PolicyManager.add_object_assignment(
+                user_id=user_id, policy_id=uuid,
+                object_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+               data_id=None, user_id=None):
         """Delete a object assignment for a given policy
 
         :param uuid: uuid of the policy
@@ -220,11 +227,12 @@ class ObjectAssignments(Resource):
         :internal_api: delete_object_assignment
         """
         try:
-            data = PolicyManager.delete_object_assignment(user_id=user_id, policy_id=uuid,
-                                                          object_id=perimeter_id, category_id=category_id,
-                                                          data_id=data_id)
+            data = PolicyManager.delete_object_assignment(
+                user_id=user_id, policy_id=uuid,
+                object_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -244,7 +252,8 @@ class ActionAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
+            data_id=None, user_id=None):
         """Retrieve all action assignment or a specific one for a given policy
 
         :param uuid: uuid of the policy
@@ -263,16 +272,18 @@ class ActionAssignments(Resource):
         :internal_api: get_action_assignments
         """
         try:
-            data = PolicyManager.get_action_assignments(user_id=user_id, policy_id=uuid,
-                                                        action_id=perimeter_id, category_id=category_id)
+            data = PolicyManager.get_action_assignments(
+                user_id=user_id, policy_id=uuid,
+                action_id=perimeter_id, category_id=category_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
+             data_id=None, user_id=None):
         """Create an action assignment.
 
         :param uuid: uuid of the policy
@@ -299,17 +310,19 @@ class ActionAssignments(Resource):
             data_id = request.json.get("data_id")
             category_id = request.json.get("category_id")
             perimeter_id = request.json.get("id")
-            data = PolicyManager.add_action_assignment(user_id=user_id, policy_id=uuid,
-                                                       action_id=perimeter_id, category_id=category_id,
-                                                       data_id=data_id)
+            data = PolicyManager.add_action_assignment(
+                user_id=user_id, policy_id=uuid,
+                action_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+               data_id=None, user_id=None):
         """Delete a action assignment for a given policy
 
         :param uuid: uuid of the policy
@@ -324,11 +337,12 @@ class ActionAssignments(Resource):
         :internal_api: delete_action_assignment
         """
         try:
-            data = PolicyManager.delete_action_assignment(user_id=user_id, policy_id=uuid,
-                                                          action_id=perimeter_id, category_id=category_id,
-                                                          data_id=data_id)
+            data = PolicyManager.delete_action_assignment(
+                user_id=user_id, policy_id=uuid,
+                action_id=perimeter_id, category_id=category_id,
+                data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}

@@ -24,7 +24,7 @@ from python_moonutilities import configuration, exceptions
 from python_moondb.core import PDPManager
 
 
-LOG = logging.getLogger("moon.manager.http_server")
+logger = logging.getLogger("moon.manager.http_server")
 
 __API__ = (
     Status, Logs, API,
@@ -88,7 +88,8 @@ class Root(Resource):
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
-        tree = {"/": {"methods": ("get",), "description": "List all methods for that service."}}
+        tree = {"/": {"methods": ("get",),
+                      "description": "List all methods for that service."}}
         for item in __API__:
             tree[item.__name__] = {"urls": item.__urls__}
             _methods = []
@@ -109,7 +110,8 @@ class HTTPServer(Server):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.app = Flask(__name__)
         conf = configuration.get_configuration("components/manager")
-        self.manager_hostname = conf["components/manager"].get("hostname", "manager")
+        self.manager_hostname = conf["components/manager"].get("hostname",
+                                                               "manager")
         self.manager_port = conf["components/manager"].get("port", 80)
         # TODO : specify only few urls instead of *
         CORS(self.app)
@@ -143,10 +145,10 @@ class HTTPServer(Server):
             except sqlalchemy.exc.ProgrammingError:
                 time.sleep(1)
                 if first:
-                    LOG.warning("Waiting for the database...")
+                    logger.warning("Waiting for the database...")
                     first = False
             else:
-                LOG.warning("Database is up, resuming operations...")
+                logger.warning("Database is up, resuming operations...")
                 break
 
     def run(self):

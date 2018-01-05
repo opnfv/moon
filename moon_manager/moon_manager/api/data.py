@@ -9,13 +9,13 @@ Data are elements used to create rules
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 
-__version__ = "0.2.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class SubjectData(Resource):
@@ -58,7 +58,7 @@ class SubjectData(Resource):
                                                   category_id=category_id,
                                                   data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_data": data}
@@ -93,7 +93,7 @@ class SubjectData(Resource):
                                                   category_id=category_id,
                                                   value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subject_data": data}
@@ -117,7 +117,7 @@ class SubjectData(Resource):
                                                      policy_id=uuid,
                                                      data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -163,7 +163,7 @@ class ObjectData(Resource):
                                                  category_id=category_id,
                                                  data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_data": data}
@@ -198,7 +198,7 @@ class ObjectData(Resource):
                                                  category_id=category_id,
                                                  value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"object_data": data}
@@ -222,7 +222,7 @@ class ObjectData(Resource):
                                                     policy_id=uuid,
                                                     data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -268,7 +268,7 @@ class ActionData(Resource):
                                                  category_id=category_id,
                                                  data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_data": data}
@@ -303,7 +303,7 @@ class ActionData(Resource):
                                                  category_id=category_id,
                                                  value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"action_data": data}
@@ -327,7 +327,7 @@ class ActionData(Resource):
                                                     policy_id=uuid,
                                                     data_id=data_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}

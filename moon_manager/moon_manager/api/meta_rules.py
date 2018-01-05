@@ -9,13 +9,13 @@ Meta rules are skeleton for security policies
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class MetaRules(Resource):
@@ -54,7 +54,7 @@ class MetaRules(Resource):
             data = ModelManager.get_meta_rules(
                 user_id=user_id, meta_rule_id=meta_rule_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"meta_rules": data}
@@ -89,7 +89,7 @@ class MetaRules(Resource):
             data = ModelManager.add_meta_rule(
                 user_id=user_id, meta_rule_id=None, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"meta_rules": data}
@@ -124,7 +124,7 @@ class MetaRules(Resource):
             data = ModelManager.set_meta_rule(
                 user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"meta_rules": data}
@@ -159,7 +159,7 @@ class MetaRules(Resource):
             data = ModelManager.delete_meta_rule(
                 user_id=user_id, meta_rule_id=meta_rule_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
