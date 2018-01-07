@@ -43,7 +43,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_orchestrator = moon_orchestrator.server:main',
+            'moon_orchestrator = moon_orchestrator.server:run',
         ],
     }
 
