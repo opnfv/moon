@@ -8,13 +8,13 @@ Rules (TODO)
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Rules(Resource):
@@ -52,7 +52,7 @@ class Rules(Resource):
                                            policy_id=uuid,
                                            rule_id=rule_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"rules": data}
@@ -114,7 +114,7 @@ class Rules(Resource):
                                           meta_rule_id=args['meta_rule_id'],
                                           value=args)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"rules": data}
@@ -133,7 +133,7 @@ class Rules(Resource):
             data = PolicyManager.delete_rule(
                 user_id=user_id, policy_id=uuid, rule_id=rule_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}

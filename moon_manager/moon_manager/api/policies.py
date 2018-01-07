@@ -9,13 +9,13 @@ Policies are instances of security models and implement security policies
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Policies(Resource):
@@ -49,7 +49,7 @@ class Policies(Resource):
         try:
             data = PolicyManager.get_policies(user_id=user_id, policy_id=uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"policies": data}
@@ -80,7 +80,7 @@ class Policies(Resource):
             data = PolicyManager.add_policy(
                 user_id=user_id, policy_id=uuid, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"policies": data}
@@ -100,7 +100,7 @@ class Policies(Resource):
         try:
             data = PolicyManager.delete_policy(user_id=user_id, policy_id=uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -125,7 +125,7 @@ class Policies(Resource):
             data = PolicyManager.update_policy(
                 user_id=user_id, policy_id=uuid, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"policies": data}

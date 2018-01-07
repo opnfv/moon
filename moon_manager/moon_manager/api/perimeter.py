@@ -12,13 +12,13 @@
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 
-__version__ = "0.2.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Subjects(Resource):
@@ -59,7 +59,7 @@ class Subjects(Resource):
                 perimeter_id=perimeter_id
             )
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subjects": data}
@@ -101,7 +101,7 @@ class Subjects(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subjects": data}
@@ -143,7 +143,7 @@ class Subjects(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"subjects": data}
@@ -170,7 +170,7 @@ class Subjects(Resource):
             data = PolicyManager.delete_subject(
                 user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -213,7 +213,7 @@ class Objects(Resource):
                 perimeter_id=perimeter_id
             )
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"objects": data}
@@ -248,7 +248,7 @@ class Objects(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"objects": data}
@@ -283,7 +283,7 @@ class Objects(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"objects": data}
@@ -307,7 +307,7 @@ class Objects(Resource):
             data = PolicyManager.delete_object(
                 user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -347,7 +347,7 @@ class Actions(Resource):
             data = PolicyManager.get_actions(
                 user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"actions": data}
@@ -382,7 +382,7 @@ class Actions(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"actions": data}
@@ -417,7 +417,7 @@ class Actions(Resource):
                 user_id=user_id, policy_id=uuid,
                 perimeter_id=perimeter_id, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"actions": data}
@@ -441,7 +441,7 @@ class Actions(Resource):
             data = PolicyManager.delete_action(
                 user_id=user_id, policy_id=uuid, perimeter_id=perimeter_id)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}

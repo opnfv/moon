@@ -8,13 +8,13 @@ Models aggregate multiple meta rules
 
 from flask import request
 from flask_restful import Resource
-from oslo_log import log as logging
+import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Models(Resource):
@@ -47,7 +47,7 @@ class Models(Resource):
         try:
             data = ModelManager.get_models(user_id=user_id, model_id=uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"models": data}
@@ -76,7 +76,7 @@ class Models(Resource):
             data = ModelManager.add_model(
                 user_id=user_id, model_id=uuid, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"models": data}
@@ -96,7 +96,7 @@ class Models(Resource):
         try:
             data = ModelManager.delete_model(user_id=user_id, model_id=uuid)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"result": True}
@@ -120,7 +120,7 @@ class Models(Resource):
             data = ModelManager.update_model(
                 user_id=user_id, model_id=uuid, value=request.json)
         except Exception as e:
-            LOG.error(e, exc_info=True)
+            logger.error(e, exc_info=True)
             return {"result": False,
                     "error": str(e)}, 500
         return {"models": data}

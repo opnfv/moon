@@ -7,13 +7,13 @@ Those API are helping API used to manage the Moon platform.
 """
 
 from flask_restful import Resource, request
-from oslo_log import log as logging
+import logging
 import moon_manager.api
 from python_moonutilities.security_functions import check_auth
 
-__version__ = "0.1.0"
+__version__ = "4.3.2"
 
-LOG = logging.getLogger("moon.manager.api." + __name__)
+logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Status(Resource):
@@ -120,7 +120,8 @@ class API(Resource):
             api_desc[api_name]["description"] = group_api_obj.__doc__
             if "__version__" in dir(group_api_obj):
                 api_desc[api_name]["version"] = group_api_obj.__version__
-            object_list = list(filter(lambda x: "__" not in x, dir(group_api_obj)))
+            object_list = list(filter(lambda x: "__" not in x,
+                                      dir(group_api_obj)))
             for obj in map(lambda x: eval("moon_manager.api.{}.{}".format(api_name, x)), object_list):
                 if "__urls__" in dir(obj):
                     api_desc[api_name][obj.__name__] = dict()
@@ -134,7 +135,7 @@ class API(Resource):
             if endpoint_id in api_desc[group_id]:
                 return {group_id: {endpoint_id: api_desc[group_id][endpoint_id]}}
             elif len(endpoint_id) > 0:
-                LOG.error("Unknown endpoint_id {}".format(endpoint_id))
+                logger.error("Unknown endpoint_id {}".format(endpoint_id))
                 return {"error": "Unknown endpoint_id {}".format(endpoint_id)}
             return {group_id: api_desc[group_id]}
         return api_desc
