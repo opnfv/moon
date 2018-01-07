@@ -40,7 +40,7 @@ setup(
 
     entry_points={
         'console_scripts': [
-            'moon_wrapper = moon_wrapper.server:main',
+            'moon_wrapper = moon_wrapper.server:run',
         ],
     }
 
