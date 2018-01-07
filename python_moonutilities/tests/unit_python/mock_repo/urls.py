@@ -10,20 +10,7 @@ def register_components(m):
         )
     m.register_uri(
         'GET', 'http://consul:8500/v1/kv/components/port_start',
-        json=[{'Key': 'port_start', 'Value': comp_util.get_b64_conf("components/port_start")}]
-    )
-    m.register_uri(
-        'GET', 'http://consul:8500/v1/kv/plugins?recurse=true',
-        json=[
-            {
-                "LockIndex": 0,
-                "Key": "plugins/authz",
-                "Flags": 0,
-                "Value": "eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0=",
-                "CreateIndex": 14,
-                "ModifyIndex": 656
-            }
-        ],
+        json=[{'Key': 'components/port_start', 'Value': comp_util.get_b64_conf("components/port_start")}]
     )
     m.register_uri(
         'PUT', 'http://consul:8500/v1/kv/components/port_start',
