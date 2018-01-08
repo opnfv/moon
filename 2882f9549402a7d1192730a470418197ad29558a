@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_a033b460",
+        "filename": "moon_manager/tests/unit_python/conftest.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 184,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-08T13:57:00Z",
+      "side": 1,
+      "message": "There is no /pods API in the interface component.\nIt should be \"orchestrator\" here.",
+      "range": {
+        "startLine": 184,
+        "startChar": 28,
+        "endLine": 184,
+        "endChar": 37
+      },
+      "revId": "2882f9549402a7d1192730a470418197ad29558a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
