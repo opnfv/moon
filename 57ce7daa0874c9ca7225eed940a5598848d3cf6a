@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_00bf00ab",
+        "filename": "moon_wrapper/tests/unit_python/api/test_wrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-08T13:24:59Z",
+      "side": 1,
+      "message": "The interface pod has been renamed to \"pipeline\", please check that your code is up-to-date and give me the whole pytest error.",
+      "range": {
+        "startLine": 9,
+        "startChar": 33,
+        "endLine": 9,
+        "endChar": 41
+      },
+      "revId": "57ce7daa0874c9ca7225eed940a5598848d3cf6a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
