@@ -135,6 +135,7 @@ COMPONENTS = (
 
 CONTEXT = {
         "project_id": "a64beb1cc224474fb4badd43173e7101",
+        "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
         "subject_name": "testuser",
         "object_name": "vm1",
         "action_name": "boot",
@@ -206,7 +207,7 @@ def set_env_variables():
 
 
 def get_pickled_context():
-    from python_moonutilities.security_functions import Context
+    from python_moonutilities.context import Context
     from python_moonutilities.cache import Cache
     CACHE = Cache()
     CACHE.update()
@@ -671,7 +672,7 @@ def set_consul_and_db(monkeypatch):
         )
         m.register_uri(
             'GET', 'http://interface-paltry:8080/authz/{}/{}/{}/{}'.format(
-                CONTEXT.get("project_id"),
+                CONTEXT.get("pdp_id"),
                 CONTEXT.get("subject_name"),
                 CONTEXT.get("object_name"),
                 CONTEXT.get("action_name"),

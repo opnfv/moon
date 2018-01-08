@@ -20,7 +20,7 @@ def test_authz_true(context):
         'rule': context.get('action_name'),
         'target': json.dumps(_target),
         'credentials': 'null'}
-    req = client.post("/authz", data=json.dumps(authz_data))
+    req = client.post("/authz/oslo", data=json.dumps(authz_data))
     assert req.status_code == 200
     assert req.data
     assert isinstance(req.data, bytes)
