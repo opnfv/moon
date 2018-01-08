@@ -35,7 +35,7 @@ CONF = {
             "bind": "0.0.0.0",
             "port": 8083,
             "container": "wukongsun/moon_orchestrator:v4.3",
-            "hostname": "interface"
+            "hostname": "orchestrator"
         },
         "interface": {
             "bind": "0.0.0.0",
@@ -116,6 +116,12 @@ CONF = {
     },
     "messenger": {
         "url": "rabbit://moon:p4sswOrd1@messenger:5672/moon"
+    },
+    "data": {
+        "name": "testuser",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "description of testuser",
     }
 }
 
@@ -125,6 +131,7 @@ COMPONENTS = (
     "database",
     "slave",
     "components/manager",
+    "components/orchestrator"
 )
 
 
@@ -132,15 +139,15 @@ def get_b64_conf(component=None):
     if component in CONF:
         return base64.b64encode(
             json.dumps(
-                CONF[component]).encode('utf-8')+b"\n").decode('utf-8')
+                CONF[component]).encode('utf-8') + b"\n").decode('utf-8')
     elif "/" in component:
         key1, _, key2 = component.partition("/")
         return base64.b64encode(
             json.dumps(
-                CONF[key1][key2]).encode('utf-8')+b"\n").decode('utf-8')
+                CONF[key1][key2]).encode('utf-8') + b"\n").decode('utf-8')
     else:
         return base64.b64encode(
-            json.dumps(CONF).encode('utf-8')+b"\n").decode('utf-8')
+            json.dumps(CONF).encode('utf-8') + b"\n").decode('utf-8')
 
 
 @pytest.fixture(autouse=True)
@@ -152,7 +159,7 @@ def no_requests(monkeypatch):
             m.register_uri(
                 'GET', 'http://consul:8500/v1/kv/{}'.format(component),
                 json=[{'Key': component, 'Value': get_b64_conf(component)}]
-                )
+            )
         m.register_uri(
             'POST', 'http://keystone:5000/v3/auth/tokens',
             headers={'X-Subject-Token': "111111111"}
@@ -171,10 +178,14 @@ def no_requests(monkeypatch):
         )
         m.register_uri(
             'POST', 'http://keystone:5000/v3/users/',
-            json={"users": [{
-                "id": "1111111111111"
-            }]}
+            json={"users": [{"id": "1111111111111"}]}
         )
+        m.register_uri(
+            'POST', 'http://orchestrator:8083/pods',
+            json=CONF["data"],
+            headers={"content-type": "application/json"}
+        )
+
         print("Start populating the DB.")
         from python_moondb.db_manager import init_engine, main
         engine = init_engine()
@@ -183,7 +194,6 @@ def no_requests(monkeypatch):
         print("End populating the DB.")
         yield m
 
-
 # @pytest.fixture(autouse=True, scope="session")
 # def manage_database():
 #     from moon_db.db_manager import init_engine, run
@@ -191,5 +201,3 @@ def no_requests(monkeypatch):
 #     run("upgrade", logging.getLogger("db_manager"), engine)
 #     yield
 #     print("Will close the DB")
-
-
