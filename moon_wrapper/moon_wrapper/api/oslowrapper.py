@@ -71,7 +71,7 @@ class OsloWrapper(Resource):
             logger.info("containers {}".format(containers))
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "pipeline" in container['name']:
+                    if "interface" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])
@@ -80,7 +80,7 @@ class OsloWrapper(Resource):
         for containers in self.CACHE.containers.values():
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "pipeline" in container['name']:
+                    if "interface" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])

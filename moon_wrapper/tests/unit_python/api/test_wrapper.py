@@ -1,3 +1,8 @@
+# Copyright 2015 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import json
 
 
@@ -20,7 +25,7 @@ def test_authz_true(context):
         'rule': context.get('action_name'),
         'target': json.dumps(_target),
         'credentials': 'null'}
-    req = client.post("/authz", data=json.dumps(authz_data))
+    req = client.post("/authz/oslo", data=json.dumps(authz_data))
     assert req.status_code == 200
     assert req.data
     assert isinstance(req.data, bytes)

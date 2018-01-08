@@ -1,3 +1,8 @@
+# Copyright 2015 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import base64
 import json
 import os
@@ -5,7 +10,6 @@ import pickle
 import pytest
 import requests_mock
 from uuid import uuid4
-from requests.packages.urllib3.response import HTTPResponse
 
 CONF = {
     "openstack": {
@@ -13,7 +17,7 @@ CONF = {
             "url": "http://keystone:5000/v3",
             "user": "admin",
             "check_token": False,
-            "password": "p4ssw0rd",
+            "password": "p4ssw0rd",  # nosec
             "domain": "default",
             "certificate": False,
             "project": "admin"
@@ -21,21 +25,21 @@ CONF = {
     },
     "components": {
         "wrapper": {
-            "bind": "0.0.0.0",
+            "bind": "0.0.0.0",  # nosec
             "port": 8080,
             "container": "wukongsun/moon_wrapper:v4.3",
             "timeout": 5,
             "hostname": "wrapper"
         },
         "manager": {
-            "bind": "0.0.0.0",
+            "bind": "0.0.0.0",  # nosec
             "port": 8082,
             "container": "wukongsun/moon_manager:v4.3",
             "hostname": "manager"
         },
         "port_start": 31001,
         "orchestrator": {
-            "bind": "0.0.0.0",
+            "bind": "0.0.0.0",  # nosec
             "port": 8083,
             "container": "wukongsun/moon_orchestrator:v4.3",
             "hostname": "orchestrator"
@@ -60,7 +64,7 @@ CONF = {
     "logging": {
         "handlers": {
             "file": {
-                "filename": "/tmp/moon.log",
+                "filename": "/tmp/moon.log",  # nosec
                 "class": "logging.handlers.RotatingFileHandler",
                 "level": "DEBUG",
                 "formatter": "custom",
@@ -105,7 +109,7 @@ CONF = {
         "master": {
             "url": None,
             "login": None,
-            "password": None
+            "password": None  # nosec
         }
     },
     "docker": {
@@ -135,6 +139,7 @@ COMPONENTS = (
 
 CONTEXT = {
         "project_id": "a64beb1cc224474fb4badd43173e7101",
+        "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
         "subject_name": "testuser",
         "object_name": "vm1",
         "action_name": "boot",
@@ -206,7 +211,7 @@ def set_env_variables():
 
 
 def get_pickled_context():
-    from python_moonutilities.security_functions import Context
+    from python_moonutilities.context import Context
     from python_moonutilities.cache import Cache
     CACHE = Cache()
     CACHE.update()
@@ -671,7 +676,7 @@ def set_consul_and_db(monkeypatch):
         )
         m.register_uri(
             'GET', 'http://interface-paltry:8080/authz/{}/{}/{}/{}'.format(
-                CONTEXT.get("project_id"),
+                CONTEXT.get("pdp_id"),
                 CONTEXT.get("subject_name"),
                 CONTEXT.get("object_name"),
                 CONTEXT.get("action_name"),
