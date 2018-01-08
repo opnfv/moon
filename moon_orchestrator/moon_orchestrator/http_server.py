@@ -5,7 +5,6 @@
 
 from flask import Flask, jsonify
 from flask_restful import Resource, Api
-from kubernetes import client, config
 import logging
 import requests
 import time
@@ -14,7 +13,6 @@ from moon_orchestrator.api.pods import Pods
 from moon_orchestrator.api.generic import Status
 from moon_orchestrator.drivers import get_driver
 from python_moonutilities import configuration, exceptions
-from python_moonutilities.misc import get_random_name
 
 logger = logging.getLogger("moon.orchestrator.http_server")
 
@@ -124,11 +122,11 @@ class HTTPServer(Server):
                 if "pdps" in pdp.json():
                     break
         logger.debug("pdp={}".format(pdp))
-        self.create_wrappers()
+        self.driver.create_wrappers()
         for _pdp_key, _pdp_value in pdp.json()['pdps'].items():
             if _pdp_value.get('keystone_project_id'):
                 # TODO: select context to add security function
-                self.create_pipeline(
+                self.driver.create_pipeline(
                     keystone_project_id=_pdp_value.get('keystone_project_id'),
                     pdp_id=_pdp_key,
                     policy_ids=_pdp_value.get('security_pipeline', []))
@@ -151,9 +149,7 @@ class HTTPServer(Server):
             self.api.add_resource(api, *api.__urls__)
         self.api.add_resource(Pods, *Pods.__urls__,
                               resource_class_kwargs={
-                                  "driver": self.driver,
-                                  "create_pipeline_hook":
-                                      self.create_pipeline,
+                                  "driver": self.driver
                               })
 
     def run(self):
@@ -162,133 +158,4 @@ class HTTPServer(Server):
     @staticmethod
     def __filter_str(data):
         return data.replace("@", "-")
-
-    def create_wrappers(self):
-        contexts, active_context = self.driver.get_slaves()
-        logger.debug("contexts: {}".format(contexts))
-        logger.debug("active_context: {}".format(active_context))
-        conf = configuration.get_configuration("components/wrapper")
-        hostname = conf["components/wrapper"].get(
-            "hostname", "wrapper")
-        port = conf["components/wrapper"].get("port", 80)
-        container = conf["components/wrapper"].get(
-            "container",
-            "wukongsun/moon_wrapper:v4.3")
-        for _ctx in contexts:
-            _config = config.new_client_from_config(context=_ctx['name'])
-            logger.debug("_config={}".format(_config))
-            api_client = client.CoreV1Api(_config)
-            ext_client = client.ExtensionsV1beta1Api(_config)
-            data = [{
-                "name": hostname + "-" + get_random_name(),
-                "container": container,
-                "port": port,
-                "namespace": "moon"
-            }, ]
-            pod = self.driver.load_pod(data, api_client, ext_client, expose=True)
-            logger.debug('wrapper pod={}'.format(pod))
-
-    def create_pipeline(self, keystone_project_id,
-                        pdp_id, policy_ids, manager_data=None,
-                        active_context=None,
-                        active_context_name=None):
-        """ Create security functions
-
-        :param keystone_project_id: the Keystone project id
-        :param pdp_id: the PDP ID mapped to this pipeline
-        :param policy_ids: the policy IDs mapped to this pipeline
-        :param manager_data: data needed to create pods
-        :param active_context: if present, add the security function in this
-                               context
-        :param active_context_name: if present,  add the security function in
-                                    this context name
-        if active_context_name and active_context are not present, add the
-        security function in all context (ie, in all slaves)
-        :return: None
-        """
-        if not manager_data:
-            manager_data = dict()
-        for key, value in self.driver.get_pods().items():
-            for _pod in value:
-                if _pod.get('keystone_project_id') == keystone_project_id:
-                    logger.warning("A pod for this Keystone project {} "
-                                   "already exists.".format(keystone_project_id))
-                    return
-
-        plugins = configuration.get_plugins()
-        conf = configuration.get_configuration("components/pipeline")
-        # i_hostname = conf["components/pipeline"].get("interface").get("hostname", "interface")
-        i_port = conf["components/pipeline"].get("interface").get("port", 80)
-        i_container = conf["components/pipeline"].get("interface").get(
-            "container",
-            "wukongsun/moon_interface:v4.3")
-        data = [
-            {
-                "name": "pipeline-" + get_random_name(),
-                "container": i_container,
-                "port": i_port,
-                'pdp_id': pdp_id,
-                'genre': "interface",
-                'keystone_project_id': keystone_project_id,
-                "namespace": "moon"
-            },
-        ]
-        logger.debug("data={}".format(data))
-        policies = manager_data.get('policies')
-        if not policies:
-            logger.info("No policy data from Manager, trying to get them")
-            policies = requests.get("http://{}:{}/policies".format(
-                self.manager_hostname, self.manager_port)).json().get(
-                "policies", dict())
-        logger.debug("policies={}".format(policies))
-        models = manager_data.get('models')
-        if not models:
-            logger.info("No models data from Manager, trying to get them")
-            models = requests.get("http://{}:{}/models".format(
-                self.manager_hostname, self.manager_port)).json().get(
-                "models", dict())
-        logger.debug("models={}".format(models))
-
-        for policy_id in policy_ids:
-            if policy_id in policies:
-                genre = policies[policy_id].get("genre", "authz")
-                if genre in plugins:
-                    for meta_rule in models[policies[policy_id]['model_id']]['meta_rules']:
-                        data.append({
-                            "name": genre + "-" + get_random_name(),
-                            "container": plugins[genre]['container'],
-                            'pdp_id': pdp_id,
-                            "port": plugins[genre].get('port', 8080),
-                            'genre': genre,
-                            'policy_id': policy_id,
-                            'meta_rule_id': meta_rule,
-                            'keystone_project_id': keystone_project_id,
-                            "namespace": "moon"
-                        })
-        logger.debug("data={}".format(data))
-        contexts, _active_context = self.driver.get_slaves()
-        logger.debug("active_context_name={}".format(active_context_name))
-        logger.debug("active_context={}".format(active_context))
-        if active_context_name:
-            for _context in contexts:
-                if _context["name"] == active_context_name:
-                    active_context = _context
-                    break
-        if active_context:
-            active_context = _active_context
-            _config = config.new_client_from_config(
-                context=active_context['name'])
-            logger.debug("_config={}".format(_config))
-            api_client = client.CoreV1Api(_config)
-            ext_client = client.ExtensionsV1beta1Api(_config)
-            self.driver.load_pod(data, api_client, ext_client, expose=False)
-            return
-        logger.debug("contexts={}".format(contexts))
-        for _ctx in contexts:
-            _config = config.new_client_from_config(context=_ctx['name'])
-            logger.debug("_config={}".format(_config))
-            api_client = client.CoreV1Api(_config)
-            ext_client = client.ExtensionsV1beta1Api(_config)
-            self.driver.load_pod(data, api_client, ext_client, expose=False)
-
 

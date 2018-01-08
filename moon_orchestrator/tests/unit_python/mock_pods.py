@@ -251,11 +251,11 @@ def register_consul(m):
             json=[{'Key': component, 'Value': get_b64_conf(component)}]
         )
     m.register_uri(
-        'GET', 'http://consul:8500/v1/kv/components_port_start',
+        'GET', 'http://consul:8500/v1/kv/components/port_start',
         json=[
             {
                 "LockIndex": 0,
-                "Key": "components_port_start",
+                "Key": "components/port_start",
                 "Flags": 0,
                 "Value": "MzEwMDE=",
                 "CreateIndex": 9,
@@ -264,22 +264,22 @@ def register_consul(m):
         ],
     )
     m.register_uri(
-        'PUT', 'http://consul:8500/v1/kv/components_port_start',
+        'PUT', 'http://consul:8500/v1/kv/components/port_start',
         json=[],
     )
-    m.register_uri(
-        'GET', 'http://consul:8500/v1/kv/plugins?recurse=true',
-        json=[
-            {
-                "LockIndex": 0,
-                "Key": "plugins/authz",
-                "Flags": 0,
-                "Value": "eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0=",
-                "CreateIndex": 14,
-                "ModifyIndex": 656
-            }
-        ],
-    )
+    # m.register_uri(
+    #     'GET', 'http://consul:8500/v1/kv/plugins?recurse=true',
+    #     json=[
+    #         {
+    #             "LockIndex": 0,
+    #             "Key": "plugins/authz",
+    #             "Flags": 0,
+    #             "Value": "eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0=",
+    #             "CreateIndex": 14,
+    #             "ModifyIndex": 656
+    #         }
+    #     ],
+    # )
 
 
 def register_pdp(m):

@@ -5,8 +5,10 @@
 
 from kubernetes import client, config
 import logging
+import requests
 import urllib3.exceptions
-from python_moonutilities import configuration
+from python_moonutilities import configuration, exceptions
+from python_moonutilities.misc import get_random_name
 
 logger = logging.getLogger("moon.orchestrator.drivers")
 
@@ -36,16 +38,24 @@ class Driver:
         #     }
         # }
 
-    def get_pods(self, namespace=None):
-        raise NotImplementedError
-
-    def load_pod(self, data, api_client=None, ext_client=None):
-        raise NotImplementedError
-
-    def delete_pod(self, uuid=None, name=None):
-        raise NotImplementedError
-
     def get_slaves(self):
+        raise NotImplementedError
+
+    def create_wrappers(self):
+        raise NotImplementedError
+
+    def delete_wrapper(self, name):
+        raise NotImplementedError
+
+    def create_pipeline(self, keystone_project_id,
+                        pdp_id, policy_ids, manager_data=None,
+                        active_context=None,
+                        active_context_name=None):
+        raise NotImplementedError
+
+    def delete_pipeline(self, uuid=None, name=None, namespace="moon",
+                        active_context=None,
+                        active_context_name=None):
         raise NotImplementedError
 
 
@@ -55,6 +65,12 @@ class K8S(Driver):
         super(K8S, self).__init__()
         config.load_kube_config()
         self.client = client.CoreV1Api()
+        conf = configuration.get_configuration("components/orchestrator")
+        self.orchestrator_hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
+        self.orchestrator_port = conf["components/orchestrator"].get("port", 80)
+        conf = configuration.get_configuration("components/manager")
+        self.manager_hostname = conf["components/manager"].get("hostname", "manager")
+        self.manager_port = conf["components/manager"].get("port", 80)
 
     def get_pods(self, name=None):
         if name:
@@ -69,7 +85,7 @@ class K8S(Driver):
         return self.cache
 
     @staticmethod
-    def __create_pod(client, data):
+    def __create_deployment(client, data):
         pod_manifest = {
             'apiVersion': 'extensions/v1beta1',
             'kind': 'Deployment',
@@ -145,29 +161,231 @@ class K8S(Driver):
         logger.info("Service {} created!".format(data.get('name')))
         return resp
 
-    def load_pod(self, data, api_client=None, ext_client=None, expose=False):
+    def load_deployment_and_service(self, data, api_client=None, ext_client=None, expose=False):
         _client = api_client if api_client else self.client
-        pod = self.__create_pod(client=ext_client, data=data)
+        pod = self.__create_deployment(client=ext_client, data=data)
         self.__create_service(client=_client, data=data[0],
-                                        expose=expose)
+                              expose=expose)
         self.cache[pod.metadata.uid] = data
 
-    def delete_pod(self, uuid=None, name=None):
-        logger.info("Deleting pod {}".format(uuid))
-        # TODO: delete_namespaced_deployment
-        # https://github.com/kubernetes-incubator/client-python/blob/master/kubernetes/client/apis/extensions_v1beta1_api.py
+    @staticmethod
+    def delete_deployment(name=None, namespace="moon", ext_client=None):
+        logger.info("Deleting deployment {}".format(name))
+        body = client.V1DeleteOptions(propagation_policy='Foreground')
+        ret = ext_client.delete_namespaced_deployment(
+            name=name,
+            namespace=namespace,
+            body=body
+        )
+        logger.info(ret)
+
+    def delete_service(self, name, namespace="moon", api_client=None):
+        if not api_client:
+            api_client = self.client
+        ret = api_client.delete_namespaced_service(name=name, namespace=namespace)
+        logger.debug("delete_service {}".format(ret))
 
     def get_slaves(self):
         contexts, active_context = config.list_kube_config_contexts()
         return contexts, active_context
 
+    def create_wrappers(self):
+        contexts, active_context = self.get_slaves()
+        logger.debug("contexts: {}".format(contexts))
+        logger.debug("active_context: {}".format(active_context))
+        conf = configuration.get_configuration("components/wrapper")
+        hostname = conf["components/wrapper"].get(
+            "hostname", "wrapper")
+        port = conf["components/wrapper"].get("port", 80)
+        container = conf["components/wrapper"].get(
+            "container",
+            "wukongsun/moon_wrapper:v4.3")
+        for _ctx in contexts:
+            _config = config.new_client_from_config(context=_ctx['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            data = [{
+                "name": hostname + "-" + get_random_name(),
+                "container": container,
+                "port": port,
+                "namespace": "moon"
+            }, ]
+            self.load_deployment_and_service(data, api_client, ext_client, expose=True)
+
+    def create_pipeline(self, keystone_project_id,
+                        pdp_id, policy_ids, manager_data=None,
+                        active_context=None,
+                        active_context_name=None):
+        """ Create security functions
+
+        :param keystone_project_id: the Keystone project id
+        :param pdp_id: the PDP ID mapped to this pipeline
+        :param policy_ids: the policy IDs mapped to this pipeline
+        :param manager_data: data needed to create pods
+        :param active_context: if present, add the security function in this
+                               context
+        :param active_context_name: if present,  add the security function in
+                                    this context name
+        if active_context_name and active_context are not present, add the
+        security function in all context (ie, in all slaves)
+        :return: None
+        """
+        if not manager_data:
+            manager_data = dict()
+        for key, value in self.get_pods().items():
+            for _pod in value:
+                if _pod.get('keystone_project_id') == keystone_project_id:
+                    logger.warning("A pod for this Keystone project {} "
+                                   "already exists.".format(keystone_project_id))
+                    return
+
+        plugins = configuration.get_plugins()
+        conf = configuration.get_configuration("components/pipeline")
+        # i_hostname = conf["components/pipeline"].get("interface").get("hostname", "interface")
+        i_port = conf["components/pipeline"].get("interface").get("port", 80)
+        i_container = conf["components/pipeline"].get("interface").get(
+            "container",
+            "wukongsun/moon_interface:v4.3")
+        data = [
+            {
+                "name": "pipeline-" + get_random_name(),
+                "container": i_container,
+                "port": i_port,
+                'pdp_id': pdp_id,
+                'genre': "interface",
+                'keystone_project_id': keystone_project_id,
+                "namespace": "moon"
+            },
+        ]
+        logger.debug("data={}".format(data))
+        policies = manager_data.get('policies')
+        if not policies:
+            logger.info("No policy data from Manager, trying to get them")
+            policies = requests.get("http://{}:{}/policies".format(
+                self.manager_hostname, self.manager_port)).json().get(
+                "policies", dict())
+        logger.debug("policies={}".format(policies))
+        models = manager_data.get('models')
+        if not models:
+            logger.info("No models data from Manager, trying to get them")
+            models = requests.get("http://{}:{}/models".format(
+                self.manager_hostname, self.manager_port)).json().get(
+                "models", dict())
+        logger.debug("models={}".format(models))
+
+        for policy_id in policy_ids:
+            if policy_id in policies:
+                genre = policies[policy_id].get("genre", "authz")
+                if genre in plugins:
+                    for meta_rule in models[policies[policy_id]['model_id']]['meta_rules']:
+                        data.append({
+                            "name": genre + "-" + get_random_name(),
+                            "container": plugins[genre]['container'],
+                            'pdp_id': pdp_id,
+                            "port": plugins[genre].get('port', 8080),
+                            'genre': genre,
+                            'policy_id': policy_id,
+                            'meta_rule_id': meta_rule,
+                            'keystone_project_id': keystone_project_id,
+                            "namespace": "moon"
+                        })
+        logger.debug("data={}".format(data))
+        contexts, _active_context = self.get_slaves()
+        logger.debug("active_context_name={}".format(active_context_name))
+        logger.debug("active_context={}".format(active_context))
+        if active_context_name:
+            for _context in contexts:
+                if _context["name"] == active_context_name:
+                    active_context = _context
+                    break
+        if active_context:
+            active_context = _active_context
+            _config = config.new_client_from_config(
+                context=active_context['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.load_deployment_and_service(data, api_client, ext_client, expose=False)
+            return
+        logger.debug("contexts={}".format(contexts))
+        for _ctx in contexts:
+            _config = config.new_client_from_config(context=_ctx['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.load_deployment_and_service(data, api_client, ext_client, expose=False)
+
+    def delete_pipeline(self, uuid=None, name=None, namespace="moon",
+                        active_context=None,
+                        active_context_name=None):
+        """Delete a pipeline
+
+        :param uuid:
+        :param name:
+        :param namespace:
+        :param active_context:
+        :param active_context_name:
+        :return:
+        """
+        name_to_delete = None
+        if uuid and uuid in self.get_pods():
+            name_to_delete = self.get_pods()[uuid][0]['name']
+        elif name:
+            for pod_key, pod_list in self.get_pods().items():
+                for pod_value in pod_list:
+                    if pod_value.get("name") == name:
+                        name_to_delete = pod_value.get("name")
+                        break
+        if not name_to_delete:
+            raise exceptions.MoonError("Cannot find pipeline")
+        logger.info("Will delete deployment and service named {}".format(name_to_delete))
+        contexts, _active_context = self.get_slaves()
+        if active_context_name:
+            for _context in contexts:
+                if _context["name"] == active_context_name:
+                    active_context = _context
+                    break
+        if active_context:
+            active_context = _active_context
+            _config = config.new_client_from_config(
+                context=active_context['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.delete_deployment(name=name_to_delete, namespace=namespace,
+                                   ext_client=ext_client)
+            self.delete_service(name=name_to_delete, api_client=api_client)
+            return
+        logger.debug("contexts={}".format(contexts))
+        for _ctx in contexts:
+            _config = config.new_client_from_config(context=_ctx['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.delete_deployment(name=name_to_delete, namespace=namespace,
+                                   ext_client=ext_client)
+            self.delete_service(name=name_to_delete, api_client=api_client)
+
 
 class Docker(Driver):
 
-    def load_pod(self, data, api_client=None, ext_client=None):
-        logger.info("Creating pod {}".format(data[0].get('name')))
+    def get_slaves(self):
         raise NotImplementedError
 
-    def delete_pod(self, uuid=None, name=None):
-        logger.info("Deleting pod {}".format(uuid))
+    def create_wrappers(self):
+        raise NotImplementedError
+
+    def delete_wrapper(self, name):
+        raise NotImplementedError
+
+    def create_pipeline(self, keystone_project_id,
+                        pdp_id, policy_ids, manager_data=None,
+                        active_context=None,
+                        active_context_name=None):
+        raise NotImplementedError
+
+    def delete_pipeline(self, uuid=None, name=None, namespace="moon",
+                        active_context=None,
+                        active_context_name=None):
         raise NotImplementedError

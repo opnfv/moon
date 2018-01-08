@@ -37,21 +37,19 @@ CONF = {
             "container": "wukongsun/moon_orchestrator:v4.3",
             "hostname": "interface"
         },
-        "interface": {
-            "bind": "0.0.0.0",
-            "port": 8080,
-            "container": "wukongsun/moon_interface:v4.3",
-            "hostname": "interface"
-        }
-    },
-    "plugins": {
-        "session": {
-            "port": 8082,
-            "container": "asteroide/session:latest"
-        },
-        "authz": {
-            "port": 8081,
-            "container": "wukongsun/moon_authz:v4.3"
+        "pipeline": {
+            "interface": {
+                "bind": "0.0.0.0",
+                "port": 8080,
+                "container": "wukongsun/moon_interface:v4.3",
+                "hostname": "interface"
+            },
+            "authz": {
+                "bind": "0.0.0.0",
+                "port": 8081,
+                "container": "wukongsun/moon_authz:v4.3",
+                "hostname": "authz"
+            },
         }
     },
     "logging": {

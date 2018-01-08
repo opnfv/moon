@@ -27,7 +27,6 @@ class Pods(Resource):
 
     def __init__(self, **kwargs):
         self.driver = kwargs.get("driver")
-        self.create_pipeline = kwargs.get("create_pipeline_hook")
 
     @check_auth
     def get(self, uuid=None, user_id=None):
@@ -75,7 +74,7 @@ class Pods(Resource):
         }
         """
         logger.debug("POST param={}".format(request.json))
-        self.create_pipeline(
+        self.driver.create_pipeline(
             request.json.get("keystone_project_id"),
             request.json.get("pdp_id"),
             request.json.get("security_pipeline"),
@@ -102,7 +101,11 @@ class Pods(Resource):
             "message": "optional message"
         }
         """
-        return {"result": True}
+        try:
+            self.driver.delete_pipeline(uuid)
+            return {'result': True}
+        except Exception as e:
+            return {"result": False, "message": str(e)}, 500
 
     @check_auth
     def patch(self, uuid=None, user_id=None):

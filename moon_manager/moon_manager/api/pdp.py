@@ -14,6 +14,8 @@ import requests
 import time
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PDPManager
+from python_moondb.core import PolicyManager
+from python_moondb.core import ModelManager
 from python_moonutilities import configuration, exceptions
 
 __version__ = "4.3.2"
@@ -22,7 +24,29 @@ logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 def delete_pod(uuid):
-    raise NotImplementedError
+    conf = configuration.get_configuration("components/orchestrator")
+    hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
+    port = conf["components/orchestrator"].get("port", 80)
+    proto = conf["components/orchestrator"].get("protocol", "http")
+    # while True:
+    #     try:
+    url = "{}://{}:{}/pods".format(proto, hostname, port)
+    req = requests.get(url)
+    # except requests.exceptions.ConnectionError:
+    #     logger.warning("Orchestrator is not ready, standby... {}".format(url))
+    #     time.sleep(1)
+    # else:
+    #     break
+    for pod_key, pod_list in req.json().get("pods", {}).items():
+        for pod_value in pod_list:
+            if "pdp_id" in pod_value:
+                if pod_value["pdp_id"] == uuid:
+                    req = requests.delete("{}://{}:{}/pods/{}".format(proto, hostname, port, pod_key))
+                    if req.status_code != 200:
+                        logger.warning("Cannot delete pod {} - {}".format(pod_key, pod_value['name']))
+                        logger.debug(req.content)
+                    # Note (Asteroide): no need to go further if one match
+                    break
 
 
 def add_pod(uuid, data):
@@ -31,6 +55,8 @@ def add_pod(uuid, data):
     logger.info("Add a new pod {}".format(data))
     if "pdp_id" not in data:
         data["pdp_id"] = uuid
+    data['policies'] = PolicyManager.get_policies(user_id="admin")
+    data['models'] = ModelManager.get_models(user_id="admin")
     conf = configuration.get_configuration("components/orchestrator")
     hostname = conf["components/orchestrator"].get("hostname", "orchestrator")
     port = conf["components/orchestrator"].get("port", 80)
@@ -41,8 +67,9 @@ def add_pod(uuid, data):
                 "{}://{}:{}/pods".format(proto, hostname, port),
                 json=data,
                 headers={"content-type": "application/json"})
-        except requests.exceptions.ConnectionError:
-            logger.warning("Orchestrator is not ready, standby...")
+        except requests.exceptions.ConnectionError as e:
+            logger.warning("add_pod: Orchestrator is not ready, standby...")
+            logger.exception(e)
             time.sleep(1)
         else:
             break
