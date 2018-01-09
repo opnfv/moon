@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_0d33b4ab",
+        "filename": "moon_manager/tests/unit_python/conftest.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T14:13:57Z",
+      "side": 1,
+      "message": "The CONF variable was created to mirror the moon.conf file. I would prefer that you use a CONTEXT variable with a \"pdp\" key inside or put directly the dictionary under the m.register function like we have in /moon_wrapper/tests/unit_python/conftest.py",
+      "range": {
+        "startLine": 120,
+        "startChar": 4,
+        "endLine": 125,
+        "endChar": 5
+      },
+      "revId": "c2d845b4be83567c6f3a30a99f28ce4ae83d5e06",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
