@@ -70,6 +70,30 @@
       "revId": "57ce7daa0874c9ca7225eed940a5598848d3cf6a",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_0a655ab4",
+        "filename": "moon_wrapper/tests/unit_python/api/test_wrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T08:27:03Z",
+      "side": 1,
+      "message": "I don\u0027t know what is your test procedure but you need to update the python_moonutilities library (pip install python_moonutilities --upgrade) either in your local configuration either in your VM. If you use the docker wukongsun/moon_python_unit_test, please use the \"latest\" tag. This should resolve your problem.",
+      "parentUuid": "9a3d3df0_8a496a33",
+      "range": {
+        "startLine": 9,
+        "startChar": 33,
+        "endLine": 9,
+        "endChar": 41
+      },
+      "revId": "57ce7daa0874c9ca7225eed940a5598848d3cf6a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
