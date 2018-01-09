@@ -68,6 +68,53 @@
       "revId": "f5659556d855d5fce85f0e324873e0589cc5c6d3",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_0d0c54ec",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 41,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T13:58:33Z",
+      "side": 1,
+      "message": "I don\u0027t find any duplicated code here, the first \"request.post\" is done on an IP (l.47), the second on a hostname (l.65) if the first one raise an exception.\nIf you have a better way to do that part, please, show me.",
+      "parentUuid": "9a3d3df0_0a9c3a0e",
+      "range": {
+        "startLine": 41,
+        "startChar": 4,
+        "endLine": 41,
+        "endChar": 7
+      },
+      "revId": "f5659556d855d5fce85f0e324873e0589cc5c6d3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_2d6038a4",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 139,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T13:58:33Z",
+      "side": 1,
+      "message": "This will prepare for a future update, Please don\u0027t modify this.",
+      "range": {
+        "startLine": 139,
+        "startChar": 16,
+        "endLine": 139,
+        "endChar": 31
+      },
+      "revId": "f5659556d855d5fce85f0e324873e0589cc5c6d3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
