@@ -92,6 +92,9 @@ class Authz(Resource):
         self.MANAGER_URL = kwargs.get("manager_url", "http://manager:8080")
         self.TIMEOUT = 5
 
+    '''
+        [Note 1] pdp_id couldn't be None as the url itself won't have url pattern with pdp_id=None
+    '''
     def get(self, pdp_id=None, subject_name=None, object_name=None, action_name=None):
         """Get a response on an authorization request
 
@@ -119,6 +122,10 @@ class Authz(Resource):
         }
         :internal_api: authz
         """
+        '''
+            [Note 2] pdp_value not used, [not should be removed]
+            [Note 3] nested if condition with no extra check [ should remove one]
+        '''
         pdp_value = get_pdp_from_cache(self.CACHE, pdp_id)
         if not pdp_id:
             pdp_value = get_pdp_from_manager(self.CACHE, pdp_id)

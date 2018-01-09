@@ -36,6 +36,9 @@ class AuthzRequest:
         self.pdp_container = self.container_chaining[0]["container_id"]
         self.run()
 
+    '''
+        [Note] remove duplicate code, and handle it in different way
+    '''
     def run(self):
         self.context.delete_cache()
         req = None
@@ -132,6 +135,10 @@ class AuthzRequest:
         authz_results = []
         for key in self.result.pdp_set:
             if "effect" in self.result.pdp_set[key]:
+                '''
+                three condition check the same key and assign the same object with True
+                so could be merged in one condition except "else"
+                '''
                 if self.result.pdp_set[key]["effect"] == "grant":
                     # the pdp is a authorization PDP and grant the request
                     authz_results.append(True)
