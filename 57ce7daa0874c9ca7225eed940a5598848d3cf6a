@@ -118,6 +118,30 @@
       "revId": "57ce7daa0874c9ca7225eed940a5598848d3cf6a",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4a38023d",
+        "filename": "moon_wrapper/tests/unit_python/api/test_wrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T10:24:48Z",
+      "side": 1,
+      "message": "I made a mistake when moving from \"interface\" to \"pipeline\", a patch will follow",
+      "parentUuid": "9a3d3df0_2a913e47",
+      "range": {
+        "startLine": 9,
+        "startChar": 33,
+        "endLine": 9,
+        "endChar": 41
+      },
+      "revId": "57ce7daa0874c9ca7225eed940a5598848d3cf6a",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
