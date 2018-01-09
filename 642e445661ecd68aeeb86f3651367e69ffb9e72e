@@ -72,6 +72,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_cd1a6cc5",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T22:04:49Z",
+      "side": 1,
+      "message": "It seems that I had this exception one day, maybe in the requests library. I think we can use instead a \"catch all\" (just in case) and send an error log under it.\nBut the \"hostname\" setting must not be here, it must be at the same level that \"tries+\u003d1\". Otherwise, this line may not be called (I think it was a bug in my code).",
+      "parentUuid": "9a3d3df0_8d3d042e",
+      "range": {
+        "startLine": 66,
+        "startChar": 19,
+        "endLine": 66,
+        "endChar": 29
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ed7490ff",
         "filename": "moon_interface/moon_interface/authz_requests.py",
         "patchSetId": 3
@@ -95,6 +119,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_687fce66",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 146,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T22:04:49Z",
+      "side": 1,
+      "message": "A False value is sufficient, this value will be managed in moon_interface/api/authz.py (see below)",
+      "parentUuid": "9a3d3df0_ed7490ff",
+      "range": {
+        "startLine": 146,
+        "startChar": 33,
+        "endLine": 146,
+        "endChar": 39
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_8d6b441d",
         "filename": "moon_interface/moon_interface/authz_requests.py",
         "patchSetId": 3
@@ -106,6 +154,30 @@
       "writtenOn": "2018-01-09T15:50:46Z",
       "side": 1,
       "message": "is it correct to return True here ?",
+      "range": {
+        "startLine": 152,
+        "startChar": 15,
+        "endLine": 152,
+        "endChar": 19
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_48d2ca5c",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T22:04:49Z",
+      "side": 1,
+      "message": "Yes, absolutely, this function (is_authz) is only here to fetch results from other Authz components (at this time we only have one authz component but in the future there will be more). When all results have been retrieved, the function send a True result to notify the caller that the result in pdp_set can be analyzed (in moon_interface/api/authz.py line 144).\nThe \"return True\" in line 150 is, in fact, not necessary.",
+      "parentUuid": "9a3d3df0_8d6b441d",
       "range": {
         "startLine": 152,
         "startChar": 15,
