@@ -9,6 +9,7 @@ import logging
 import flask
 from flask import request
 from flask_restful import Resource
+from python_moonutilities import exceptions
 
 logger = logging.getLogger("moon.authz.api." + __name__)
 
@@ -86,6 +87,8 @@ class Authz(Resource):
         scopes_list = list()
         current_header_id = self.context.headers[self.context.index]
         # Context.update_target(context)
+        if not self.context.pdp_set:
+            raise exceptions.PdpUnknown
         current_pdp = self.context.pdp_set[current_header_id]
         category_list = list()
         category_list.extend(current_pdp["meta_rules"]["subject_categories"])
