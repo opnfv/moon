@@ -36,46 +36,40 @@ class AuthzRequest:
         self.pdp_container = self.container_chaining[0]["container_id"]
         self.run()
 
+    '''
+        [Note] remove duplicate code, and handle it in different way
+    '''
     def run(self):
         self.context.delete_cache()
         req = None
-        try:
-            req = requests.post("http://{}:{}/authz".format(
-                self.container_chaining[0]["hostip"],
-                self.container_chaining[0]["port"],
-            ), data=pickle.dumps(self.context))
-            if req.status_code != 200:
-                raise exceptions.AuthzException(
-                    "Receive bad response from Authz function "
-                    "(with IP address - {})".format(
-                        req.status_code
-                    ))
-        except requests.exceptions.ConnectionError:
-            logger.error("Cannot connect to {}".format(
-                "http://{}:{}/authz".format(
-                    self.container_chaining[0]["hostip"],
-                    self.container_chaining[0]["port"]
-                )))
-        except ValueError:
+        tries = 0
+        success = False
+        hostname = self.container_chaining[0]["hostip"]
+        while( tries < 2 ):
             try:
                 req = requests.post("http://{}:{}/authz".format(
-                    self.container_chaining[0]["hostname"],
+                    hostname,
                     self.container_chaining[0]["port"],
                 ), data=pickle.dumps(self.context))
                 if req.status_code != 200:
                     raise exceptions.AuthzException(
                         "Receive bad response from Authz function "
-                        "(with hostname - {})".format(
-                            req.status_code
-                        ))
+                        "(with address - {})".format(req.status_code)
+                    )
+                success = True
             except requests.exceptions.ConnectionError:
                 logger.error("Cannot connect to {}".format(
                     "http://{}:{}/authz".format(
-                        self.container_chaining[0]["hostname"],
+                        self.container_chaining[0]["hostip"],
                         self.container_chaining[0]["port"]
                     )))
-                raise exceptions.AuthzException(
-                    "Cannot connect to Authz function")
+            except ValueError:
+                hostname = self.container_chaining[0]["hostname"],
+            tries+=1
+
+        if not success:
+            raise exceptions.AuthzException("Cannot connect to Authz function")
+
         self.context.set_cache(CACHE)
         if req and len(self.container_chaining) == 1:
             self.result = pickle.loads(req.content)
@@ -132,6 +126,10 @@ class AuthzRequest:
         authz_results = []
         for key in self.result.pdp_set:
             if "effect" in self.result.pdp_set[key]:
+                '''
+                three condition check the same key and assign the same object with True
+                so could be merged in one condition except "else"
+                '''
                 if self.result.pdp_set[key]["effect"] == "grant":
                     # the pdp is a authorization PDP and grant the request
                     authz_results.append(True)
