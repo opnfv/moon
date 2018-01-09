@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_8dc86456",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 48,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-09T15:13:24Z",
+      "side": 1,
+      "message": "You don\u0027t need parenthesis here, apart from that, it\u0027s OK for me. It is an interesting way :)",
+      "range": {
+        "startLine": 48,
+        "startChar": 13,
+        "endLine": 48,
+        "endChar": 26
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
