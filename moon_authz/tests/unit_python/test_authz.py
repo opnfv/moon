@@ -1,5 +1,6 @@
 import json
 import pickle
+import pytest
 
 
 def get_data(data):
@@ -8,6 +9,13 @@ def get_data(data):
 
 def get_json(data):
     return json.loads(data.decode("utf-8"))
+
+
+def run(component_data, cache, context):
+    from moon_authz.api.authorization import Authz
+    authz = Authz(component_data=component_data, cache=cache)
+    authz.context = context
+    authz.run()
 
 
 def test_authz_true(context):
@@ -89,3 +97,20 @@ def test_action_not_allowed(context):
     assert isinstance(data, dict)
     assert "message" in data
     assert data["message"] == "Cannot find action invalid"
+
+
+def test_authz_with_empty_pdp_set(context):
+    from python_moonutilities.context import Context
+    from python_moonutilities.cache import Cache
+    CACHE = Cache()
+    CACHE.update()
+    _context = Context(context, CACHE)
+    component_data = {
+        'component_id': 'component_id1',
+        'pdp_id': 'pdp_id1',
+        'meta_rule_id': 'meta_rule_id1',
+        'keystone_project_id': 'keystone_project_id1',
+    }
+    with pytest.raises(Exception) as exception_info:
+        run(component_data, CACHE, _context)
+    assert str(exception_info.value) == '400: Pdp Unknown'
