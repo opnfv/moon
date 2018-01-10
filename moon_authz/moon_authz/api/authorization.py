@@ -89,16 +89,28 @@ class Authz(Resource):
         # Context.update_target(context)
         if not self.context.pdp_set:
             raise exceptions.PdpUnknown
+        if current_header_id not in self.context.pdp_set:
+            raise Exception('Invalid index')
         current_pdp = self.context.pdp_set[current_header_id]
         category_list = list()
-        category_list.extend(current_pdp["meta_rules"]["subject_categories"])
-        category_list.extend(current_pdp["meta_rules"]["object_categories"])
-        category_list.extend(current_pdp["meta_rules"]["action_categories"])
+        if 'meta_rules' not in current_pdp:
+            raise exceptions.PdpContentError
+        try:
+            category_list.extend(current_pdp["meta_rules"]["subject_categories"])
+            category_list.extend(current_pdp["meta_rules"]["object_categories"])
+            category_list.extend(current_pdp["meta_rules"]["action_categories"])
+        except Exception:
+            raise exceptions.MetaRuleContentError
+        if 'target' not in current_pdp:
+            raise exceptions.PdpContentError
         for category in category_list:
             scope = list(current_pdp['target'][category])
             scopes_list.append(scope)
         # policy_id = self.cache.get_policy_from_meta_rules("admin", current_header_id)
-
+        if self.context.current_policy_id not in self.cache.rules:
+            raise exceptions.PolicyUnknown
+        if 'rules' not in self.cache.rules[self.context.current_policy_id]:
+            raise exceptions.RuleUnknown
         for item in itertools.product(*scopes_list):
             req = list(item)
             for rule in self.cache.rules[self.context.current_policy_id]["rules"]:

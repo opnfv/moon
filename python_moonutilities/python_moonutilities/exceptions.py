@@ -443,6 +443,13 @@ class MetaRuleExisting(AdminMetaRule):
     logger = "ERROR"
 
 
+class MetaRuleContentError(AdminMetaRule):
+    description = _("Invalid content of pdp.")
+    code = 400
+    title = 'Meta Rule Error'
+    logger = "ERROR"
+
+
 class RuleExisting(AdminRule):
     description = _("The rule already exists.")
     code = 400
@@ -542,6 +549,13 @@ class PdpExisting(MoonError):
     logger = "Error"
 
 
+class PdpContentError(MoonError):
+    description = _("Invalid content of pdp.")
+    code = 409
+    title = 'Pdp Error'
+    logger = "Error"
+
+
 class PdpKeystoneMappingConflict(MoonError):
     description = _("A pdp is already mapped to that Keystone project.")
     code = 409
@@ -561,4 +575,3 @@ class PolicyExisting(MoonError):
     code = 409
     title = 'Policy Error'
     logger = "Error"
-

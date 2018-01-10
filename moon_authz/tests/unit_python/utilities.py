@@ -37,11 +37,19 @@ CONF = {
             "container": "wukongsun/moon_orchestrator:v4.3",
             "hostname": "orchestrator"
         },
-        "interface": {
-            "bind": "0.0.0.0",
-            "port": 8080,
-            "container": "wukongsun/moon_interface:v4.3",
-            "hostname": "interface"
+        "pipeline": {
+            "interface": {
+                "bind": "0.0.0.0",
+                "port": 8080,
+                "container": "wukongsun/moon_interface:v4.3",
+                "hostname": "interface"
+            },
+            "authz": {
+                "bind": "0.0.0.0",
+                "port": 8081,
+                "container": "wukongsun/moon_authz:v4.3",
+                "hostname": "authz"
+            }
         }
     },
     "plugins": {
@@ -144,7 +152,8 @@ COMPONENTS = (
     "slave",
     "components/manager",
     "components/orchestrator",
-    "components/interface",
+    "components/pipeline",
+
     "components/wrapper",
 )
 
