@@ -7,6 +7,7 @@ import logging
 import itertools
 import pickle
 import requests
+import sys
 from python_moonutilities import exceptions
 from python_moonutilities.context import Context
 from python_moonutilities.cache import Cache
@@ -31,51 +32,53 @@ class AuthzRequest:
         if ctx['project_id'] not in CACHE.container_chaining:
             raise exceptions.KeystoneProjectError("Unknown Project ID {}".format(ctx['project_id']))
         self.container_chaining = CACHE.container_chaining[ctx['project_id']]
-        if len(self.container_chaining) == 0:
+
+        if len(self.container_chaining) == 0 or not all(k in self.container_data for k in ("container_id", "hostname", "hostip", "port")):
             raise exceptions.MoonError('Void container chaining')
+
         self.pdp_container = self.container_chaining[0]["container_id"]
         self.run()
 
     def run(self):
         self.context.delete_cache()
         req = None
-        try:
-            req = requests.post("http://{}:{}/authz".format(
-                self.container_chaining[0]["hostip"],
-                self.container_chaining[0]["port"],
-            ), data=pickle.dumps(self.context))
-            if req.status_code != 200:
-                raise exceptions.AuthzException(
-                    "Receive bad response from Authz function "
-                    "(with IP address - {})".format(
-                        req.status_code
-                    ))
-        except requests.exceptions.ConnectionError:
-            logger.error("Cannot connect to {}".format(
-                "http://{}:{}/authz".format(
-                    self.container_chaining[0]["hostip"],
-                    self.container_chaining[0]["port"]
-                )))
-        except ValueError:
+        tries = 0
+        success = False
+
+        if "hostip" in self.container_chaining[0]:
+            hostname = self.container_chaining[0]["hostip"]
+        elif "hostname" in self.container_chaining[0]:
+            hostname = self.container_chaining[0]["hostname"]
+        else:
+            raise exceptions.AuthzException(
+                "error in address no hostname or hostip"
+            )
+        while tries < 2:
             try:
                 req = requests.post("http://{}:{}/authz".format(
-                    self.container_chaining[0]["hostname"],
+                    hostname,
                     self.container_chaining[0]["port"],
                 ), data=pickle.dumps(self.context))
                 if req.status_code != 200:
                     raise exceptions.AuthzException(
                         "Receive bad response from Authz function "
-                        "(with hostname - {})".format(
-                            req.status_code
-                        ))
+                        "(with address - {})".format(req.status_code)
+                    )
+                success = True
             except requests.exceptions.ConnectionError:
                 logger.error("Cannot connect to {}".format(
                     "http://{}:{}/authz".format(
-                        self.container_chaining[0]["hostname"],
+                        hostname,
                         self.container_chaining[0]["port"]
                     )))
-                raise exceptions.AuthzException(
-                    "Cannot connect to Authz function")
+            except:
+                logger.error("Unexpected error:", sys.exc_info()[0])
+            hostname = self.container_chaining[0]["hostname"],
+            tries += 1
+
+        if not success:
+            raise exceptions.AuthzException("Cannot connect to Authz function")
+
         self.context.set_cache(CACHE)
         if req and len(self.container_chaining) == 1:
             self.result = pickle.loads(req.content)
@@ -132,6 +135,7 @@ class AuthzRequest:
         authz_results = []
         for key in self.result.pdp_set:
             if "effect" in self.result.pdp_set[key]:
+
                 if self.result.pdp_set[key]["effect"] == "grant":
                     # the pdp is a authorization PDP and grant the request
                     authz_results.append(True)

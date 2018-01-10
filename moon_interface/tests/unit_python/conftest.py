@@ -214,6 +214,19 @@ def get_pickled_context():
     print(_context.pdp_set)
     return pickle.dumps(_context)
 
+def get_pickled_context_invalid():
+    from python_moonutilities.context import Context
+    from python_moonutilities.cache import Cache
+    CACHE = Cache()
+    CACHE.update()
+    _context = Context(context(), CACHE)
+    _context.increment_index()
+    _context.pdp_set['effect'] = 'invalid'
+    _context.pdp_set[os.environ['META_RULE_ID']]['effect'] = 'invalid'
+    print(_context.pdp_set)
+    return pickle.dumps(_context)
+
+
 
 @pytest.fixture(autouse=True)
 def set_consul_and_db(monkeypatch):

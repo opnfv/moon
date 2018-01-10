@@ -12,6 +12,7 @@ import logging
 import pickle
 import time
 from uuid import uuid4
+from python_moonutilities import exceptions
 
 from moon_interface.authz_requests import AuthzRequest
 
@@ -29,18 +30,13 @@ def get_pdp_from_cache(cache, uuid):
     """
     if uuid in cache.pdp:
         return cache.pdp.get(uuid)
-    return None
 
-
-def get_pdp_from_manager(cache, uuid):
-    """Check if a PDP exist with this ID in the Manager component
-
-    :param cache: Cache to use
-    :param uuid: Keystone Project ID
-    :return: True or False
-    """
     cache.update()
-    return get_pdp_from_cache(cache, uuid)
+
+    if uuid in cache.pdp:
+        return cache.pdp.get(uuid)
+
+    raise exceptions.PdpUnknown
 
 
 def create_authz_request(cache, interface_name, manager_url, pdp_id, subject_name, object_name, action_name):
@@ -92,7 +88,7 @@ class Authz(Resource):
         self.MANAGER_URL = kwargs.get("manager_url", "http://manager:8080")
         self.TIMEOUT = 5
 
-    def get(self, pdp_id=None, subject_name=None, object_name=None, action_name=None):
+    def get(self, pdp_id, subject_name=None, object_name=None, action_name=None):
         """Get a response on an authorization request
 
         :param pdp_id: uuid of a tenant or an intra_extension
@@ -119,13 +115,13 @@ class Authz(Resource):
         }
         :internal_api: authz
         """
-        pdp_value = get_pdp_from_cache(self.CACHE, pdp_id)
-        if not pdp_id:
-            pdp_value = get_pdp_from_manager(self.CACHE, pdp_id)
-            if not pdp_id:
-                return {
+        try:
+            get_pdp_from_cache(self.CACHE, pdp_id)
+        except exceptions.PdpUnknown:
+            return {
                    "result": False,
                    "message": "Unknown PDP ID."}, 403
+
         authz_request = create_authz_request(
             cache=self.CACHE,
             pdp_id=pdp_id,

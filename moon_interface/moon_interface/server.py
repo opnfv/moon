@@ -13,8 +13,12 @@ logger = logging.getLogger("moon.interface.server")
 def create_server():
     configuration.init_logging()
     try:
+
         conf = configuration.get_configuration("components/pipeline").get(
             "components/pipeline", {}).get("interface", {})
+        '''
+        [Note] i think pipeline should be changed to interface
+        '''
         hostname = conf.get("hostname", "pipeline")
         port = conf.get("port", 80)
         bind = conf.get("bind", "127.0.0.1")
@@ -22,6 +26,9 @@ def create_server():
         hostname = "interface"
         bind = "127.0.0.1"
         port = 80
+        '''
+        [Note] i think pipeline should be changed to interface
+        '''
         configuration.add_component(uuid="pipeline",
                                     name=hostname,
                                     port=port,
