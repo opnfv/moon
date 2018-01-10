@@ -96,6 +96,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_2365e9b4",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-10T07:41:37Z",
+      "side": 1,
+      "message": "no problem, will update it",
+      "parentUuid": "9a3d3df0_cd1a6cc5",
+      "range": {
+        "startLine": 66,
+        "startChar": 19,
+        "endLine": 66,
+        "endChar": 29
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_ed7490ff",
         "filename": "moon_interface/moon_interface/authz_requests.py",
         "patchSetId": 3
@@ -178,6 +202,30 @@
       "side": 1,
       "message": "Yes, absolutely, this function (is_authz) is only here to fetch results from other Authz components (at this time we only have one authz component but in the future there will be more). When all results have been retrieved, the function send a True result to notify the caller that the result in pdp_set can be analyzed (in moon_interface/api/authz.py line 144).\nThe \"return True\" in line 150 is, in fact, not necessary.",
       "parentUuid": "9a3d3df0_8d6b441d",
+      "range": {
+        "startLine": 152,
+        "startChar": 15,
+        "endLine": 152,
+        "endChar": 19
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_4360eda4",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-10T07:41:37Z",
+      "side": 1,
+      "message": "okay, but i think in line 150 return True is necessary in order not to update final_result \u003d \"Deny\"",
+      "parentUuid": "9a3d3df0_48d2ca5c",
       "range": {
         "startLine": 152,
         "startChar": 15,
