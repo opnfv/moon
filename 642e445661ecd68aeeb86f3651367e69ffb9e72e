@@ -235,6 +235,30 @@
       "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_e314a1ea",
+        "filename": "moon_interface/moon_interface/authz_requests.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 152,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-10T08:17:04Z",
+      "side": 1,
+      "message": "Yes you are completely right, I was already sleeping yesterday night ;)",
+      "parentUuid": "9a3d3df0_4360eda4",
+      "range": {
+        "startLine": 152,
+        "startChar": 15,
+        "endLine": 152,
+        "endChar": 19
+      },
+      "revId": "642e445661ecd68aeeb86f3651367e69ffb9e72e",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
