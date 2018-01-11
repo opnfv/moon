@@ -78,6 +78,39 @@ You must see something like this:
     manager-5bfbb96988-w9wnk               1/1       Running   0          51m
     orchestrator-65d8fb4574-tnfx2          1/1       Running   0          51m
     wrapper-astonishing-748b7dcc4f-ngsvp   1/1       Running   0          51m
+
+    
+### Troubleshoot
+check *Consul* for: 
+- *Components/Manager*, e.g. 
+```json
+{
+  "port": 8082, 
+  "bind": "0.0.0.0", 
+  "hostname": "manager", 
+  "container": "wukongsun/moon_manager:v4.3.1", 
+  "external": {
+    "port": 30001, 
+    "hostname": "$MOON_HOST"
+  }
+}
+```
+- *OpenStack/Keystone*: e.g. 
+```json
+{
+  "url": "http://keystone:5000/v3", 
+  "user": "admin", 
+  "password": "p4ssw0rd", 
+  "domain": "default", 
+  "project": "admin", 
+  "check_token": false, 
+  "certificate": false, 
+  "external": {
+    "url": "http://$MOON_HOST:30006/v3"
+  }
+}
+```
+
     
 ### Docker-K8S Port Mapping
 ```yamlex
