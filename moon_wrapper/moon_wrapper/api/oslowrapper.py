@@ -110,7 +110,7 @@ class OsloWrapper(Resource):
             _action
         ))
         '''
-        [Note] i think here if status != 200, should raise an exception
+        [Note Question] i think here if status != 200, should raise an exception
         '''
         logger.debug("Get interface {}".format(req.text))
         if req.status_code == 200:
