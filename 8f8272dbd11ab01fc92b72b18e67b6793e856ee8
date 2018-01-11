@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_fd1ef90a",
+        "filename": "moon_interface/moon_interface/http_server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-11T10:56:21Z",
+      "side": 1,
+      "message": "I\u0027m not sure to understand your question. You propose to manage all response code (including 500) here in the __hook_errors functions ?",
+      "range": {
+        "startLine": 122,
+        "startChar": 8,
+        "endLine": 122,
+        "endChar": 11
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dd7a1576",
+        "filename": "moon_interface/moon_interface/server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-11T10:56:21Z",
+      "side": 1,
+      "message": "No, we change the name of the interface component to pipeline to avoid confusion ; now, we have a pipeline component which is composed of 2 pods : interface and authz",
+      "range": {
+        "startLine": 20,
+        "startChar": 9,
+        "endLine": 20,
+        "endChar": 22
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_3d8b4169",
+        "filename": "moon_interface/moon_interface/server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 30,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-11T10:56:21Z",
+      "side": 1,
+      "message": "same reason.",
+      "range": {
+        "startLine": 30,
+        "startChar": 9,
+        "endLine": 30,
+        "endChar": 22
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
