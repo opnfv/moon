@@ -37,8 +37,14 @@ class OsloWrapper(Resource):
     def post(self):
         logger.debug("POST {}".format(request.form))
         response = flask.make_response("False")
-        if self.manage_data():
-            response = flask.make_response("True")
+        try:
+            if self.manage_data():
+                response = flask.make_response("True")
+        except exceptions.AuthzException as e:
+            logger.error(e, exc_info=True)
+        except Exception as e:
+            logger.error(e, exc_info=True)
+
         response.headers['content-type'] = 'application/octet-stream'
         return response
 
@@ -109,10 +115,10 @@ class OsloWrapper(Resource):
             _object,
             _action
         ))
-        '''
-        [Note] i think here if status != 200, should raise an exception
-        '''
+
         logger.debug("Get interface {}".format(req.text))
         if req.status_code == 200:
             if req.json().get("result", False):
                 return True
+
+        raise exceptions.AuthzException("error in authz request")

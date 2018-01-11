@@ -68,4 +68,5 @@ def test_authz_error_no_interface_key(context):
         'target': json.dumps(_target),
         'credentials': 'null'}
     req = client.post("/authz/oslo", data=json.dumps(authz_data))
-    assert req.status_code == 403
+
+    assert req.data == b"False"
