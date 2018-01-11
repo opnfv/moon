@@ -1,16 +1,16 @@
 # Moon
 __Version 4.3__
-
 This directory contains all the modules for running the Moon platform.
 
-## Platform Setup
+
+## Platform 
+### Setup
 - [Docker installation](tools/moon_kubernetes/README.md)
 - [kubeadm installation](tools/moon_kubernetes/README.md)
 - [Moon deployment](tools/moon_kubernetes/README.md)
 - [OpenStack deployment](tools/openstack/README.md)
 
-
-## Micro-service Architecture
+### Micro-service Architecture
 The Moon platform is composed on the following components/containers:
 - *consul*: a Consul configuration server
 - *db*: a MySQL database server
@@ -23,83 +23,30 @@ The Moon platform is composed on the following components/containers:
 
 ## Manipulation
 ### moon_gui
-The Moon platform comes with a graphical user interface which can be used with 
-a web browser at this URL `http://$MOON_HOST:30002`
-
-You will be asked to put a login and password. Those elements are the login and password 
-of the Keystone server, if you didn't modify the Keystone server, you will find the 
-login and password here `http://$MOON_HOST:30005/ui/#/dc1/kv/openstack/keystone/edit` 
+The web access of Moon is through the URL `http://$MOON_HOST:30002` with the login and password of Keystone.
+The default login and password can be found here: `http://$MOON_HOST:30005/ui/#/dc1/kv/openstack/keystone/edit`.  
 
 **WARNING: the password is in clear text, this is a known security issue.**
 
 ### moon_manager
-The Moon platform can also be requested through its API `http://$MOON_HOST:30001`
+The REST access of Moon is through `http://$MOON_HOST:30001`
 
-**WARNING: By default, no login/password will be needed because of 
-the configuration which is in DEV mode.**
+**WARNING: By default, no login/password will be needed because of the configuration which is in DEV mode.**
 
-If you want more security, you have to update the configuration of the Keystone server here:
-`http://$MOON_HOST:30005/ui/#/dc1/kv/openstack/keystone/edit` 
-by modifying the `check_token` argument to `yes`.
-If you write this modification, your requests to Moon API must always include a valid token 
-taken from the Keystone server. This token must be place in the header of the request 
-(`X-Auth-Token`).
+For more security, update `http://$MOON_HOST:30005/ui/#/dc1/kv/openstack/keystone/edit` by modifying the `check_token` argument to `yes`
+Requests to Moon API must include a valid token taken from Keystone in the header of `X-Auth-Token`.
 
-### End-to-end Functional Test
-Check if the Manager API is running:
+Check if the Manager API is running with:
 ```bash
 curl http://$MOON_HOST:30001
 curl http://$MOON_HOST:30001/pdp
 curl http://$MOON_HOST:30001/policies
 ```
 
-### Consul Check
-Check the Consul service for 
-- *Components/Manager*, e.g. 
-```json
-{
-  "port": 8082, 
-  "bind": "0.0.0.0", 
-  "hostname": "manager", 
-  "container": "wukongsun/moon_manager:v4.3.1", 
-  "external": {
-    "port": 30001, 
-    "hostname": "$MOON_HOST"
-  }
-}
-```
-- *OpenStack/Keystone*: e.g. 
-```json
-{
-  "url": "http://keystone:5000/v3", 
-  "user": "admin", 
-  "password": "p4ssw0rd", 
-  "domain": "default", 
-  "project": "admin", 
-  "check_token": false, 
-  "certificate": false, 
-  "external": {
-    "url": "http://$MOON_HOST:30006/v3"
-  }
-}
-```
 
-### Tests
-Launch functional [test scenario](tests/functional/scenario_enabled) : 
-```bash
-sudo pip install python_moonclient --upgrade
-cd $MOON_HOME/tests/functional/scenario_tests
-moon_create_pdp --consul-host=$MOON_HOST --consul-port=30005 -v rbac_large.py
-moon_get_keystone_project --consul-host=$MOON_HOST --consul-port=30005 
-moon_get_pdp --consul-host=$MOON_HOST --consul-port=30005 
-moon_map_pdp_to_project "<pdp_id>" "<keystone_project_id>"
-moon_send_authz_to_wrapper --consul-host=$MOON_HOST --consul-port=30005 --authz-host=$WRAPPER_HOST --authz-port=$WRAPPER_PORT -v rbac_large.py
-```
-
-To retrieve the wrapper information, use the following command:
-```bash
-kubectl get -n moon services | grep wrapper
-```
+## Tests
+- [Python Unit Test](tests/python_unit/README.md)
+- [Functional Test](tests/functional/README.md)
 
 
 ## Annexe
