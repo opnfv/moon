@@ -35,7 +35,7 @@ CONF = {
             "bind": "0.0.0.0",
             "port": 8083,
             "container": "wukongsun/moon_orchestrator:v4.3",
-            "hostname": "interface"
+            "hostname": "orchestrator"
         },
         "pipeline": {
             "interface": {
@@ -114,7 +114,7 @@ CONF = {
     },
     "messenger": {
         "url": "rabbit://moon:p4sswOrd1@messenger:5672/moon"
-    }
+    },
 }
 
 COMPONENTS = (
@@ -123,22 +123,50 @@ COMPONENTS = (
     "database",
     "slave",
     "components/manager",
+    "components/orchestrator"
 )
+
+PODS = {
+    "pods": {
+        "721760dd-de5f-11e7-8001-3863bbb766f3": [
+            {
+                "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
+                "port": 8080,
+                "genre": "interface",
+                "name": "interface-paltry",
+                "keystone_project_id": "a64beb1cc224474fb4badd43173e7101",
+                "namespace": "moon",
+                "container": "wukongsun/moon_interface:v4.3"
+            },
+            {
+                "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
+                "meta_rule_id": "f8f49a779ceb47b3ac810f01ef71b4e0",
+                "port": 8081,
+                "genre": "authz",
+                "name": "authz-economic",
+                "policy_id": "f8f49a779ceb47b3ac810f01ef71b4e0",
+                "keystone_project_id": "a64beb1cc224474fb4badd43173e7101",
+                "namespace": "moon",
+                "container": "wukongsun/moon_authz:v4.3"
+            }
+        ]
+    }
+}
 
 
 def get_b64_conf(component=None):
     if component in CONF:
         return base64.b64encode(
             json.dumps(
-                CONF[component]).encode('utf-8')+b"\n").decode('utf-8')
+                CONF[component]).encode('utf-8') + b"\n").decode('utf-8')
     elif "/" in component:
         key1, _, key2 = component.partition("/")
         return base64.b64encode(
             json.dumps(
-                CONF[key1][key2]).encode('utf-8')+b"\n").decode('utf-8')
+                CONF[key1][key2]).encode('utf-8') + b"\n").decode('utf-8')
     else:
         return base64.b64encode(
-            json.dumps(CONF).encode('utf-8')+b"\n").decode('utf-8')
+            json.dumps(CONF).encode('utf-8') + b"\n").decode('utf-8')
 
 
 @pytest.fixture(autouse=True)
@@ -150,7 +178,7 @@ def no_requests(monkeypatch):
             m.register_uri(
                 'GET', 'http://consul:8500/v1/kv/{}'.format(component),
                 json=[{'Key': component, 'Value': get_b64_conf(component)}]
-                )
+            )
         m.register_uri(
             'POST', 'http://keystone:5000/v3/auth/tokens',
             headers={'X-Subject-Token': "111111111"}
@@ -169,10 +197,22 @@ def no_requests(monkeypatch):
         )
         m.register_uri(
             'POST', 'http://keystone:5000/v3/users/',
-            json={"users": [{
-                "id": "1111111111111"
-            }]}
+            json={"users": [{"id": "1111111111111"}]}
         )
+        m.register_uri(
+            'POST', 'http://orchestrator:8083/pods',
+            json=PODS,
+            headers={"content-type": "application/json"}
+        )
+        m.register_uri(
+            'GET', 'http://orchestrator:8083/pods',
+            json=PODS
+        )
+        m.register_uri(
+            'DELETE', 'http://orchestrator:8083/pods/{}'.format(list([PODS['pods'].keys()])[0]),
+            headers={"content-type": "application/json"}
+        )
+
         print("Start populating the DB.")
         from python_moondb.db_manager import init_engine, main
         engine = init_engine()
@@ -181,7 +221,6 @@ def no_requests(monkeypatch):
         print("End populating the DB.")
         yield m
 
-
 # @pytest.fixture(autouse=True, scope="session")
 # def manage_database():
 #     from moon_db.db_manager import init_engine, run
@@ -189,5 +228,3 @@ def no_requests(monkeypatch):
 #     run("upgrade", logging.getLogger("db_manager"), engine)
 #     yield
 #     print("Will close the DB")
-
-
