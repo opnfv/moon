@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_b90da640",
+        "filename": "moon_wrapper/moon_wrapper/api/oslowrapper.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-11T08:16:54Z",
+      "side": 1,
+      "message": "what do you think about that ?",
+      "range": {
+        "startLine": 113,
+        "startChar": 23,
+        "endLine": 113,
+        "endChar": 27
+      },
+      "revId": "7775dccb613b99eca11ef93b8e8317820b023aa3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
