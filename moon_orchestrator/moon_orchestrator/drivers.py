@@ -259,6 +259,8 @@ class K8S(Driver):
             },
         ]
         logger.debug("data={}".format(data))
+        #   When policies and models are empty, is it right that it returns 200 ?
+        #   Should it return no found policies or models ?
         policies = manager_data.get('policies')
         if not policies:
             logger.info("No policy data from Manager, trying to get them")
@@ -274,6 +276,8 @@ class K8S(Driver):
                 "models", dict())
         logger.debug("models={}".format(models))
 
+        if not policy_ids:
+            raise exceptions.PolicyUnknown
         for policy_id in policy_ids:
             if policy_id in policies:
                 genre = policies[policy_id].get("genre", "authz")
