@@ -112,13 +112,13 @@ class HTTPServer(Server):
     def __hook_errors(self):
 
         def get_404_json(e):
-            return jsonify({"result": False, "code": 404,
-                            "description": str(e)}), 404
+            return jsonify({"False"}),404
+
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
-            return jsonify({"result": False, "code": 400,
-                            "description": str(e)}), 400
+            return jsonify({"False"}),400
+
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 
