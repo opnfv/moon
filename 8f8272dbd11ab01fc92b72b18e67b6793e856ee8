@@ -49,6 +49,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_bd15914a",
+        "filename": "moon_interface/moon_interface/http_server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-11T15:47:59Z",
+      "side": 1,
+      "message": "When the API gives a response to the external caller, it must always be through a dictionary (return {\"result\": ...}, ERROR_CODE) because the caller need this dict. \n\nBut throwing an exception allows to skip a part of the code and speed up the response (specially on error responses). That\u0027s why you can find both. Maybe it would be better to always throw an exception when an error occurred and if this error automatically leads to the end of the request.\n\nAn other point, I wrote this function (__hook_errors) to be able to catch un-controllable errors like 404 or to transform some exceptions in dictionary like the 403 error.",
+      "parentUuid": "9a3d3df0_1dd0fd1d",
+      "range": {
+        "startLine": 122,
+        "startChar": 8,
+        "endLine": 122,
+        "endChar": 11
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_dd7a1576",
         "filename": "moon_interface/moon_interface/server.py",
         "patchSetId": 1
