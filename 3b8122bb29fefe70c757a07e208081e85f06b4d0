@@ -22,6 +22,30 @@
       "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_bd5bd1f4",
+        "filename": "moon_wrapper/moon_wrapper/api/oslowrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-11T10:37:05Z",
+      "side": 1,
+      "message": "if you have a look at line 87, you will see the same idea\n and you throw an exception and you have http_server file ( like moon_manager) which catch the exception and send a response with error code\n\nso what i mean here that the response will be returned with 200 and False, while actually it should n\u0027t be 200 , got my point ?",
+      "parentUuid": "9a3d3df0_5de56536",
+      "range": {
+        "startLine": 113,
+        "startChar": 9,
+        "endLine": 113,
+        "endChar": 22
+      },
+      "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
