@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_1dd0fd1d",
+        "filename": "moon_interface/moon_interface/http_server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-11T11:15:20Z",
+      "side": 1,
+      "message": "my point is\n- you sometime throw an exception (ex. auth_requests/run)\n- and other time you return  {\"result\": False,\n            message\": \"Authz request had timed out.\"}, 500\n\nso the question here when should i use this and when should i use that, although in the http_server you catch the thrown exception and return a failure response with certain status code",
+      "parentUuid": "9a3d3df0_fd1ef90a",
+      "range": {
+        "startLine": 122,
+        "startChar": 8,
+        "endLine": 122,
+        "endChar": 11
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_dd7a1576",
         "filename": "moon_interface/moon_interface/server.py",
         "patchSetId": 1
