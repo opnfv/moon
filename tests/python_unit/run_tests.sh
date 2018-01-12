@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 
-cd ${MOON_HOME}/python_moonclient
+echo "starting Moon Functional Tests"
+
+cd python_moonutilities
+docker run --rm --volume $(pwd):/data wukongsun/moon_python_unit_test:latest
+
+cd ../python_moondb
+docker run --rm --volume $(pwd):/data wukongsun/moon_python_unit_test:latest
+
+cd ../python_moonclient
 docker run --rm --volume $(pwd):/data wukongsun/moon_python_unit_test:latest

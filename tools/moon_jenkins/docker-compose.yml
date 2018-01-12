@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+
+  jenkins:
+    build:
+      context: .
+      args:
+    image: blueocean:v0.3
+    ports:
+      - 8080:8080
+      - 50000:50000
+    environment:
+      - jenkins_user=${JENKINS_USER}
+      - jenkins_password=${JENKINS_PASSWORD}
+    volumes:
+      - jenkins-data:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    user: root
+
+volumes:
+  jenkins-data:
