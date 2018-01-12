@@ -46,6 +46,30 @@
       "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_030b802a",
+        "filename": "moon_wrapper/moon_wrapper/api/oslowrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-12T09:18:13Z",
+      "side": 1,
+      "message": "I understand your point, you want to throw an exception when the error is not 200 but we must send a correct response to the OpenStack connector in line 43 so you can throw an exception here but catch the exception before line 40 in order to send the correct response in lines 42 and 43. The OpenStack connector needs it.\nFor the line 87, I did not catch the exception in line 40 but it is a mistake.",
+      "parentUuid": "9a3d3df0_bd5bd1f4",
+      "range": {
+        "startLine": 113,
+        "startChar": 9,
+        "endLine": 113,
+        "endChar": 22
+      },
+      "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
