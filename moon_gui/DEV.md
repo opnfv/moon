@@ -47,3 +47,5 @@ if the page is not manually refresh by the user and if the `Rules` window is alr
 10) Move the `project` tabular to the end
 
 11) create a simplified version (to be discussed)
+
+test
