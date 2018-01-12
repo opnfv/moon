@@ -67,13 +67,15 @@
 
                 var updatedMetaRule = utilService.transformOne(data, 'meta_rules');
 
+                angular.copy(updatedMetaRule, edit.metaRule);
+
                 $translate('moon.model.metarules.edit.basic.success', { metaRuleName: updatedMetaRule.name }).then( function(translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
                 edit.loading = false;
 
-                $scope.$emit('event:metaRuleBasicUpdatedSuccess', updatedMetaRule);
+                $scope.$emit('event:metaRuleBasicUpdatedSuccess', edit.metaRule);
 
             }
 

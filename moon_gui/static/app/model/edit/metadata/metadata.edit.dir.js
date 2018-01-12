@@ -42,8 +42,6 @@
 
         edit.fromList = true;
 
-        edit.laoading = false;
-
         edit.form = {};
 
         edit.metaData = { name: null, description: null};
@@ -106,7 +104,7 @@
 
             }
 
-            var metaRuleToSend = edit.metaRule;
+            var metaRuleToSend = angular.copy(edit.metaRule);
 
             switch(edit.metaDataType){
 
@@ -138,7 +136,9 @@
 
                 metaRuleToSend = utilService.transformOne(data, 'meta_rules');
 
-                $scope.$emit('event:updateMetaRuleFromMetaDataAddSuccess', metaRuleToSend);
+                angular.copy(metaRuleToSend, edit.metaRule)
+
+                $scope.$emit('event:updateMetaRuleFromMetaDataAddSuccess', edit.metaRule);
 
                 stopLoading();
 
@@ -278,7 +278,7 @@
 
                 metaRuleService.findOneWithMetaData(edit.metaRule.id).then( function(metaRule){
 
-                    edit.metaRule = metaRule;
+                    angular.copy(metaRule, edit.metaRule)
 
                     cleanSelectedValue();
 

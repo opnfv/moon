@@ -21,8 +21,22 @@
         edit.showRules = false;
         edit.showAssignments = false;
 
+        edit.showPart = showPart;
+
 
         activate();
+
+        function showPart(partName) {
+            var state = edit[partName];
+
+            edit.showPerimeters = false;
+            edit.showData = false;
+            edit.showRules = false;
+            edit.showAssignments = false;
+
+            edit[partName] = !state;
+        }
+
 
         function activate(){
 

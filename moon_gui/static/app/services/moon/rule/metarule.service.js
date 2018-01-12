@@ -81,7 +81,7 @@
                 var _self = this;
 
                 if(metaRuleListId.length === 0){
-                    return [];
+                    return callback([]);
                 }
 
                 var promises = _(metaRuleListId).map(function(objectId) {

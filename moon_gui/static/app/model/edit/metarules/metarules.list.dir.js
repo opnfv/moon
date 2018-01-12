@@ -86,7 +86,8 @@
             'event:metaRuleMapToModelSuccess': $rootScope.$on('event:metaRuleMapToModelSuccess', updateModelFromMapSuccess),
 
             'event:metaRuleUnMappedToModelSuccess': $rootScope.$on('event:metaRuleUnMappedToModelSuccess', modelUnmappedSuccess),
-            'event:metaRuleUnMappedToModelError': $rootScope.$on('event:metaRuleUnMappedToModelError', modelUnmappedError)
+            'event:metaRuleUnMappedToModelError': $rootScope.$on('event:metaRuleUnMappedToModelError', modelUnmappedError),
+            
 
         };
 

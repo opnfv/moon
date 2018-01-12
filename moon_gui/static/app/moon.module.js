@@ -68,8 +68,8 @@
 	     * routes
 	     */
 	    
-	    $urlRouterProvider.when('', '/project');
-        $urlRouterProvider.when('/', '/project');
+	    $urlRouterProvider.when('', '/model');
+        $urlRouterProvider.when('/', '/model');
 	    $urlRouterProvider.otherwise('/404');
 	    
 	    configureDefaultRoutes($stateProvider);
