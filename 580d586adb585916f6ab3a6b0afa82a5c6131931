@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_973986a6",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-14T15:38:26Z",
+      "side": 1,
+      "message": "is it right to be like that ?",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 4
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_37b99a15",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-14T15:38:26Z",
+      "side": 1,
+      "message": "Notice",
+      "range": {
+        "startLine": 223,
+        "startChar": 17,
+        "endLine": 223,
+        "endChar": 20
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
