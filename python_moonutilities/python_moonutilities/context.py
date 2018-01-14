@@ -14,39 +14,35 @@ logger = logging.getLogger("moon.utilities." + __name__)
 class Context:
 
     def __init__(self, init_context, cache):
+        if init_context is None:
+            raise Exception("Invalid context content object")
+
         self.cache = cache
         self.__keystone_project_id = init_context.get("project_id")
-        self.__pdp_id = None
-        self.__pdp_value = None
-        for _pdp_key, _pdp_value in self.cache.pdp.items():
-            if _pdp_value["keystone_project_id"] == self.__keystone_project_id:
-                self.__pdp_id = _pdp_key
-                self.__pdp_value = copy.deepcopy(_pdp_value)
-                break
-        if not self.__pdp_value:
+        self.__pdp_id = self.cache.get_pdp_from_keystone_project(self.__keystone_project_id)
+
+        if not self.__pdp_id:
             raise exceptions.AuthzException(
                 "Cannot create context for authz "
                 "with Keystone project ID {}".format(
                     self.__keystone_project_id
-            ))
+                ))
+        self.__pdp_value = copy.deepcopy(self.cache.pdp[self.__pdp_id])
+
         self.__subject = init_context.get("subject_name")
         self.__object = init_context.get("object_name")
         self.__action = init_context.get("action_name")
-        self.__current_request = None
         self.__request_id = init_context.get("req_id")
         self.__cookie = init_context.get("cookie")
         self.__manager_url = init_context.get("manager_url")
         self.__interface_name = init_context.get("interface_name")
+        self.__current_request = None
+
         self.__index = -1
         # self.__init_initial_request()
-        self.__headers = []
-        policies = self.cache.policies
-        models = self.cache.models
-        for policy_id in self.__pdp_value["security_pipeline"]:
-            model_id = policies[policy_id]["model_id"]
-            for meta_rule in models[model_id]["meta_rules"]:
-                self.__headers.append(meta_rule)
+        self.__meta_rule_ids = self.cache.get_meta_rule_ids_from_pdp_value(self.__pdp_value)
         self.__meta_rules = self.cache.meta_rules
+
         self.__pdp_set = {}
         # self.__init_pdp_set()
 
@@ -63,20 +59,25 @@ class Context:
 
     @property
     def current_state(self):
-        return self.__pdp_set[self.__headers[self.__index]]['effect']
+        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        return self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect']
 
     @current_state.setter
     def current_state(self, state):
         if state not in ("grant", "deny", "passed"):
             state = "passed"
-        self.__pdp_set[self.__headers[self.__index]]['effect'] = state
+        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect'] = state
 
     @current_state.deleter
     def current_state(self):
-        self.__pdp_set[self.__headers[self.__index]]['effect'] = "unset"
+        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect'] = "unset"
 
     @property
     def current_policy_id(self):
+        if "security_pipeline" not in self.__pdp_value:
+            raise exceptions.AuthzException('Cannot find security_pipeline key within pdp.')
         return self.__pdp_value["security_pipeline"][self.__index]
 
     @current_policy_id.setter
@@ -88,6 +89,8 @@ class Context:
         pass
 
     def __init_current_request(self):
+        if "security_pipeline" not in self.__pdp_value:
+            raise exceptions.PdpContentError
         self.__subject = self.cache.get_subject(
             self.__pdp_value["security_pipeline"][self.__index],
             self.__subject)
@@ -100,11 +103,11 @@ class Context:
         self.__current_request = dict(self.initial_request)
 
     def __init_pdp_set(self):
-        for header in self.__headers:
-            self.__pdp_set[header] = dict()
-            self.__pdp_set[header]["meta_rules"] = self.__meta_rules[header]
-            self.__pdp_set[header]["target"] = self.__add_target(header)
-            self.__pdp_set[header]["effect"] = "unset"
+        for meta_rule_id in self.__meta_rule_ids:
+            self.__pdp_set[meta_rule_id] = dict()
+            self.__pdp_set[meta_rule_id]["meta_rules"] = self.__meta_rules[meta_rule_id]
+            self.__pdp_set[meta_rule_id]["target"] = self.__add_target(meta_rule_id)
+            self.__pdp_set[meta_rule_id]["effect"] = "unset"
         self.__pdp_set["effect"] = "deny"
 
     # def update_target(self, context):
@@ -151,23 +154,37 @@ class Context:
         _subject = self.__current_request["subject"]
         _object = self.__current_request["object"]
         _action = self.__current_request["action"]
+
         meta_rules = self.cache.meta_rules
         policy_id = self.cache.get_policy_from_meta_rules(meta_rule_id)
+
+        if 'subject_categories' not in meta_rules[meta_rule_id]:
+            raise exceptions.MetaRuleContentError(" 'subject_categories' key not found ")
+
         for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
             if sub_cat not in result:
                 result[sub_cat] = []
             result[sub_cat].extend(
                 self.cache.get_subject_assignments(policy_id, _subject, sub_cat))
+
+        if 'object_categories' not in meta_rules[meta_rule_id]:
+            raise exceptions.MetaRuleContentError(" 'object_categories' key not found ")
+
         for obj_cat in meta_rules[meta_rule_id]['object_categories']:
             if obj_cat not in result:
                 result[obj_cat] = []
             result[obj_cat].extend(
                 self.cache.get_object_assignments(policy_id, _object, obj_cat))
+
+        if 'action_categories' not in meta_rules[meta_rule_id]:
+            raise exceptions.MetaRuleContentError(" 'action_categories' key not found ")
+
         for act_cat in meta_rules[meta_rule_id]['action_categories']:
             if act_cat not in result:
                 result[act_cat] = []
             result[act_cat].extend(
                 self.cache.get_action_assignments(policy_id, _action, act_cat))
+
         return result
 
     def __repr__(self):
@@ -181,7 +198,7 @@ pdp_set: {pdp_set}
             id=self.__pdp_id,
             current_request=self.__current_request,
             request_id=self.__request_id,
-            headers=self.__headers,
+            headers=self.__meta_rule_ids,
             pdp_set=self.__pdp_set,
             index=self.__index
         )
@@ -190,7 +207,7 @@ pdp_set: {pdp_set}
         return {
             "initial_request": copy.deepcopy(self.initial_request),
             "current_request": copy.deepcopy(self.__current_request),
-            "headers": copy.deepcopy(self.__headers),
+            "headers": copy.deepcopy(self.__meta_rule_ids),
             "index": copy.deepcopy(self.__index),
             "pdp_set": copy.deepcopy(self.__pdp_set),
             "request_id": copy.deepcopy(self.__request_id),
@@ -265,11 +282,12 @@ pdp_set: {pdp_set}
     @property
     def current_request(self):
         if not self.__current_request:
-            self.__current_request = copy.deepcopy(self.initial_request)
+            self.__current_request = dict(self.initial_request)
         return self.__current_request
 
     @current_request.setter
     def current_request(self, value):
+
         self.__current_request = copy.deepcopy(value)
         # Note (asteroide): if the current request is modified,
         # we must update the PDP Set.
@@ -280,17 +298,22 @@ pdp_set: {pdp_set}
         self.__current_request = {}
         self.__pdp_set = {}
 
+    '''
+        [Note ] Refactor name of headers to meta_rule_ids done ,
+         may need to refactor getter and setter of headers
+    '''
+
     @property
     def headers(self):
-        return self.__headers
+        return self.__meta_rule_ids
 
     @headers.setter
-    def headers(self, headers):
-        self.__headers = headers
+    def headers(self, meta_rule_ids):
+        self.__meta_rule_ids = meta_rule_ids
 
     @headers.deleter
     def headers(self):
-        self.__headers = list()
+        self.__meta_rule_ids = list()
 
     @property
     def index(self):
@@ -316,4 +339,6 @@ pdp_set: {pdp_set}
     def pdp_set(self):
         self.__pdp_set = {}
 
-
+    def __validate_meta_rule_content(self, meta_rules):
+        if 'effect' not in meta_rules:
+            raise exceptions.PdpContentError
