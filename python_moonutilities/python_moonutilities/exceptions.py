@@ -444,7 +444,7 @@ class MetaRuleExisting(AdminMetaRule):
 
 
 class MetaRuleContentError(AdminMetaRule):
-    description = _("Invalid content of pdp.")
+    description = _("Invalid content of meta rule.")
     code = 400
     title = 'Meta Rule Error'
     logger = "ERROR"

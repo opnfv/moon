@@ -101,14 +101,14 @@ class Cache(object):
             raise exceptions.PolicyUnknown("Cannot find policy within policy_id {}".format(policy_id))
 
         if policy_id in self.subjects:
-            for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
+            for _subject_id, _subject_dict in self.subjects[policy_id].items():
                 if "name" in _subject_dict and _subject_dict["name"] == name:
                     return _subject_id
 
         self.__update_subjects(policy_id)
 
         if policy_id in self.subjects:
-            for _subject_id, _subject_dict in self.__SUBJECTS[policy_id].items():
+            for _subject_id, _subject_dict in self.subjects[policy_id].items():
                 if "name" in _subject_dict and _subject_dict["name"] == name:
                     return _subject_id
 
@@ -488,6 +488,20 @@ class Cache(object):
                 logger.warning("Cannot find 'security_pipeline' "
                                "key within pdp ")
 
+    def get_meta_rule_ids_from_pdp_value(self, pdp_value):
+        meta_rules = []
+        if "security_pipeline" in pdp_value:
+            for policy_id in pdp_value["security_pipeline"]:
+                if policy_id not in self.policies or "model_id" not in self.policies[policy_id]:
+                    raise exceptions.PolicyUnknown("Cannot find 'models' key")
+                model_id = self.policies[policy_id]["model_id"]
+                if model_id not in self.models or 'meta_rules' not in self.models[model_id]:
+                    raise exceptions.ModelNotFound("Cannot find 'models' key")
+                for meta_rule in self.models[model_id]["meta_rules"]:
+                    meta_rules.append(meta_rule)
+            return meta_rules
+        raise exceptions.PdpContentError
+
     def get_pdp_from_keystone_project(self, keystone_project_id):
         for pdp_key, pdp_value in self.pdp.items():
             if "keystone_project_id" in pdp_value and \
@@ -566,8 +580,8 @@ class Cache(object):
         :return:
         """
         if all(k in container_data for k in ("keystone_project_id", "name", "container_id", "policy_id",
-                                          "meta_rule_id", "port")) \
-            and all(k in container_data['port'] for k in ("PublicPort", "Type", "IP", "PrivatePort")):
+                                             "meta_rule_id", "port")) \
+                and all(k in container_data['port'] for k in ("PublicPort", "Type", "IP", "PrivatePort")):
 
             self.__CONTAINERS[uuid4().hex] = {
                 "keystone_project_id": container_data['keystone_project_id'],
@@ -641,7 +655,7 @@ class Cache(object):
         container_ids = []
         for pdp_id, pdp_value, in self.__PDP.items():
             if pdp_value:
-                if  all(k in pdp_value for k in ("keystone_project_id", "security_pipeline")) \
+                if all(k in pdp_value for k in ("keystone_project_id", "security_pipeline")) \
                         and pdp_value["keystone_project_id"] == keystone_project_id:
                     for policy_id in pdp_value["security_pipeline"]:
                         if policy_id in self.policies and "model_id" in self.policies[policy_id]:
@@ -677,4 +691,3 @@ class Cache(object):
                                                            "and may not contains 'model_id' key".format(policy_id))
 
         self.__CONTAINER_CHAINING[keystone_project_id] = container_ids
-
