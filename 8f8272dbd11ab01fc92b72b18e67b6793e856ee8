@@ -144,6 +144,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_8614b9a0",
+        "filename": "moon_interface/moon_interface/http_server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-15T15:01:54Z",
+      "side": 1,
+      "message": "1) yes\n2) yes but why do you think it must be written in an other way, the flask documentation says:\n- \"app.register_error_handler(400, lambda e: \u0027bad request!\u0027)\", \n- app.register_error_handler(\u003cerror_code\u003e, \u003cfunction\u003e)\n\nSee http://flask.pocoo.org/docs/0.12/errorhandling/#error-handlers",
+      "parentUuid": "9a3d3df0_773e828d",
+      "range": {
+        "startLine": 124,
+        "startChar": 17,
+        "endLine": 124,
+        "endChar": 39
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_dd7a1576",
         "filename": "moon_interface/moon_interface/server.py",
         "patchSetId": 1
