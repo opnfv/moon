@@ -10,3 +10,17 @@ def register_client():
     server = moon_manager.server.create_server()
     client = server.app.test_client()
     return client
+
+
+def get_policy_id():
+    import api.test_policies as policies
+    client = register_client()
+    policy_id = ''
+    req, policy = policies.get_policies(client)
+    for id in policy['policies']:
+        if id:
+            policy_id = id
+            break
+    if not policy_id:
+        policies.add_policies(client, "testuser")
+    return policy_id
