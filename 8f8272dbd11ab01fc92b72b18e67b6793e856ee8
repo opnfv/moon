@@ -168,6 +168,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_c93ff285",
+        "filename": "moon_interface/moon_interface/http_server.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 124,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-15T21:49:00Z",
+      "side": 1,
+      "message": "according to that link http://flask.pocoo.org/docs/0.12//api/#flask.Flask.register_error_handler\n\n\nyou will find register_error_handler(code_or_exception, f) \n\nwhich mean that it could catch status code or catch a certain exception and then apply a certain function\n\n\ni guess you want to catch any exception thrown from type AuthzException and then return a certain response\n\nwhile the upper code \"self.app.register_error_handler(403, exceptions.AuthException)\" said that when catch a 403 status code , you will throw eAuthzexception although you mentioned before that you don\u0027t want to throw exception to openstack, you just want to send a specified response",
+      "parentUuid": "9a3d3df0_8614b9a0",
+      "range": {
+        "startLine": 124,
+        "startChar": 17,
+        "endLine": 124,
+        "endChar": 39
+      },
+      "revId": "8f8272dbd11ab01fc92b72b18e67b6793e856ee8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_dd7a1576",
         "filename": "moon_interface/moon_interface/server.py",
         "patchSetId": 1
