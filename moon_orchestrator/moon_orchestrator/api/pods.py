@@ -44,15 +44,18 @@ class Pods(Resource):
         :internal_api: get_pdp
         """
         pods = {}
-        if uuid:
-            return {"pods": self.driver.get_pods(uuid)}
-        for _pod_key, _pod_values in self.driver.get_pods().items():
-            pods[_pod_key] = []
-            for _pod_value in _pod_values:
-                if _pod_value['namespace'] != "moon":
-                    continue
-                pods[_pod_key].append(_pod_value)
-        return {"pods": pods}
+        try:
+            if uuid:
+                return {"pods": self.driver.get_pods(uuid)}
+            for _pod_key, _pod_values in self.driver.get_pods().items():
+                pods[_pod_key] = []
+                for _pod_value in _pod_values:
+                    if _pod_value['namespace'] != "moon":
+                        continue
+                    pods[_pod_key].append(_pod_value)
+            return {"pods": pods}
+        except Exception as e:
+            return {"result": False, "message": str(e)}, 500
 
     @check_auth
     def post(self, uuid=None, user_id=None):
@@ -74,21 +77,24 @@ class Pods(Resource):
         }
         """
         logger.debug("POST param={}".format(request.json))
-        self.driver.create_pipeline(
-            request.json.get("keystone_project_id"),
-            request.json.get("pdp_id"),
-            request.json.get("security_pipeline"),
-            manager_data=request.json,
-            active_context=None,
-            active_context_name=None)
-        pods = {}
-        for _pod_key, _pod_values in self.driver.get_pods().items():
-            pods[_pod_key] = []
-            for _pod_value in _pod_values:
-                if _pod_value['namespace'] != "moon":
-                    continue
-                pods[_pod_key].append(_pod_value)
-        return {"pods": pods}
+        try:
+            self.driver.create_pipeline(
+                request.json.get("keystone_project_id"),
+                request.json.get("pdp_id"),
+                request.json.get("security_pipeline"),
+                manager_data=request.json,
+                active_context=None,
+                active_context_name=None)
+            pods = {}
+            for _pod_key, _pod_values in self.driver.get_pods().items():
+                pods[_pod_key] = []
+                for _pod_value in _pod_values:
+                    if _pod_value['namespace'] != "moon":
+                        continue
+                    pods[_pod_key].append(_pod_value)
+            return {"pods": pods}
+        except Exception as e:
+            return {"result": False, "message": str(e)}, 500
 
     @check_auth
     def delete(self, uuid=None, user_id=None):
@@ -128,4 +134,3 @@ class Pods(Resource):
         :internal_api: update_pdp
         """
         return {"pods": None}
-
