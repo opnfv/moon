@@ -387,7 +387,7 @@
 							"success": "Rules `{{rulesName}}` successfully deleted"
 						},
 						"add": {
-							"title": "Add a Rules",
+							"title": "Add a Rule",
 							"policies": "Select a policy",
 							"instructions": "Instruction",
 							"metarules" : "Select one of the associated MetaRules",
@@ -420,7 +420,7 @@
 									"required": "{{number}} Object(s) are required"
 								},
 								"action":{
-									"required": "{{number}} a(s) are required"
+									"required": "{{number}} Action(s) are required"
 								}
 							},
 							"create":{

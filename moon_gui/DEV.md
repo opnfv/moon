@@ -22,28 +22,28 @@ To run the GUI service, follow the `README.md` file.
 
 ## Current bugs
 
-1) Models -> "`List of Meta rules`", after updating the meta_rule 
-"`Actions` -> `edit`" and clicking on `close`, the main screen doesn't refresh
+1) ~~Models -> "`List of Meta rules`", after updating the meta_rule 
+"`Actions` -> `edit`" and clicking on `close`, the main screen doesn't refresh~~
 
-2) idem if we want to remove the meta_rule
+2) ~~idem if we want to remove the meta_rule~~
 
-3) after deleting an action perimeter (`Policy` -> `Add an action` -> `select a perimeter` and delete it), 
-the dropdown list is not updated
+3) ~~after deleting an action perimeter (`Policy` -> `Add an action` -> `select a perimeter` and delete it), 
+the dropdown list is not updated~~
 
-4) when adding a data subject (`Policy` -> `Data` -> `Add a Data Subject`), only the right category names must
-be listed in `Catagory list`. Hide the categories that doesn't belong to that policy.
+4) ~~when adding a data subject (`Policy` -> `Data` -> `Add a Data Subject`), only the right category names must
+be listed in `Catagory list`. Hide the categories that doesn't belong to that policy.~~
 
-5) idem for object data
+5) ~~idem for object data~~
 
-6) idem for action data
+6) ~~idem for action data~~
 
-7) after adding data (subject, object, action), the dropdown list in `Rules` -> `Add a rules` are not updated 
-if the page is not manually refresh by the user and if the `Rules` window is already showing.
+7) ~~after adding data (subject, object, action), the dropdown list in `Rules` -> `Add a rules` are not updated 
+if the page is not manually refresh by the user and if the `Rules` window is already showing.~~
 
-8) typographic error in `Add a rules`
+8) ~~typographic error in `Add a rules`~~
 
-9) in `Data` -> `Add a Data Object`, the `Create Data` never create the data in the backend
+9) ~~in `Data` -> `Add a Data Object`, the `Create Data` never create the data in the backend~~
 
-10) Move the `project` tabular to the end
+10) ~~Move the `project` tabular to the end~~
 
 11) create a simplified version (to be discussed)

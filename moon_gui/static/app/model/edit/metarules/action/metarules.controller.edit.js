@@ -40,7 +40,7 @@
          */
         function metaRuleUpdatedSuccess(event, metaRule){
 
-            edit.metaRule = metaRule;
+            angular.copy(metaRule, edit.metaRule);
 
         }
 

@@ -394,7 +394,7 @@
         }
 
         function cleanSelectedValue() {
-
+            edit.list = _.without(edit.list, edit.selectedPerimeter);
             delete edit.selectedPerimeter;
 
         }

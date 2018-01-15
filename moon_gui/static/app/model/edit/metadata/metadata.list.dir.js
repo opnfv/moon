@@ -19,7 +19,7 @@
                 metaRule: '=',
                 editMode: '=',
                 // shortDisplay : boolean value
-                shortDisplay: '='
+                //shortDisplay: '='
             },
             restrict : 'E',
             replace : true
@@ -80,7 +80,6 @@
             $scope.$on('$destroy', rootListeners[unbind]);
         }
 
-
         function manageSubjectCategories(){
 
             list.loadingCatSub = true;
@@ -140,7 +139,8 @@
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.metaRule = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                metaRuleToSend = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                angular.copy(metaRuleToSend, list.metaRule);
 
                 activate();
 
@@ -176,7 +176,8 @@
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.metaRule = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                metaRuleToSend = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                angular.copy(metaRuleToSend, list.metaRule);
 
                 activate();
 
@@ -212,7 +213,8 @@
                     alertService.alertSuccess(translatedValue);
                 });
 
-                list.metaRule = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                metaRuleToSend = metaRuleService.findMetaDataFromMetaRule(utilService.transformOne(data, 'meta_rules'));
+                angular.copy(metaRuleToSend, list.metaRule);
 
                 activate();
 

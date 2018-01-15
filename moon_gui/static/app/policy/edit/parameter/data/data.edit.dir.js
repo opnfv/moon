@@ -31,10 +31,10 @@
         .controller('moonDataEditController', moonDataEditController);
 
     moonDataEditController.$inject = ['$scope', 'dataService', 'DATA_CST', 'alertService', '$translate',
-        'formService', 'policyService', 'utilService', 'metaDataService'];
+        'formService', 'policyService', 'utilService', 'metaDataService', 'modelService', 'metaRuleService'];
 
     function moonDataEditController($scope, dataService, DATA_CST, alertService, $translate,
-                                    formService, policyService, utilService, metaDataService) {
+                                    formService, policyService, utilService, metaDataService, modelService, metaRuleService) {
 
         var edit = this;
 
@@ -50,7 +50,6 @@
         edit.data = { name: null, description: null};
 
         edit.list = [];
-        edit.policyList = [];
         edit.categoriesToBeSelected = [];
 
         edit.create = createData;
@@ -64,7 +63,6 @@
         function activate(){
 
             loadAllCategories();
-            loadAllPolicies();
 
             switch(edit.dataType){
 
@@ -105,58 +103,54 @@
 
         }
 
+
         function loadAllCategories(){
 
-            switch(edit.dataType){
+            modelService.findOneWithCallback(edit.policy.model_id, function(model){
 
-                case DATA_CST.TYPE.SUBJECT:
+                metaRuleService.findSomeWithCallback(model.meta_rules, function(metaRules){
 
-                    metaDataService.subject.findAllWithCallback(callBackList);
-                    break;
+                    switch(edit.dataType){
 
-                case DATA_CST.TYPE.OBJECT:
-
-                    metaDataService.object.findAllWithCallback(callBackList);
-                    break;
-
-                case DATA_CST.TYPE.ACTION:
-
-                    metaDataService.action.findAllWithCallback(callBackList);
-                    break;
-
-                default :
-
-                    edit.categoriesToBeSelected = [];
-                    break;
-
-            }
-
-            function callBackList(list){
-
-                edit.categoriesToBeSelected = list;
-
-            }
-        }
-
-        function loadAllPolicies() {
-
-            edit.policyList = [];
-
-            policyService.findAllWithCallback( function(data) {
-
-                _.each(data, function(element){
-
-                    if(element.id === edit.policy.id){
-                        edit.selectedPolicy = element;
+                        case DATA_CST.TYPE.SUBJECT:
+                            var subjectCategoryList = _.reduce(metaRules, function(result, metaRule) {
+                                return result.concat(metaRule.subject_categories);
+                            }, [])
+                            metaDataService.subject.findSomeWithCallback(subjectCategoryList, callBackList);
+                            break;
+        
+                        case DATA_CST.TYPE.OBJECT:
+                            var objectCategoryList = _.reduce(metaRules, function(result, metaRule) {
+                                return result.concat(metaRule.object_categories);
+                            }, [])
+                            metaDataService.object.findSomeWithCallback(objectCategoryList, callBackList);
+                            break;
+        
+                        case DATA_CST.TYPE.ACTION:
+                            var actionCategoryList = _.reduce(metaRules, function(result, metaRule) {
+                                return result.concat(metaRule.action_categories);
+                            }, [])
+                            metaDataService.action.findSomeWithCallback(actionCategoryList, callBackList);
+                            break;
+        
+                        default :
+        
+                            edit.categoriesToBeSelected = [];
+                            break;
+        
                     }
-
+        
+                    function callBackList(list){
+        
+                        edit.categoriesToBeSelected = list;
+        
+                    }
                 });
 
-                edit.policyList = data;
-
             });
-        }
 
+            
+        }
 
         /**
          * Create
@@ -200,26 +194,30 @@
             function createSuccess(data) {
 
                 var created = {};
+                var name = '';
 
                 switch(edit.dataType){
 
                     case DATA_CST.TYPE.SUBJECT:
 
                         created = utilService.transformOne(data['subject_data'], 'data');
+                        name = created.name;
                         break;
 
                     case DATA_CST.TYPE.OBJECT:
 
                         created = utilService.transformOne(data['object_data'], 'data');
+                        name = created.value.name;
                         break;
 
                     case DATA_CST.TYPE.ACTION:
 
                         created = utilService.transformOne(data['action_data'], 'data');
+                        name = created.value.name;
                         break;
                 }
 
-                $translate('moon.policy.data.edit.create.success', { name: created.name }).then(function (translatedValue) {
+                $translate('moon.policy.data.edit.create.success', { name: name }).then(function (translatedValue) {
                     alertService.alertSuccess(translatedValue);
                 });
 
