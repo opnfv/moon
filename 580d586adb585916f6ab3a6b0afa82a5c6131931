@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "9a3d3df0_26a84d76",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 83,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-15T14:55:06Z",
+      "side": 1,
+      "message": "The setter allows to modify the variable current_policy_id. The goal here is to forbid the modification of this variable. So this code is OK.\nMaybe we can add an exception here like in line 228.",
+      "parentUuid": "9a3d3df0_973986a6",
+      "range": {
+        "startLine": 83,
+        "startChar": 0,
+        "endLine": 83,
+        "endChar": 4
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a3d3df0_37b99a15",
         "filename": "python_moonutilities/python_moonutilities/context.py",
         "patchSetId": 1
@@ -41,6 +65,53 @@
         "startChar": 17,
         "endLine": 223,
         "endChar": 20
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_c6336160",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 223,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-15T14:55:06Z",
+      "side": 1,
+      "message": "If I don\u0027t set the function below, I may have an unmanageable exception here (\"AttributeError: can\u0027t set attribute\").\nIn fact, I write the code to quickly, I should raised an exception from the python_moonutilities library. But I do not have enough time. \nYou must have in mind that this code will move from Moon component to other Moon component and we need some security locks (see moon_interface.authz_requests line 61).",
+      "parentUuid": "9a3d3df0_37b99a15",
+      "range": {
+        "startLine": 223,
+        "startChar": 17,
+        "endLine": 223,
+        "endChar": 20
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_a638dd3d",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-15T14:55:06Z",
+      "side": 1,
+      "message": "True, those variables must not be modified.\nOne instance of the Context object is only for one request and the subject, action and object do not change during the request.\nWhen a new authorization request comes, a new Context instance is build with new subject, action and object.",
+      "range": {
+        "startLine": 296,
+        "startChar": 14,
+        "endLine": 296,
+        "endChar": 40
       },
       "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
