@@ -34,7 +34,7 @@
 -	git commit --signoff --all
 -	git review
 
-### Review Correction
+### Review Correction [ from existed Repo which contains commit-id ]
 -	`git clone https://git.opnfv.org/moon`
 -	`cd moon`
 -   get the commit id from Gerrit dashboard
@@ -45,6 +45,15 @@
 -	`git commit –amend`
 -	`git review`
 
+### Review Correction [ from existed Repo/or new one which not contains commit-id ]
+-	`git clone https://git.openstack.org/openstack/oslo-specs`
+-	`cd oslo-specs`
+-	`git fetch https://git.openstack.org/openstack/oslo-specs refs/changes/43/492543/1 && git checkout FETCH_HEAD`
+-	`git checkout -b 492543-1`
+-	`vi specs/policy/external-pdp.rst`
+-	`git add specs/policy/external-pdp.rst`
+-	`git commit –amend`
+-	`git review`
 
 ## Build Python Package
 ### pre-requist
