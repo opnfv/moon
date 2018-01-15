@@ -1,3 +1,6 @@
+import policies.mock_data as mock_data
+
+
 def get_action_assignments(policy_id, action_id=None, category_id=None):
     from python_moondb.core import PolicyManager
     return PolicyManager.get_action_assignments("", policy_id, action_id, category_id)
@@ -44,7 +47,7 @@ def delete_subject_assignment(policy_id, subject_id, category_id, data_id):
 
 
 def test_get_action_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     action_id = "action_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -59,7 +62,7 @@ def test_get_action_assignments(db):
 
 
 def test_get_action_assignments_by_policy_id(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     action_id = "action_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -77,7 +80,7 @@ def test_get_action_assignments_by_policy_id(db):
 
 
 def test_add_action_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     action_id = "action_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -92,9 +95,9 @@ def test_add_action_assignments(db):
 
 
 def test_delete_action_assignment(db):
-    policy_id = "admin_1"
+    policy_id = mock_data.get_policy_id()
     add_action_assignment(policy_id, "", "", "")
-    policy_id = "admin_2"
+    policy_id = mock_data.get_policy_id()
     action_id = "action_id_2"
     category_id = "category_id_2"
     data_id = "data_id_2"
@@ -112,7 +115,7 @@ def test_delete_action_assignment_with_invalid_policy_id(db):
 
 
 def test_get_object_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     object_id = "object_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -127,7 +130,7 @@ def test_get_object_assignments(db):
 
 
 def test_get_object_assignments_by_policy_id(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     object_id_1 = "object_id_1"
     category_id_1 = "category_id_1"
     data_id = "data_id_1"
@@ -145,7 +148,7 @@ def test_get_object_assignments_by_policy_id(db):
 
 
 def test_add_object_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     object_id = "object_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -160,7 +163,7 @@ def test_add_object_assignments(db):
 
 
 def test_delete_object_assignment(db):
-    policy_id = "admin_1"
+    policy_id = mock_data.get_policy_id()
     add_object_assignment(policy_id, "", "", "")
     object_id = "action_id_2"
     category_id = "category_id_2"
@@ -179,7 +182,7 @@ def test_delete_object_assignment_with_invalid_policy_id(db):
 
 
 def test_get_subject_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     subject_id = "object_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -194,7 +197,7 @@ def test_get_subject_assignments(db):
 
 
 def test_get_subject_assignments_by_policy_id(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     subject_id_1 = "subject_id_1"
     category_id_1 = "category_id_1"
     data_id = "data_id_1"
@@ -212,7 +215,7 @@ def test_get_subject_assignments_by_policy_id(db):
 
 
 def test_add_subject_assignments(db):
-    policy_id = "admin"
+    policy_id = mock_data.get_policy_id()
     subject_id = "subject_id_1"
     category_id = "category_id_1"
     data_id = "data_id_1"
@@ -227,7 +230,7 @@ def test_add_subject_assignments(db):
 
 
 def test_delete_subject_assignment(db):
-    policy_id = "admin_1"
+    policy_id = mock_data.get_policy_id()
     add_subject_assignment(policy_id, "", "", "")
     subject_id = "subject_id_2"
     category_id = "category_id_2"

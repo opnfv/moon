@@ -22,11 +22,15 @@ class PolicyManager(Managers):
         policies = self.PolicyManager.get_policies("admin")
         models = self.ModelManager.get_models("admin")
         for pdp_key, pdp_value in self.PDPManager.get_pdp(user_id).items():
+            if 'security_pipeline' not in pdp_value:
+                raise exceptions.PdpContentError
             for policy_id in pdp_value["security_pipeline"]:
-                if not policies:
+                if not policies or policy_id not in policies:
                     raise exceptions.PolicyUnknown
                 model_id = policies[policy_id]["model_id"]
                 if not models:
+                    raise exceptions.ModelUnknown
+                if model_id not in models:
                     raise exceptions.ModelUnknown
                 if meta_rule_id in models[model_id]["meta_rules"]:
                     return policy_id
@@ -78,6 +82,8 @@ class PolicyManager(Managers):
                     value.get('name'))
                 perimeter_id = uuid4().hex
         value.update(k_user['users'][0])
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.set_subject(policy_id=policy_id, perimeter_id=perimeter_id, value=value)
 
     @enforce(("read", "write"), "perimeter")
@@ -90,6 +96,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "perimeter")
     def add_object(self, user_id, policy_id, perimeter_id=None, value=None):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         if not perimeter_id:
             perimeter_id = uuid4().hex
         return self.driver.set_object(policy_id=policy_id, perimeter_id=perimeter_id, value=value)
@@ -104,6 +112,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "perimeter")
     def add_action(self, user_id, policy_id, perimeter_id=None, value=None):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         if not perimeter_id:
             perimeter_id = uuid4().hex
         return self.driver.set_action(policy_id=policy_id, perimeter_id=perimeter_id, value=value)
@@ -127,6 +137,10 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "data")
     def set_subject_data(self, user_id, policy_id, data_id=None, category_id=None, value=None):
+        if not category_id:
+            raise Exception('Invalid category id')
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         if not data_id:
             data_id = uuid4().hex
         return self.driver.set_subject_data(policy_id=policy_id, data_id=data_id, category_id=category_id, value=value)
@@ -151,6 +165,10 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "data")
     def add_object_data(self, user_id, policy_id, data_id=None, category_id=None, value=None):
+        if not category_id:
+            raise Exception('Invalid category id')
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         if not data_id:
             data_id = uuid4().hex
         return self.driver.set_object_data(policy_id=policy_id, data_id=data_id, category_id=category_id, value=value)
@@ -167,14 +185,18 @@ class PolicyManager(Managers):
         if not category_id:
             for cat in available_metadata["action"]:
                 results.append(self.driver.get_action_data(policy_id=policy_id, data_id=data_id,
-                                                            category_id=cat))
+                                                           category_id=cat))
         if category_id and category_id in available_metadata["action"]:
             results.append(self.driver.get_action_data(policy_id=policy_id, data_id=data_id,
-                                                        category_id=category_id))
+                                                       category_id=category_id))
         return results
 
     @enforce(("read", "write"), "data")
     def add_action_data(self, user_id, policy_id, data_id=None, category_id=None, value=None):
+        if not category_id:
+            raise Exception('Invalid category id')
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         if not data_id:
             data_id = uuid4().hex
         return self.driver.set_action_data(policy_id=policy_id, data_id=data_id, category_id=category_id, value=value)
@@ -190,6 +212,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "assignments")
     def add_subject_assignment(self, user_id, policy_id, subject_id, category_id, data_id):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.add_subject_assignment(policy_id=policy_id, subject_id=subject_id,
                                                   category_id=category_id, data_id=data_id)
 
@@ -204,6 +228,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "assignments")
     def add_object_assignment(self, user_id, policy_id, object_id, category_id, data_id):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.add_object_assignment(policy_id=policy_id, object_id=object_id,
                                                  category_id=category_id, data_id=data_id)
 
@@ -218,6 +244,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "assignments")
     def add_action_assignment(self, user_id, policy_id, action_id, category_id, data_id):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.add_action_assignment(policy_id=policy_id, action_id=action_id,
                                                  category_id=category_id, data_id=data_id)
 
@@ -232,6 +260,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "rules")
     def add_rule(self, user_id, policy_id, meta_rule_id, value):
+        if not self.get_policies(user_id=user_id, policy_id=policy_id):
+            raise exceptions.PolicyUnknown
         return self.driver.add_rule(policy_id=policy_id, meta_rule_id=meta_rule_id, value=value)
 
     @enforce(("read", "write"), "rules")
