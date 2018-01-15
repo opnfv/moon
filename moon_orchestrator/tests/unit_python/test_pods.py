@@ -31,7 +31,7 @@ def test_get_pods_failure(context, monkeypatch):
     assert not data["pods"]
 
 
-def test_add_pods(context, monkeypatch):
+def test_add_pods_with_pipeline(context, monkeypatch):
     patch_k8s(monkeypatch)
 
     import moon_orchestrator.server
@@ -52,6 +52,60 @@ def test_add_pods(context, monkeypatch):
     assert data["pods"]
 
 
+def test_add_pods_without_pipeline_with_bad_slave_name(context, monkeypatch):
+    patch_k8s(monkeypatch)
+
+    import moon_orchestrator.server
+    server = moon_orchestrator.server.create_server()
+    _client = server.app.test_client()
+    data = {
+        "slave_name": "test",
+    }
+    req = _client.post("/pods", data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert req.data
+    data = get_json(req.data)
+    assert isinstance(data, dict)
+    assert 'The slave is unknown.' in data['message']
+
+
+def test_add_pods_without_pipeline_with_good_slave_name(context, monkeypatch):
+    patch_k8s(monkeypatch)
+
+    import moon_orchestrator.server
+    server = moon_orchestrator.server.create_server()
+    _client = server.app.test_client()
+    data = {
+        "slave_name": "active_context",
+    }
+    req = _client.post("/pods", data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+    assert req.status_code == 200
+    assert req.data
+    data = get_json(req.data)
+    assert isinstance(data, dict)
+    assert "pods" in data
+    assert data["pods"]
+
+
+def test_add_pods_without_pipeline_without_slave_name(context, monkeypatch):
+    patch_k8s(monkeypatch)
+
+    import moon_orchestrator.server
+    server = moon_orchestrator.server.create_server()
+    _client = server.app.test_client()
+    data = {
+    }
+    req = _client.post("/pods", data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert req.data
+    data = get_json(req.data)
+    assert isinstance(data, dict)
+    assert 'The slave is unknown.' in data['message']
+
+
 def test_add_pods_with_no_data(context, monkeypatch):
     patch_k8s(monkeypatch)
     import moon_orchestrator.server
@@ -59,10 +113,10 @@ def test_add_pods_with_no_data(context, monkeypatch):
     _client = server.app.test_client()
     req = _client.post("/pods", data=json.dumps({}),
                        headers={'Content-Type': 'application/json'})
-    assert req.status_code == 500
+    assert req.status_code == 400
     assert req.data
     data = get_json(req.data)
-    assert '400: Policy Unknown' in data['message']
+    assert 'The slave is unknown.' in data['message']
 
 
 def test_add_pods_with_no_policies_no_models(context, monkeypatch, no_requests):

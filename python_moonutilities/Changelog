@@ -78,3 +78,7 @@ CHANGES
 1.4.5
 -----
 - Add PdpKeystoneMappingConflict exception
+
+1.4.6
+-----
+- Add WrapperConflict, PipelineConflict, SlaveNameUnknown exceptions

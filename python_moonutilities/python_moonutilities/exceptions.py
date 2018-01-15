@@ -535,6 +535,41 @@ class ContainerMissing(DockerError):
     logger = "ERROR"
 
 
+class WrapperConflict(MoonError):
+    description = _("A Wrapper already exist for the specified slave.")
+    code = 409
+    title = 'Wrapper conflict'
+    logger = "ERROR"
+
+
+class PipelineConflict(MoonError):
+    description = _("A Pipeline already exist for the specified slave.")
+    code = 409
+    title = 'Pipeline conflict'
+    logger = "ERROR"
+
+
+class PipelineUnknown(MoonError):
+    description = _("This Pipeline is unknown from the system.")
+    code = 400
+    title = 'Pipeline Unknown'
+    logger = "ERROR"
+
+
+class WrapperUnknown(MoonError):
+    description = _("This Wrapper is unknown from the system.")
+    code = 400
+    title = 'Wrapper Unknown'
+    logger = "ERROR"
+
+
+class SlaveNameUnknown(MoonError):
+    description = _("The slave is unknown.")
+    code = 400
+    title = 'Slave Unknown'
+    logger = "Error"
+
+
 class PdpUnknown(MoonError):
     description = _("The pdp is unknown.")
     code = 400

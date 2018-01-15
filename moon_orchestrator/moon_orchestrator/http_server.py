@@ -10,6 +10,7 @@ import requests
 import time
 from moon_orchestrator import __version__
 from moon_orchestrator.api.pods import Pods
+from moon_orchestrator.api.slaves import Slaves
 from moon_orchestrator.api.generic import Status
 from moon_orchestrator.drivers import get_driver
 from python_moonutilities import configuration, exceptions
@@ -122,7 +123,7 @@ class HTTPServer(Server):
                 if "pdps" in pdp.json():
                     break
         logger.debug("pdp={}".format(pdp))
-        self.driver.create_wrappers()
+        # self.driver.create_wrappers()
         for _pdp_key, _pdp_value in pdp.json()['pdps'].items():
             if _pdp_value.get('keystone_project_id'):
                 # TODO: select context to add security function
@@ -148,6 +149,10 @@ class HTTPServer(Server):
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
         self.api.add_resource(Pods, *Pods.__urls__,
+                              resource_class_kwargs={
+                                  "driver": self.driver
+                              })
+        self.api.add_resource(Slaves, *Slaves.__urls__,
                               resource_class_kwargs={
                                   "driver": self.driver
                               })

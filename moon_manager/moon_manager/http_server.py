@@ -14,6 +14,7 @@ from moon_manager.api.generic import Status, Logs, API
 from moon_manager.api.models import Models
 from moon_manager.api.policies import Policies
 from moon_manager.api.pdp import PDP
+from moon_manager.api.slaves import Slaves
 from moon_manager.api.meta_rules import MetaRules
 from moon_manager.api.meta_data import SubjectCategories, ObjectCategories, ActionCategories
 from moon_manager.api.perimeter import Subjects, Objects, Actions
@@ -32,7 +33,7 @@ __API__ = (
     Subjects, Objects, Actions, Rules,
     SubjectAssignments, ObjectAssignments, ActionAssignments,
     SubjectData, ObjectData, ActionData,
-    Models, Policies, PDP
+    Models, Policies, PDP, Slaves
  )
 
 

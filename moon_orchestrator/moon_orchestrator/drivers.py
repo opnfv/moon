@@ -159,17 +159,17 @@ class K8S(Driver):
         resp = client.create_namespaced_service(namespace="moon",
                                                 body=service_manifest)
         logger.info("Service {} created!".format(data.get('name')))
-        return resp
+        return service_manifest
 
     def load_deployment_and_service(self, data, api_client=None, ext_client=None, expose=False):
         _client = api_client if api_client else self.client
+        manifest = self.__create_service(client=_client, data=data[0],
+                                         expose=expose)
+        data[0]["external_port"] = manifest['spec']['ports'][0].get('nodePort')
         pod = self.__create_deployment(client=ext_client, data=data)
-        self.__create_service(client=_client, data=data[0],
-                              expose=expose)
         self.cache[pod.metadata.uid] = data
 
-    @staticmethod
-    def delete_deployment(name=None, namespace="moon", ext_client=None):
+    def delete_deployment(self, name=None, namespace="moon", ext_client=None):
         logger.info("Deleting deployment {}".format(name))
         body = client.V1DeleteOptions(propagation_policy='Foreground')
         ret = ext_client.delete_namespaced_deployment(
@@ -177,7 +177,16 @@ class K8S(Driver):
             namespace=namespace,
             body=body
         )
-        logger.info(ret)
+        logger.debug(ret)
+        _uid = None
+        for uid, value in self.cache.items():
+            if value[0]['name'] == name:
+                _uid = uid
+                break
+        if _uid:
+            self.cache.pop(_uid)
+        else:
+            raise exceptions.DockerError("Cannot find and delete pod named {}".format(name))
 
     def delete_service(self, name, namespace="moon", api_client=None):
         if not api_client:
@@ -185,12 +194,45 @@ class K8S(Driver):
         ret = api_client.delete_namespaced_service(name=name, namespace=namespace)
         logger.debug("delete_service {}".format(ret))
 
-    def get_slaves(self):
+    def get_slaves(self, active=False):
+        contexts, active_context = self.get_contexts()
+        pods = self.get_pods()
+        # logger.info("pods = {}".format(pods))
+        slaves = []
+        if active:
+            for key, value in pods.items():
+                # logger.info("ctx={}".format(active_context))
+                # logger.info("value={}".format(value))
+                if active_context["name"] == value[0].get('slave_name'):
+                    data = dict(active_context)
+                    data["wrapper_name"] = value[0]['name']
+                    data["ip"] = value[0].get("ip", "NC")
+                    data["port"] = value[0].get("external_port", "NC")
+                    slaves.append(data)
+                    break
+            return slaves
+        for ctx in contexts:
+            data = dict(ctx)
+            data["configured"] = False
+            for key, value in pods.items():
+                # logger.info("ctx={}".format(ctx))
+                # logger.info("value={}".format(value))
+                if ctx["name"] == value[0].get('slave_name'):
+                    data["wrapper_name"] = value[0]['name']
+                    data["ip"] = value[0].get("ip", "NC")
+                    data["port"] = value[0].get("external_port", "NC")
+                    data["configured"] = True
+                    break
+            slaves.append(data)
+        return slaves
+
+    @staticmethod
+    def get_contexts():
         contexts, active_context = config.list_kube_config_contexts()
         return contexts, active_context
 
-    def create_wrappers(self):
-        contexts, active_context = self.get_slaves()
+    def create_wrappers(self, slave_name=None):
+        contexts, active_context = self.get_contexts()
         logger.debug("contexts: {}".format(contexts))
         logger.debug("active_context: {}".format(active_context))
         conf = configuration.get_configuration("components/wrapper")
@@ -201,6 +243,8 @@ class K8S(Driver):
             "container",
             "wukongsun/moon_wrapper:v4.3")
         for _ctx in contexts:
+            if slave_name and slave_name != _ctx['name']:
+                continue
             _config = config.new_client_from_config(context=_ctx['name'])
             logger.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
@@ -209,14 +253,56 @@ class K8S(Driver):
                 "name": hostname + "-" + get_random_name(),
                 "container": container,
                 "port": port,
-                "namespace": "moon"
+                "namespace": "moon",
+                "slave_name": _ctx['name']
             }, ]
             self.load_deployment_and_service(data, api_client, ext_client, expose=True)
+
+    def delete_wrapper(self, uuid=None, name=None, namespace="moon",
+                       active_context=None,
+                       active_context_name=None):
+        name_to_delete = None
+        if uuid and uuid in self.get_pods():
+            name_to_delete = self.get_pods()[uuid][0]['name']
+        elif name:
+            for pod_key, pod_list in self.get_pods().items():
+                for pod_value in pod_list:
+                    if pod_value.get("name") == name:
+                        name_to_delete = pod_value.get("name")
+                        break
+        if not name_to_delete:
+            raise exceptions.WrapperUnknown
+        contexts, _active_context = self.get_contexts()
+        if active_context_name:
+            for _context in contexts:
+                if _context["name"] == active_context_name:
+                    active_context = _context
+                    break
+        if active_context:
+            active_context = _active_context
+            _config = config.new_client_from_config(
+                context=active_context['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.delete_deployment(name=name_to_delete, namespace=namespace,
+                                   ext_client=ext_client)
+            self.delete_service(name=name_to_delete, api_client=api_client)
+            return
+        logger.debug("contexts={}".format(contexts))
+        for _ctx in contexts:
+            _config = config.new_client_from_config(context=_ctx['name'])
+            logger.debug("_config={}".format(_config))
+            api_client = client.CoreV1Api(_config)
+            ext_client = client.ExtensionsV1beta1Api(_config)
+            self.delete_deployment(name=name_to_delete, namespace=namespace,
+                                   ext_client=ext_client)
+            self.delete_service(name=name_to_delete, api_client=api_client)
 
     def create_pipeline(self, keystone_project_id,
                         pdp_id, policy_ids, manager_data=None,
                         active_context=None,
-                        active_context_name=None):
+                        slave_name=None):
         """ Create security functions
 
         :param keystone_project_id: the Keystone project id
@@ -225,7 +311,7 @@ class K8S(Driver):
         :param manager_data: data needed to create pods
         :param active_context: if present, add the security function in this
                                context
-        :param active_context_name: if present,  add the security function in
+        :param slave_name: if present,  add the security function in
                                     this context name
         if active_context_name and active_context are not present, add the
         security function in all context (ie, in all slaves)
@@ -295,12 +381,12 @@ class K8S(Driver):
                             "namespace": "moon"
                         })
         logger.debug("data={}".format(data))
-        contexts, _active_context = self.get_slaves()
-        logger.debug("active_context_name={}".format(active_context_name))
+        contexts, _active_context = self.get_contexts()
+        logger.debug("active_context_name={}".format(slave_name))
         logger.debug("active_context={}".format(active_context))
-        if active_context_name:
+        if slave_name:
             for _context in contexts:
-                if _context["name"] == active_context_name:
+                if _context["name"] == slave_name:
                     active_context = _context
                     break
         if active_context:
@@ -314,6 +400,8 @@ class K8S(Driver):
             return
         logger.debug("contexts={}".format(contexts))
         for _ctx in contexts:
+            if slave_name and slave_name != _ctx['name']:
+                continue
             _config = config.new_client_from_config(context=_ctx['name'])
             logger.debug("_config={}".format(_config))
             api_client = client.CoreV1Api(_config)
@@ -342,9 +430,9 @@ class K8S(Driver):
                         name_to_delete = pod_value.get("name")
                         break
         if not name_to_delete:
-            raise exceptions.MoonError("Cannot find pipeline")
+            raise exceptions.PipelineUnknown
         logger.info("Will delete deployment and service named {}".format(name_to_delete))
-        contexts, _active_context = self.get_slaves()
+        contexts, _active_context = self.get_contexts()
         if active_context_name:
             for _context in contexts:
                 if _context["name"] == active_context_name:
