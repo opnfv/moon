@@ -91,7 +91,10 @@ def get_plugins():
     pipeline = get_configuration("components/pipeline")
     logger.debug("pipeline={}".format(pipeline))
     components = pipeline.get("components/pipeline")
-    components.pop('interface')
+    if 'interface' in components:
+        components.pop('interface')
+    else:
+        raise exceptions.ConsulComponentContentError("error= Components pipeline has no interface")
     return components
 
 

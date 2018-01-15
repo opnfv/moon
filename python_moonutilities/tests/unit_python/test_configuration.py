@@ -98,7 +98,15 @@ def test_get_plugins_success():
     plugin = configuration.get_plugins()
     assert plugin is not None
 
-
+def test_get_plugins_failure(no_requests):
+    from python_moonutilities import configuration
+    no_requests.register_uri(
+        'GET', 'http://consul:8500/v1/kv/components/pipeline',
+        json=[{'Key': 'components/pipeline', 'Value': 'eyJjb250YWluZXIiOiAid3Vrb25nc3VuL21vb25fYXV0aHo6djQuMyIsICJwb3J0IjogODA4MX0='}]
+    )
+    with pytest.raises(Exception) as exception_info:
+        configuration.get_plugins()
+    assert str(exception_info.value) == '500: Consul Content error'
 ################################ component ####################################
 def test_get_components():
     from python_moonutilities import configuration
