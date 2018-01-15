@@ -118,6 +118,30 @@
       "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_8907aac9",
+        "filename": "moon_wrapper/moon_wrapper/api/oslowrapper.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 113,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-15T21:54:45Z",
+      "side": 1,
+      "message": "great, that what i understood but the conflict i found here that in this file you return a response with body True or False only, but if you open wrapper/http_server __hook() you will find that the response body will be different something like that \"{\"result\": False, \"code\": 400,\n                            \"description\": str(e)}), 400\"",
+      "parentUuid": "9a3d3df0_46747135",
+      "range": {
+        "startLine": 113,
+        "startChar": 9,
+        "endLine": 113,
+        "endChar": 22
+      },
+      "revId": "3b8122bb29fefe70c757a07e208081e85f06b4d0",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
