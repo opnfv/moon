@@ -117,8 +117,6 @@ def test_get_action_data(db):
 def test_get_action_data_with_invalid_category_id(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
-
-    policy_id = policy_id
     data_id = "data_id_1"
     category_id = "action_category_id1"
     value = {
@@ -132,7 +130,7 @@ def test_get_action_data_with_invalid_category_id(db):
 
 
 def test_add_action_data(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     data_id = "data_id_1"
     category_id = "category_id_1"
     value = {
@@ -143,6 +141,18 @@ def test_add_action_data(db):
     assert action_data
     action_data_id = list(action_data.keys())[0]
     assert action_data[action_data_id].get('policy_id') == policy_id
+
+
+def test_add_action_data_with_invalid_category_id(db):
+    policy_id = mock_data.get_policy_id()
+    data_id = "data_id_1"
+    value = {
+        "name": "action-type",
+        "description": {"vm-action": "", "storage-action": "", },
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_action_data(policy_id=policy_id, data_id=data_id, value=value).get('data')
+    assert str(exception_info.value) == 'Invalid category id'
 
 
 def test_delete_action_data(db):
@@ -164,8 +174,6 @@ def test_delete_action_data(db):
 def test_get_object_data(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
-
-    policy_id = policy_id
     data_id = "data_id_1"
     category_id = "object_category_id1"
     value = {
@@ -181,8 +189,6 @@ def test_get_object_data(db):
 def test_get_object_data_with_invalid_category_id(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
-
-    policy_id = policy_id
     data_id = "data_id_1"
     category_id = "object_category_id1"
     value = {
@@ -196,7 +202,7 @@ def test_get_object_data_with_invalid_category_id(db):
 
 
 def test_add_object_data(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     data_id = "data_id_1"
     category_id = "object_category_id1"
     value = {
@@ -207,6 +213,18 @@ def test_add_object_data(db):
     assert object_data
     object_data_id = list(object_data.keys())[0]
     assert object_data[object_data_id].get('policy_id') == policy_id
+
+
+def test_add_object_data_with_invalid_category_id(db):
+    policy_id = mock_data.get_policy_id()
+    data_id = "data_id_1"
+    value = {
+        "name": "object-security-level",
+        "description": {"low": "", "medium": "", "high": ""},
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_object_data(policy_id=policy_id, data_id=data_id, value=value).get('data')
+    assert str(exception_info.value) == 'Invalid category id'
 
 
 def test_delete_object_data(db):
@@ -228,8 +246,6 @@ def test_delete_object_data(db):
 def test_get_subject_data(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
-
-    policy_id = policy_id
     data_id = "data_id_1"
     category_id = "subject_category_id1"
     value = {
@@ -245,8 +261,6 @@ def test_get_subject_data(db):
 def test_get_subject_data_with_invalid_category_id(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
-
-    policy_id = policy_id
     data_id = "data_id_1"
     category_id = "subject_category_id1"
     value = {
@@ -260,17 +274,29 @@ def test_get_subject_data_with_invalid_category_id(db):
 
 
 def test_add_subject_data(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     data_id = "data_id_1"
     category_id = "subject_category_id1"
     value = {
         "name": "subject-security-level",
         "description": {"low": "", "medium": "", "high": ""},
     }
-    subject_data = add_object_data(policy_id, data_id, category_id, value).get('data')
+    subject_data = add_subject_data(policy_id, data_id, category_id, value).get('data')
     assert subject_data
     subject_data_id = list(subject_data.keys())[0]
     assert subject_data[subject_data_id].get('policy_id') == policy_id
+
+
+def test_add_subject_data_with_no_category_id(db):
+    policy_id = mock_data.get_policy_id()
+    data_id = "data_id_1"
+    value = {
+        "name": "subject-security-level",
+        "description": {"low": "", "medium": "", "high": ""},
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_subject_data(policy_id=policy_id, data_id=data_id, value=value).get('data')
+    assert str(exception_info.value) == 'Invalid category id'
 
 
 def test_delete_subject_data(db):
@@ -290,7 +316,7 @@ def test_delete_subject_data(db):
 
 
 def test_get_actions(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_action",
         "description": "test",
@@ -304,7 +330,7 @@ def test_get_actions(db):
 
 
 def test_add_action(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_action",
         "description": "test",
@@ -316,7 +342,7 @@ def test_add_action(db):
 
 
 def test_add_action_multiple_times(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_action",
         "description": "test",
@@ -330,14 +356,14 @@ def test_add_action_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    action = add_action('policy_id_7', perimeter_id, value)
+    action = add_action(mock_data.get_policy_id(), perimeter_id, value)
     assert action
     action_id = list(action.keys())[0]
     assert len(action[action_id].get('policy_list')) == 2
 
 
 def test_delete_action(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_action",
         "description": "test",
@@ -358,7 +384,7 @@ def test_delete_action_with_invalid_perimeter_id(db):
 
 
 def test_get_objects(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_object",
         "description": "test",
@@ -372,7 +398,7 @@ def test_get_objects(db):
 
 
 def test_add_object(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_object",
         "description": "test",
@@ -384,7 +410,7 @@ def test_add_object(db):
 
 
 def test_add_objects_multiple_times(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_object",
         "description": "test",
@@ -398,14 +424,14 @@ def test_add_objects_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    added_object = add_object('policy_id_7', perimeter_id, value)
+    added_object = add_object(mock_data.get_policy_id(), perimeter_id, value)
     assert added_object
     object_id = list(added_object.keys())[0]
     assert len(added_object[object_id].get('policy_list')) == 2
 
 
 def test_delete_object(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "test_object",
         "description": "test",
@@ -426,7 +452,7 @@ def test_delete_object_with_invalid_perimeter_id(db):
 
 
 def test_get_subjects(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "testuser",
         "description": "test",
@@ -440,7 +466,7 @@ def test_get_subjects(db):
 
 
 def test_add_subject(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "testuser",
         "description": "test",
@@ -452,7 +478,7 @@ def test_add_subject(db):
 
 
 def test_add_subjects_multiple_times(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "testuser",
         "description": "test",
@@ -466,14 +492,14 @@ def test_add_subjects_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    subject = add_subject('policy_id_7', perimeter_id, value)
+    subject = add_subject(mock_data.get_policy_id(), perimeter_id, value)
     assert subject
     subject_id = list(subject.keys())[0]
     assert len(subject[subject_id].get('policy_list')) == 2
 
 
 def test_delete_subject(db):
-    policy_id = "policy_id_1"
+    policy_id = mock_data.get_policy_id()
     value = {
         "name": "testuser",
         "description": "test",

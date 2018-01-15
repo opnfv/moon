@@ -231,7 +231,7 @@ def test_get_rules(db):
         "instructions": ({"decision": "grant"}),
         "enabled": "",
     }
-    policy_id = "1"
+    policy_id = mock_data.get_policy_id()
     meta_rule_id = "1"
     add_rule(policy_id, meta_rule_id, value)
     value = {
@@ -239,7 +239,6 @@ def test_get_rules(db):
         "instructions": ({"decision": "grant"}),
         "enabled": "",
     }
-    policy_id = "1"
     meta_rule_id = "1"
     add_rule(policy_id, meta_rule_id, value)
     rules = get_rules(policy_id, meta_rule_id)
@@ -261,7 +260,7 @@ def test_add_rule(db):
         "instructions": ({"decision": "grant"}),
         "enabled": "",
     }
-    policy_id = "1"
+    policy_id = mock_data.get_policy_id()
     meta_rule_id = "1"
     rules = add_rule(policy_id, meta_rule_id, value)
     assert rules
@@ -279,7 +278,7 @@ def test_delete_rule(db):
         "instructions": ({"decision": "grant"}),
         "enabled": "",
     }
-    policy_id = "2"
+    policy_id = mock_data.get_policy_id()
     meta_rule_id = "2"
     rules = add_rule(policy_id, meta_rule_id, value)
     rule_id = list(rules.keys())[0]
