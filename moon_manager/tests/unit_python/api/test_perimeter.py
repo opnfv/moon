@@ -14,6 +14,7 @@ def get_subjects(client):
 
 
 def add_subjects(client, name):
+    utilities.get_policy_id()
     data = {
         "name": name,
         "description": "description of {}".format(name),
@@ -37,6 +38,7 @@ def add_subjects(client, name):
 
 
 def add_subjects_without_name(client, name):
+    utilities.get_policy_id()
     data = {
         "name": name,
         "description": "description of {}".format(name),
@@ -77,6 +79,7 @@ def get_objects(client):
 
 
 def add_objects(client, name):
+    utilities.get_policy_id()
     data = {
         "name": name,
         "description": "description of {}".format(name),
@@ -122,6 +125,7 @@ def get_actions(client):
 
 
 def add_actions(client, name):
+    utilities.get_policy_id()
     data = {
         "name": name,
         "description": "description of {}".format(name),
