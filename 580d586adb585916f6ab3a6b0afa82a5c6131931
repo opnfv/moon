@@ -140,6 +140,30 @@
       "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dc6b2e1c",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 296,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-16T13:43:09Z",
+      "side": 1,
+      "message": "The initial request save the initial subject, object and action. When we will have more than one security function, one of those can required to change one of subject, object or action. This modification will be saved in current request. A lot of work still needs to be done here so don\u0027t focus on potential bug here, actually it works and we will improve this part later.",
+      "parentUuid": "9a3d3df0_5c80bebf",
+      "range": {
+        "startLine": 296,
+        "startChar": 14,
+        "endLine": 296,
+        "endChar": 40
+      },
+      "revId": "580d586adb585916f6ab3a6b0afa82a5c6131931",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
