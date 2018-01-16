@@ -22,6 +22,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_c9241262",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-16T13:28:20Z",
+      "side": 0,
+      "message": "i think that it is not safe to be able update index",
+      "parentUuid": "9a3d3df0_0641c9a8",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
