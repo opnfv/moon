@@ -1,12 +1,10 @@
 version: '3.1'
 
 services:
-
   jenkins:
     build:
       context: .
-      args:
-    image: blueocean:v0.3
+    image: blueocean:v0.4
     ports:
       - 8080:8080
       - 50000:50000
