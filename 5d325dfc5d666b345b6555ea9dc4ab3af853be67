@@ -94,6 +94,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_d03dcf2c",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-18T14:09:26Z",
+      "side": 0,
+      "message": "I understand that using a setter function to only increment an index is not the best way but I will need such a function when we will have more than one security function.\nThis is the same problem with the deleter function below. I can have a negative index which leads to an exception.",
+      "parentUuid": "9a3d3df0_5c671e4d",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
