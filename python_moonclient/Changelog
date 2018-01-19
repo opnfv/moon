@@ -30,3 +30,10 @@ CHANGES
     - moon_create_pdp
     - moon_send_authz_to_wrapper
 - Fix a bug in pdp library
+
+1.2.0
+-----
+- Add some commands:
+    - moon_get_slaves
+    - moon_set_slave
+    - moon_delete_slave

@@ -48,7 +48,10 @@ setup(
             'moon_delete_pdp = python_moonclient.scripts:delete_pdp',
             'moon_delete_policy = python_moonclient.scripts:delete_policy',
             'moon_map_pdp_to_project = python_moonclient.scripts:map_pdp_to_project',
-            'moon_send_authz_to_wrapper = python_moonclient.scripts:send_authz_to_wrapper'
+            'moon_send_authz_to_wrapper = python_moonclient.scripts:send_authz_to_wrapper',
+            'moon_get_slaves = python_moonclient.scripts:get_slaves',
+            'moon_set_slave = python_moonclient.scripts:set_slave',
+            'moon_delete_slave = python_moonclient.scripts:delete_slave'
         ],
     }
 

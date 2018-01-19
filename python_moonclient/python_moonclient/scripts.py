@@ -1,6 +1,6 @@
 import logging
 from importlib.machinery import SourceFileLoader
-from . import parse, models, policies, pdp, authz
+from . import parse, models, policies, pdp, authz, slaves
 
 
 logger = logging.getLogger("moonclient.scripts")
@@ -161,3 +161,75 @@ def map_pdp_to_project():
         logger.info("Mapping: {}=>{}".format(args.filename[0], args.filename[1]))
         # TODO: check if pdp_id and keystone_project_id exist
         pdp.map_to_keystone(pdp_id=args.filename[0], keystone_project_id=args.filename[1])
+
+
+def get_slaves():
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.WARNING)
+    requests_log.propagate = True
+
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+    slaves.init(consul_host, consul_port)
+
+    for value in slaves.get_slaves().get('slaves', dict()):
+        if value['configured']:
+            print("    {} (configured)".format(value['name']))
+        else:
+            print("    {} (not configured)".format(value['name']))
+
+
+def set_slave():
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.WARNING)
+    requests_log.propagate = True
+
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+    slaves.init(consul_host, consul_port)
+
+    slave_name = "kubernetes-admin@kubernetes"
+    if args.filename:
+        slave_name = args.filename
+    for value in slaves.set_slave(slave_name).get('slaves', dict()):
+        if value['configured']:
+            print("    {} (configured)".format(value['name']))
+        else:
+            print("    {} (not configured)".format(value['name']))
+
+
+def delete_slave():
+    requests_log = logging.getLogger("requests.packages.urllib3")
+    requests_log.setLevel(logging.WARNING)
+    requests_log.propagate = True
+
+    args = parse.parse()
+    consul_host = args.consul_host
+    consul_port = args.consul_port
+
+    models.init(consul_host, consul_port)
+    policies.init(consul_host, consul_port)
+    pdp.init(consul_host, consul_port)
+    slaves.init(consul_host, consul_port)
+
+    slave_name = "kubernetes-admin@kubernetes"
+    if args.filename:
+        slave_name = args.filename
+    for value in slaves.delete_slave(slave_name).get('slaves', dict()):
+        if value['configured']:
+            print("    {} (configured)".format(value['name']))
+        else:
+            print("    {} (not configured)".format(value['name']))
+
+
+
