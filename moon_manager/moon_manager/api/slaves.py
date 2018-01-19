@@ -64,7 +64,7 @@ class Slaves(Resource):
         req = requests.get("http://{}:{}/slaves".format(
             self.orchestrator_hostname, self.orchestrator_port
         ))
-        return {"slaves": req.json()}
+        return {"slaves": req.json().get("slaves", dict())}
 
     @check_auth
     def patch(self, uuid=None, user_id=None):
