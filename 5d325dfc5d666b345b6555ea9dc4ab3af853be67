@@ -142,6 +142,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_dba7abbb",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-22T15:10:14Z",
+      "side": 0,
+      "message": "1 What I am saying is that I need to increment my index regardless of the function we use (setter or increment_index()). When I develop that I through it was more aesthetic than a traditional increment function ;) .\n\n2 A security pipeline is composed of several security functions (today only 1: authz). \nThe index is a pointer to the headers list which is (as you pointed out) a list of meta rule ID. Each meta rule ID identifies one of the security function. When I will go through each security function, I will update this index to know where I am.\nDon\u0027t forget that this context will flow through each security function and will be updated by them accordingly to the result of each security function.\nAt this time, I don\u0027t know who will update the index:\n- the interface or\n- the previous component or\n- the current component",
+      "parentUuid": "9a3d3df0_db532b15",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
