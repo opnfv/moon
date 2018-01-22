@@ -1,0 +1,30 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: functest
+  namespace: moon
+spec:
+  template:
+    metadata:
+      name: functest
+    spec:
+      containers:
+      - name: functest
+        image: wukongsun/moon_forming:dev
+        env:
+        - name: COMMAND
+          value: "functest"
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/moon
+        - name: tests-volume
+          mountPath: /data
+      volumes:
+      - name: config-volume
+        configMap:
+          name: moon-config
+      - name: tests-volume
+        hostPath:
+          path: "{{PATH}}"
+      restartPolicy: Never
+      #backoffLimit: 4

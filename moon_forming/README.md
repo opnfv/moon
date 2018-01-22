@@ -39,6 +39,9 @@ kubectl delete -f $MOON_HOME/tools/moon_kubernetes/templates/moon_forming.yaml
 kubectl create -f $MOON_HOME/tools/moon_kubernetes/templates/moon_forming.yaml
 ```
 
+## Functional tests
 
+```bash
+kubectl create -f ../tools/moon_kubernetes/templates/moon_forming_functest.yaml
 
-
+```
