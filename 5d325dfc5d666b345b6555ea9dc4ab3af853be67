@@ -118,6 +118,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_db532b15",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-22T11:58:23Z",
+      "side": 0,
+      "message": "1- okay but u didn\u0027t mention why you couldn\u0027t use increment_index() to do that\n2- i could understand that if u increment index ( line 92,95,98) would access the second security pipeline\nbut what is the relation between index and meta rule (as in line 66,72,76\n\nif i understood well that headers is list of meta rule id ( which is not 1 or 2 rule it could be more) so why we access it by the index ( which related to security pipeline size ,1 or 2 .. ) ?",
+      "parentUuid": "9a3d3df0_d03dcf2c",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
