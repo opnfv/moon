@@ -166,6 +166,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_f63446fd",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-23T08:42:35Z",
+      "side": 0,
+      "message": "is that mean that the list of meta rule ID will be the same size as security function (security pipeline) , which is for now one ?\n\nif not, so i expect that the index will be incremented at some time to access the rest of meta rule ID, in this case the index will be greater than size of security pipeline !\nHow to use same index for both?",
+      "parentUuid": "9a3d3df0_dba7abbb",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
