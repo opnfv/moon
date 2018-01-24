@@ -190,6 +190,30 @@
       "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a3d3df0_7075d9c9",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 301,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-01-24T08:59:27Z",
+      "side": 0,
+      "message": "Yes the list of meta rule ID _must_ be the same size as the security pipeline. If not, we must return a 500 error code.",
+      "parentUuid": "9a3d3df0_f63446fd",
+      "range": {
+        "startLine": 299,
+        "startChar": 4,
+        "endLine": 301,
+        "endChar": 25
+      },
+      "revId": "5d325dfc5d666b345b6555ea9dc4ab3af853be67",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
