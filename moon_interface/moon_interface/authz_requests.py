@@ -33,7 +33,7 @@ class AuthzRequest:
             raise exceptions.KeystoneProjectError("Unknown Project ID {}".format(ctx['project_id']))
         self.container_chaining = CACHE.container_chaining[ctx['project_id']]
 
-        if len(self.container_chaining) == 0 or not all(k in self.container_data for k in ("container_id", "hostname", "hostip", "port")):
+        if len(self.container_chaining) == 0 or not all(k in self.container_chaining[0] for k in ("container_id", "hostname", "hostip", "port")):
             raise exceptions.MoonError('Void container chaining')
 
         self.pdp_container = self.container_chaining[0]["container_id"]
