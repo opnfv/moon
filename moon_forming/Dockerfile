@@ -1,11 +1,11 @@
 FROM python:3
 
 WORKDIR /usr/src/app
-RUN pip install --no-cache-dir --upgrade requests pyyaml python_moonutilities python_moondb python_moonclient
+RUN pip install --no-cache-dir --upgrade requests pytest pyyaml python_moonutilities python_moondb python_moonclient
 
-ENV POPULATE_ARGS "-v"
+ENV COMMAND "config"
 
 ADD . /root
 WORKDIR /root
 
-CMD sh /root/run.sh ${POPULATE_ARGS}
+CMD /bin/bash /root/switch.sh ${COMMAND}
