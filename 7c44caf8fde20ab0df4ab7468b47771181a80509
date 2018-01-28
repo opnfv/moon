@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a3d3df0_59527935",
+        "filename": "python_moonutilities/python_moonutilities/context.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 321,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-01-28T16:52:04Z",
+      "side": 1,
+      "message": "1- i have reverted back the setter function for index\n2- i have removed the comments that you have already replied in the previous patches\n\nwaiting for verification",
+      "range": {
+        "startLine": 321,
+        "startChar": 0,
+        "endLine": 321,
+        "endChar": 0
+      },
+      "revId": "7c44caf8fde20ab0df4ab7468b47771181a80509",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
