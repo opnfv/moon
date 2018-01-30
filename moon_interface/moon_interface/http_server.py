@@ -114,12 +114,6 @@ class HTTPServer(Server):
         def get_400_json(e):
             return jsonify({"result": False, "code": 400, "description": str(e)}), 400
 
-        '''
-            [Note] i have tried to simulate authz post request (authz_Requests/run) to return 500 response code
-            and an AuthzException thrown from their [Line 63] and catched here , then the server here return response 
-            with 403 code [Forbidden] , is it correct if so why sometime at authz [from Line 137] return a response 
-            with error code , i think we can do it in the same way as the one mentioned?
-        '''
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 

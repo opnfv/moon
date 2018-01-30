@@ -21,6 +21,8 @@ Bugs to fix:
 - When adding user or VM in GUI, there is a bug in the backend (manager ?)
 - GUI: in the "Projects" tab, move the "Map" link in the "Action" button
 - GUI: move tabs in this order : "Models, Policy, PDP, Projects"
+- Fixing Error Handling at module "Interface" & "Wrapper" according to this link 'http://flask-restful.readthedocs.io/en/0.3.5/extending.html#custom-error-handlers'
+- in case an error occurred, it would be better throwing an exception rather than sending result with error code (as the exception was already thrown in some cases ) [ Interface, Wrapper]
 
 Other actions:
 
