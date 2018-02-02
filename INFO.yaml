@@ -1,0 +1,56 @@
+---
+project: 'Security Management Module (Moon)'
+project_creation_date: '07 Mai 2015'
+project_category: 'Collaborative Development'
+lifecycle_state: 'Incubation'
+project_lead: &opnfv_moon_ptl
+    name: 'Ruan HE'
+    email: 'ruan.he@orange.com'
+    id: 'Ruan'
+    company: 'orange.com'
+    timezone: 'Unknown'
+primary_contact: *opnfv_moon_ptl
+issue_tracking:
+    type: 'jira'
+    url: 'https://jira.opnfv.org/projects/MOON'
+    key: 'MOON'
+mailing_list:
+    type: 'mailman2'
+    url: 'opnfv-tech-discuss@lists.opnfv.org'
+    tag: '[moon]'
+realtime_discussion:
+    type: irc
+    server: 'freenode.net'
+    channel: '#opnfv-moon'
+meetings:
+    - type: 'gotomeeting+irc'
+      agenda:  # eg: 'https://wiki.opnfv.org/display/'
+      url:  # eg: 'https://global.gotomeeting.com/join/819733085'
+      server: 'freenode.net'
+      channel: '#opnfv-meeting'
+      repeats: 'weekly'
+      time:  # eg: '16:00 UTC'
+repositories:
+    - 'moon'
+committers:
+    - <<: *opnfv_moon_ptl
+    - name: 'Marcel Winandy'
+      email: 'marcel.winandy@huawei.com'
+      company: 'huawei.com'
+      id: 'mwinandy'
+    - name: 'jamil chawki'
+      email: 'jamil.chawki@orange.com'
+      company: 'orange.com'
+      id: 'jamy'
+    - name: 'Asteroide'
+      email: 'thomas.duval@orange.com'
+      company: 'orange.com'
+      id: 'asteroide'
+    - name: 'WuKong Sun'
+      email: 'rebirthmonkey@gmail.com'
+      company: 'gmail.com'
+      id: 'WuKong'
+tsc:
+    # yamllint disable rule:line-length
+    approval: 'http//meetbot.opnfv.org/meetings/opnfv-meeting/2015/opnfv-meeting.2015-05-12-13.59.html'
+    # yamllint enable rule:line-length
