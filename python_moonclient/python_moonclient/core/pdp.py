@@ -3,7 +3,7 @@ import logging
 import requests
 from python_moonclient import config
 
-logger = logging.getLogger("python_moonclient.pdp")
+logger = logging.getLogger("python_moonclient.core.pdp")
 
 URL = None
 HEADERS = None
@@ -185,8 +185,11 @@ def map_to_keystone(pdp_id, keystone_project_id):
 
 def delete_pdp(pdp_id):
     req = requests.delete(URL + "/pdp/{}".format(pdp_id))
+    print(req)
     assert req.status_code == 200
+    print('test')
     result = req.json()
+    print(result)
     assert type(result) is dict
     assert "result" in result
     assert result["result"]

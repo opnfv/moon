@@ -2,7 +2,7 @@ import logging
 import requests
 from . import config, models
 
-logger = logging.getLogger("moonclient.policies")
+logger = logging.getLogger("moonclient.core.policies")
 
 URL = None
 HEADERS = None

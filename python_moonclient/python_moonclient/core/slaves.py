@@ -3,7 +3,7 @@ import requests
 import copy
 from . import config
 
-logger = logging.getLogger("moonclient.slaves")
+logger = logging.getLogger("moonclient.core.slaves")
 
 
 URL = None
