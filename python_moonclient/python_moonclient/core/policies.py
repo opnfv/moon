@@ -1,8 +1,8 @@
 import logging
 import requests
-from . import config, models
+from python_moonclient.core import models, config
 
-logger = logging.getLogger("moonclient.policies")
+logger = logging.getLogger("moonclient.core.policies")
 
 URL = None
 HEADERS = None

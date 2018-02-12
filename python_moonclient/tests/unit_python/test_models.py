@@ -1,4 +1,4 @@
-from python_moonclient.models import *
+from python_moonclient.core.models import *
 
 
 def test_models():

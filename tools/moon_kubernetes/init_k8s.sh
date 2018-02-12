@@ -19,8 +19,8 @@ kubectl apply -f http://docs.projectcalico.org/v2.4/getting-started/kubernetes/i
 
 #kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/src/deploy/recommended/kubernetes-dashboard.yaml
 
-kubectl delete deployment kube-dns --namespace=kube-system
-kubectl apply -f tools/moon_kubernetes/templates/kube-dns.yaml
+#kubectl delete deployment kube-dns --namespace=kube-system
+#kubectl apply -f tools/moon_kubernetes/templates/kube-dns.yaml
 
 kubectl taint nodes --all node-role.kubernetes.io/master- # make the master also as a node
 

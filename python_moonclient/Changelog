@@ -37,3 +37,19 @@ CHANGES
     - moon_get_slaves
     - moon_set_slave
     - moon_delete_slave
+
+1.3.0
+-----
+- Base the cli on cliff library 
+- Commands are:
+    - moon authz send
+    - moon pdp create
+    - moon pdp delete
+    - moon pdp list
+    - moon pdp map
+    - moon policy delete
+    - moon policy list
+    - moon project list
+    - moon slave delete
+    - moon slave list
+    - moon slave set

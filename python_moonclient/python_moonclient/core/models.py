@@ -1,9 +1,9 @@
 import logging
 import requests
 import copy
-from . import config
+from python_moonclient.core import config
 
-logger = logging.getLogger("moonclient.models")
+logger = logging.getLogger("moonclient.core.models")
 
 
 URL = None
