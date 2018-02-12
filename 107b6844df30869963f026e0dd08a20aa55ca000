@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_e0d71cec",
+        "filename": "python_moonclient/python_moonclient/core/policies.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-02-12T14:23:37Z",
+      "side": 1,
+      "message": "I get this error:\nImportError: cannot import name \u0027config\u0027",
+      "range": {
+        "startLine": 3,
+        "startChar": 0,
+        "endLine": 3,
+        "endChar": 28
+      },
+      "revId": "107b6844df30869963f026e0dd08a20aa55ca000",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_80e738e4",
+        "filename": "python_moonclient/setup.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 59,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-02-12T14:23:37Z",
+      "side": 1,
+      "message": "I have an error when using the command: \"moon -h\"\n\n...\nCould not load EntryPoint.parse(...)\n...",
+      "range": {
+        "startLine": 47,
+        "startChar": 9,
+        "endLine": 59,
+        "endChar": 11
+      },
+      "revId": "107b6844df30869963f026e0dd08a20aa55ca000",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
