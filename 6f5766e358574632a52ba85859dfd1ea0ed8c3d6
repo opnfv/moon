@@ -1,0 +1,50 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_5d119bab",
+        "filename": "moon_wrapper/moon_wrapper/http_server.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 115,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-02-12T08:50:30Z",
+      "side": 1,
+      "message": "We have to do the same way as in oslowrapper.py \"flask.make_response(\"False\")\". We don\u0027t need a JSON but only a string (that\u0027s how OpenStack Oslo Policy is currently working)",
+      "range": {
+        "startLine": 115,
+        "startChar": 19,
+        "endLine": 115,
+        "endChar": 37
+      },
+      "revId": "6f5766e358574632a52ba85859dfd1ea0ed8c3d6",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_9d220300",
+        "filename": "moon_wrapper/moon_wrapper/http_server.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 120,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-02-12T08:50:30Z",
+      "side": 1,
+      "message": "same comment.",
+      "range": {
+        "startLine": 120,
+        "startChar": 19,
+        "endLine": 120,
+        "endChar": 37
+      },
+      "revId": "6f5766e358574632a52ba85859dfd1ea0ed8c3d6",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
