@@ -1,8 +1,12 @@
-from python_moonclient.policies import *
-from python_moonclient.models import *
+from python_moonclient.core.policies import *
+from python_moonclient.core.models import *
+from python_moonclient.core import policies
+from python_moonclient.core import models
 
 
 def test_policies():
+    policies.init("consul", 8500)
+    models.init("consul", 8500)
     check_policy()
     policy_id = add_policy()
     check_policy(policy_id)
@@ -71,7 +75,7 @@ def test_object_data():
     object_data_id = add_object_data(policy_id=policy_id, category_id=object_cat_id)
     check_object_data(policy_id=policy_id, data_id=object_data_id, category_id=object_cat_id)
     delete_object_data(policy_id=policy_id, data_id=object_data_id, category_id=object_cat_id)
-
+    print('ok')
 
 def test_action_data():
     policy_id = add_policy()

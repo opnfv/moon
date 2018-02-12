@@ -1,13 +1,14 @@
-from python_moonclient.pdp import *
-
+from python_moonclient.core.pdp import *
 
 def test_pdp():
+    init("consul", 8500)
     projects = get_keystone_projects()
     admin_project_id = None
     for _project in projects['projects']:
         if _project['name'] == "admin":
             admin_project_id = _project['id']
-    assert admin_project_id
+    if admin_project_id is None:
+        raise MoonCliException("Unexpected results, could not find the admin project")
     check_pdp()
     pdp_id = add_pdp()
     check_pdp(pdp_id)

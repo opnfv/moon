@@ -33,3 +33,8 @@ def register_consul(m):
             'GET', 'http://consul:8500/v1/kv/{}'.format(component),
             json=[{'Key': component, 'Value': utilities.get_b64_conf(component)}]
         )
+
+    m.register_uri(
+        'GET', 'http://manager:30001',
+        json={}
+    )

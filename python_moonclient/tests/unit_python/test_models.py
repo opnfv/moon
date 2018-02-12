@@ -1,7 +1,8 @@
-from python_moonclient.models import *
+from python_moonclient.core.models import *
 
 
 def test_models():
+    init("consul", 8500)
     check_model()
     model_id = add_model()
     check_model(model_id)
