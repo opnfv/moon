@@ -32,9 +32,10 @@ def delete_models(context, name):
     request = None
     for key, value in models['models'].items():
         if value['name'] == name:
-            request = requests.delete("http://{}:{}/models/{}".format(key,
+            request = requests.delete("http://{}:{}/models/{}".format(
                                       context.get("hostname"),
-                                      context.get("port")),
+                                      context.get("port"),
+                                      key),
                                       timeout=3)
             break
     return request
