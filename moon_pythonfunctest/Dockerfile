@@ -6,4 +6,4 @@ RUN pip install --no-cache-dir --upgrade requests pytest pyyaml python_moonutili
 ADD . /root
 WORKDIR /root
 
-CMD /bin/bash /root/config_moon.sh 
+CMD /bin/bash /root/run_func_test.sh 
