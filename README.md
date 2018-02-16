@@ -46,7 +46,7 @@ curl http://$MOON_HOST:30001/policies
 The Moon platform is fully installed and configured when you have no error with the `moon_get_keystone_projects`:
 ```bash
 sudo pip install python_moonclient --upgrade
-moon_get_keystone_projects
+moon project list
 ```
 
 ### moon_wrapper
@@ -54,18 +54,18 @@ The moon_wrapper component is used to connect OpenStack to the Moon platform.
 You need to load one wrapper before connecting OpenStack to Moon.
 First of all, get the names of all available slaves:
 ```bash
-moon_get_slaves
+moon slave list
 ```
 Select the slave you want to configure:
 ```bash
-moon_set_slave <name_of_the_slave>
+moon slave set <name_of_the_slave>
 ```
 If you don't put a name here, by default, the script will use `kubernetes-admin@kubernetes`
 which is the master.
 
 If you need to unload the slave, use the following command:
 ```bash
-moon_delete_slave <name_of_the_slave>
+moon slave delete <name_of_the_slave>
 ```
 If you don't put a name here, by default, the script will use `kubernetes-admin@kubernetes`.
 
