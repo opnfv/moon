@@ -3,6 +3,7 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
+import flask
 from flask import Flask, jsonify
 from flask_restful import Resource, Api
 import logging
@@ -112,13 +113,13 @@ class HTTPServer(Server):
     def __hook_errors(self):
 
         def get_404_json(e):
-            return jsonify({"result": False, "code": 404,
-                            "description": str(e)}), 404
+            return flask.make_response("False")
+
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
-            return jsonify({"result": False, "code": 400,
-                            "description": str(e)}), 400
+            return flask.make_response("False")
+
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 
