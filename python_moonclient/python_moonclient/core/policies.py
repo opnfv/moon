@@ -1,8 +1,9 @@
 import logging
 import requests
-from . import config, models
+from python_moonclient.core import models, config
+from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.policies")
+logger = logging.getLogger("moonclient.core.policies")
 
 URL = None
 HEADERS = None
@@ -65,15 +66,11 @@ def init(consul_host, consul_port):
 
 def check_policy(policy_id=None):
     req = requests.get(URL.format("/policies"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "policies" in result
+    check_policy_in_result(result)
     if policy_id:
-        assert result["policies"]
-        assert policy_id in result['policies']
-        assert "name" in result['policies'][policy_id]
-        assert policy_template["name"] == result['policies'][policy_id]["name"]
+        check_policy_name(policy_template["name"], policy_id, result)
     return result
 
 
@@ -81,37 +78,31 @@ def add_policy(name="test_policy", genre="authz"):
     policy_template["name"] = name
     policy_template["genre"] = genre
     req = requests.post(URL.format("/policies"), json=policy_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
+    check_policy_in_result(result)
     policy_id = list(result['policies'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['policies'][policy_id]
-    assert policy_template["name"] == result['policies'][policy_id]["name"]
+    check_optionnal_result(result)
+    check_policy_name(policy_template["name"], policy_id, result)
     return policy_id
 
 
 def update_policy(policy_id, model_id):
     req = requests.patch(URL.format("/policies/{}".format(policy_id)),
                          json={"model_id": model_id}, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
+    check_policy_in_result(result)
     policy_id = list(result['policies'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "model_id" in result['policies'][policy_id]
-    assert model_id == result['policies'][policy_id]["model_id"]
+    check_optionnal_result(result)
+    check_policy_model_id(model_id, policy_id, result)
 
 
 def delete_policy(policy_id):
     req = requests.delete(URL.format("/policies/{}".format(policy_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
 
 def add_subject(policy_id=None, name="test_subject"):
@@ -124,9 +115,9 @@ def add_subject(policy_id=None, name="test_subject"):
         logger.debug(URL.format("/subjects"))
         req = requests.post(URL.format("/subjects"), json=subject_template, headers=HEADERS)
     logger.debug(req.text)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subjects" in result
+    check_subject_in_result(result)
     subject_id = list(result['subjects'].keys())[0]
     return subject_id
 
@@ -141,16 +132,11 @@ def update_subject(subject_id, policy_id=None, description=None):
     else:
         req = requests.patch(URL.format("/subjects/{}".format(subject_id)),
                              json={"description": description})
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subjects" in result
-    assert "name" in result["subjects"][subject_id]
-    assert subject_template["name"] == result["subjects"][subject_id]["name"]
-    assert "policy_list" in result["subjects"][subject_id]
-    if policy_id:
-        assert policy_id in result["subjects"][subject_id]["policy_list"]
-    if description:
-        assert description in result["subjects"][subject_id]["description"]
+    check_subject_name(subject_template["name"], subject_id, result)
+    check_subject_policy(policy_id, result["subjects"][subject_id])
+    check_subject_description(description, result["subjects"][subject_id])
 
 
 def check_subject(subject_id=None, policy_id=None):
@@ -158,14 +144,10 @@ def check_subject(subject_id=None, policy_id=None):
         req = requests.get(URL.format("/policies/{}/subjects".format(policy_id)))
     else:
         req = requests.get(URL.format("/subjects"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subjects" in result
-    assert "name" in result["subjects"][subject_id]
-    assert subject_template["name"] == result["subjects"][subject_id]["name"]
-    if policy_id:
-        assert "policy_list" in result["subjects"][subject_id]
-        assert policy_id in result["subjects"][subject_id]["policy_list"]
+    check_subject_name(subject_template["name"], subject_id, result)
+    check_subject_policy(policy_id, result["subjects"][subject_id])
 
 
 def delete_subject(subject_id, policy_id=None):
@@ -173,25 +155,20 @@ def delete_subject(subject_id, policy_id=None):
         req = requests.delete(URL.format("/policies/{}/subjects/{}".format(policy_id, subject_id)))
     else:
         req = requests.delete(URL.format("/subjects/{}".format(subject_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     if policy_id:
         req = requests.get(URL.format("/policies/{}/subjects".format(policy_id)))
     else:
         req = requests.get(URL.format("/subjects"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subjects" in result
+    check_subject_in_result(result)
     if subject_id in result["subjects"]:
-        assert "name" in result["subjects"][subject_id]
-        assert subject_template["name"] == result["subjects"][subject_id]["name"]
-        if policy_id:
-            assert "policy_list" in result["subjects"][subject_id]
-            assert policy_id not in result["subjects"][subject_id]["policy_list"]
+        check_subject_name(subject_template["name"], subject_id, result)
+        check_subject_policy(policy_id, result["subjects"][subject_id])
 
 
 def add_object(policy_id=None, name="test_object"):
@@ -201,22 +178,20 @@ def add_object(policy_id=None, name="test_object"):
                             json=object_template, headers=HEADERS)
     else:
         req = requests.post(URL.format("/objects"), json=object_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "objects" in result
+    check_object_in_result(result)
     object_id = list(result['objects'].keys())[0]
     return object_id
 
 
 def update_object(object_id, policy_id):
     req = requests.patch(URL.format("/policies/{}/objects/{}".format(policy_id, object_id)), json={})
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "objects" in result
-    assert "name" in result["objects"][object_id]
-    assert object_template["name"] == result["objects"][object_id]["name"]
-    assert "policy_list" in result["objects"][object_id]
-    assert policy_id in result["objects"][object_id]["policy_list"]
+    check_object_in_result(result)
+    check_object_name(object_template["name"] , object_id, result)
+    check_object_policy(policy_id, result["objects"][object_id])
 
 
 def check_object(object_id=None, policy_id=None):
@@ -224,14 +199,12 @@ def check_object(object_id=None, policy_id=None):
         req = requests.get(URL.format("/policies/{}/objects".format(policy_id)))
     else:
         req = requests.get(URL.format("/objects"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "objects" in result
-    assert "name" in result["objects"][object_id]
-    assert object_template["name"] == result["objects"][object_id]["name"]
+    check_object_in_result(result)
+    check_object_name(object_template["name"], object_id, result)
     if policy_id:
-        assert "policy_list" in result["objects"][object_id]
-        assert policy_id in result["objects"][object_id]["policy_list"]
+        check_object_policy(policy_id, result["objects"][object_id])
 
 
 def delete_object(object_id, policy_id=None):
@@ -239,25 +212,21 @@ def delete_object(object_id, policy_id=None):
         req = requests.delete(URL.format("/policies/{}/objects/{}".format(policy_id, object_id)))
     else:
         req = requests.delete(URL.format("/objects/{}".format(object_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     if policy_id:
         req = requests.get(URL.format("/policies/{}/objects".format(policy_id)))
     else:
         req = requests.get(URL.format("/objects"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "objects" in result
+    check_object_in_result(result)
     if object_id in result["objects"]:
-        assert "name" in result["objects"][object_id]
-        assert object_template["name"] == result["objects"][object_id]["name"]
+        check_object_name(object_template["name"], object_id, result)
         if policy_id:
-            assert "policy_list" in result["objects"][object_id]
-            assert policy_id not in result["objects"][object_id]["policy_list"]
+            check_object_policy(policy_id, result["objects"][object_id])
 
 
 def add_action(policy_id=None, name="test_action"):
@@ -267,22 +236,20 @@ def add_action(policy_id=None, name="test_action"):
                             json=action_template, headers=HEADERS)
     else:
         req = requests.post(URL.format("/actions"), json=action_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "actions" in result
+    check_action_in_result(result)
     action_id = list(result['actions'].keys())[0]
     return action_id
 
 
 def update_action(action_id, policy_id):
     req = requests.patch(URL.format("/policies/{}/actions/{}".format(policy_id, action_id)), json={})
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "actions" in result
-    assert "name" in result["actions"][action_id]
-    assert action_template["name"] == result["actions"][action_id]["name"]
-    assert "policy_list" in result["actions"][action_id]
-    assert policy_id in result["actions"][action_id]["policy_list"]
+    check_action_in_result(result)
+    check_action_name(action_template["name"], action_id, result)
+    check_action_policy(policy_id, result["actions"][action_id])
 
 
 def check_action(action_id=None, policy_id=None):
@@ -290,14 +257,12 @@ def check_action(action_id=None, policy_id=None):
         req = requests.get(URL.format("/policies/{}/actions".format(policy_id)))
     else:
         req = requests.get(URL.format("/actions"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "actions" in result
-    assert "name" in result["actions"][action_id]
-    assert action_template["name"] == result["actions"][action_id]["name"]
+    check_action_in_result(result)
+    check_action_name(action_template["name"], action_id, result)
     if policy_id:
-        assert "policy_list" in result["actions"][action_id]
-        assert policy_id in result["actions"][action_id]["policy_list"]
+        check_action_policy(policy_id, result["actions"][action_id])
 
 
 def delete_action(action_id, policy_id=None):
@@ -305,127 +270,111 @@ def delete_action(action_id, policy_id=None):
         req = requests.delete(URL.format("/policies/{}/actions/{}".format(policy_id, action_id)))
     else:
         req = requests.delete(URL.format("/actions/{}".format(action_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     if policy_id:
         req = requests.get(URL.format("/policies/{}/actions".format(policy_id)))
     else:
         req = requests.get(URL.format("/actions"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "actions" in result
+    check_action_in_result(result)
     if action_id in result["actions"]:
-        assert "name" in result["actions"][action_id]
-        assert action_template["name"] == result["actions"][action_id]["name"]
+        check_action_name(action_template["name"], action_id, result)
         if policy_id:
-            assert "policy_list" in result["actions"][action_id]
-            assert policy_id not in result["actions"][action_id]["policy_list"]
+            check_action_policy(policy_id, result["actions"][action_id])
 
 
 def add_subject_data(policy_id, category_id, name="subject_data1"):
     subject_data_template['name'] = name
     req = requests.post(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)),
                         json=subject_data_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_data" in result
+    check_subject_data_data(result)
     subject_id = list(result['subject_data']['data'].keys())[0]
     return subject_id
 
 
 def check_subject_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_data" in result
-    for _data in result['subject_data']:
-        assert data_id in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_in_subject_data_data(data_id, result)
+    check_category_id_in_subject_data_data(category_id, result)
 
 
 def delete_subject_data(policy_id, category_id, data_id):
     req = requests.delete(URL.format("/policies/{}/subject_data/{}/{}".format(policy_id, category_id, data_id)),
                           headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_data" in result
-    for _data in result['subject_data']:
-        assert data_id not in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_not_in_subject_data_data(data_id, result)
+    check_category_id_in_subject_data_data(category_id, result)
 
 
 def add_object_data(policy_id, category_id, name="object_data1"):
     object_data_template['name'] = name
     req = requests.post(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)),
                         json=object_data_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_data" in result
+    check_object_data_data(result)
     object_id = list(result['object_data']['data'].keys())[0]
     return object_id
 
 
 def check_object_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_data" in result
-    for _data in result['object_data']:
-        assert data_id in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_in_object_data_data(data_id, result)
+    check_category_id_in_object_data_data(category_id, result)
 
 
 def delete_object_data(policy_id, category_id, data_id):
     req = requests.delete(URL.format("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id)),
                           headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_data" in result
-    for _data in result['object_data']:
-        assert data_id not in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_not_in_object_data_data(data_id, result)
+    check_category_id_in_object_data_data(category_id, result)
 
 
 def add_action_data(policy_id, category_id, name="action_data1"):
     action_data_template['name'] = name
     req = requests.post(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)),
                         json=action_data_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_data" in result
+    check_action_data_data(result)
     action_id = list(result['action_data']['data'].keys())[0]
     return action_id
 
 
 def check_action_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_data" in result
-    for _data in result['action_data']:
-        assert data_id in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_in_action_data_data(data_id, result)
+    check_category_id_in_action_data_data(category_id, result)
 
 
 def delete_action_data(policy_id, category_id, data_id):
     req = requests.delete(URL.format("/policies/{}/action_data/{}/{}".format(policy_id, category_id, data_id)),
                           headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_data" in result
-    for _data in result['action_data']:
-        assert data_id not in list(_data['data'].keys())
-        assert category_id == _data["category_id"]
+    check_id_not_in_action_data_data(data_id, result)
+    check_category_id_in_action_data_data(category_id, result)
 
 
 def add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id):
@@ -435,58 +384,36 @@ def add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_
                                 "category_id": subject_cat_id,
                                 "data_id": subject_data_id
                             }, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_assignments" in result
-    assert result["subject_assignments"]
+    check_subject_assignment_in_result(result)
 
 
 def check_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id):
     req = requests.get(URL.format("/policies/{}/subject_assignments/{}/{}/{}".format(
         policy_id, subject_id, subject_cat_id, subject_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_assignments" in result
-    assert result["subject_assignments"]
-    for key in result["subject_assignments"]:
-        assert "subject_id" in result["subject_assignments"][key]
-        assert "category_id" in result["subject_assignments"][key]
-        assert "assignments" in result["subject_assignments"][key]
-        if result["subject_assignments"][key]['subject_id'] == subject_id and \
-                result["subject_assignments"][key]["category_id"] == subject_cat_id:
-            assert subject_data_id in result["subject_assignments"][key]["assignments"]
+    check_subject_assignment_in_result(result)
+    check_subject_assignements(subject_id, subject_cat_id, subject_data_id, result)
 
 
 def check_object_assignments(policy_id, object_id, object_cat_id, object_data_id):
     req = requests.get(URL.format("/policies/{}/object_assignments/{}/{}/{}".format(
         policy_id, object_id, object_cat_id, object_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_assignments" in result
-    assert result["object_assignments"]
-    for key in result["object_assignments"]:
-        assert "object_id" in result["object_assignments"][key]
-        assert "category_id" in result["object_assignments"][key]
-        assert "assignments" in result["object_assignments"][key]
-        if result["object_assignments"][key]['object_id'] == object_id and \
-                result["object_assignments"][key]["category_id"] == object_cat_id:
-            assert object_data_id in result["object_assignments"][key]["assignments"]
+    check_object_assignment_in_result(result)
+    check_object_assignements(object_id, object_cat_id, object_data_id, result)
 
 
 def check_action_assignments(policy_id, action_id, action_cat_id, action_data_id):
     req = requests.get(URL.format("/policies/{}/action_assignments/{}/{}/{}".format(
         policy_id, action_id, action_cat_id, action_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_assignments" in result
-    assert result["action_assignments"]
-    for key in result["action_assignments"]:
-        assert "action_id" in result["action_assignments"][key]
-        assert "category_id" in result["action_assignments"][key]
-        assert "assignments" in result["action_assignments"][key]
-        if result["action_assignments"][key]['action_id'] == action_id and \
-                result["action_assignments"][key]["category_id"] == action_cat_id:
-            assert action_data_id in result["action_assignments"][key]["assignments"]
+    check_action_assignment_in_result(result)
+    check_action_assignements(action_id, action_cat_id, action_data_id, result)
 
 
 def add_object_assignments(policy_id, object_id, object_cat_id, object_data_id):
@@ -496,10 +423,9 @@ def add_object_assignments(policy_id, object_id, object_cat_id, object_data_id):
                                 "category_id": object_cat_id,
                                 "data_id": object_data_id
                             }, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_assignments" in result
-    assert result["object_assignments"]
+    check_object_assignment_in_result(result)
 
 
 def add_action_assignments(policy_id, action_id, action_cat_id, action_data_id):
@@ -509,79 +435,54 @@ def add_action_assignments(policy_id, action_id, action_cat_id, action_data_id):
                                 "category_id": action_cat_id,
                                 "data_id": action_data_id
                             }, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_assignments" in result
-    assert result["action_assignments"]
+    check_action_assignment_in_result(result)
 
 
 def delete_subject_assignment(policy_id, subject_id, subject_cat_id, subject_data_id):
     req = requests.delete(URL.format("/policies/{}/subject_assignments/{}/{}/{}".format(
         policy_id, subject_id, subject_cat_id, subject_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     req = requests.get(URL.format("/policies/{}/subject_assignments/{}/{}/{}".format(
         policy_id, subject_id, subject_cat_id, subject_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "subject_assignments" in result
-    assert result["subject_assignments"]
-    for key in result["subject_assignments"]:
-        assert "subject_id" in result["subject_assignments"][key]
-        assert "category_id" in result["subject_assignments"][key]
-        assert "assignments" in result["subject_assignments"][key]
-        if result["subject_assignments"][key]['subject_id'] == subject_id and \
-                result["subject_assignments"][key]["category_id"] == subject_cat_id:
-            assert subject_data_id not in result["subject_assignments"][key]["assignments"]
+    check_subject_assignment_in_result(result)
+    check_not_subject_assignements(subject_id, subject_cat_id, subject_data_id, result)
 
 
 def delete_object_assignment(policy_id, object_id, object_cat_id, object_data_id):
     req = requests.delete(URL.format("/policies/{}/object_assignments/{}/{}/{}".format(
         policy_id, object_id, object_cat_id, object_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     req = requests.get(URL.format("/policies/{}/object_assignments/{}/{}/{}".format(
         policy_id, object_id, object_cat_id, object_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "object_assignments" in result
-    assert result["object_assignments"]
-    for key in result["object_assignments"]:
-        assert "object_id" in result["object_assignments"][key]
-        assert "category_id" in result["object_assignments"][key]
-        assert "assignments" in result["object_assignments"][key]
-        if result["object_assignments"][key]['object_id'] == object_id and \
-                result["object_assignments"][key]["category_id"] == object_cat_id:
-            assert object_data_id not in result["object_assignments"][key]["assignments"]
+    check_object_assignment_in_result(result)
+    check_not_object_assignements(object_id, object_cat_id, object_data_id, result)
 
 
 def delete_action_assignment(policy_id, action_id, action_cat_id, action_data_id):
     req = requests.delete(URL.format("/policies/{}/action_assignments/{}/{}/{}".format(
         policy_id, action_id, action_cat_id, action_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
     req = requests.get(URL.format("/policies/{}/action_assignments/{}/{}/{}".format(
         policy_id, action_id, action_cat_id, action_data_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "action_assignments" in result
-    assert result["action_assignments"]
-    for key in result["action_assignments"]:
-        assert "action_id" in result["action_assignments"][key]
-        assert "category_id" in result["action_assignments"][key]
-        assert "assignments" in result["action_assignments"][key]
-        if result["action_assignments"][key]['action_id'] == action_id and \
-                result["action_assignments"][key]["category_id"] == action_cat_id:
-            assert action_data_id not in result["action_assignments"][key]["assignments"]
+    check_action_assignment_in_result(result)
+    check_not_action_assignements(action_id, action_cat_id, action_data_id, result)
 
 
 def add_rule(policy_id, meta_rule_id, rule, instructions={"chain": [{"security_pipeline": "rbac"}]}):
@@ -593,53 +494,36 @@ def add_rule(policy_id, meta_rule_id, rule, instructions={"chain": [{"security_p
                             "enabled": True
                         },
                         headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "rules" in result
-    try:
-        rule_id = list(result["rules"].keys())[0]
-    except Exception as e:
-        return False
-    assert "policy_id" in result["rules"][rule_id]
-    assert policy_id == result["rules"][rule_id]["policy_id"]
-    assert "meta_rule_id" in result["rules"][rule_id]
-    assert meta_rule_id == result["rules"][rule_id]["meta_rule_id"]
-    assert rule == result["rules"][rule_id]["rule"]
+    check_rule_in_result(result)
+    rule_id = list(result["rules"].keys())[0]
+    check_policy_id_in_dict(policy_id, result["rules"][rule_id])
+    check_meta_rule_id_in_dict(meta_rule_id, result["rules"][rule_id])
+    check_rule_in_dict(rule, result["rules"][rule_id])
     return rule_id
 
 
 def check_rule(policy_id, meta_rule_id, rule_id, rule):
     req = requests.get(URL.format("/policies/{}/rules".format(policy_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "rules" in result
-    assert "policy_id" in result["rules"]
-    assert policy_id == result["rules"]["policy_id"]
-    for item in result["rules"]["rules"]:
-        assert "meta_rule_id" in item
-        if meta_rule_id == item["meta_rule_id"]:
-            if rule_id == item["id"]:
-                assert rule == item["rule"]
+    check_rule_in_result(result)
+    check_policy_id_in_dict(policy_id, result["rules"])
+    check_rule_id_in_list(meta_rule_id, rule_id, rule, result["rules"]["rules"])
 
 
 def delete_rule(policy_id, rule_id):
     req = requests.delete(URL.format("/policies/{}/rules/{}".format(policy_id, rule_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "result" in result
-    assert result["result"]
-
+    check_result(result)
     req = requests.get(URL.format("/policies/{}/rules".format(policy_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert "rules" in result
-    assert "policy_id" in result["rules"]
-    assert policy_id == result["rules"]["policy_id"]
-    found_rule = False
-    for item in result["rules"]["rules"]:
-        if rule_id == item["id"]:
-            found_rule = True
-    assert not found_rule
+    check_rule_in_result(result)
+    check_policy_id_in_dict(policy_id, result["rules"])
+    check_rule_id_not_in_list(rule_id, result["rules"]["rules"])
 
 
 def create_policy(scenario, model_id, meta_rule_list):

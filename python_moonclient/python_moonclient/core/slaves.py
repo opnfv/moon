@@ -1,9 +1,9 @@
 import logging
 import requests
-import copy
-from . import config
+from python_moonclient.core import config
+from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.slaves")
+logger = logging.getLogger("moonclient.core.slaves")
 
 
 URL = None
@@ -20,19 +20,19 @@ def init(consul_host, consul_port):
     HEADERS = {"content-type": "application/json"}
 
 
+
+
 def get_slaves():
     req = requests.get(URL.format("/slaves"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "slaves" in result
+    check_slaves_in_result(result)
     return result
 
 
 def set_slave(name):
     slaves = get_slaves().get("slaves", [])
-    names = map(lambda x: x['name'], slaves)
-    assert name in names
+    check_name_in_slaves(name, slaves)
     req = requests.patch(URL.format("/slaves/{}".format(name)),
                          headers=HEADERS,
                          json={
@@ -40,17 +40,15 @@ def set_slave(name):
                             "variable": "configured",
                             "value": True
                         })
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "slaves" in result
+    check_slaves_in_result(result)
     return get_slaves()
 
 
 def delete_slave(name):
     slaves = get_slaves().get("slaves", [])
-    names = map(lambda x: x['name'], slaves)
-    assert name in names
+    check_name_in_slaves(name, slaves)
     req = requests.patch(URL.format("/slaves/{}".format(name)),
                          headers=HEADERS,
                          json={
@@ -58,4 +56,7 @@ def delete_slave(name):
                             "variable": "configured",
                             "value": False
                         })
+    req.raise_for_status()
+    result = req.json()
+    check_slaves_in_result(result)
     return get_slaves()

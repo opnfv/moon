@@ -13,7 +13,7 @@ HOST_KEYSTONE = None
 PORT_KEYSTONE = None
 
 lock = threading.Lock()
-logger = logging.getLogger("moonclient.authz")
+logger = logging.getLogger("moonclient.core.authz")
 
 
 def _construct_payload(creds, current_rule, enforcer, target):

@@ -1,9 +1,10 @@
 import logging
 import requests
 import copy
-from . import config
+from python_moonclient.core import config
+from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.models")
+logger = logging.getLogger("moonclient.core.models")
 
 
 URL = None
@@ -38,18 +39,13 @@ def init(consul_host, consul_port):
     HEADERS = {"content-type": "application/json"}
 
 
-def check_model(model_id=None, check_model_name=True):
+def check_model(model_id=None, do_check_model_name=True):
     req = requests.get(URL.format("/models"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "models" in result
+    check_model_in_result(result)
     if model_id:
-        assert result["models"]
-        assert model_id in result['models']
-        assert "name" in result['models'][model_id]
-        if check_model_name:
-            assert model_template["name"] == result['models'][model_id]["name"]
+        check_model_name(model_template["name"], model_id, result, do_check_model_name)
     return result
 
 
@@ -57,135 +53,105 @@ def add_model(name=None):
     if name:
         model_template['name'] = name
     req = requests.post(URL.format("/models"), json=model_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
+    check_model_in_result(result)
     model_id = list(result['models'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['models'][model_id]
-    assert model_template["name"] == result['models'][model_id]["name"]
+    check_model_name(model_template["name"], model_id, result, True)
     return model_id
 
 
 def delete_model(model_id):
     req = requests.delete(URL.format("/models/{}".format(model_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
 
 def add_subject_category(name="subject_cat_1"):
     category_template["name"] = name
     req = requests.post(URL.format("/subject_categories"), json=category_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "subject_categories" in result
+
+    check_subject_category_in_result(result)
     category_id = list(result['subject_categories'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['subject_categories'][category_id]
-    assert category_template["name"] == result['subject_categories'][category_id]["name"]
+    check_optionnal_result(result)
+    check_subject_categories_name(category_template["name"], category_id, result)
     return category_id
 
 
 def check_subject_category(category_id):
     req = requests.get(URL.format("/subject_categories"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "subject_categories" in result
-    if "result" in result:
-        assert result["result"]
-    assert category_id in result['subject_categories']
-    assert "name" in result['subject_categories'][category_id]
-    assert category_template["name"] == result['subject_categories'][category_id]["name"]
+
+    check_subject_category_in_result(result)
+    check_optionnal_result(result)
+    check_subject_categories_name(category_template["name"], category_id, result)
 
 
 def delete_subject_category(category_id):
     req = requests.delete(URL.format("/subject_categories/{}".format(category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    if "result" in result:
-        assert result["result"]
+    check_optionnal_result(result)
 
 
 def add_object_category(name="object_cat_1"):
     category_template["name"] = name
     req = requests.post(URL.format("/object_categories"), json=category_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "object_categories" in result
+    check_object_category_in_result(result)
     category_id = list(result['object_categories'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['object_categories'][category_id]
-    assert category_template["name"] == result['object_categories'][category_id]["name"]
+    check_optionnal_result(result)
+    check_object_categories_name(category_template["name"], category_id, result)
     return category_id
 
 
 def check_object_category(category_id):
     req = requests.get(URL.format("/object_categories"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "object_categories" in result
-    if "result" in result:
-        assert result["result"]
-    assert category_id in result['object_categories']
-    assert "name" in result['object_categories'][category_id]
-    assert category_template["name"] == result['object_categories'][category_id]["name"]
+    check_object_category_in_result(result)
+    check_optionnal_result(result)
+    check_object_categories_name(category_template["name"], category_id, result)
 
 
 def delete_object_category(category_id):
     req = requests.delete(URL.format("/object_categories/{}".format(category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    if "result" in result:
-        assert result["result"]
+    check_optionnal_result(result)
 
 
 def add_action_category(name="action_cat_1"):
     category_template["name"] = name
     req = requests.post(URL.format("/action_categories"), json=category_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "action_categories" in result
+    check_action_category_in_result(result)
     category_id = list(result['action_categories'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['action_categories'][category_id]
-    assert category_template["name"] == result['action_categories'][category_id]["name"]
+    check_optionnal_result(result)
+    check_action_categories_name(category_template["name"], category_id, result)
     return category_id
 
 
 def check_action_category(category_id):
     req = requests.get(URL.format("/action_categories"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "action_categories" in result
-    if "result" in result:
-        assert result["result"]
-    assert category_id in result['action_categories']
-    assert "name" in result['action_categories'][category_id]
-    assert category_template["name"] == result['action_categories'][category_id]["name"]
+    check_action_category_in_result(result)
+    check_optionnal_result(result)
+    check_action_categories_name(category_template["name"], category_id, result)
 
 
 def delete_action_category(category_id):
     req = requests.delete(URL.format("/action_categories/{}".format(category_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    if "result" in result:
-        assert result["result"]
+    check_optionnal_result(result)
 
 
 def add_categories_and_meta_rule(name="test_meta_rule"):
@@ -198,15 +164,12 @@ def add_categories_and_meta_rule(name="test_meta_rule"):
     _meta_rule_template["object_categories"].append(ocat_id)
     _meta_rule_template["action_categories"].append(acat_id)
     req = requests.post(URL.format("/meta_rules"), json=_meta_rule_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "meta_rules" in result
+    check_meta_rule_in_result(result)
     meta_rule_id = list(result['meta_rules'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['meta_rules'][meta_rule_id]
-    assert _meta_rule_template["name"] == result['meta_rules'][meta_rule_id]["name"]
+    check_optionnal_result(result)
+    check_meta_rules_name(_meta_rule_template["name"], meta_rule_id, result)
     return meta_rule_id, scat_id, ocat_id, acat_id
 
 
@@ -220,63 +183,53 @@ def add_meta_rule(name="test_meta_rule", scat=[], ocat=[], acat=[]):
     _meta_rule_template["action_categories"] = []
     _meta_rule_template["action_categories"].extend(acat)
     req = requests.post(URL.format("/meta_rules"), json=_meta_rule_template, headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "meta_rules" in result
+    check_meta_rule_in_result(result)
     meta_rule_id = list(result['meta_rules'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['meta_rules'][meta_rule_id]
-    assert _meta_rule_template["name"] == result['meta_rules'][meta_rule_id]["name"]
+    check_optionnal_result(result)
+    check_meta_rules_name(_meta_rule_template["name"], meta_rule_id, result)
     return meta_rule_id
 
 
 def check_meta_rule(meta_rule_id, scat_id=None, ocat_id=None, acat_id=None):
     req = requests.get(URL.format("/meta_rules"))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "meta_rules" in result
-    if "result" in result:
-        assert result["result"]
+    check_meta_rule_in_result(result)
+    check_optionnal_result(result)
     if not meta_rule_id:
         return result
-    assert meta_rule_id in result['meta_rules']
-    assert "name" in result['meta_rules'][meta_rule_id]
+    check_meta_rules_name(None, meta_rule_id, result)
     if scat_id:
-        assert scat_id in result['meta_rules'][meta_rule_id]["subject_categories"]
+        check_scat_id_in_dict(scat_id, result['meta_rules'][meta_rule_id]["subject_categories"])
     if ocat_id:
-        assert ocat_id in result['meta_rules'][meta_rule_id]["object_categories"]
+        check_ocat_id_in_dict(ocat_id, result['meta_rules'][meta_rule_id]["object_categories"])
     if acat_id:
-        assert acat_id in result['meta_rules'][meta_rule_id]["action_categories"]
+        check_acat_id_in_dict(acat_id, result['meta_rules'][meta_rule_id]["action_categories"])
 
 
 def delete_meta_rule(meta_rule_id):
     req = requests.delete(URL.format("/meta_rules/{}".format(meta_rule_id)))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    if "result" in result:
-        assert result["result"]
+    check_optionnal_result(result)
 
 
 def add_meta_rule_to_model(model_id, meta_rule_id):
-    model = check_model(model_id, check_model_name=False)['models']
+    model = check_model(model_id, do_check_model_name=False)['models']
     meta_rule_list = model[model_id]["meta_rules"]
     if meta_rule_id not in meta_rule_list:
         meta_rule_list.append(meta_rule_id)
         req = requests.patch(URL.format("/models/{}".format(model_id)),
                              json={"meta_rules": meta_rule_list},
                              headers=HEADERS)
-        assert req.status_code == 200
+        req.raise_for_status()
         result = req.json()
-        assert type(result) is dict
+        check_model_in_result(result)
         model_id = list(result['models'].keys())[0]
-        if "result" in result:
-            assert result["result"]
-        assert "meta_rules" in result['models'][model_id]
-        assert meta_rule_list == result['models'][model_id]["meta_rules"]
+        check_optionnal_result(result)
+        check_meta_rules_list_in_model(meta_rule_list, model_id, result)
 
 
 def create_model(scenario, model_id=None):

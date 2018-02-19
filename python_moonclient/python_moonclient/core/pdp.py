@@ -1,9 +1,11 @@
 import sys
 import logging
 import requests
-from python_moonclient import config
+from python_moonclient.core import config
+from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("python_moonclient.pdp")
+
+logger = logging.getLogger("python_moonclient.core.pdp")
 
 URL = None
 HEADERS = None
@@ -63,7 +65,7 @@ def get_keystone_projects():
     req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
     logger.debug("{}/auth/tokens".format(KEYSTONE_SERVER))
     logger.debug(req.text)
-    assert req.status_code in (200, 201)
+    req.raise_for_status()
     TOKEN = req.headers['X-Subject-Token']
     HEADERS['X-Auth-Token'] = TOKEN
     req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
@@ -77,11 +79,11 @@ def get_keystone_projects():
             }
         }
         req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
-        assert req.status_code in (200, 201)
+        req.raise_for_status()
         TOKEN = req.headers['X-Subject-Token']
         HEADERS['X-Auth-Token'] = TOKEN
         req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
-    assert req.status_code in (200, 201)
+    req.raise_for_status()
     return req.json()
 
 
@@ -101,25 +103,19 @@ def get_keystone_id(pdp_name):
     return keystone_project_id
 
 
+
 def check_pdp(pdp_id=None, keystone_project_id=None, moon_url=None):
     _URL = URL
     if moon_url:
         _URL = moon_url
     req = requests.get(_URL + "/pdp")
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "pdps" in result
+    check_pdp_in_result(result)
     if pdp_id:
-        assert result["pdps"]
-        assert pdp_id in result['pdps']
-        assert "name" in result['pdps'][pdp_id]
-        assert pdp_template["name"] == result['pdps'][pdp_id]["name"]
+        check_pdp_name(pdp_template["name"], pdp_id, result)
     if keystone_project_id:
-        assert result["pdps"]
-        assert pdp_id in result['pdps']
-        assert "keystone_project_id" in result['pdps'][pdp_id]
-        assert keystone_project_id == result['pdps'][pdp_id]["keystone_project_id"]
+        check_pdp_project_id(keystone_project_id, pdp_id, result)
     return result
 
 
@@ -130,54 +126,42 @@ def add_pdp(name="test_pdp", policy_id=None):
     req = requests.post(URL + "/pdp", json=pdp_template, headers=HEADERS)
     logger.debug(req.status_code)
     logger.debug(req)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
+    check_pdp_in_result(result)
     pdp_id = list(result['pdps'].keys())[0]
-    if "result" in result:
-        assert result["result"]
-    assert "name" in result['pdps'][pdp_id]
-    assert pdp_template["name"] == result['pdps'][pdp_id]["name"]
+    check_pdp_name(pdp_template["name"], pdp_id, result)
     return pdp_id
 
 
 def update_pdp(pdp_id, policy_id=None):
     req = requests.get(URL + "/pdp/{}".format(pdp_id))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "pdps" in result
-    assert pdp_id in result['pdps']
+    check_pdp_id(pdp_id, result)
     pipeline = result['pdps'][pdp_id]["security_pipeline"]
     if policy_id not in pipeline:
         pipeline.append(policy_id)
         req = requests.patch(URL + "/pdp/{}".format(pdp_id),
                              json={"security_pipeline": pipeline})
-        assert req.status_code == 200
+        req.raise_for_status()
         result = req.json()
-        assert type(result) is dict
-        assert "pdps" in result
-        assert pdp_id in result['pdps']
+        check_pdp_id(pdp_id, result)
 
     req = requests.get(URL + "/pdp/{}".format(pdp_id))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "pdps" in result
-    assert pdp_id in result['pdps']
-    assert policy_id in pipeline
+    check_pdp_id(pdp_id, result)
+    check_policy_id_in_pipeline(pdp_id, pipeline)
 
 
 def map_to_keystone(pdp_id, keystone_project_id):
     req = requests.patch(URL + "/pdp/{}".format(pdp_id),
                          json={"keystone_project_id": keystone_project_id},
                          headers=HEADERS)
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    if "result" in result:
-        assert result["result"]
-    assert pdp_id in result['pdps']
+    check_pdp_id(pdp_id, result)
     # assert "name" in result['pdps'][pdp_id]
     # assert pdp_template["name"] == result['pdps'][pdp_id]["name"]
     return pdp_id
@@ -185,11 +169,9 @@ def map_to_keystone(pdp_id, keystone_project_id):
 
 def delete_pdp(pdp_id):
     req = requests.delete(URL + "/pdp/{}".format(pdp_id))
-    assert req.status_code == 200
+    req.raise_for_status()
     result = req.json()
-    assert type(result) is dict
-    assert "result" in result
-    assert result["result"]
+    check_result(result)
 
 
 def create_pdp(scenario, policy_id=None, project_id=None):
