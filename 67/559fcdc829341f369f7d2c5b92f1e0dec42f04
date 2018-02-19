@@ -1,0 +1,8 @@
+Verified+1: jenkins-ci <jenkins-opnfv-ci@opnfv.org>
+Verified+1: Asteroide <thomas.duval@orange.com>
+Code-Review+2: Asteroide <thomas.duval@orange.com>
+Submitted-by: Asteroide <thomas.duval@orange.com>
+Submitted-at: Mon, 19 Feb 2018 15:33:48 +0000
+Reviewed-on: https://gerrit.opnfv.org/gerrit/50401
+Project: moon
+Branch: refs/heads/master
