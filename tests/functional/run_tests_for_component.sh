@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 CUR_PWD=$(pwd)
-INPUT_FILE=../tools/moon_kubernetes/templates/moon_forming_functest.yaml
-OUTPUT_FILE=tests/functional_pod/moon_forming_functest.yaml
+INPUT_FILE=../tools/moon_kubernetes/templates/moon_functest.yaml
+OUTPUT_FILE=tests/functional_pod/moon_functest.yaml
 
 echo current working directory: ${CUR_PWD}
 
