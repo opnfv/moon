@@ -3,7 +3,7 @@ properties([
 ])
 node {
     checkout scm
-    def packages = ["python_moonutilities","python_moondb","python_moonclient"]
+    def packages = ["python_moonutilities","python_moondb","python_moonclient","moon_manager","moon_wrapper","moon_authz","moon_interface","moon_orchestrator"]
     def subtests = [:]
     for (x in packages) {
         def pkg = x
