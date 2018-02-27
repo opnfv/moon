@@ -1,0 +1,89 @@
+{
+  "pdps": [{"name" : "pdp_mls", "keystone_project_id" : "", "description": "", "policies": [{"name": "MLS policy example"}]}],
+
+  "policies":[{ "name": "MLS policy example", "genre": "authz", "description": "", "model": {"name": "MLS"} , "mandatory" :false , "override":true}],
+
+  "models":[{"name":"MLS", "description":"","meta_rules": [{"name" : "mls"}], "override":true}],
+
+
+
+
+
+  "subjects": [{ "name":"adminuser", "description": "", "extra": {}, "policies": [{ "name": "MLS policy example"}]} ,
+               { "name": "user1", "description": "", "extra": {}, "policies": [{ "name": "MLS policy example"}] },
+               { "name": "user2", "description": "", "extra": {}, "policies": [{ "name": "MLS policy example"}] }],
+
+  "subject_categories": [{ "name":"subject-security-level", "description": "" }],
+
+  "subject_data": [{ "name":"low", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}},
+                   { "name":"medium", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}},
+                   { "name":"high",  "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}}],
+
+  "subject_assignments":[{ "subject" : {"name": "adminuser"}, "category" : {"name": "subject-security-level"}, "assignments": [{"name" : "high"}]},
+                         { "subject" : {"name": "user1"}, "category" : {"name": "subject-security-level"}, "assignments": [{"name" : "medium"}] }],
+
+
+
+
+
+
+  "objects": [{ "name":"vm0", "description": "", "extra": {}, "policies": [{"name": "MLS policy example"}]} ,
+              {"name": "vm1", "description": "", "extra": {}, "policies": [{"name": "MLS policy example"}]} ],
+
+  "object_categories": [{"name":"object-security-level", "description": ""}],
+
+  "object_data": [{ "name":"low", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}},
+                  { "name":"medium", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}},
+                  { "name":"high",  "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}}],
+
+  "object_assignments":[{ "object" : {"name": "vm0"}, "category" : {"name": "object-security-level"}, "assignments": [{"name" : "medium"}]},
+                        { "object" : {"name": "vm1"}, "category" : {"name": "object-security-level"}, "assignments": [{"name" : "low"}]}],
+
+
+
+
+
+
+  "actions": [{ "name": "start", "description": "", "extra": {}, "policies": [{"name": "MLS policy example"}]} ,
+              { "name": "stop", "description": "", "extra": {}, "policies": [{"name": "MLS policy example"}]}],
+
+  "action_categories": [{"name":"action-type", "description": ""}],
+
+  "action_data": [{"name":"vm-action", "description": "", "policy": {"name": "MLS policy example"}, "category": {"name": "action-type"}},
+                  {"name":"storage-action", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "action-type"}}],
+
+  "action_assignments":[{ "action" : {"name": "start"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}]},
+                        { "action" : {"name": "stop"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}]}],
+
+
+
+
+
+
+  "meta_rules":[{"name":"mls", "description": "",
+    "subject_categories": [{"name": "subject-security-level"}],
+    "object_categories": [{"name": "object-security-level"}],
+    "action_categories": [{"name": "action-type"}]
+  }],
+
+  "rules": [{
+    "meta_rule": {"name" : "mls"},
+    "rule": {"subject_datas" : [{"name":"high"}], "object_data": {"name": "medium"}, "action_data": {"name": "vm-action"}},
+    "policy": {"name" :"MLS policy example"},
+    "instructions" : {"decision" : "grant"}
+  }, {
+    "meta_rule": {"name" : "mls"},
+    "rule": {"subject_datas" : [{"name":"high"}], "object_data": {"name": "low"}, "action_data":  {"name": "vm-action"}},
+    "policy": {"name" :"MLS policy example"},
+    "instructions" : {"decision" : "grant"}
+  }, {
+    "meta_rule": {"name" : "mls"},
+    "rule": {"subject_datas" : [{"name":"medium"}], "object_data": {"name": "low"}, "action_data":  {"name": "vm-action"}},
+    "policy": {"name" :"MLS policy example"},
+    "instructions" : {"decision" : "grant"}
+  }]
+
+
+
+
+}

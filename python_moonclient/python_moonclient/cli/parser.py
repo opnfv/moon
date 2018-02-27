@@ -17,6 +17,18 @@ class Parser:
         Parser._add_name_argument(parser)
 
     @staticmethod
+    def add_policy_argument(parser):
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--policy-name', help='name of the policy')
+        group.add_argument('--policy-id', help='id of the policy')
+
+    @staticmethod
+    def add_category_argument(parser):
+        group = parser.add_mutually_exclusive_group(required=True)
+        group.add_argument('--category-name', help='name of the category')
+        group.add_argument('--category-id', help='id of the category')
+
+    @staticmethod
     def add_id_or_name_argument(parser):
         group = parser.add_mutually_exclusive_group(required=True) 
         Parser._add_id_argument(group)

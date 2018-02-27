@@ -94,7 +94,6 @@ class Root(Resource):
 
 
 class HTTPServer(Server):
-
     def __init__(self, host="0.0.0.0", port=38001, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.component_data = kwargs.get("component_data", {})

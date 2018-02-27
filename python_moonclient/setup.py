@@ -56,7 +56,19 @@ setup(
           'slave_list = python_moonclient.cli.slaves:Slaves',
           'slave_set = python_moonclient.cli.slaves:SetSlave',
           'slave_delete = python_moonclient.cli.slaves:DeleteSlave',
-          'authz_send = python_moonclient.cli.authz:SendAuthz'
+          'authz_send = python_moonclient.cli.authz:SendAuthz',
+          'import = python_moonclient.cli.import:Import',
+          'export = python_moonclient.cli.export:Export',
+          'model_list = python_moonclient.cli.models:Models',
+          'subject_data_list = python_moonclient.cli.policies:SubjectDatas',
+          'object_data_list = python_moonclient.cli.policies:ObjectDatas',
+          'action_data_list = python_moonclient.cli.policies:ActionDatas',
+          'subject_category_list = python_moonclient.cli.models:SubjectCategories',
+          'object_category_list = python_moonclient.cli.models:ObjectCategories',
+          'action_category_list = python_moonclient.cli.models:ActionCategories',
+          'subject_category_create = python_moonclient.cli.models:SubjectCategoryAdd',
+          'subject_data_create = python_moonclient.cli.policies:CreateSubjectData',
+          'metarule_list = python_moonclient.cli.policies:MetaRules'
         ], 
     }
 

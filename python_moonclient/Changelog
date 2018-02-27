@@ -53,3 +53,18 @@ CHANGES
     - moon slave delete
     - moon slave list
     - moon slave set
+
+1.4.0
+-----
+- Add some commands:
+    - moon import
+    - moon export
+    - moon subject category create
+    - moon subject category list
+    - moon object category list
+    - moon action category list
+    - moon subject data create
+    - moon subject data list
+    - moon object data list
+    - moon action data list
+    - moon metarule list
