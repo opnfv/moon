@@ -9,5 +9,5 @@ then
     bash /data/tests/unit_python/run_tests.sh;
 fi
 
-cd /data/tests/python_python
-pytest .
+cd /data/tests/unit_python
+pytest -s .

@@ -1,0 +1,85 @@
+{
+  "pdps": [{"name" : "pdp_rbac", "keystone_project_id" : "", "description": "", "policies": [{"name": "RBAC policy example"}]}],
+
+  "policies":[{ "name": "RBAC policy example", "genre": "authz", "description": "", "model": {"name": "RBAC"} , "mandatory" :true , "override":true}],
+
+  "models":[{"name":"RBAC", "description":"","meta_rules": [{"name" : "rbac"}], "override":true}],
+
+
+
+
+
+  "subjects": [{ "name":"adminuser", "description": "", "extra": {}, "policies": [{ "name": "RBAC policy example"}]} ,
+               { "name": "user1", "description": "", "extra": {}, "policies": [{ "name": "RBAC policy example"}] },
+               { "name": "public", "description": "", "extra": {}, "policies": [] }],
+
+  "subject_categories": [{ "name":"role", "description": "" }],
+
+  "subject_data": [{ "name":"admin", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}},
+                   { "name":"employee", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}},
+                   { "name":"*",  "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}}],
+
+  "subject_assignments":[{ "subject" : {"name": "adminuser"}, "category" : {"name": "role"}, "assignments": [{"name" : "admin"}, {"name" : "employee"}, {"name" : "*"}]},
+                         { "subject" : {"name": "user1"}, "category" : {"name": "role"}, "assignments": [{"name" : "employee"}, {"name" : "*"}] }],
+
+
+
+
+
+
+  "objects": [{ "name":"vm0", "description": "", "extra": {}, "policies": [{"name": "RBAC policy example"}]} ,
+              {"name": "vm1", "description": "", "extra": {}, "policies": [{"name": "RBAC policy example"}]} ],
+
+  "object_categories": [{"name":"id", "description": ""}],
+
+  "object_data": [{ "name":"vm0", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}},
+                  { "name":"vm1", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}},
+                  { "name":"*",  "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}}],
+
+  "object_assignments":[{ "object" : {"name": "vm0"}, "category" : {"name": "id"}, "assignments": [{"name" : "vm0"}, {"name" : "*"}]},
+                        { "object" : {"name": "vm1"}, "category" : {"name": "id"}, "assignments": [{"name" : "vm1"}, {"name" : "*"}]}],
+
+
+
+
+
+
+  "actions": [{ "name": "start", "description": "", "extra": {}, "policies": [{"name": "RBAC policy example"}]} ,
+              { "name": "stop", "description": "", "extra": {}, "policies": [{"name": "RBAC policy example"}]}],
+
+  "action_categories": [{"name":"action-type", "description": ""}],
+
+  "action_data": [{"name":"vm-action", "description": "", "policy": {"name": "RBAC policy example"}, "category": {"name": "action-type"}},
+                  {"name":"*", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "action-type"}}],
+
+  "action_assignments":[{ "action" : {"name": "start"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}, {"name" : "*"}]},
+                        { "action" : {"name": "stop"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}, {"name" : "*"}]}],
+
+
+
+
+
+
+  "meta_rules":[{"name":"rbac", "description": "",
+    "subject_categories": [{"name": "role"}],
+    "object_categories": [{"name": "id"}],
+    "action_categories": [{"name": "action-type"}]
+  }],
+
+  "rules": [{
+    "meta_rule": {"name" : "rbac"},
+    "rule": {"subject_datas" : [{"name":"admin"}], "object_data": {"name": "vm0"}, "action_data": {"name": "vm-action"}},
+    "policy": {"name" :"RBAC policy example"},
+    "instructions" : {"decision" : "grant"},
+    "enabled": true
+  }, {
+    "meta_rule": {"name" : "rbac"},
+    "rule": {"subject_datas" : [{"name":"employee"}], "object_data": {"name": "vm1"}, "action_data":  {"name": "vm-action"}},
+    "policy": {"name" :"RBAC policy example"},
+    "instructions" : {"decision" : "grant"}
+  }]
+
+
+
+
+}

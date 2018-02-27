@@ -45,6 +45,7 @@ class Models(Resource):
         :internal_api: get_models
         """
         try:
+            logger.info("APIIIIIIIIIIIIIIIIIIIIIIIIII GET")
             data = ModelManager.get_models(user_id=user_id, model_id=uuid)
         except Exception as e:
             logger.error(e, exc_info=True)
