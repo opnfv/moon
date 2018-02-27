@@ -69,6 +69,15 @@ moon slave delete <name_of_the_slave>
 ```
 If you don't put a name here, by default, the script will use `kubernetes-admin@kubernetes`.
 
+### inport/export of the moon database
+Using the moon python client, it is possible to export and import the content of the moon database. The format of the file must be json. Examples of files that can be imported are found in the moon_manager package (rbac.json and mls.json)
+
+The relations between different elements of the json in made using their names. Therefore, the name acts, for now, as a unique identifier in the json files. Importing several times the same json file can lead to unexpected behavior. It is advised to import json file in an empty database.
+
+Two particular entries in the json description are used to specify the way of performing the import:
+ - "mandatory": it can be true or false. This field is only valid for policies description. The policy having this field set to true, will be automatically added to the other elements of the json file that have an empty "policy" field (subject data for instance) or that have a "policies" field which does not already contain the mandatory policy name (such as subjects). 
+ - "override" : it can be true or false. This field is only valid for policies and models. If set to true and a policy/model with an identical name already exists in the database, it will be overwritten.
+
 
 ## Tests
 - [Python Unit Test](tests/python_unit/README.md)

@@ -31,7 +31,6 @@ class PoliciesUtils:
                 return _policy_value['name']
         return None
 
-
 class Policies(Lister):
     """show the list of existing policies"""
     def get_parser(self, prog_name):
@@ -51,6 +50,30 @@ class Policies(Lister):
         return (('Key' , 'Name'),
                    ((_policy_key,  _policy_value['name']) for _policy_key, _policy_value in _policies["policies"].items())
                )
+
+
+class Subjects(Lister):
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        Parser.add_id_or_name_argument(parser)
+        Parser.add_policy_argument(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        _policies = policies.check_subject(parsed_args.id, parsed_args.policy_id)
+
+        return (('Key' , 'Name'),
+                   ((_policy_key,  _policy_value['name']) for _policy_key, _policy_value in _policies["policies"].items())
+               )
+
 
 
 class DeletePolicy(Command):
@@ -85,3 +108,139 @@ class DeletePolicy(Command):
         return (('Key', 'Value'),
                 ((_policy_key, _policy_value) for _policy_key, _policy_value in _policies["policies"].items())
                 )
+
+
+
+class SubjectDatas(Lister):
+    """list the subject data """
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        Parser.add_policy_argument(parser)
+        Parser.add_category_argument(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        subject_data = policies.check_subject_data(parsed_args.policy_id, None, parsed_args.category_id)
+        if len(subject_data["subject_data"]) == 0:
+            return (('Key', 'Name'),())
+
+        return (('Key', 'Name'),
+                   ((_subject_key, subject_data["subject_data"][0]["data"][_subject_key]['name']) for _subject_key in subject_data["subject_data"][0]["data"].keys())
+               )
+
+
+class ObjectDatas(Lister):
+    """list the object data"""
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        Parser.add_policy_argument(parser)
+        Parser.add_category_argument(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        object_datas = policies.check_object_data(parsed_args.policy_id, None, parsed_args.category_id)
+
+        if len(object_datas["object_data"]) == 0:
+            return (('Key', 'Name'),())
+        object_data = object_datas["object_data"][0]["data"]
+        res =  (('Key', 'Name'),
+                   ((_object_key, object_data[_object_key]["value"]['name']) for _object_key in list(object_data))
+               )
+        return res
+
+
+class ActionDatas(Lister):
+    """list the action data"""
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        Parser.add_policy_argument(parser)
+        Parser.add_category_argument(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        action_datas = policies.check_action_data(parsed_args.policy_id, None, parsed_args.category_id)
+
+        if len(action_datas["action_data"]) == 0:
+            return (('Key', 'Name'),())
+        action_data = action_datas["action_data"][0]["data"]
+        res =  (('Key', 'Name'),
+                   ((_action_key, action_data[_action_key]["value"]['name']) for _action_key in list(action_data))
+               )
+        return res
+
+
+class MetaRules(Lister):
+    """list the meta rules"""
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        metarule_datas = policies.check_meta_rule()
+
+        if len(metarule_datas["meta_rules"]) == 0:
+            return (('Key', 'Name'),())
+
+        metarule_data = metarule_datas["meta_rules"]
+        res =  (('Key', 'Name'),
+                   ((_key, metarule_data[_key]['name']) for _key in list(metarule_data))
+               )
+        return res
+
+class CreateSubjectData(Command):
+    """create a subject data according to a policy and a category"""
+    def get_parser(self, prog_name):
+        parser = super().get_parser(prog_name)
+        Parser.add_common_options(parser)
+        Parser.add_policy_argument(parser)
+        Parser.add_category_argument(parser)
+        Parser.add_name_argument(parser)
+        return parser
+
+    def take_action(self, parsed_args):
+        consul_host = parsed_args.consul_host
+        consul_port = parsed_args.consul_port
+
+        models.init(consul_host, consul_port)
+        policies.init(consul_host, consul_port)
+        pdp.init(consul_host, consul_port)
+
+        subject_data_id = policies.add_subject_data(parsed_args.policy_id, parsed_args.category_id, parsed_args.name)
+        if subject_data_id is not None:
+            print("Subject category created with id {}".format(subject_data_id))
+        else:
+            print("Error while creating subject category")
+        subject_data = policies.check_subject_data(parsed_args.policy_id, None, parsed_args.category_id)
+        # subject_categories = models.check_subject_category(subject_category_id)

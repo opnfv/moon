@@ -35,6 +35,7 @@ def test_get_rules():
     assert req.status_code == 200
     assert isinstance(rules, dict)
     assert "rules" in rules
+    return req, rules
 
 
 def test_add_rules():

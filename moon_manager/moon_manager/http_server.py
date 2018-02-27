@@ -2,10 +2,12 @@
 # This software is distributed under the terms and conditions of the 'Apache-2.0'
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
-
-from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
+from flask import Flask, jsonify, Response, make_response
 from flask_cors import CORS, cross_origin
+from json import dumps
 from flask_restful import Resource, Api
+import flask_restful
 import logging
 import sqlalchemy.exc
 import time
@@ -21,7 +23,10 @@ from moon_manager.api.perimeter import Subjects, Objects, Actions
 from moon_manager.api.data import SubjectData, ObjectData, ActionData
 from moon_manager.api.assignments import SubjectAssignments, ObjectAssignments, ActionAssignments
 from moon_manager.api.rules import Rules
-from python_moonutilities import configuration, exceptions
+from moon_manager.api.json_import import JsonImport
+from moon_manager.api.base_exception import BaseException
+from moon_manager.api.json_export import JsonExport
+from python_moonutilities import configuration
 from python_moondb.core import PDPManager
 
 
@@ -33,7 +38,7 @@ __API__ = (
     Subjects, Objects, Actions, Rules,
     SubjectAssignments, ObjectAssignments, ActionAssignments,
     SubjectData, ObjectData, ActionData,
-    Models, Policies, PDP, Slaves
+    Models, Policies, PDP, Slaves, JsonImport, JsonExport
  )
 
 
@@ -105,31 +110,51 @@ class Root(Resource):
         }
 
 
-class HTTPServer(Server):
+class CustomApi(Api):
 
+    def handle_error(self, e):
+        try:
+            error_message = dumps({'message': str(e)})
+            logger.error(error_message)
+            return make_response(error_message, e.code)
+        except Exception as e2: # unhandled exception in the api...
+            logger.error(str(e2))
+            return make_response(error_message, 500)
+
+
+class HTTPServer(Server):
     def __init__(self, host="localhost", port=80, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.app = Flask(__name__)
+        self.app.config['TRAP_HTTP_EXCEPTIONS'] = True
         conf = configuration.get_configuration("components/manager")
         self.manager_hostname = conf["components/manager"].get("hostname",
                                                                "manager")
         self.manager_port = conf["components/manager"].get("port", 80)
         # TODO : specify only few urls instead of *
         CORS(self.app)
-        self.api = Api(self.app)
+        self.api = CustomApi(self.app)
         self.__set_route()
-        self.__hook_errors()
+    #    self.__hook_errors()
 
-    def __hook_errors(self):
+    #def __hook_errors(self):
+    #    def get_500_json(e):
+    #        logger.error("get_500_json")
+    #        return jsonify({"result": False, "code": 500, "description": str(e)}), 500
+    #    self.app.register_error_handler(JsonUtilsException, get_500_json)
+    #    self.app.register_error_handler(JsonImportException, get_500_json)
+    #    self.app.register_error_handler(UnknownName, get_500_json)
 
-        def get_404_json(e):
-            return jsonify({"result": False, "code": 404, "description": str(e)}), 404
-        self.app.register_error_handler(404, get_404_json)
+    #    def get_404_json(e):
+    #        return jsonify({"result": False, "code": 404, "description": str(e)}), 404
+    #    self.app.register_error_handler(404, get_404_json)
 
-        def get_400_json(e):
-            return jsonify({"result": False, "code": 400, "description": str(e)}), 400
-        self.app.register_error_handler(400, lambda e: get_400_json)
-        self.app.register_error_handler(403, exceptions.AuthException)
+    #   def get_400_json(e):
+    #        return jsonify({"result": False, "code": 400, "description": str(e)}), 400
+
+    #    self.app.register_error_handler(500, lambda e: get_500_json)
+    #    self.app.register_error_handler(400, lambda e: get_400_json)
+    #    self.app.register_error_handler(403, exceptions.AuthException)
 
     def __set_route(self):
         self.api.add_resource(Root, '/')
