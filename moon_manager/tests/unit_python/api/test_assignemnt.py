@@ -28,15 +28,6 @@ def delete_subject_assignment(client, policy_id):
     return req
 
 
-def test_get_subject_assignment():
-    policy_id = utilities.get_policy_id()
-    client = utilities.register_client()
-    req, subject_assignment = get_subject_assignment(client, policy_id)
-    assert req.status_code == 200
-    assert isinstance(subject_assignment, dict)
-    assert "subject_assignments" in subject_assignment
-
-
 def test_add_subject_assignment():
     policy_id = utilities.get_policy_id()
     client = utilities.register_client()
@@ -49,6 +40,15 @@ def test_add_subject_assignment():
     assert value[id]['policy_id'] == policy_id
     assert value[id]['category_id'] == "111"
     assert value[id]['subject_id'] == "id1"
+
+
+def test_get_subject_assignment():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, subject_assignment = get_subject_assignment(client, policy_id)
+    assert req.status_code == 200
+    assert isinstance(subject_assignment, dict)
+    assert "subject_assignments" in subject_assignment
 
 
 def test_delete_subject_assignment():

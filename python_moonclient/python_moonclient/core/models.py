@@ -81,14 +81,16 @@ def add_subject_category(name="subject_cat_1"):
     return category_id
 
 
-def check_subject_category(category_id):
+def check_subject_category(category_id=None):
     req = requests.get(URL.format("/subject_categories"))
     req.raise_for_status()
     result = req.json()
 
     check_subject_category_in_result(result)
     check_optionnal_result(result)
-    check_subject_categories_name(category_template["name"], category_id, result)
+    if category_id is not None:
+        check_subject_categories_name(category_template["name"], category_id, result)
+    return result
 
 
 def delete_subject_category(category_id):
@@ -110,13 +112,15 @@ def add_object_category(name="object_cat_1"):
     return category_id
 
 
-def check_object_category(category_id):
+def check_object_category(category_id=None):
     req = requests.get(URL.format("/object_categories"))
     req.raise_for_status()
     result = req.json()
     check_object_category_in_result(result)
     check_optionnal_result(result)
-    check_object_categories_name(category_template["name"], category_id, result)
+    if category_id is not None:
+        check_object_categories_name(category_template["name"], category_id, result)
+    return result
 
 
 def delete_object_category(category_id):
@@ -138,13 +142,16 @@ def add_action_category(name="action_cat_1"):
     return category_id
 
 
-def check_action_category(category_id):
+def check_action_category(category_id=None):
     req = requests.get(URL.format("/action_categories"))
     req.raise_for_status()
     result = req.json()
+    print(result)
     check_action_category_in_result(result)
     check_optionnal_result(result)
-    check_action_categories_name(category_template["name"], category_id, result)
+    if category_id is not None:
+        check_action_categories_name(category_template["name"], category_id, result)
+    return result
 
 
 def delete_action_category(category_id):
@@ -207,6 +214,7 @@ def check_meta_rule(meta_rule_id, scat_id=None, ocat_id=None, acat_id=None):
         check_ocat_id_in_dict(ocat_id, result['meta_rules'][meta_rule_id]["object_categories"])
     if acat_id:
         check_acat_id_in_dict(acat_id, result['meta_rules'][meta_rule_id]["action_categories"])
+    return result
 
 
 def delete_meta_rule(meta_rule_id):

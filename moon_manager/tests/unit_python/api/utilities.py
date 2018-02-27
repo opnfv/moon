@@ -21,6 +21,8 @@ def get_policy_id():
         if id:
             policy_id = id
             break
+    print("policy id {}".format(policy_id))
     if not policy_id:
         policies.add_policies(client, "testuser")
+        policy_id = get_policy_id()
     return policy_id
