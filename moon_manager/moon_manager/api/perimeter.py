@@ -47,7 +47,7 @@ class Subjects(Resource):
                 "subject_id": {
                     "name": "name of the subject",
                     "keystone_id": "keystone id of the subject",
-                    "description": "a description"
+                    "description": "a description (optional)"
             }
         }
         :internal_api: get_subjects
@@ -73,17 +73,17 @@ class Subjects(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the subject",
-            "description": "description of the subject",
-            "password": "password for the subject",
-            "email": "email address of the subject"
+            "description": "description of the subject (optional)",
+            "password": "password for the subject (optional)",
+            "email": "email address of the subject (optional)"
         }
         :return: {
                 "subject_id": {
                     "name": "name of the subject",
                     "keystone_id": "keystone id of the subject",
-                    "description": "description of the subject",
-                    "password": "password for the subject",
-                    "email": "email address of the subject"
+                    "description": "description of the subject (optional)",
+                    "password": "password for the subject (optional)",
+                    "email": "email address of the subject (optional)"
             }
         }
         :internal_api: set_subject
@@ -115,17 +115,17 @@ class Subjects(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the subject",
-            "description": "description of the subject",
-            "password": "password for the subject",
-            "email": "email address of the subject"
+            "description": "description of the subject (optional)",
+            "password": "password for the subject (optional)",
+            "email": "email address of the subject (optional)"
         }
         :return: {
                 "subject_id": {
                     "name": "name of the subject",
                     "keystone_id": "keystone id of the subject",
-                    "description": "description of the subject",
-                    "password": "password for the subject",
-                    "email": "email address of the subject"
+                    "description": "description of the subject (optional)",
+                    "password": "password for the subject (optional)",
+                    "email": "email address of the subject (optional)"
             }
         }
         :internal_api: set_subject
@@ -159,9 +159,9 @@ class Subjects(Resource):
                 "subject_id": {
                     "name": "name of the subject",
                     "keystone_id": "keystone id of the subject",
-                    "description": "description of the subject",
-                    "password": "password for the subject",
-                    "email": "email address of the subject"
+                    "description": "description of the subject (optional)",
+                    "password": "password for the subject (optional)",
+                    "email": "email address of the subject (optional)"
             }
         }
         :internal_api: delete_subject
@@ -201,7 +201,7 @@ class Objects(Resource):
         :return: {
                 "object_id": {
                     "name": "name of the object",
-                    "description": "description of the object"
+                    "description": "description of the object (optional)"
             }
         }
         :internal_api: get_objects
@@ -227,12 +227,12 @@ class Objects(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "object_name": "name of the object",
-            "object_description": "description of the object"
+            "object_description": "description of the object (optional)"
         }
         :return: {
                 "object_id": {
                     "name": "name of the object",
-                    "description": "description of the object"
+                    "description": "description of the object (optional)"
             }
         }
         :internal_api: set_object
@@ -262,12 +262,12 @@ class Objects(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "object_name": "name of the object",
-            "object_description": "description of the object"
+            "object_description": "description of the object (optional)"
         }
         :return: {
                 "object_id": {
                     "name": "name of the object",
-                    "description": "description of the object"
+                    "description": "description of the object (optional)"
             }
         }
         :internal_api: set_object
@@ -298,7 +298,7 @@ class Objects(Resource):
         :return: {
                 "object_id": {
                     "name": "name of the object",
-                    "description": "description of the object"
+                    "description": "description of the object (optional)"
             }
         }
         :internal_api: delete_object
@@ -338,7 +338,7 @@ class Actions(Resource):
         :return: {
                 "action_id": {
                     "name": "name of the action",
-                    "description": "description of the action"
+                    "description": "description of the action (optional)"
             }
         }
         :internal_api: get_actions
@@ -361,12 +361,12 @@ class Actions(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the action",
-            "description": "description of the action"
+            "description": "description of the action (optional)"
         }
         :return: {
                 "action_id": {
                     "name": "name of the action",
-                    "description": "description of the action"
+                    "description": "description of the action (optional)"
             }
         }
         :internal_api: set_action
@@ -396,12 +396,12 @@ class Actions(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the action",
-            "description": "description of the action"
+            "description": "description of the action (optional)"
         }
         :return: {
                 "action_id": {
                     "name": "name of the action",
-                    "description": "description of the action"
+                    "description": "description of the action (optional)"
             }
         }
         :internal_api: set_action
@@ -432,7 +432,7 @@ class Actions(Resource):
         :return: {
                 "action_id": {
                     "name": "name of the action",
-                    "description": "description of the action"
+                    "description": "description of the action (optional)"
             }
         }
         :internal_api: delete_action
