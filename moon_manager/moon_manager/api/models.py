@@ -38,7 +38,7 @@ class Models(Resource):
         :return: {
             "model_id1": {
                 "name": "...",
-                "description": "...",
+                "description": "... (optional)",
                 "meta_rules": ["meta_rule_id1", ]
             }
         }
@@ -60,13 +60,13 @@ class Models(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "...",
-            "description": "...",
+            "description": "... (optional)",
             "meta_rules": ["meta_rule_id1", ]
         }
         :return: {
             "model_id1": {
                 "name": "...",
-                "description": "...",
+                "description": "... (optional)",
                 "meta_rules": ["meta_rule_id1", ]
             }
         }
@@ -89,7 +89,7 @@ class Models(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_model
         """
@@ -110,7 +110,7 @@ class Models(Resource):
         :return: {
             "model_id1": {
                 "name": "...",
-                "description": "...",
+                "description": "... (optional)",
                 "meta_rules": ["meta_rule_id1", ]
             }
         }

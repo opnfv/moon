@@ -46,7 +46,7 @@ class SubjectData(Resource):
             "data": {
                 "subject_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }]
@@ -73,7 +73,7 @@ class SubjectData(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the data",
-            "description": "description of the data"
+            "description": "description of the data (optional)"
         }
         :return: {
             "policy_id": "policy_id1",
@@ -81,7 +81,7 @@ class SubjectData(Resource):
             "data": {
                 "subject_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }
@@ -108,7 +108,7 @@ class SubjectData(Resource):
         :param user_id: user ID who do the request
         :return: [{
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }]
         :internal_api: delete_subject_data
         """
@@ -151,7 +151,7 @@ class ObjectData(Resource):
             "data": {
                 "object_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }]
@@ -178,7 +178,7 @@ class ObjectData(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the data",
-            "description": "description of the data"
+            "description": "description of the data (optional)"
         }
         :return: {
             "policy_id": "policy_id1",
@@ -186,7 +186,7 @@ class ObjectData(Resource):
             "data": {
                 "object_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }
@@ -213,7 +213,7 @@ class ObjectData(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_object_data
         """
@@ -256,7 +256,7 @@ class ActionData(Resource):
             "data": {
                 "action_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }]
@@ -291,7 +291,7 @@ class ActionData(Resource):
             "data": {
                 "action_data_id": {
                     "name": "name of the data",
-                    "description": "description of the data"
+                    "description": "description of the data (optional)"
                 }
             }
         }
@@ -318,7 +318,7 @@ class ActionData(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_action_data
         """
