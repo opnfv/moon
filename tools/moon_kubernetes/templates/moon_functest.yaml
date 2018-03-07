@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: functest
-        image: wukongsun/moon_python_func_test:latest
+        image: moonplatform/moon_python_func_test:latest
         volumeMounts:
         - name: config-volume
           mountPath: /etc/moon
