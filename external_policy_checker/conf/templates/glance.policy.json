@@ -1,0 +1,61 @@
+{
+
+    "add_image": "{{wrapper}}",
+    "delete_image": "{{wrapper}}",
+    "get_image": "{{wrapper}}",
+    "get_images": "{{wrapper}}",
+    "modify_image": "{{wrapper}}",
+    "publicize_image": "{{wrapper}}",
+    "communitize_image": "{{wrapper}}",
+    "copy_from": "{{wrapper}}",
+
+    "download_image": "{{wrapper}}",
+    "upload_image": "{{wrapper}}",
+
+    "delete_image_location": "{{wrapper}}",
+    "get_image_location": "{{wrapper}}",
+    "set_image_location": "{{wrapper}}",
+
+    "add_member": "{{wrapper}}",
+    "delete_member": "{{wrapper}}",
+    "get_member": "{{wrapper}}",
+    "get_members": "{{wrapper}}",
+    "modify_member": "{{wrapper}}",
+
+    "manage_image_cache": "{{wrapper}}",
+
+    "get_task": "{{wrapper}}",
+    "get_tasks": "{{wrapper}}",
+    "add_task": "{{wrapper}}",
+    "modify_task": "{{wrapper}}",
+    "tasks_api_access": "{{wrapper}}",
+
+    "deactivate": "{{wrapper}}",
+    "reactivate": "{{wrapper}}",
+
+    "get_metadef_namespace": "{{wrapper}}",
+    "get_metadef_namespaces":"{{wrapper}}",
+    "modify_metadef_namespace":"{{wrapper}}",
+    "add_metadef_namespace":"{{wrapper}}",
+
+    "get_metadef_object":"{{wrapper}}",
+    "get_metadef_objects":"{{wrapper}}",
+    "modify_metadef_object":"{{wrapper}}",
+    "add_metadef_object":"{{wrapper}}",
+
+    "list_metadef_resource_types":"{{wrapper}}",
+    "get_metadef_resource_type":"{{wrapper}}",
+    "add_metadef_resource_type_association":"{{wrapper}}",
+
+    "get_metadef_property":"{{wrapper}}",
+    "get_metadef_properties":"{{wrapper}}",
+    "modify_metadef_property":"{{wrapper}}",
+    "add_metadef_property":"{{wrapper}}",
+
+    "get_metadef_tag":"{{wrapper}}",
+    "get_metadef_tags":"{{wrapper}}",
+    "modify_metadef_tag":"{{wrapper}}",
+    "add_metadef_tag":"{{wrapper}}",
+    "add_metadef_tags":"{{wrapper}}"
+
+}
