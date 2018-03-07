@@ -400,7 +400,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "testuser",
                         "email": "mail",
                         "id": "89ba91c18dd54abfbfde7a66936c51a6",
-                        "partner_id": ""
+                        "extra":  {}
                     },
                     "31fd15ad14784a9696fcc887dddbfaf9": {
                         "description": "test",
@@ -411,7 +411,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "adminuser",
                         "email": "mail",
                         "id": "31fd15ad14784a9696fcc887dddbfaf9",
-                        "partner_id": ""
+                        "extra":  {}
                     }
                 }
             }
@@ -424,7 +424,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "vm1",
                         "description": "test",
                         "id": "67b8008a3f8d4f8e847eb628f0f7ca0e",
-                        "partner_id": "",
+                        "extra":  {},
                         "policy_list": [
                             "f8f49a779ceb47b3ac810f01ef71b4e0",
                             "636cd473324f4c0bbd9102cb5b62a16d"
@@ -434,7 +434,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "vm0",
                         "description": "test",
                         "id": "9089b3d2ce5b4e929ffc7e35b55eba1a",
-                        "partner_id": "",
+                        "extra":  {},
                         "policy_list": [
                             "f8f49a779ceb47b3ac810f01ef71b4e0",
                             "636cd473324f4c0bbd9102cb5b62a16d"
@@ -451,7 +451,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "boot",
                         "description": "test",
                         "id": "cdb3df220dc04a6ea3334b994827b068",
-                        "partner_id": "",
+                        "extra":  {},
                         "policy_list": [
                             "f8f49a779ceb47b3ac810f01ef71b4e0",
                             "636cd473324f4c0bbd9102cb5b62a16d"
@@ -461,7 +461,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "stop",
                         "description": "test",
                         "id": "cdb3df220dc04a6ea3334b994827b068",
-                        "partner_id": "",
+                        "extra":  {},
                         "policy_list": [
                             "f8f49a779ceb47b3ac810f01ef71b4e0",
                             "636cd473324f4c0bbd9102cb5b62a16d"
@@ -471,7 +471,7 @@ def set_consul_and_db(monkeypatch):
                         "name": "start",
                         "description": "test",
                         "id": "9f5112afe9b34a6c894eb87246ccb7aa",
-                        "partner_id": "",
+                        "extra":  {},
                         "policy_list": [
                             "f8f49a779ceb47b3ac810f01ef71b4e0",
                             "636cd473324f4c0bbd9102cb5b62a16d"

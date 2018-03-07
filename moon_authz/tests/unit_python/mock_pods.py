@@ -87,7 +87,7 @@ subject_mock = {
             "name": "testuser",
             "email": "mail",
             "id": "89ba91c18dd54abfbfde7a66936c51a6",
-            "partner_id": ""
+            "extra":  {}
         }
     },
     "policy_id_1": {
@@ -141,7 +141,7 @@ object_mock = {
             "name": "vm1",
             "description": "test",
             "id": "9089b3d2ce5b4e929ffc7e35b55eba1a",
-            "partner_id": "",
+            "extra":  {},
             "policy_list": [
                 "f8f49a779ceb47b3ac810f01ef71b4e0",
                 "636cd473324f4c0bbd9102cb5b62a16d"
@@ -195,7 +195,7 @@ action_mock = {
             "name": "boot",
             "description": "test",
             "id": "cdb3df220dc04a6ea3334b994827b068",
-            "partner_id": "",
+            "extra":  {},
             "policy_list": [
                 "f8f49a779ceb47b3ac810f01ef71b4e0",
                 "636cd473324f4c0bbd9102cb5b62a16d"
@@ -205,7 +205,7 @@ action_mock = {
             "name": "stop",
             "description": "test",
             "id": "cdb3df220dc04a6ea3334b994827b068",
-            "partner_id": "",
+            "extra":  {},
             "policy_list": [
                 "f8f49a779ceb47b3ac810f01ef71b4e0",
                 "636cd473324f4c0bbd9102cb5b62a16d"
@@ -215,7 +215,7 @@ action_mock = {
             "name": "start",
             "description": "test",
             "id": "9f5112afe9b34a6c894eb87246ccb7aa",
-            "partner_id": "",
+            "extra":  {},
             "policy_list": [
                 "f8f49a779ceb47b3ac810f01ef71b4e0",
                 "636cd473324f4c0bbd9102cb5b62a16d"
