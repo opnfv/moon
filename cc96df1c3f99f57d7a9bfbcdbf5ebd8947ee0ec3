@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_89cbaf71",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-08T15:55:39Z",
+      "side": 1,
+      "message": "Yes, in fact, this function tests if a slave with that name already exists and is configured. Maybe the function name is not very accurate.",
+      "range": {
+        "startLine": 68,
+        "startChar": 32,
+        "endLine": 68,
+        "endChar": 36
+      },
+      "revId": "cc96df1c3f99f57d7a9bfbcdbf5ebd8947ee0ec3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_a9ce6b81",
+        "filename": "moon_orchestrator/moon_orchestrator/drivers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 79,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-08T15:55:39Z",
+      "side": 1,
+      "message": "It\u0027s quicker to send and receive exceptions than dealing with \"if... else\".\nBut here, I don\u0027t see where validation is needed.",
+      "range": {
+        "startLine": 79,
+        "startChar": 19,
+        "endLine": 79,
+        "endChar": 37
+      },
+      "revId": "cc96df1c3f99f57d7a9bfbcdbf5ebd8947ee0ec3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_69b583ed",
+        "filename": "moon_orchestrator/moon_orchestrator/drivers.py",
+        "patchSetId": 1
+      },
+      "lineNbr": 310,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-08T15:55:39Z",
+      "side": 1,
+      "message": "OK, next meeting on monday.",
+      "range": {
+        "startLine": 310,
+        "startChar": 5,
+        "endLine": 310,
+        "endChar": 9
+      },
+      "revId": "cc96df1c3f99f57d7a9bfbcdbf5ebd8947ee0ec3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
