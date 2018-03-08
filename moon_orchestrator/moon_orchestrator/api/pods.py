@@ -64,6 +64,9 @@ class Pods(Resource):
             if pod_values[0]['keystone_project_id'] == keystone_pid:
                 return True
 
+    '''
+        is it correct to return true while asking for a certain wrapper ?
+    '''
     def __get_wrapper(self, slave_name):
         for slave in self.driver.get_slaves():
             if slave_name == slave["name"] \

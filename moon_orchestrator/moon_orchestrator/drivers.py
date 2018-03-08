@@ -72,6 +72,12 @@ class K8S(Driver):
         self.manager_hostname = conf["components/manager"].get("hostname", "manager")
         self.manager_port = conf["components/manager"].get("port", 80)
 
+    '''
+    [Note]
+     - there are some validation needed ex( when accessing array , should check if arrlength >=requiredIndex
+     - need to validate if keys already exists before accessing it
+     - if so, will throw an exception as we did in the other components or what do you think ?
+    '''
     def get_pods(self, name=None):
         if name:
             pods = self.client.list_pod_for_all_namespaces(watch=False)
@@ -217,6 +223,7 @@ class K8S(Driver):
             for key, value in pods.items():
                 # logger.info("ctx={}".format(ctx))
                 # logger.info("value={}".format(value))
+
                 if ctx["name"] == value[0].get('slave_name'):
                     data["wrapper_name"] = value[0]['name']
                     data["ip"] = value[0].get("ip", "NC")
@@ -299,6 +306,9 @@ class K8S(Driver):
                                    ext_client=ext_client)
             self.delete_service(name=name_to_delete, api_client=api_client)
 
+    '''
+    [Note] i think we want you to explain more about cycle and relation between pipeline, pod, project, pdp 
+    '''
     def create_pipeline(self, keystone_project_id,
                         pdp_id, policy_ids, manager_data=None,
                         active_context=None,
