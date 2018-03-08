@@ -38,7 +38,7 @@ class SubjectCategories(Resource):
         :return: {
             "subject_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: get_subject_categories
@@ -60,12 +60,12 @@ class SubjectCategories(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the category",
-            "description": "description of the category"
+            "description": "description of the category (optional)"
         }
         :return: {
             "subject_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: add_subject_category
@@ -87,7 +87,7 @@ class SubjectCategories(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_subject_category
         """
@@ -121,7 +121,7 @@ class ObjectCategories(Resource):
         :return: {
             "object_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: get_object_categories
@@ -143,12 +143,12 @@ class ObjectCategories(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the category",
-            "description": "description of the category"
+            "description": "description of the category (optional)"
         }
         :return: {
             "object_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: add_object_category
@@ -170,7 +170,7 @@ class ObjectCategories(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_object_category
         """
@@ -204,7 +204,7 @@ class ActionCategories(Resource):
         :return: {
             "action_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: get_action_categories
@@ -226,12 +226,12 @@ class ActionCategories(Resource):
         :param user_id: user ID who do the request
         :request body: {
             "name": "name of the category",
-            "description": "description of the category"
+            "description": "description of the category (optional)"
         }
         :return: {
             "action_category_id": {
                 "name": "name of the category",
-                "description": "description of the category"
+                "description": "description of the category (optional)"
             }
         }
         :internal_api: add_action_category
@@ -253,7 +253,7 @@ class ActionCategories(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_action_category
         """

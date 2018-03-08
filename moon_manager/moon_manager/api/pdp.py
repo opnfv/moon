@@ -107,7 +107,7 @@ class PDP(Resource):
                 "name": "...",
                 "security_pipeline": [...],
                 "keystone_project_id": "keystone_project_id1",
-                "description": "...",
+                "description": "... (optional)",
             }
         }
         :internal_api: get_pdp
@@ -130,14 +130,14 @@ class PDP(Resource):
             "name": "...",
             "security_pipeline": [...],
             "keystone_project_id": "keystone_project_id1",
-            "description": "...",
+            "description": "... (optional)",
         }
         :return: {
             "pdp_id1": {
                 "name": "...",
                 "security_pipeline": [...],
                 "keystone_project_id": "keystone_project_id1",
-                "description": "...",
+                "description": "... (optional)",
             }
         }
         :internal_api: add_pdp
@@ -169,7 +169,7 @@ class PDP(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_pdp
         """
@@ -193,7 +193,7 @@ class PDP(Resource):
                 "name": "...",
                 "security_pipeline": [...],
                 "keystone_project_id": "keystone_project_id1",
-                "description": "...",
+                "description": "... (optional)",
             }
         }
         :internal_api: update_pdp

@@ -40,8 +40,8 @@ class Policies(Resource):
             "policy_id1": {
                 "name": "...",
                 "model_id": "...",
-                "genre": "...",
-                "description": "...",
+                "genre": "... (optional)",
+                "description": "... (optional)",
             }
         }
         :internal_api: get_policies
@@ -63,15 +63,15 @@ class Policies(Resource):
         :request body: {
             "name": "...",
             "model_id": "...",
-            "genre": "...",
-            "description": "...",
+            "genre": "... (optional)",
+            "description": "... (optional)",
         }
         :return: {
             "policy_id1": {
                 "name": "...",
                 "model_id": "...",
-                "genre": "...",
-                "description": "...",
+                "genre": "... (optional)",
+                "description": "... (optional)",
             }
         }
         :internal_api: add_policy
@@ -93,7 +93,7 @@ class Policies(Resource):
         :param user_id: user ID who do the request
         :return: {
             "result": "True or False",
-            "message": "optional message"
+            "message": "optional message (optional)"
         }
         :internal_api: delete_policy
         """
@@ -115,8 +115,8 @@ class Policies(Resource):
             "policy_id1": {
                 "name": "...",
                 "model_id": "...",
-                "genre": "...",
-                "description": "...",
+                "genre": "... (optional)",
+                "description": "... (optional)",
             }
         }
         :internal_api: update_policy

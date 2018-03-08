@@ -40,7 +40,6 @@ class MetaRules(Resource):
             "meta_rules": {
                 "meta_rule_id1": {
                     "name": "name of the meta rule",
-                    "algorithm": "name of the meta rule algorithm",
                     "subject_categories": ["subject_category_id1",
                                            "subject_category_id2"],
                     "object_categories": ["object_category_id1"],
