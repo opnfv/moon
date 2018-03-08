@@ -302,8 +302,11 @@ def check_subject_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
     result = req.json()
-    check_id_in_subject_data_data(data_id, result)
+    print(result)
+    if data_id is not None:
+        check_id_in_subject_data_data(data_id, result)
     check_category_id_in_subject_data_data(category_id, result)
+    return result
 
 
 def delete_subject_data(policy_id, category_id, data_id):
@@ -332,9 +335,10 @@ def check_object_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
     result = req.json()
-    check_id_in_object_data_data(data_id, result)
+    if data_id is not None:
+        check_id_in_object_data_data(data_id, result)
     check_category_id_in_object_data_data(category_id, result)
-
+    return result
 
 def delete_object_data(policy_id, category_id, data_id):
     req = requests.delete(URL.format("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id)),
@@ -362,9 +366,11 @@ def check_action_data(policy_id, data_id, category_id):
     req = requests.get(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
     result = req.json()
-    check_id_in_action_data_data(data_id, result)
+    print(result)
+    if data_id is not None:
+        check_id_in_action_data_data(data_id, result)
     check_category_id_in_action_data_data(category_id, result)
-
+    return result
 
 def delete_action_data(policy_id, category_id, data_id):
     req = requests.delete(URL.format("/policies/{}/action_data/{}/{}".format(policy_id, category_id, data_id)),
@@ -525,6 +531,13 @@ def delete_rule(policy_id, rule_id):
     check_policy_id_in_dict(policy_id, result["rules"])
     check_rule_id_not_in_list(rule_id, result["rules"]["rules"])
 
+
+def check_meta_rule():
+    req = requests.get(URL.format("/meta_rules/"))
+    req.raise_for_status()
+    result = req.json()
+    print(result)
+    return result
 
 def create_policy(scenario, model_id, meta_rule_list):
     logger.info("Creating policy {}".format(scenario.policy_name))

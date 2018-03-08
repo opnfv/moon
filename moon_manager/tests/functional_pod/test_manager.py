@@ -1,6 +1,45 @@
 import json
 import requests
 
+def test_import_rbac(context):
+    files = {'file': open('/data/tests/functional_pod/json/rbac.json', 'r')}
+    req = requests.post("http://{}:{}/import".format(
+        context.get("hostname"),
+        context.get("port"))
+        , files=files)
+    print(req)
+    result = req.json()
+    print(result)
+    req.raise_for_status()
+
+def test_import_mls(context):
+    files = {'file': open('/data/tests/functional_pod/json/mls.json', 'r')}
+    req = requests.post("http://{}:{}/import".format(
+        context.get("hostname"),
+        context.get("port"))
+        , files=files)
+    req.raise_for_status()
+
+
+def test_export_rbac(context):
+    test_import_rbac(context)
+    req = requests.get("http://{}:{}/export".format(
+       context.get("hostname"),
+       context.get("port")),
+       data={"filename":"/data/tests/functional_pod/json/rbac_export.json"}
+    )
+    req.raise_for_status()
+
+
+def test_export_mls(context):
+    test_import_mls(context)
+    req = requests.get("http://{}:{}/export".format(
+       context.get("hostname"),
+       context.get("port")),
+       data={"filename":"/data/tests/functional_pod/json/mls_export.json"}
+    )
+    req.raise_for_status()
+      
 
 def get_json(data):
     return json.loads(data.decode("utf-8"))

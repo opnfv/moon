@@ -5,8 +5,11 @@ import json
 # subject_categories_test
 
 
-def get_subject_data(client, policy_id):
-    req = client.get("/policies/{}/subject_data".format(policy_id))
+def get_subject_data(client, policy_id, category_id=None):
+    if category_id is None:
+        req = client.get("/policies/{}/subject_data".format(policy_id))
+    else:
+        req = client.get("/policies/{}/subject_data/{}".format(policy_id, category_id))
     subject_data = utilities.get_json(req.data)
     return req, subject_data
 
@@ -60,8 +63,11 @@ def test_delete_subject_data():
 # object_categories_test
 
 
-def get_object_data(client, policy_id):
-    req = client.get("/policies/{}/object_data".format(policy_id))
+def get_object_data(client, policy_id, category_id=None):
+    if category_id is None:
+        req = client.get("/policies/{}/object_data".format(policy_id))
+    else:
+        req = client.get("/policies/{}/object_data/{}".format(policy_id, category_id))
     object_data = utilities.get_json(req.data)
     return req, object_data
 
@@ -115,8 +121,11 @@ def test_delete_object_data():
 # action_categories_test
 
 
-def get_action_data(client, policy_id):
-    req = client.get("/policies/{}/action_data".format(policy_id))
+def get_action_data(client, policy_id, category_id=None):
+    if category_id is None:
+        req = client.get("/policies/{}/action_data".format(policy_id))
+    else:
+        req = client.get("/policies/{}/action_data/{}".format(policy_id, category_id))
     action_data = utilities.get_json(req.data)
     return req, action_data
 
