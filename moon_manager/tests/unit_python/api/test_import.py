@@ -66,24 +66,24 @@ PRE_DATA = {"models": [{"name": "test model", "description": "", "meta_rules": [
             "meta_rules": [{"name": "good meta rule", "description": "valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "test action categories"}]},
                            {"name": "other good meta rule", "description": "valid meta rule", "subject_categories": [{"name": "other test subject categories"}], "object_categories": [{"name": "other test object categories"}], "action_categories": [{"name": "other test action categories"}]}]}
 
-SUBJECT_DATA = [{"subject_data": [{"name": "not valid subject data", "description": "", "policy": {}, "category": {}}]},
-                {"subject_data": [{"name": "not valid subject data", "description": "", "policy": {}, "category": {"name": "test subject categories"}}]},
-                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "subject_data": [{"name": "one valid subject data", "description": "description", "policy": {}, "category": {"name": "test subject categories"}}]},
-                {"subject_data": [{"name": "valid subject data", "description": "description", "policy": {"name": "test policy"}, "category": {"name": "test subject categories"}}]},
-                {"subject_data": [{"name": "valid subject data", "description": "new description", "policy": {"name": "test other policy"}, "category": {"name": "test subject categories"}}]}]
+SUBJECT_DATA = [{"subject_data": [{"name": "not valid subject data", "description": "", "policies": [{}], "category": {}}]},
+                {"subject_data": [{"name": "not valid subject data", "description": "", "policies": [{}], "category": {"name": "test subject categories"}}]},
+                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "subject_data": [{"name": "one valid subject data", "description": "description", "policies": [{}], "category": {"name": "test subject categories"}}]},
+                {"subject_data": [{"name": "valid subject data", "description": "description", "policies": [{"name": "test policy"}], "category": {"name": "test subject categories"}}]},
+                {"subject_data": [{"name": "valid subject data", "description": "new description", "policies": [{"name": "test other policy"}], "category": {"name": "test subject categories"}}]}]
 
-OBJECT_DATA = [{"object_data": [{"name": "not valid object data", "description": "", "policy": {}, "category": {}}]},
-                {"object_data": [{"name": "not valid object data", "description": "", "policy": {}, "category": {"name": "test object categories"}}]},
-                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "object_data": [{"name": "one valid object data", "description": "description", "policy": {}, "category": {"name": "test object categories"}}]},
-                {"object_data": [{"name": "valid object data", "description": "description", "policy": {"name": "test policy"}, "category": {"name": "test object categories"}}]},
-                {"object_data": [{"name": "valid object data", "description": "new description", "policy": {"name": "test other policy"}, "category": {"name": "test object categories"}}]}]
+OBJECT_DATA = [{"object_data": [{"name": "not valid object data", "description": "", "policies": [{}], "category": {}}]},
+                {"object_data": [{"name": "not valid object data", "description": "", "policies": [{}], "category": {"name": "test object categories"}}]},
+                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "object_data": [{"name": "one valid object data", "description": "description", "policies": [{}], "category": {"name": "test object categories"}}]},
+                {"object_data": [{"name": "valid object data", "description": "description", "policies": [{"name": "test policy"}], "category": {"name": "test object categories"}}]},
+                {"object_data": [{"name": "valid object data", "description": "new description", "policies": [{"name": "test other policy"}], "category": {"name": "test object categories"}}]}]
 
 
-ACTION_DATA = [{"action_data": [{"name": "not valid action data", "description": "", "policy": {}, "category": {}}]},
-                {"action_data": [{"name": "not valid action data", "description": "", "policy": {}, "category": {"name": "test action categories"}}]},
-                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "action_data": [{"name": "one valid action data", "description": "description", "policy": {}, "category": {"name": "test action categories"}}]},
-                {"action_data": [{"name": "valid action data", "description": "description", "policy": {"name": "test policy"}, "category": {"name": "test action categories"}}]},
-                {"action_data": [{"name": "valid action data", "description": "new description", "policy": {"name": "test other policy"}, "category": {"name": "test action categories"}}]}]
+ACTION_DATA = [{"action_data": [{"name": "not valid action data", "description": "", "policies": [{}], "category": {}}]},
+                {"action_data": [{"name": "not valid action data", "description": "", "policies": [{}], "category": {"name": "test action categories"}}]},
+                {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name": "test model"}, "mandatory": True}], "action_data": [{"name": "one valid action data", "description": "description", "policies": [{}], "category": {"name": "test action categories"}}]},
+                {"action_data": [{"name": "valid action data", "description": "description", "policies": [{"name": "test policy"}], "category": {"name": "test action categories"}}]},
+                {"action_data": [{"name": "valid action data", "description": "new description", "policies": [{"name": "test other policy"}], "category": {"name": "test action categories"}}]}]
 
 
 PRE_META_RULES = {"subject_categories": [{"name": "test subject categories", "description": "subject category description"}],
@@ -104,9 +104,9 @@ PRE_ASSIGNMENTS = {"models": [{"name": "test model", "description": "", "meta_ru
                    "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}],
                    "actions": [{"name": "test action", "description": "description of the action", "extra": {}, "policies": [{"name": "test policy"}]}],
                    "meta_rules": [{"name": "good meta rule", "description": "valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "test action categories"}]}],
-                   "subject_data": [{"name": "subject data", "description": "test subject data", "policy": {"name": "test policy"}, "category": {"name": "test subject categories"}}],
-                   "object_data": [{"name": "object data", "description": "test object data", "policy": {"name": "test policy"}, "category": {"name": "test object categories"}}],
-                   "action_data": [{"name": "action data", "description": "test action data", "policy": {"name": "test policy"}, "category": {"name": "test action categories"}}]}
+                   "subject_data": [{"name": "subject data", "description": "test subject data", "policies": [{"name": "test policy"}], "category": {"name": "test subject categories"}}],
+                   "object_data": [{"name": "object data", "description": "test object data", "policies": [{"name": "test policy"}], "category": {"name": "test object categories"}}],
+                   "action_data": [{"name": "action data", "description": "test action data", "policies": [{"name": "test policy"}], "category": {"name": "test action categories"}}]}
 
 
 SUBJECT_ASSIGNMENTS = [{"subject_assignments": [{"subject": {"name": "unknonw"}, "category" : {"name": "test subject categories"}, "assignments": [{"name": "subject data"}]}]},

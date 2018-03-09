@@ -15,9 +15,9 @@
 
   "subject_categories": [{ "name":"role", "description": "" }],
 
-  "subject_data": [{ "name":"admin", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}},
-                   { "name":"employee", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}},
-                   { "name":"*",  "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "role"}}],
+  "subject_data": [{ "name":"admin", "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "role"}},
+                   { "name":"employee", "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "role"}},
+                   { "name":"*",  "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "role"}}],
 
   "subject_assignments":[{ "subject" : {"name": "adminuser"}, "category" : {"name": "role"}, "assignments": [{"name" : "admin"}, {"name" : "employee"}, {"name" : "*"}]},
                          { "subject" : {"name": "user1"}, "category" : {"name": "role"}, "assignments": [{"name" : "employee"}, {"name" : "*"}] }],
@@ -32,9 +32,9 @@
 
   "object_categories": [{"name":"id", "description": ""}],
 
-  "object_data": [{ "name":"vm0", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}},
-                  { "name":"vm1", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}},
-                  { "name":"*",  "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "id"}}],
+  "object_data": [{ "name":"vm0", "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "id"}},
+                  { "name":"vm1", "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "id"}},
+                  { "name":"*",  "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "id"}}],
 
   "object_assignments":[{ "object" : {"name": "vm0"}, "category" : {"name": "id"}, "assignments": [{"name" : "vm0"}, {"name" : "*"}]},
                         { "object" : {"name": "vm1"}, "category" : {"name": "id"}, "assignments": [{"name" : "vm1"}, {"name" : "*"}]}],
@@ -49,8 +49,8 @@
 
   "action_categories": [{"name":"action-type", "description": ""}],
 
-  "action_data": [{"name":"vm-action", "description": "", "policy": {"name": "RBAC policy example"}, "category": {"name": "action-type"}},
-                  {"name":"*", "description": "", "policy": {"name" :"RBAC policy example"}, "category": {"name": "action-type"}}],
+  "action_data": [{"name":"vm-action", "description": "", "policies": [{"name": "RBAC policy example"}], "category": {"name": "action-type"}},
+                  {"name":"*", "description": "", "policies": [{"name" :"RBAC policy example"}], "category": {"name": "action-type"}}],
 
   "action_assignments":[{ "action" : {"name": "start"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}, {"name" : "*"}]},
                         { "action" : {"name": "stop"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}, {"name" : "*"}]}],

@@ -188,19 +188,20 @@ class JsonImport(Resource):
             JsonUtils.copy_field_if_exists(json_item_data, json_to_use, "description", str)
             json_policy = dict()
             # field_mandatory : not mandatory if there is some mandatory policies
-            JsonUtils.convert_name_to_id(json_item_data, json_policy, "policy", "policy_id", "policy",
+            JsonUtils.convert_names_to_ids(json_item_data, json_policy, "policies", "policy_id", "policy",
                                          PolicyManager, self._user_id, field_mandatory=len(mandatory_policy_ids) == 0)
             logger.info("json_policy {}".format(json_policy))
             json_category = dict()
             JsonUtils.convert_name_to_id(json_item_data, json_category, "category", "category_id", type_element+"_category",
                                          ModelManager, self._user_id)
             logger.info("json_category {}".format(json_category))
-            policy_id = None
+            policy_ids = []
             if "policy_id" in json_policy:
-                policy_id = json_policy["policy_id"]
+                policy_ids = json_policy["policy_id"]
 
-            if policy_id is not None and policy_id not in mandatory_policy_ids:
-                mandatory_policy_ids.append(policy_id)
+            for policy_id in policy_ids:
+                if policy_id is not None and policy_id not in mandatory_policy_ids:
+                    mandatory_policy_ids.append(policy_id)
 
             if len(mandatory_policy_ids) == 0:
                 raise InvalidJson("Invalid data, the policy shall be set when importing {}".format(json_item_data))
