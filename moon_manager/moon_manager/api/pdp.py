@@ -73,7 +73,7 @@ def add_pod(uuid, data):
             time.sleep(1)
         else:
             break
-    logger.info(req.text)
+    logger.info("Pod add request answer : {}".format(req.text))
 
 
 def check_keystone_pid(k_pid):

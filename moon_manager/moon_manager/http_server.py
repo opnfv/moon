@@ -158,4 +158,4 @@ class HTTPServer(Server):
 
     def run(self):
         self.__check_if_db_is_up()
-        self.app.run(host=self._host, port=self._port)  # nosec
+        self.app.run(host=self._host, port=self._port, threaded=True)  # nosec

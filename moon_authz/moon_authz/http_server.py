@@ -94,7 +94,7 @@ class Root(Resource):
 
 
 class HTTPServer(Server):
-    def __init__(self, host="0.0.0.0", port=38001, **kwargs):
+    def __init__(self, host="localhost", port=38001, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.component_data = kwargs.get("component_data", {})
         logger.info("HTTPServer port={} {}".format(port, kwargs))
@@ -135,4 +135,4 @@ class HTTPServer(Server):
                                   )
 
     def run(self):
-        self.app.run(host=self._host, port=self._port)  # nosec
+        self.app.run(host=self._host, port=self._port, threaded=True)  # nosec
