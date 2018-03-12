@@ -82,3 +82,7 @@ CHANGES
 1.4.6
 -----
 - Add WrapperConflict, PipelineConflict, SlaveNameUnknown exceptions
+
+1.4.7
+-----
+- Delete the auth.py file to remove some code duplication
