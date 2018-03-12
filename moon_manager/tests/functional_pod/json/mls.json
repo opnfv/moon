@@ -15,9 +15,9 @@
 
   "subject_categories": [{ "name":"subject-security-level", "description": "" }],
 
-  "subject_data": [{ "name":"low", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}},
-                   { "name":"medium", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}},
-                   { "name":"high",  "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "subject-security-level"}}],
+  "subject_data": [{ "name":"low", "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "subject-security-level"}},
+                   { "name":"medium", "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "subject-security-level"}},
+                   { "name":"high",  "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "subject-security-level"}}],
 
   "subject_assignments":[{ "subject" : {"name": "adminuser"}, "category" : {"name": "subject-security-level"}, "assignments": [{"name" : "high"}]},
                          { "subject" : {"name": "user1"}, "category" : {"name": "subject-security-level"}, "assignments": [{"name" : "medium"}] }],
@@ -32,9 +32,9 @@
 
   "object_categories": [{"name":"object-security-level", "description": ""}],
 
-  "object_data": [{ "name":"low", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}},
-                  { "name":"medium", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}},
-                  { "name":"high",  "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "object-security-level"}}],
+  "object_data": [{ "name":"low", "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "object-security-level"}},
+                  { "name":"medium", "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "object-security-level"}},
+                  { "name":"high",  "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "object-security-level"}}],
 
   "object_assignments":[{ "object" : {"name": "vm0"}, "category" : {"name": "object-security-level"}, "assignments": [{"name" : "medium"}]},
                         { "object" : {"name": "vm1"}, "category" : {"name": "object-security-level"}, "assignments": [{"name" : "low"}]}],
@@ -49,8 +49,8 @@
 
   "action_categories": [{"name":"action-type", "description": ""}],
 
-  "action_data": [{"name":"vm-action", "description": "", "policy": {"name": "MLS policy example"}, "category": {"name": "action-type"}},
-                  {"name":"storage-action", "description": "", "policy": {"name" :"MLS policy example"}, "category": {"name": "action-type"}}],
+  "action_data": [{"name":"vm-action", "description": "", "policies": [{"name": "MLS policy example"}], "category": {"name": "action-type"}},
+                  {"name":"storage-action", "description": "", "policies": [{"name" :"MLS policy example"}], "category": {"name": "action-type"}}],
 
   "action_assignments":[{ "action" : {"name": "start"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}]},
                         { "action" : {"name": "stop"}, "category" : {"name": "action-type"}, "assignments": [{"name" : "vm-action"}]}],
