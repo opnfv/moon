@@ -158,7 +158,7 @@ class HTTPServer(Server):
                               })
 
     def run(self):
-        self.app.run(host=self._host, port=self._port)  # nosec
+        self.app.run(host=self._host, port=self._port, threaded=True)  # nosec
 
     @staticmethod
     def __filter_str(data):

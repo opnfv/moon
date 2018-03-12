@@ -1,0 +1,30 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
+
+CHANGES
+=======
+
+1.0.0
+-----
+- First version of the manager
+
+2.0.0
+-----
+- Version built inside the Keystone component
+
+3.0.0
+-----
+- Version built outside the Keystone component
+
+4.0.0
+-----
+- First micro-architecture version
+
+4.3.3
+-----
+- use the threading capability of Flask app
+- set the number of manager to 1
+- update to the latest version of the python-moondb library

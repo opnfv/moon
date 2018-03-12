@@ -23,3 +23,7 @@ CHANGES
 -----
 - add bootstrap file to start Orchestrator with all configuration
 
+4.4.1
+-----
+- the processing of a request is now performed in a thread
+
