@@ -33,11 +33,11 @@ policy = {
         {"name": "demo", "description": "", "extra": {}, "policies": [{"name": "OpenStack RBAC Policy"}]}
     ],
 
-    "subject_categories": [{ "name":"role", "description": "a role in OpenStack" }],
+    "subject_categories": [{"name": "role", "description": "a role in OpenStack"}],
 
     "subject_data": [
-        { "name": "admin", "description": "the admin role", "policy": {"name": "OpenStack RBAC Policy"}, "category": {"name": "role"}},
-        { "name": "member", "description": "the member role", "policy": {"name": "OpenStack RBAC Policy"}, "category": {"name": "role"}}
+        {"name": "admin", "description": "the admin role", "policies": [], "category": {"name": "role"}},
+        {"name": "member", "description": "the member role", "policies": [], "category": {"name": "role"}}
     ],
 
     "subject_assignments": [
@@ -45,18 +45,17 @@ policy = {
         {"subject": {"name": "demo"}, "category": {"name": "role"}, "assignments": [{"name": "member"}]}
     ],
 
-    "objects": [
-        {
-            "name": "all_vm",
-            "description": "represents all virtual machines in this project",
-            "extra": {},
-            "policies": [{"name": "OpenStack RBAC Policy"}]
-        }
-    ],
+    "objects": [],
 
     "object_categories": [{"name": "id", "description": "the UID of each virtual machine"}],
 
-    "object_data": [],
+    "object_data": [
+        {
+            "name": "all_vm",
+            "description": "represents all virtual machines in this project",
+            "policies": [],
+            "category": {"name": "id"}},
+    ],
 
     "object_assignments": [],
 
