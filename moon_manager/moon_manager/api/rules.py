@@ -40,9 +40,9 @@ class Rules(Resource):
                 "policy_id": "policy_id1",
                 "meta_rule_id": "meta_rule_id1",
                 "rule_id1":
-                    ["subject_data_id1", "object_data_id1", "action_data_id1"],
+                    ["subject_data_id1", "subject_data_id2", "object_data_id1", "action_data_id1"],
                 "rule_id2":
-                    ["subject_data_id2", "object_data_id2", "action_data_id2"],
+                    ["subject_data_id3", "subject_data_id4", "object_data_id2", "action_data_id2"],
             ]
         }
         :internal_api: get_rules
