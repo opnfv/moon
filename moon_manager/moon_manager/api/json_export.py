@@ -39,11 +39,19 @@ class JsonExport(Resource):
                 JsonUtils.convert_id_to_name(policy_key, rule_dict, "policy", "policy", PolicyManager, self._user_id)
                 ids = rule["rule"]
                 rule_description = dict()
-                JsonUtils.convert_ids_to_names([ids[0]], rule_description, "subject_data", "subject_data",  PolicyManager, self._user_id, policy_key)
-                JsonUtils.convert_ids_to_names([ids[1]], rule_description, "object_data", "object_data", PolicyManager, self._user_id, policy_key)
-                JsonUtils.convert_ids_to_names([ids[2]], rule_description, "action_data", "action_data", PolicyManager, self._user_id, policy_key)
+                meta_rule = ModelManager.get_meta_rules(self._user_id, rule["meta_rule_id"])
+                meta_rule = [v for v in meta_rule.values()]
+                meta_rule = meta_rule[0]
+                index_subject_data = len(meta_rule["subject_categories"])-1
+                index_object_data = len(meta_rule["subject_categories"]) + len(meta_rule["object_categories"])-1
+                index_action_data = len(meta_rule["subject_categories"]) + len(meta_rule["object_categories"]) + len(meta_rule["action_categories"])-1
+                ids_subject_data = [ids[0]] if len(meta_rule["subject_categories"]) == 1 else ids[0:index_subject_data]
+                ids_object_data = [ids[index_object_data]] if len(meta_rule["object_categories"]) == 1 else ids[index_subject_data+1:index_object_data]
+                ids_action_date = [ids[index_action_data]] if len(meta_rule["action_categories"]) == 1 else ids[index_object_data+1:index_action_data]
+                JsonUtils.convert_ids_to_names(ids_subject_data, rule_description, "subject_data", "subject_data",  PolicyManager, self._user_id, policy_key)
+                JsonUtils.convert_ids_to_names(ids_object_data, rule_description, "object_data", "object_data", PolicyManager, self._user_id, policy_key)
+                JsonUtils.convert_ids_to_names(ids_action_date, rule_description, "action_data", "action_data", PolicyManager, self._user_id, policy_key)
                 rule_dict["rule"] = rule_description
-                logger.info("Exporting rule {}".format(rule_dict))
                 rules_array.append(rule_dict)
 
         if len(rules_array) > 0:

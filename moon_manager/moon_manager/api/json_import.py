@@ -79,6 +79,23 @@ class JsonImport(Resource):
         "/import/",
     )
 
+    def _reorder_rules_ids(self, rule, ordered_perimeter_categories_ids, json_data_ids, policy_id, get_function):
+        ordered_json_ids = [None]*len(ordered_perimeter_categories_ids)
+        logger.info("ordered_json_ids {}".format(ordered_json_ids))
+        logger.info("json_data_ids {}".format(json_data_ids))
+        for json_id in json_data_ids:
+            logger.info("json_id {}".format(json_id))
+            data = get_function(self._user_id, policy_id, data_id=json_id)
+            data = data[0]
+            logger.info("data {}".format(data))
+            if data["category_id"] not in ordered_perimeter_categories_ids:
+                raise InvalidJson("The category id {} of the rule {} does not match the meta rule".format(data["category_id"], rule))
+            if ordered_json_ids[ordered_perimeter_categories_ids.index(data["category_id"])] is not None:
+                raise InvalidJson("The category id {} of the rule {} shall not be used twice in the same rule".format(data["category_id"], rule))
+            ordered_json_ids[ordered_perimeter_categories_ids.index(data["category_id"])] = json_id
+            logger.info(ordered_json_ids)
+        return ordered_json_ids
+
     def _import_rules(self, json_rules):
         if not isinstance(json_rules, list):
             raise InvalidJson("rules shall be a list!")
@@ -91,26 +108,28 @@ class JsonImport(Resource):
             json_ids = dict()
             JsonUtils.convert_name_to_id(json_rule, json_ids, "policy", "policy_id", "policy", PolicyManager, self._user_id)
             JsonUtils.convert_name_to_id(json_rule, json_to_use, "meta_rule", "meta_rule_id", "meta_rule", ModelManager, self._user_id)
-
             json_subject_ids = dict()
             json_object_ids = dict()
             json_action_ids = dict()
-            json_rule_to_use = dict()
             JsonUtils.convert_names_to_ids(json_rule["rule"], json_subject_ids, "subject_data", "subject", "subject_data", PolicyManager, self._user_id, json_ids["policy_id"])
             JsonUtils.convert_names_to_ids(json_rule["rule"], json_object_ids, "object_data", "object", "object_data", PolicyManager, self._user_id, json_ids["policy_id"])
             JsonUtils.convert_names_to_ids(json_rule["rule"], json_action_ids, "action_data", "action", "action_data", PolicyManager, self._user_id, json_ids["policy_id"])
-            logger.info(json_rule_to_use)
-            for json_subject_id in json_subject_ids["subject"]:
-                for json_object_id in json_object_ids["object"]:
-                    for json_action_id in json_action_ids["action"]:
-                        json_to_use["rule"] = [json_subject_id, json_object_id, json_action_id]
-                    try:
-                        logger.info("Adding / updating a rule from json {}".format(json_to_use))
-                        PolicyManager.add_rule(self._user_id, json_ids["policy_id"], json_to_use["meta_rule_id"], json_to_use)
-                    except exceptions.RuleExisting:
-                        pass
-                    except exceptions.PolicyUnknown:
-                        raise UnknownPolicy("Unknown policy with id {}".format(json_ids["policy_id"]))
+
+            meta_rule = ModelManager.get_meta_rules(self._user_id, json_to_use["meta_rule_id"])
+            meta_rule = [v for v in meta_rule.values()]
+            meta_rule = meta_rule[0]
+
+            json_to_use_rule = self._reorder_rules_ids(json_rule, meta_rule["subject_categories"], json_subject_ids["subject"], json_ids["policy_id"], PolicyManager.get_subject_data)
+            json_to_use_rule = json_to_use_rule + self._reorder_rules_ids(json_rule, meta_rule["object_categories"], json_object_ids["object"], json_ids["policy_id"], PolicyManager.get_object_data)
+            json_to_use_rule = json_to_use_rule + self._reorder_rules_ids(json_rule, meta_rule["action_categories"], json_action_ids["action"], json_ids["policy_id"], PolicyManager.get_action_data)
+            json_to_use["rule"] = json_to_use_rule
+            try:
+                logger.info("Adding / updating a rule from json {}".format(json_to_use))
+                PolicyManager.add_rule(self._user_id, json_ids["policy_id"], json_to_use["meta_rule_id"], json_to_use)
+            except exceptions.RuleExisting:
+                pass
+            except exceptions.PolicyUnknown:
+                raise UnknownPolicy("Unknown policy with id {}".format(json_ids["policy_id"]))
 
     def _import_meta_rules(self, json_meta_rules):
         logger.info("Input meta rules : {}".format(json_meta_rules))
