@@ -3,5 +3,5 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-__version__ = "1.2.6"
+__version__ = "1.2.7"
 
