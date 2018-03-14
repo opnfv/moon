@@ -112,6 +112,7 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "perimeter")
     def add_action(self, user_id, policy_id, perimeter_id=None, value=None):
+        logger.info("add_action {}".format(policy_id))
         if not self.get_policies(user_id=user_id, policy_id=policy_id):
             raise exceptions.PolicyUnknown
         if not perimeter_id:

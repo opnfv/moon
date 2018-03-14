@@ -95,8 +95,8 @@ class JsonExport(Resource):
                         JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
                         JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
                     else:
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key]["value"], data_dict, "name", str)
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key]["value"], data_dict, "description", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
 
                     JsonUtils.convert_id_to_name(policy_id, data_dict, "policy", "policy", PolicyManager, self._user_id)
                     JsonUtils.convert_id_to_name(category_id, data_dict, "category", type_element + "_category", ModelManager, self._user_id, policy_key)
