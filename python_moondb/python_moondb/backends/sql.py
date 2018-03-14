@@ -892,7 +892,7 @@ class ModelConnector(BaseConnector, ModelDriver):
         return self.__add_perimeter_category(ObjectCategory, name, description, uuid=uuid)
 
     def delete_object_category(self, category_id):
-        self.__delete_perimeter_category(SubjectCategory, category_id)
+        self.__delete_perimeter_category(ObjectCategory, category_id)
 
     def get_action_categories(self, category_id=None):
         return self.__get_perimeter_categories(ActionCategory, category_id=category_id)
@@ -901,7 +901,7 @@ class ModelConnector(BaseConnector, ModelDriver):
         return self.__add_perimeter_category(ActionCategory, name, description, uuid=uuid)
 
     def delete_action_category(self, category_id):
-        self.__delete_perimeter_category(SubjectCategory, category_id)
+        self.__delete_perimeter_category(ActionCategory, category_id)
 
     # Getter and Setter for subject_category
 

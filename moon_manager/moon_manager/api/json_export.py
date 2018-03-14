@@ -1,3 +1,8 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import logging
 from flask_restful import Resource
 from python_moonutilities.security_functions import check_auth
@@ -95,8 +100,8 @@ class JsonExport(Resource):
                         JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
                         JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
                     else:
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key]["value"], data_dict, "name", str)
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key]["value"], data_dict, "description", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
 
                     JsonUtils.convert_id_to_name(policy_id, data_dict, "policy", "policy", PolicyManager, self._user_id)
                     JsonUtils.convert_id_to_name(category_id, data_dict, "category", type_element + "_category", ModelManager, self._user_id, policy_key)

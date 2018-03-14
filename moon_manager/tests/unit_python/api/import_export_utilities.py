@@ -1,3 +1,8 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import api.utilities as utilities
 import api.test_models as test_models
 import api.test_policies as test_policies
@@ -7,6 +12,10 @@ import api.test_data as test_data
 import api.meta_rules_test as test_meta_rules
 import api.test_assignemnt as test_assignments
 import api.test_rules as test_rules
+import logging
+
+logger = logging.getLogger("moon.manager.test.api." + __name__)
+
 
 def clean_models(client):
     req, models = test_models.get_models(client)
@@ -25,9 +34,11 @@ def clean_policies(client):
 
 def clean_subjects(client):
     subjects = test_perimeter.get_subjects(client)
+    logger.info("subjects {}".format(subjects))
     for key in subjects["subjects"]:
         subject = subjects["subjects"][key]
         policy_keys = subject["policy_list"]
+        logger.info("subjects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
             client.delete("/policies/{}/subjects/{}".format(policy_key,key))
         client.delete("/subjects/{}".format(key))
@@ -36,9 +47,11 @@ def clean_subjects(client):
 
 def clean_objects(client):
     objects = test_perimeter.get_objects(client)
+    logger.info("objects {}".format(objects))
     for key in objects["objects"]:
         object_ = objects["objects"][key]
         policy_keys = object_["policy_list"]
+        logger.info("objects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
             print("/policies/{}/objects/{}".format(policy_key, key))
             req = client.delete("/policies/{}/objects/{}".format(policy_key, key))
@@ -48,9 +61,11 @@ def clean_objects(client):
 
 def clean_actions(client):
     actions = test_perimeter.get_actions(client)
+    logger.info("objects {}".format(actions))
     for key in actions["actions"]:
         action = actions["actions"][key]
         policy_keys = action["policy_list"]
+        logger.info("action policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
             client.delete("/policies/{}/actions/{}".format(policy_key, key))
         client.delete("/actions/{}".format(key))
@@ -59,19 +74,21 @@ def clean_actions(client):
 
 def clean_subject_categories(client):
     req, categories = test_categories.get_subject_categories(client)
-    print(categories)
+    logger.info(categories)
     for key in categories["subject_categories"]:
         client.delete("/subject_categories/{}".format(key))
 
 
 def clean_object_categories(client):
     req, categories = test_categories.get_object_categories(client)
+    logger.info(categories)
     for key in categories["object_categories"]:
         client.delete("/object_categories/{}".format(key))
 
 
 def clean_action_categories(client):
     req, categories = test_categories.get_action_categories(client)
+    logger.info(categories)
     for key in categories["action_categories"]:
         client.delete("/action_categories/{}".format(key))
 
@@ -174,8 +191,9 @@ def clean_all(client):
     clean_object_data(client)
     clean_action_data(client)
 
-    clean_policies(client)
-    clean_models(client)
     clean_actions(client)
     clean_objects(client)
     clean_subjects(client)
+
+    clean_policies(client)
+    clean_models(client)

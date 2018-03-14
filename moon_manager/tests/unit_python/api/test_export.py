@@ -1,3 +1,8 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import json
 import api.utilities as utilities
 import api.import_export_utilities as import_export_utilities
@@ -169,7 +174,6 @@ def test_export_subject_object_action_categories():
     req = client.get("/export")
     assert req.status_code == 200
     data = utilities.get_json(req.data)
-    print(data)
     assert "content" in data
     type_elements = ["subject", "object", "action"]
     for type_element in type_elements:

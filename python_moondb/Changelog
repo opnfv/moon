@@ -61,3 +61,7 @@ CHANGES
 -----
 - Remove some code duplication in moon_db
 - handle the extra field for the perimeter
+
+1.2.7
+-----
+- Fix some bugs
