@@ -513,3 +513,5 @@ def test_import_subject_object_action_data():
 def test_clean():
     client = utilities.register_client()
     import_export_utilities.clean_all(client)
+    #restore the database as previously
+    utilities.get_policy_id()

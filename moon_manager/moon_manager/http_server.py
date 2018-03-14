@@ -114,9 +114,9 @@ class CustomApi(Api):
 
     def handle_error(self, e):
         try:
-            error_message = dumps({'message': str(e)})
+            error_message = dumps({'message': str(e), "code": getattr(e, "code", 500)})
             logger.error(error_message)
-            return make_response(error_message, e.code)
+            return make_response(error_message, getattr(e, "code", 500))
         except Exception as e2: # unhandled exception in the api...
             logger.error(str(e2))
             return make_response(error_message, 500)

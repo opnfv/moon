@@ -169,7 +169,6 @@ def test_export_subject_object_action_categories():
     req = client.get("/export")
     assert req.status_code == 200
     data = utilities.get_json(req.data)
-    print(data)
     assert "content" in data
     type_elements = ["subject", "object", "action"]
     for type_element in type_elements:
