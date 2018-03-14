@@ -7,4 +7,5 @@ werkzeug
 flask
 requests
 pytest
+pytest-cov
 requests_mock
