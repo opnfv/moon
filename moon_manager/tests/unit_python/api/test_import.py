@@ -1,3 +1,8 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import api.utilities as utilities
 import api.test_models as test_models
 import api.test_policies as test_policies
@@ -513,3 +518,5 @@ def test_import_subject_object_action_data():
 def test_clean():
     client = utilities.register_client()
     import_export_utilities.clean_all(client)
+    #restore the database as previously
+    utilities.get_policy_id()

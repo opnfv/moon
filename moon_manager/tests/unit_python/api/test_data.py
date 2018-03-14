@@ -1,3 +1,8 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
 import api.utilities as utilities
 import json
 
@@ -106,8 +111,12 @@ def test_add_object_data():
     value = object_data["object_data"]['data']
     assert "object_data" in object_data
     id = list(value.keys())[0]
-    assert value[id]['value']['name'] == "testuser"
-    assert value[id]['value']['description'] == "description of {}".format("testuser")
+    print("-----------------------")
+    print(id)
+    print(value[id])
+    print("-----------------------")
+    assert value[id]['name'] == "testuser"
+    assert value[id]['description'] == "description of {}".format("testuser")
 
 
 def test_delete_object_data():
@@ -164,8 +173,8 @@ def test_add_action_data():
     value = action_data["action_data"]['data']
     assert "action_data" in action_data
     id = list(value.keys())[0]
-    assert value[id]['value']['name'] == "testuser"
-    assert value[id]['value']['description'] == "description of {}".format("testuser")
+    assert value[id]['name'] == "testuser"
+    assert value[id]['description'] == "description of {}".format("testuser")
 
 
 def test_delete_action_data():
