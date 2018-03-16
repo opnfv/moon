@@ -1,5 +1,7 @@
 import pytest
-
+from python_moonutilities.exceptions import *
+import logging
+logger = logging.getLogger("moon.db.tests.test_model")
 
 def get_models(model_id=None):
     from python_moondb.core import ModelManager
@@ -9,8 +11,9 @@ def get_models(model_id=None):
 def add_model(model_id=None, value=None):
     from python_moondb.core import ModelManager
     if not value:
+        name = "MLS" if model_id is None else "MLS " + model_id
         value = {
-            "name": "MLS",
+            "name": name,
             "description": "test",
             "meta_rules": "meta_rule_mls_1"
         }
@@ -25,6 +28,14 @@ def delete_models(uuid=None, name=None):
                 uuid = model_id
                 break
     ModelManager.delete_model(user_id=None, model_id=uuid)
+
+
+def delete_all_models():
+    from python_moondb.core import ModelManager
+    models_values = get_models()
+    print(models_values)
+    for model_id, model_value in models_values.items():
+        ModelManager.delete_model(user_id=None, model_id=model_id)
 
 
 def update_model(model_id=None, value=None):
@@ -49,7 +60,7 @@ def test_get_model(db):
     assert isinstance(models, dict)
     assert models  # assert model is not empty
     assert len(models) is 1
-
+    delete_all_models()
 
 def test_get_specific_model(db):
     # prepare
@@ -61,7 +72,7 @@ def test_get_specific_model(db):
     assert isinstance(models, dict)
     assert models  # assert model is not empty
     assert len(models) is 1
-
+    delete_all_models()
 
 def test_add_model(db):
     # act
@@ -70,15 +81,17 @@ def test_add_model(db):
     assert isinstance(model, dict)
     assert model  # assert model is not empty
     assert len(model) is 1
+    delete_all_models()
 
 
 def test_add_same_model_twice(db):
     # prepare
     add_model(model_id="model_1")  # add model twice
     # act
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ModelExisting) as exception_info:
         add_model(model_id="model_1")
-    assert str(exception_info.value) == '409: Model Error'
+    delete_all_models()
+    #assert str(exception_info.value) == '409: Model Error'
 
 
 def test_add_model_generate_new_uuid(db):
@@ -97,6 +110,7 @@ def test_add_model_generate_new_uuid(db):
     model2 = add_model(value=model_value2)
 
     assert list(model1)[0] != list(model2)[0]
+    delete_all_models()
 
 
 def test_add_models(db):
@@ -113,6 +127,7 @@ def test_add_models(db):
     for key in ("name", "meta_rules", "description"):
         assert key in models[model_id]
         assert models[model_id][key] == model_value1[key]
+    delete_all_models()
 
 
 def test_delete_models(db):
@@ -135,6 +150,7 @@ def test_delete_models(db):
     # assert
     models = get_models()
     assert id not in models
+    delete_all_models()
 
 
 def test_update_model(db):
@@ -147,7 +163,7 @@ def test_update_model(db):
     model = add_model(value=model_value)
     model_id = list(model)[0]
     new_model_value = {
-        "name": "MLS",
+        "name": "MLS2",
         "description": "test",
         "meta_rules": "meta_rule_mls_2"
     }
@@ -159,3 +175,4 @@ def test_update_model(db):
     for key in ("name", "meta_rules", "description"):
         assert key in model[model_id]
         assert model[model_id][key] == new_model_value[key]
+    delete_all_models()

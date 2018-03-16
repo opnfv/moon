@@ -1,5 +1,6 @@
 import policies.mock_data as mock_data
-
+from python_moonutilities.exceptions import *
+import pytest
 
 def get_action_assignments(policy_id, action_id=None, category_id=None):
     from python_moondb.core import PolicyManager
@@ -93,11 +94,13 @@ def test_add_action_assignments(db):
     assert len(action_assignments[action_id_1].get("assignments")) == 1
     assert data_id in action_assignments[action_id_1].get("assignments")
 
+    with pytest.raises(ActionAssignmentExisting) as exception_info:
+        add_action_assignment(policy_id, action_id, category_id, data_id)
 
 def test_delete_action_assignment(db):
     policy_id = mock_data.get_policy_id()
     add_action_assignment(policy_id, "", "", "")
-    policy_id = mock_data.get_policy_id()
+    policy_id = mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2", category_prefix="_")
     action_id = "action_id_2"
     category_id = "category_id_2"
     data_id = "data_id_2"
@@ -160,6 +163,9 @@ def test_add_object_assignments(db):
     assert object_assignments[object_id_1]["category_id"] == category_id
     assert len(object_assignments[object_id_1].get("assignments")) == 1
     assert data_id in object_assignments[object_id_1].get("assignments")
+
+    with pytest.raises(ObjectAssignmentExisting):
+        add_object_assignment(policy_id, object_id, category_id, data_id)
 
 
 def test_delete_object_assignment(db):
@@ -227,6 +233,9 @@ def test_add_subject_assignments(db):
     assert subject_assignments[subject_id_1]["category_id"] == category_id
     assert len(subject_assignments[subject_id_1].get("assignments")) == 1
     assert data_id in subject_assignments[subject_id_1].get("assignments")
+
+    with pytest.raises(SubjectAssignmentExisting):
+        add_subject_assignment(policy_id, subject_id, category_id, data_id)
 
 
 def test_delete_subject_assignment(db):

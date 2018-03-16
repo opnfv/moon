@@ -127,7 +127,6 @@ def test_get_meta_rule_success(db):
 
 def test_get_specific_meta_rule_success(db):
     # arrange
-    add_meta_rule()
     added_meta_rules  = add_meta_rule()
     added_meta_rule_id = list(added_meta_rules.keys())[0]
     # action

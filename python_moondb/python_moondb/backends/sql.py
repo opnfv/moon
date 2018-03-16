@@ -16,6 +16,7 @@ from sqlalchemy import types as sql_types
 from python_moonutilities import configuration
 from python_moonutilities.exceptions import *
 from python_moondb.core import PDPDriver, PolicyDriver, ModelDriver
+import sqlalchemy
 
 logger = logging.getLogger("moon.db.driver.sql")
 Base = declarative_base()
@@ -61,13 +62,14 @@ class JsonBlob(sql_types.TypeDecorator):
 
 class Model(Base, DictBase):
     __tablename__ = 'models'
-    attributes = ['id', 'value']
+    attributes = ['id', 'name', 'value']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
     value = sql.Column(JsonBlob(), nullable=True)
 
     def to_dict(self):
         return {
-            "name": self.value.get("name"),
+            "name": self.name,
             "description": self.value.get("description", ""),
             "meta_rules": self.value.get("meta_rules", list()),
         }
@@ -75,30 +77,34 @@ class Model(Base, DictBase):
 
 class Policy(Base, DictBase):
     __tablename__ = 'policies'
-    attributes = ['id', 'value']
+    attributes = ['id', 'name', 'model_id', 'value']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
+    model_id = sql.Column(sql.String(64), nullable=True, default="")
     value = sql.Column(JsonBlob(), nullable=True)
 
     def to_dict(self):
         return {
-            "name": self.value.get("name"),
             "description": self.value.get("description", ""),
-            "model_id": self.value.get("model_id", ""),
             "genre": self.value.get("genre", ""),
+            "model_id": self.model_id,
+            "name": self.name
         }
 
 
 class PDP(Base, DictBase):
     __tablename__ = 'pdp'
-    attributes = ['id', 'value']
+    attributes = ['id', 'name', 'keystone_project_id', 'value']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
+    keystone_project_id = sql.Column(sql.String(64), nullable=True, default="")
     value = sql.Column(JsonBlob(), nullable=True)
 
     def to_dict(self):
         return {
-            "name": self.value.get("name"),
+            "name": self.name,
             "description": self.value.get("description", ""),
-            "keystone_project_id": self.value.get("keystone_project_id", ""),
+            "keystone_project_id": self.keystone_project_id,
             "security_pipeline": self.value.get("security_pipeline", []),
         }
 
@@ -123,17 +129,18 @@ class ActionCategory(Base, PerimeterCategoryBase):
 
 
 class PerimeterBase(DictBase):
-    attributes = ['id', 'value']
+    attributes = ['id', 'name', 'value']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
     value = sql.Column(JsonBlob(), nullable=True)
     __mapper_args__ = {'concrete': True}
     def __repr__(self):
-        return "{}: {}".format(self.id, json.dumps(self.value))
+        return "{} with name {} : {}".format(self.id, self.name, json.dumps(self.value))
 
     def to_return(self):
         return {
             'id': self.id,
-            'name': self.value.get("name", ""),
+            'name': self.name,
             'description': self.value.get("description", ""),
             'email': self.value.get("email", ""),
             'extra': self.value.get("extra", dict()),
@@ -141,11 +148,12 @@ class PerimeterBase(DictBase):
         }
 
     def to_dict(self):
+        dict_value = copy.deepcopy(self.value)
+        dict_value["name"] = self.name
         return {
             'id': self.id,
-            'value': self.value
+            'value': dict_value
         }
-
 
 class Subject(Base, PerimeterBase):
     __tablename__ = 'subjects'
@@ -160,8 +168,9 @@ class Action(Base, PerimeterBase):
 
 
 class PerimeterDataBase(DictBase):
-    attributes = ['id', 'value', 'category_id', 'policy_id']
+    attributes = ['id', 'name', 'value', 'category_id', 'policy_id']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
     value = sql.Column(JsonBlob(), nullable=True)
     @declared_attr
     def policy_id(cls):
@@ -170,7 +179,7 @@ class PerimeterDataBase(DictBase):
     def to_dict(self):
         return {
             'id': self.id,
-            'name': self.value.get("name", ""),
+            'name': self.name,
             'description': self.value.get("description", ""),
             'category_id': self.category_id,
             'policy_id': self.policy_id
@@ -243,17 +252,21 @@ class ActionAssignment(Base, PerimeterAssignmentBase):
 
 class MetaRule(Base, DictBase):
     __tablename__ = 'meta_rules'
-    attributes = ['id', 'value']
+    attributes = ['id', 'name', 'subject_categories', 'object_categories', 'action_categories', 'value']
     id = sql.Column(sql.String(64), primary_key=True)
+    name = sql.Column(sql.String(256), nullable=False)
+    subject_categories =  sql.Column(JsonBlob(), nullable=True)
+    object_categories = sql.Column(JsonBlob(), nullable=True)
+    action_categories = sql.Column(JsonBlob(), nullable=True)
     value = sql.Column(JsonBlob(), nullable=True)
 
     def to_dict(self):
         return {
-            "name": self.value["name"],
+            "name": self.name,
             "description": self.value.get("description", ""),
-            "subject_categories": self.value.get("subject_categories", list()),
-            "object_categories": self.value.get("object_categories", list()),
-            "action_categories": self.value.get("action_categories", list()),
+            "subject_categories": self.subject_categories,
+            "object_categories": self.object_categories,
+            "action_categories": self.action_categories,
         }
 
 
@@ -323,15 +336,23 @@ class BaseConnector(object):
 class PDPConnector(BaseConnector, PDPDriver):
 
     def update_pdp(self, pdp_id, value):
-        with self.get_session_for_write() as session:
-            query = session.query(PDP)
-            query = query.filter_by(id=pdp_id)
-            ref = query.first()
-            if ref:
-                d = dict(ref.value)
-                d.update(value)
-                setattr(ref, "value", d)
-            return {ref.id: ref.to_dict()}
+        try:
+            with self.get_session_for_write() as session:
+                query = session.query(PDP)
+                query = query.filter_by(id=pdp_id)
+                ref = query.first()
+                if ref:
+                    value_wo_name = copy.deepcopy(value)
+                    value_wo_name.pop("name", None)
+                    value_wo_name.pop("keystone_project_id", None)
+                    ref.name = value["name"]
+                    ref.keystone_project_id = value["keystone_project_id"]
+                    d = dict(ref.value)
+                    d.update(value_wo_name)
+                    setattr(ref, "value", d)
+                return {ref.id: ref.to_dict()}
+        except sqlalchemy.exc.IntegrityError:
+            raise PdpExisting
 
     def delete_pdp(self, pdp_id):
         with self.get_session_for_write() as session:
@@ -339,13 +360,21 @@ class PDPConnector(BaseConnector, PDPDriver):
             session.delete(ref)
 
     def add_pdp(self, pdp_id=None, value=None):
-        with self.get_session_for_write() as session:
-            new = PDP.from_dict({
-                "id": pdp_id if pdp_id else uuid4().hex,
-                "value": value
-            })
-            session.add(new)
-            return {new.id: new.to_dict()}
+        try:
+            with self.get_session_for_write() as session:
+                value_wo_name = copy.deepcopy(value)
+                value_wo_name.pop("name", None)
+                value_wo_name.pop("keystone_project_id", None)
+                new = PDP.from_dict({
+                    "id": pdp_id if pdp_id else uuid4().hex,
+                    "name": value["name"],
+                    "keystone_project_id": value["keystone_project_id"],
+                    "value": value_wo_name
+                })
+                session.add(new)
+                return {new.id: new.to_dict()}
+        except sqlalchemy.exc.IntegrityError:
+            raise PdpExisting
 
     def get_pdp(self, pdp_id=None):
         with self.get_session_for_read() as session:
@@ -364,8 +393,13 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             query = query.filter_by(id=policy_id)
             ref = query.first()
             if ref:
+                value_wo_other_info = copy.deepcopy(value)
+                value_wo_other_info.pop("name", None)
+                value_wo_other_info.pop("model_id", None)
+                ref.name = value["name"]
+                ref.model_id= value["model_id"]
                 d = dict(ref.value)
-                d.update(value)
+                d.update(value_wo_other_info)
                 setattr(ref, "value", d)
             return {ref.id: ref.to_dict()}
 
@@ -376,9 +410,14 @@ class PolicyConnector(BaseConnector, PolicyDriver):
 
     def add_policy(self, policy_id=None, value=None):
         with self.get_session_for_write() as session:
+            value_wo_other_info = copy.deepcopy(value)
+            value_wo_other_info.pop("name", None)
+            value_wo_other_info.pop("model_id", None)
             new = Policy.from_dict({
                 "id": policy_id if policy_id else uuid4().hex,
-                "value": value
+                "name": value["name"],
+                "model_id": value["model_id"],
+                "value": value_wo_other_info
             })
             session.add(new)
             return {new.id: new.to_dict()}
@@ -412,21 +451,26 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 return {_ref.id: _ref.to_return() for _ref in results}
             return {_ref.id: _ref.to_return() for _ref in ref_list}
 
-    def __set_perimeter(self, ClassType, policy_id, perimeter_id=None, value=None):
+    def __set_perimeter(self, ClassType, ClassTypeException, policy_id, perimeter_id=None, value=None):
         _perimeter = None
         with self.get_session_for_write() as session:
             if perimeter_id:
                 query = session.query(ClassType)
                 query = query.filter_by(id=perimeter_id)
                 _perimeter = query.first()
+                logger.info("+++++++++++++ {}".format(_perimeter))
             if not _perimeter:
                 if "policy_list" not in value or type(value["policy_list"]) is not list:
                     value["policy_list"] = []
                 if policy_id and policy_id not in value["policy_list"]:
                     value["policy_list"] = [policy_id, ]
+
+                value_wo_name = copy.deepcopy(value)
+                value_wo_name.pop("name",None)
                 new = ClassType.from_dict({
-                    "id": perimeter_id if perimeter_id else uuid4().hex,
-                    "value": value
+                    "id": uuid4().hex,
+                    "name": value["name"],
+                    "value": value_wo_name
                 })
                 session.add(new)
                 return {new.id: new.to_return()}
@@ -436,9 +480,19 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                     _value["value"]["policy_list"] = []
                 if policy_id and policy_id not in _value["value"]["policy_list"]:
                     _value["value"]["policy_list"].append(policy_id)
-                new_perimeter = ClassType.from_dict(_value)
-                # setattr(_subject, "value", _value["value"])
-                setattr(_perimeter, "value", getattr(new_perimeter, "value"))
+                logger.info("-------------_value- {}".format(_value))
+
+                name = _value["value"]["name"]
+                _value["value"].pop("name")
+                new_perimeter = ClassType.from_dict({
+                    "id": _value["id"],
+                    "name": name,
+                    "value": _value["value"]
+                })
+                logger.info("-------------- new {}".format(new_perimeter))
+                logger.info("-------------- old {}".format(_perimeter))
+                _perimeter.value = new_perimeter.value
+                _perimeter.name = new_perimeter.name
                 return {_perimeter.id: _perimeter.to_return()}
 
     def __delete_perimeter(self,ClassType, ClassUnknownException, policy_id, perimeter_id):
@@ -462,7 +516,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeters(Subject, policy_id, perimeter_id)
 
     def set_subject(self, policy_id, perimeter_id=None, value=None):
-        return self.__set_perimeter(Subject, policy_id, perimeter_id=perimeter_id, value=value)
+        try:
+            return self.__set_perimeter(Subject, SubjectExisting, policy_id, perimeter_id=perimeter_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise SubjectExisting
 
     def delete_subject(self, policy_id, perimeter_id):
         self.__delete_perimeter(Subject, SubjectUnknown, policy_id, perimeter_id)
@@ -471,7 +528,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeters(Object, policy_id, perimeter_id)
 
     def set_object(self, policy_id, perimeter_id=None, value=None):
-        return self.__set_perimeter(Object, policy_id, perimeter_id=perimeter_id, value=value)
+        try:
+            return self.__set_perimeter(Object, ObjectExisting, policy_id, perimeter_id=perimeter_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise ObjectExisting
 
     def delete_object(self, policy_id, perimeter_id):
         self.__delete_perimeter(Object, ObjectUnknown, policy_id, perimeter_id)
@@ -480,7 +540,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeters(Action, policy_id, perimeter_id)
 
     def set_action(self, policy_id, perimeter_id=None, value=None):
-        return self.__set_perimeter(Action, policy_id, perimeter_id=perimeter_id, value=value)
+        try:
+            return self.__set_perimeter(Action, ActionExisting, policy_id, perimeter_id=perimeter_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise ActionExisting
 
     def delete_action(self, policy_id, perimeter_id):
         self.__delete_perimeter(Action, ActionUnknown, policy_id, perimeter_id)
@@ -507,10 +570,13 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             query = query.filter_by(policy_id=policy_id, id=data_id, category_id=category_id)
             ref = query.first()
             if not ref:
+                value_wo_name = copy.deepcopy(value)
+                value_wo_name.pop("name", None)
                 new_ref = ClassTypeData.from_dict(
                     {
                         "id": data_id if data_id else uuid4().hex,
-                        'value': value,
+                        'name': value["name"],
+                        'value': value_wo_name,
                         'category_id': category_id,
                         'policy_id': policy_id,
                     }
@@ -540,7 +606,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeter_data(SubjectData, policy_id, data_id=data_id, category_id=category_id)
 
     def set_subject_data(self, policy_id, data_id=None, category_id=None, value=None):
-        return self.__set_perimeter_data(Subject, SubjectData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        try:
+            return self.__set_perimeter_data(Subject, SubjectData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise SubjectScopeExisting
 
     def delete_subject_data(self, policy_id, data_id):
         return self.__delete_perimeter_data(SubjectData, policy_id, data_id)
@@ -549,7 +618,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeter_data(ObjectData, policy_id, data_id=data_id, category_id=category_id)
 
     def set_object_data(self, policy_id, data_id=None, category_id=None, value=None):
-        return self.__set_perimeter_data(Object, ObjectData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        try:
+            return self.__set_perimeter_data(Object, ObjectData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise ObjectScopeExisting
 
     def delete_object_data(self, policy_id, data_id):
         return self.__delete_perimeter_data(ObjectData, policy_id, data_id)
@@ -558,7 +630,10 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__get_perimeter_data(ActionData, policy_id, data_id=data_id, category_id=category_id)
 
     def set_action_data(self, policy_id, data_id=None, category_id=None, value=None):
-        return self.__set_perimeter_data(Action, ActionData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        try:
+            return self.__set_perimeter_data(Action, ActionData, policy_id, data_id=data_id, category_id=category_id, value=value)
+        except sqlalchemy.exc.IntegrityError:
+            raise ActionScopeExisting
 
     def delete_action_data(self, policy_id, data_id):
         return self.__delete_perimeter_data(ActionData, policy_id, data_id)
@@ -587,6 +662,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if data_id not in assignments:
                     assignments.append(data_id)
                     setattr(ref, "assignments", assignments)
+                else:
+                    raise SubjectAssignmentExisting
             else:
                 ref = SubjectAssignment.from_dict(
                     {
@@ -640,6 +717,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if data_id not in assignments:
                     assignments.append(data_id)
                     setattr(ref, "assignments", assignments)
+                else:
+                    raise ObjectAssignmentExisting
             else:
                 ref = ObjectAssignment.from_dict(
                     {
@@ -693,6 +772,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 if data_id not in assignments:
                     assignments.append(data_id)
                     setattr(ref, "assignments", assignments)
+                else:
+                    raise ActionAssignmentExisting
             else:
                 ref = ActionAssignment.from_dict(
                     {
@@ -746,13 +827,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 }
 
     def add_rule(self, policy_id, meta_rule_id, value):
-        with self.get_session_for_write() as session:
-            query = session.query(Rule)
-            query = query.filter_by(policy_id=policy_id, meta_rule_id=meta_rule_id)
-            ref_list = query.all()
-            rules = list(map(lambda x: x.rule, ref_list))
-            if not rules or value not in rules:
-                logger.info("add_rule IN IF")
+        try:
+            with self.get_session_for_write() as session:
                 ref = Rule.from_dict(
                     {
                         "id": uuid4().hex,
@@ -763,7 +839,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
                 )
                 session.add(ref)
                 return {ref.id: ref.to_dict()}
-            return {}
+        except sqlalchemy.exc.IntegrityError:
+            raise RuleExisting
 
     def delete_rule(self, policy_id, rule_id):
         with self.get_session_for_write() as session:
@@ -783,8 +860,11 @@ class ModelConnector(BaseConnector, ModelDriver):
                 query = query.filter_by(id=model_id)
             ref = query.first()
             if ref:
+                value_wo_name = copy.deepcopy(value)
+                value_wo_name.pop("name", None)
+                setattr(ref, "name", value["name"])
                 d = dict(ref.value)
-                d.update(value)
+                d.update(value_wo_name)
                 setattr(ref, "value", d)
             return {ref.id: ref.to_dict()}
 
@@ -794,13 +874,19 @@ class ModelConnector(BaseConnector, ModelDriver):
             session.delete(ref)
 
     def add_model(self, model_id=None, value=None):
-        with self.get_session_for_write() as session:
-            new = Model.from_dict({
-                "id": model_id if model_id else uuid4().hex,
-                "value": value
-            })
-            session.add(new)
-            return {new.id: new.to_dict()}
+        try:
+            with self.get_session_for_write() as session:
+                value_wo_name = copy.deepcopy(value)
+                value_wo_name.pop("name", None)
+                new = Model.from_dict({
+                    "id": model_id if model_id else uuid4().hex,
+                    "name": value["name"],
+                    "value": value_wo_name
+                })
+                session.add(new)
+                return {new.id: new.to_dict()}
+        except sqlalchemy.exc.IntegrityError as e:
+            raise ModelExisting
 
     def get_models(self, model_id=None):
         with self.get_session_for_read() as session:
@@ -809,23 +895,41 @@ class ModelConnector(BaseConnector, ModelDriver):
                 ref_list = query.filter(Model.id == model_id)
             else:
                 ref_list = query.all()
-            return {_ref.id: _ref.to_dict() for _ref in ref_list}
+
+            r = {_ref.id: _ref.to_dict() for _ref in ref_list}
+            return r
 
     def set_meta_rule(self, meta_rule_id, value):
         with self.get_session_for_write() as session:
-            query = session.query(MetaRule)
-            query = query.filter_by(id=meta_rule_id)
-            ref = query.first()
-            if not ref:
-                ref = MetaRule.from_dict(
-                    {
-                        "id": meta_rule_id if meta_rule_id else uuid4().hex,
-                        "value": value
-                    }
-                )
-                session.add(ref)
+            value_wo_other_data = copy.deepcopy(value)
+            value_wo_other_data.pop("name", None)
+            value_wo_other_data.pop("subject_categories", None)
+            value_wo_other_data.pop("object_categories", None)
+            value_wo_other_data.pop("action_categories", None)
+            if meta_rule_id is None:
+                try:
+                    ref = MetaRule.from_dict(
+                        {
+                            "id": uuid4().hex,
+                            "name": value["name"],
+                            "subject_categories": value["subject_categories"],
+                            "object_categories": value["object_categories"],
+                            "action_categories": value["action_categories"],
+                            "value": value_wo_other_data
+                        }
+                    )
+                    session.add(ref)
+                except sqlalchemy.exc.IntegrityError as e:
+                    raise MetaRuleExisting
             else:
-                setattr(ref, "value", value)
+                query = session.query(MetaRule)
+                query = query.filter_by(id=meta_rule_id)
+                ref = query.first()
+                setattr(ref, "name", value["name"])
+                setattr(ref, "subject_categories", value["subject_categories"])
+                setattr(ref, "object_categories", value["object_categories"])
+                setattr(ref, "action_categories", value["action_categories"])
+                setattr(ref, "value", value_wo_other_data)
             return {ref.id: ref.to_dict()}
 
     def get_meta_rules(self, meta_rule_id=None):
@@ -854,18 +958,14 @@ class ModelConnector(BaseConnector, ModelDriver):
 
     def __add_perimeter_category(self, ClassType, name, description, uuid=None):
         with self.get_session_for_write() as session:
-            query = session.query(ClassType)
-            query = query.filter_by(name=name)
-            ref = query.first()
-            if not ref:
-                ref = ClassType.from_dict(
-                    {
-                        "id": uuid if uuid else uuid4().hex,
-                        "name": name,
-                        "description": description
-                    }
-                )
-                session.add(ref)
+            ref = ClassType.from_dict(
+                {
+                    "id": uuid if uuid else uuid4().hex,
+                    "name": name,
+                    "description": description
+                }
+            )
+            session.add(ref)
             return {ref.id: ref.to_dict()}
 
     def __delete_perimeter_category(self, ClassType, category_id):
@@ -880,7 +980,10 @@ class ModelConnector(BaseConnector, ModelDriver):
         return self.__get_perimeter_categories(SubjectCategory, category_id=category_id)
 
     def add_subject_category(self, name, description, uuid=None):
-        return self.__add_perimeter_category(SubjectCategory, name, description, uuid=uuid)
+        try:
+            return self.__add_perimeter_category(SubjectCategory, name, description, uuid=uuid)
+        except sql.exc.IntegrityError as e:
+            raise SubjectCategoryExisting()
 
     def delete_subject_category(self, category_id):
         self.__delete_perimeter_category(SubjectCategory, category_id)
@@ -889,16 +992,23 @@ class ModelConnector(BaseConnector, ModelDriver):
         return self.__get_perimeter_categories(ObjectCategory, category_id=category_id)
 
     def add_object_category(self, name, description, uuid=None):
-        return self.__add_perimeter_category(ObjectCategory, name, description, uuid=uuid)
+        try:
+            return self.__add_perimeter_category(ObjectCategory, name, description, uuid=uuid)
+        except sql.exc.IntegrityError as e:
+            raise ObjectCategoryExisting()
 
     def delete_object_category(self, category_id):
         self.__delete_perimeter_category(ObjectCategory, category_id)
 
     def get_action_categories(self, category_id=None):
+
         return self.__get_perimeter_categories(ActionCategory, category_id=category_id)
 
     def add_action_category(self, name, description, uuid=None):
-        return self.__add_perimeter_category(ActionCategory, name, description, uuid=uuid)
+        try:
+            return self.__add_perimeter_category(ActionCategory, name, description, uuid=uuid)
+        except sql.exc.IntegrityError as e:
+            raise ActionCategoryExisting()
 
     def delete_action_category(self, category_id):
         self.__delete_perimeter_category(ActionCategory, category_id)

@@ -282,6 +282,26 @@ class ActionUnknown(AdminPerimeter):
     logger = "ERROR"
 
 
+class SubjectExisting(AdminPerimeter):
+    description = _("The given subject is existing.")
+    code = 409
+    title = 'Subject Existing'
+    logger = "ERROR"
+
+
+class ObjectExisting(AdminPerimeter):
+    description = _("The given object is existing.")
+    code = 409
+    title = 'Object Existing'
+    logger = "ERROR"
+
+
+class ActionExisting(AdminPerimeter):
+    description = _("The given action is existing.")
+    code = 409
+    title = 'Action Existing'
+    logger = "ERROR"
+
 class SubjectNameExisting(AdminPerimeter):
     description = _("The given subject name is existing.")
     code = 400
@@ -335,6 +355,27 @@ class ActionScopeUnknown(AdminScope):
     description = _("The given action scope is unknown.")
     code = 400
     title = 'Action Scope Unknown'
+    logger = "ERROR"
+
+
+class SubjectScopeExisting(AdminScope):
+    description = _("The given subject scope is existing.")
+    code = 409
+    title = 'Subject Scope Existing'
+    logger = "ERROR"
+
+
+class ObjectScopeExisting(AdminScope):
+    description = _("The given object scope is existing.")
+    code = 409
+    title = 'Object Scope Existing'
+    logger = "ERROR"
+
+
+class ActionScopeExisting(AdminScope):
+    description = _("The given action scope is existing.")
+    code = 409
+    title = 'Action Scope Existing'
     logger = "ERROR"
 
 
