@@ -5,7 +5,7 @@
 
 import pytest
 import policies.mock_data as mock_data
-
+from python_moonutilities.exceptions import *
 
 def get_policies():
     from python_moondb.core import PolicyManager
@@ -97,9 +97,9 @@ def test_add_policies_twice_with_same_id(db):
         "description": "test",
     }
     add_policies(policy_id, value)
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyExisting) as exception_info:
         add_policies(policy_id, value)
-    assert str(exception_info.value) == '409: Policy Error'
+    #assert str(exception_info.value) == '409: Policy Error'
 
 
 def test_delete_policies(db):
@@ -127,9 +127,9 @@ def test_delete_policies(db):
 
 def test_delete_policies_with_invalid_id(db):
     policy_id = 'policy_id_1'
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         delete_policies(policy_id)
-    assert str(exception_info.value) == '400: Policy Unknown'
+    #assert str(exception_info.value) == '400: Policy Unknown'
 
 
 def test_update_policy(db):
@@ -156,9 +156,9 @@ def test_update_policy_with_invalid_id(db):
         "genre": "authz",
         "description": "test-3",
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         update_policy(policy_id, value)
-    assert str(exception_info.value) == '400: Policy Unknown'
+    #assert str(exception_info.value) == '400: Policy Unknown'
 
 
 def test_get_policy_from_meta_rules(db):
@@ -270,6 +270,9 @@ def test_add_rule(db):
     for key in ("rule", "instructions", "enabled"):
         assert key in rules[rule_id]
         assert rules[rule_id][key] == value[key]
+
+    with pytest.raises(RuleExisting):
+        add_rule(policy_id, meta_rule_id, value)
 
 
 def test_delete_rule(db):

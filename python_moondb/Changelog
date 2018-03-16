@@ -65,3 +65,7 @@ CHANGES
 1.2.7
 -----
 - Fix some bugs
+
+1.2.8
+-----
+- Add unique constraints on db tables

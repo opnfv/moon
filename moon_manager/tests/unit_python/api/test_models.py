@@ -34,6 +34,14 @@ def delete_models_without_id(client):
     return req
 
 
+def clean_models():
+    client = utilities.register_client()
+    req, models= get_models(client)
+    for key, value in models['models'].items():
+        print(key)
+        print(value)
+        client.delete("/models/{}".format(key))
+
 def test_get_models():
     client = utilities.register_client()
     req, models= get_models(client)
@@ -43,6 +51,7 @@ def test_get_models():
 
 
 def test_add_models():
+    clean_models()
     client = utilities.register_client()
     req, models = add_models(client, "testuser")
     assert req.status_code == 200

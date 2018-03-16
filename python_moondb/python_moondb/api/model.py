@@ -58,9 +58,6 @@ class ModelManager(Managers):
     def add_meta_rule(self, user_id, meta_rule_id=None, value=None):
         if meta_rule_id in self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
             raise exceptions.MetaRuleExisting
-        if not meta_rule_id:
-            meta_rule_id = uuid4().hex
-            logger.info("add_meta_rule {}".format(value))
         return self.driver.set_meta_rule(meta_rule_id=meta_rule_id, value=value)
 
     @enforce(("read", "write"), "meta_rules")
@@ -78,8 +75,6 @@ class ModelManager(Managers):
     def add_subject_category(self, user_id, category_id=None, value=None):
         if category_id in self.driver.get_subject_categories(category_id=category_id):
             raise exceptions.SubjectCategoryExisting
-        # if not category_id:
-        #     category_id = uuid4().hex
         return self.driver.add_subject_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")
@@ -98,8 +93,6 @@ class ModelManager(Managers):
     def add_object_category(self, user_id, category_id=None, value=None):
         if category_id in self.driver.get_object_categories(category_id=category_id):
             raise exceptions.ObjectCategoryExisting
-        # if not category_id:
-        #     category_id = uuid4().hex
         return self.driver.add_object_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")
@@ -118,8 +111,6 @@ class ModelManager(Managers):
     def add_action_category(self, user_id, category_id=None, value=None):
         if category_id in self.driver.get_action_categories(category_id=category_id):
             raise exceptions.ActionCategoryExisting
-        # if not category_id:
-        #     category_id = uuid4().hex
         return self.driver.add_action_category(name=value["name"], description=value["description"], uuid=category_id)
 
     @enforce(("read", "write"), "meta_data")

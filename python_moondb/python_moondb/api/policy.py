@@ -115,8 +115,6 @@ class PolicyManager(Managers):
         logger.info("add_action {}".format(policy_id))
         if not self.get_policies(user_id=user_id, policy_id=policy_id):
             raise exceptions.PolicyUnknown
-        if not perimeter_id:
-            perimeter_id = uuid4().hex
         return self.driver.set_action(policy_id=policy_id, perimeter_id=perimeter_id, value=value)
 
     @enforce(("read", "write"), "perimeter")
