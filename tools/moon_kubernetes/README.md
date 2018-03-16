@@ -28,17 +28,17 @@ apt-get install -y kubelet kubeadm kubectl
 ```
 
 ## Moon Deployment
-### Initiate K8S
+### Deploy kubernete and moon
 ```bash
 cd $MOON_HOME
-bash tools/moon_kubernetes/init_k8s.sh
+bash tools/moon_kubernetes/init_k8s_moon.sh
 ```
+This will wait for kubernetes and then moon to be up
 
-Wait until all the kubeadm containers are in the `running` state:
+To check that the platform is running correctely, 
 ```bash
 watch kubectl get po --namespace=kube-system
 ```
-    
 You must see something like this:
 
     $ kubectl get po --namespace=kube-system
@@ -53,14 +53,6 @@ You must see something like this:
     kube-proxy-x88wg                            1/1       Running   0          1h
     kube-scheduler-varuna                       1/1       Running   0          1h
 
-
-### Deploy Moon
-```bash
-cd $MOON_HOME
-sudo bash tools/moon_kubernetes/start_moon.sh
-```
-
-Wait until all the Moon containers are in the `running` state:
 ```bash
 watch kubectl get po --namespace=moon
 ```
@@ -78,6 +70,16 @@ You must see something like this:
     manager-5bfbb96988-w9wnk               1/1       Running   0          51m
     orchestrator-65d8fb4574-tnfx2          1/1       Running   0          51m
     wrapper-astonishing-748b7dcc4f-ngsvp   1/1       Running   0          51m
+
+
+### Deploy or redeploy Moon only
+
+Kubernete shall be running.
+
+```bash
+cd $MOON_HOME
+sudo bash tools/moon_kubernetes/init_k8s_moon.sh moon
+```
 
     
 ### Troubleshoot
