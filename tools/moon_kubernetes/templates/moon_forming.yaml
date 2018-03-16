@@ -10,7 +10,7 @@ spec:
     spec:
       containers:
       - name: forming
-        image: wukongsun/moon_forming:latest
+        image: moonplatform/moon_forming:latest
         env:
         - name: POPULATE_ARGS
           value: "--verbose" # debug mode: --debug

@@ -13,7 +13,7 @@ spec:
       hostname: gui
       containers:
       - name: gui
-        image: wukongsun/moon_gui:latest
+        image: moonplatform/moon_gui:latest
         env:
         - name: MANAGER_HOST
           value: "127.0.0.1"

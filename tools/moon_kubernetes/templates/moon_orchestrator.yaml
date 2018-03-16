@@ -13,7 +13,7 @@ spec:
       hostname: orchestrator
       containers:
       - name: orchestrator
-        image: wukongsun/moon_orchestrator:latest
+        image: moonplatform/moon_orchestrator:latest
         ports:
         - containerPort: 8083
         volumeMounts:
