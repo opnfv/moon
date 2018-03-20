@@ -65,7 +65,7 @@ class Subjects(Resource):
         return {"subjects": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, user_id=None):
+    def post(self, uuid, perimeter_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy

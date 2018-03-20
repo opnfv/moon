@@ -240,6 +240,7 @@ class JsonImport(Resource):
                 except exceptions.PolicyUnknown:
                     raise UnknownPolicy("Unknown policy with id {}".format(policy_id))
                 except Exception as e:
+                    logger.exception(str(e))
                     raise BaseException(str(e))
 
     def _import_subject_object_action_categories(self, json_item_categories, type_element):
@@ -275,6 +276,7 @@ class JsonImport(Resource):
                 logger.info("Ignored {} category with name {} is already in the database".format(type_element, json_to_use["name"]))
             except Exception as e:
                 logger.info("Error while importing the category : {}".format(str(e)))
+                logger.exception(str(e))
                 raise e
 
     def _import_subject_object_action(self, json_items, mandatory_policy_ids, type_element):
@@ -302,7 +304,7 @@ class JsonImport(Resource):
                 raise ForbiddenOverride("{} does not support override flag !".format(type_element))
 
             if len(policy_ids) == 0:
-                raise MissingPolicy("a {} needs at least one policy to be created or updated : {}".format(type_element,  json.dumps(json_item)))
+                raise MissingPolicy("a {} needs at least one policy to be created or updated : {}".format(type_element, json.dumps(json_item)))
 
             for policy_id in policy_ids:
                 try:
@@ -322,6 +324,7 @@ class JsonImport(Resource):
                 except exceptions.PolicyUnknown:
                     raise UnknownPolicy("Unknown policy when adding a {}!".format(type_element))
                 except Exception as e:
+                    logger.exception(str(e))
                     raise BaseException(str(e))
 
     def _import_policies(self, json_policies):

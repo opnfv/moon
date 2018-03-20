@@ -4,8 +4,8 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import json
-import api.utilities as utilities
 from uuid import uuid4
+import api.utilities as utilities
 
 
 def get_policies(client):
@@ -50,8 +50,8 @@ def test_get_policies():
 
 
 def test_add_policies():
+    policy_name = "testuser"+uuid4().hex
     client = utilities.register_client()
-    policy_name = "testuser" + uuid4().hex
     req, policies = add_policies(client, policy_name)
     assert req.status_code == 200
     assert isinstance(policies, dict)
