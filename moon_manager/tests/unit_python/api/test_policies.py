@@ -1,4 +1,5 @@
 import json
+from uuid import uuid4
 import api.utilities as utilities
 
 
@@ -44,14 +45,15 @@ def test_get_policies():
 
 
 def test_add_policies():
+    policy_name = "testuser"+uuid4().hex
     client = utilities.register_client()
-    req, policies = add_policies(client, "testuser")
+    req, policies = add_policies(client, policy_name)
     assert req.status_code == 200
     assert isinstance(policies, dict)
     value = list(policies["policies"].values())[0]
     assert "policies" in policies
-    assert value['name'] == "testuser"
-    assert value["description"] == "description of {}".format("testuser")
+    assert value['name'] == policy_name
+    assert value["description"] == "description of {}".format(policy_name)
     assert value["model_id"] == "modelId"
     assert value["genre"] == "genre"
 

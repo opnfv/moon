@@ -25,6 +25,7 @@ def add_subjects(client, name):
     assert req.status_code == 200
     subjects = utilities.get_json(req.data)
     assert isinstance(subjects, dict)
+    print(list(subjects["subjects"].keys()))
     key = list(subjects["subjects"].keys())[0]
     value = list(subjects["subjects"].values())[0]
     assert "subjects" in subjects

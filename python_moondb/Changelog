@@ -69,3 +69,7 @@ CHANGES
 1.2.8
 -----
 - Add unique constraints on db tables
+
+1.2.9
+-----
+- Fix bugs due to the previous version

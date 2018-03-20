@@ -64,6 +64,11 @@ class Subjects(Resource):
                     "error": str(e)}, 500
         return {"subjects": data}
 
+'''
+    - i  think we have to remove None from uuid=None, as uuid refer to policy id which shouldn't be None
+    - also i think we should add a path to accept policyId in the url
+    what do you think 
+'''
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a subject.

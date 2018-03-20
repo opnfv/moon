@@ -37,11 +37,16 @@ SUBJECTS = [{"subjects": [{"name": "testuser", "description": "description of th
             {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "subjects": [{"name": "testuser", "description": "description of the subject", "extra": {}, "policies": [{"name": "test policy"}]}]}]
 
 
-OBJECTS = [{"objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"policies": [{"name": "test other policy", "genre": "authz", "description": "description", "model": {}, "mandatory": True}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"objects": [{"name": "test object", "description": "new description of the object", "extra": {"test": "test extra"}, "policies": [{"name": "test other policy"}]}]},
-           {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}]}]
+OBJECTS = [
+    {"objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"policies": [{"name": "test other policy", "genre": "authz", "description": "description", "model": {}, "mandatory": True}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"objects": [{"name": "test object", "description": "new description of the object", "extra": {"test": "test extra"},
+                 "policies": [{"name": "test other policy"}]}]},
+    {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}]}]
 
 
 ACTIONS = [{"actions": [{"name": "test action", "description": "description of the action", "extra": {}, "policies": []}]},
@@ -137,8 +142,6 @@ RULES = [{"rules": [{"meta_rule": {"name": "unknown meta rule"}, "policy": {"nam
          {"rules": [{"meta_rule": {"name": "good meta rule"}, "policy": {"name": "test policy"}, "instructions": {"decision": "grant"}, "enabled": True, "rule": {"subject_data": [{"name": "subject data"}], "object_data": [{"name": "object data"}], "action_data": [{"name": "action data"}]}}]}]
 
 
-
-
 def test_import_models_without_new_meta_rules():
     client = utilities.register_client()
     import_export_utilities.clean_all(client)
@@ -191,7 +194,7 @@ def test_import_policies():
 
 def test_import_subject_object_action():
     client = utilities.register_client()
-    type_elements =["object", "action"]
+    type_elements = ["object", "action"]
 
     for type_element in type_elements:
         import_export_utilities.clean_all(client)
@@ -200,7 +203,7 @@ def test_import_subject_object_action():
         if type_element == "subject":
             elements = SUBJECTS
             get_method = test_perimeter.get_subjects
-            clean_method= import_export_utilities.clean_subjects
+            clean_method = import_export_utilities.clean_subjects
             name = "testuser"
             key_extra = "email"
             value_extra = "new-email@test.com"
@@ -245,16 +248,13 @@ def test_import_subject_object_action():
             assert len(list(get_elements.keys())) == 1
             values = list(get_elements.values())
             assert values[0]["name"] == name
-            print(values[0])
             if counter == 2 or counter == 4:
                 assert values[0]["description"] == "description of the " + type_element
                 print(values[0])
                 #assert not values[0]["extra"]
             if counter == 3:
-                #TODO uncomment this if update shall be done through import !
-                #assert values[0]["description"] == "new description of the " + type_element
-                #assert values[0]["extra"][key_extra] == value_extra
-                assert True
+                assert values[0]["description"] == "new description of the " + type_element
+                assert values[0]["extra"][key_extra] == value_extra
 
             # assert len(values[0]["policy_list"]) == 1
     import_export_utilities.clean_all(client)
