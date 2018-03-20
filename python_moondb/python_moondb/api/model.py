@@ -118,6 +118,6 @@ class ModelManager(Managers):
         # TODO (asteroide): delete all data linked to that category
         # TODO (asteroide): delete all meta_rules linked to that category
         if category_id not in self.driver.get_action_categories(category_id=category_id):
-            raise exceptions.ActionCategoryExisting
+            raise exceptions.ActionCategoryUnknown
         return self.driver.delete_action_category(category_id=category_id)
 
