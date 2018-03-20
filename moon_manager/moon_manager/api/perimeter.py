@@ -69,7 +69,7 @@ class Subjects(Resource):
 
     @validate_input("post", body_state=[True, False, False, False])
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, user_id=None):
+    def post(self, uuid, perimeter_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
@@ -95,7 +95,7 @@ class Subjects(Resource):
         try:
             if not perimeter_id:
                 data = PolicyManager.get_subjects(user_id=user_id,
-                                                  policy_id=None)
+                                                  policy_id=uuid)
                 if 'name' in request.json:
                     for data_id, data_value in data.items():
                         if data_value['name'] == request.json['name']:
@@ -384,7 +384,7 @@ class Actions(Resource):
         :internal_api: set_action
         """
         try:
-            data = PolicyManager.get_actions(user_id=user_id, policy_id=None)
+            data = PolicyManager.get_actions(user_id=user_id, policy_id=uuid)
             if 'name' in request.json:
                 for data_id, data_value in data.items():
                     if data_value['name'] == request.json['name']:

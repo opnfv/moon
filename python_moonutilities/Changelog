@@ -94,3 +94,4 @@ CHANGES
 1.4.9
 -----
 - Add some exceptions when deletion of elements is impossible
+- Add CategoryNameInvalid and PerimeterNameInvalid exceptions

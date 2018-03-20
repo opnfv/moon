@@ -4,20 +4,28 @@ import json
 import api.utilities as utilities
 
 
+def add_policy(client, name):
+    data = {
+        "name": name,
+        "description": "description of {}".format(name)
+    }
+    req = client.post("/policies", data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+
 def get_subjects(client):
     req = client.get("/subjects")
     subjects = utilities.get_json(req.data)
     return req, subjects
 
-
 def add_subjects(client, name):
+    policyId = add_policy(client, "policy_"+name)
     data = {
         "name": name,
         "description": "description of {}".format(name),
         "password": "password for {}".format(name),
         "email": "{}@moon".format(name)
     }
-    req = client.post("/subjects", data=json.dumps(data),
+    req = client.post("/subjects/{}".format(policyId), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     subjects = utilities.get_json(req.data)
     return req, subjects
@@ -48,8 +56,8 @@ def test_perimeter_get_subject():
 def test_perimeter_add_subject():
     client = utilities.register_client()
     req, subjects = add_subjects(client, "testuser")
-    assert req.status_code == 200
     value = list(subjects["subjects"].values())[0]
+    assert req.status_code == 200
     assert "subjects" in subjects
     assert value['name'] == "testuser"
     assert value["email"] == "{}@moon".format("testuser")
@@ -88,11 +96,12 @@ def get_objects(client):
 
 
 def add_objects(client, name):
+    policyId = add_policy(client, "policy_" + name)
     data = {
         "name": name,
         "description": "description of {}".format(name),
     }
-    req = client.post("/objects", data=json.dumps(data),
+    req = client.post("/objects/{}".format(policyId), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     objects = utilities.get_json(req.data)
     return req, objects
@@ -162,11 +171,12 @@ def get_actions(client):
 
 
 def add_actions(client, name):
+    policyId = add_policy(client, "policy_" + name)
     data = {
         "name": name,
         "description": "description of {}".format(name),
     }
-    req = client.post("/actions", data=json.dumps(data),
+    req = client.post("/actions/{}".format(policyId), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     actions = utilities.get_json(req.data)
     return req, actions

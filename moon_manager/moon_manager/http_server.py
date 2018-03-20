@@ -116,7 +116,7 @@ class CustomApi(Api):
             logger.error(error_message)
             return make_response(error_message, getattr(e, "code", 500))
         except Exception as e2:  # unhandled exception in the api...
-            logger.error(str(e2))
+            logger.exception(str(e2))
             return make_response(error_message, 500)
 
 

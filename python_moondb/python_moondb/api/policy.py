@@ -72,6 +72,8 @@ class PolicyManager(Managers):
 
     @enforce(("read", "write"), "perimeter")
     def add_subject(self, user_id, policy_id, perimeter_id=None, value=None):
+        if not value or "name" not in value or not value["name"].strip():
+            raise exceptions.PerimeterNameInvalid
         k_user = Managers.KeystoneManager.get_user_by_name(value.get('name'))
         if not k_user['users']:
             k_user = Managers.KeystoneManager.create_user(value)

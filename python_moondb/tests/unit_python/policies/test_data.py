@@ -79,6 +79,26 @@ def add_object(policy_id, perimeter_id=None, value=None):
     return PolicyManager.add_object("", policy_id, perimeter_id, value)
 
 
+def test_add_object_blank_name(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_object(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+
+def test_add_object_with_name_space(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "   ",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_object(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+
 def delete_object(policy_id, perimeter_id):
     from python_moondb.core import PolicyManager
     PolicyManager.delete_object("", policy_id, perimeter_id)
@@ -407,6 +427,28 @@ def test_add_action(db):
         add_action(policy_id=policy_id, value=value)
 
 
+def test_add_action_blank_name(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_action(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+
+
+def test_add_action_with_name_space(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "   ",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_action(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+
+
 def test_add_action_multiple_times(db):
     policy_id = mock_data.get_policy_id()
     value = {
@@ -553,6 +595,28 @@ def test_add_subject(db):
 
     with pytest.raises(SubjectExisting):
         add_subject(policy_id=policy_id, value=value)
+
+
+def test_add_subject_blank_name(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_subject(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+
+
+def test_add_subject_with_name_space(db):
+    policy_id = mock_data.get_policy_id()
+    value = {
+        "name": "   ",
+        "description": "test",
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_subject(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
 
 
 def test_add_subjects_multiple_times(db):
