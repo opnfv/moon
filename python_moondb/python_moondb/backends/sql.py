@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from contextlib import contextmanager
 from sqlalchemy import types as sql_types
 from python_moonutilities import configuration
-from python_moonutilities.exceptions import *
+from python_moonutilities import exceptions
 from python_moondb.core import PDPDriver, PolicyDriver, ModelDriver
 
 logger = logging.getLogger("moon.db.driver.sql")
@@ -413,6 +413,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             return {_ref.id: _ref.to_return() for _ref in ref_list}
 
     def __set_perimeter(self, ClassType, policy_id, perimeter_id=None, value=None):
+        if "name" not in value or not value["name"]:
+            raise exceptions.PerimeterNameInvalid
         _perimeter = None
         with self.get_session_for_write() as session:
             if perimeter_id:
@@ -853,6 +855,8 @@ class ModelConnector(BaseConnector, ModelDriver):
             return {_ref.id: _ref.to_dict() for _ref in ref_list}
 
     def __add_perimeter_category(self, ClassType, name, description, uuid=None):
+        if not name:
+            raise exceptions.CategoryNameInvalid
         with self.get_session_for_write() as session:
             query = session.query(ClassType)
             query = query.filter_by(name=name)
