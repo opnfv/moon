@@ -5,7 +5,7 @@ logger = logging.getLogger("moon.db.tests.test_model")
 
 def get_models(model_id=None):
     from python_moondb.core import ModelManager
-    return ModelManager.get_models(user_id= None , model_id= model_id)
+    return ModelManager.get_models(user_id=None, model_id=model_id)
 
 
 def add_model(model_id=None, value=None):
@@ -41,6 +41,51 @@ def delete_all_models():
 def update_model(model_id=None, value=None):
     from python_moondb.core import ModelManager
     return ModelManager.update_model(user_id=None, model_id=model_id, value=value)
+
+
+def add_subject_category(user_id, category_id=None, value=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.add_subject_category("", category_id=category_id, value=value)
+
+
+def get_subject_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.get_subject_categories("", category_id=category_id)
+
+
+def delete_subject_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.delete_subject_category("", category_id=category_id)
+
+
+def add_object_category(user_id, category_id=None, value=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.add_object_category("", category_id=category_id, value=value)
+
+
+def get_object_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.get_object_categories("", category_id=category_id)
+
+
+def delete_object_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.delete_object_category("", category_id=category_id)
+
+
+def add_action_category(user_id, category_id=None, value=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.add_action_category("", category_id=category_id, value=value)
+
+
+def get_action_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.get_action_categories("", category_id=category_id)
+
+
+def delete_action_category(user_id, category_id=None):
+    from python_moondb.core import ModelManager
+    return ModelManager.delete_action_category("", category_id=category_id)
 
 
 def test_get_models_empty(db):
@@ -176,3 +221,198 @@ def test_update_model(db):
         assert key in model[model_id]
         assert model[model_id][key] == new_model_value[key]
     delete_all_models()
+
+
+def test_add_subject_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "subject_category",
+        "description": "description subject_category"
+    }
+    subject_category = add_subject_category("", category_id, value)
+    assert subject_category
+    assert len(subject_category) == 1
+
+
+def test_add_subject_category_with_empty_name(db):
+    category_id = "category_id1"
+    value = {
+        "name": "",
+        "description": "description subject_category"
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_subject_category("", category_id, value)
+    assert str(exception_info.value) == '409: Category Name Invalid'
+
+
+
+def test_add_subject_category_with_same_category_id(db):
+    category_id = "category_id1"
+    value = {
+        "name": "subject_category",
+        "description": "description subject_category"
+    }
+    add_subject_category("", category_id, value)
+    with pytest.raises(Exception) as exception_info:
+        add_subject_category("", category_id, value)
+    assert str(exception_info.value) == '409: Subject Category Existing'
+
+
+def test_get_subject_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "subject_category",
+        "description": "description subject_category"
+    }
+    add_subject_category("", category_id, value)
+    subject_category = get_subject_category("", category_id)
+    assert subject_category
+    assert len(subject_category) == 1
+
+
+def test_delete_subject_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "subject_category",
+        "description": "description subject_category"
+    }
+    add_subject_category("", category_id, value)
+    subject_category = delete_subject_category("", category_id)
+    assert not subject_category
+
+
+def test_delete_subject_category_with_unkown_category_id(db):
+    category_id = "invalid_category_id"
+
+    with pytest.raises(Exception) as exception_info:
+        delete_subject_category("", category_id)
+    assert str(exception_info.value) == '400: Subject Category Unknown'
+
+
+def test_add_object_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "object_category",
+        "description": "description object_category"
+    }
+    object_category = add_object_category("", category_id, value)
+    assert object_category
+    assert len(object_category) == 1
+
+
+def test_add_object_category_with_same_category_id(db):
+    category_id = "category_id1"
+    value = {
+        "name": "object_category",
+        "description": "description object_category"
+    }
+    add_object_category("", category_id, value)
+    with pytest.raises(Exception) as exception_info:
+        add_object_category("", category_id, value)
+    assert str(exception_info.value) == '409: Object Category Existing'
+
+
+def test_add_object_category_with_empty_name(db):
+    category_id = "category_id1"
+    value = {
+        "name": "",
+        "description": "description object_category"
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_object_category("", category_id, value)
+    assert str(exception_info.value) == '409: Category Name Invalid'
+
+
+def test_get_object_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "object_category",
+        "description": "description object_category"
+    }
+    add_object_category("", category_id, value)
+    object_category = get_object_category("", category_id)
+    assert object_category
+    assert len(object_category) == 1
+
+
+def test_delete_object_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "object_category",
+        "description": "description object_category"
+    }
+    add_object_category("", category_id, value)
+    object_category = delete_object_category("", category_id)
+    assert not object_category
+
+
+def test_delete_object_category_with_unkown_category_id(db):
+    category_id = "invalid_category_id"
+
+    with pytest.raises(Exception) as exception_info:
+        delete_object_category("", category_id)
+    assert str(exception_info.value) == '400: Object Category Unknown'
+
+def test_add_action_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "action_category",
+        "description": "description action_category"
+    }
+    action_category = add_action_category("", category_id, value)
+    assert action_category
+    assert len(action_category) == 1
+
+
+def test_add_action_category_with_same_category_id(db):
+    category_id = "category_id1"
+    value = {
+        "name": "action_category",
+        "description": "description action_category"
+    }
+    add_action_category("", category_id, value)
+    with pytest.raises(Exception) as exception_info:
+        add_action_category("", category_id, value)
+    assert str(exception_info.value) == '409: Action Category Existing'
+
+
+def test_add_action_category_with_empty_name(db):
+    category_id = "category_id1"
+    value = {
+        "name": "",
+        "description": "description action_category"
+    }
+    with pytest.raises(Exception) as exception_info:
+        add_action_category("", category_id, value)
+    assert str(exception_info.value) == '409: Category Name Invalid'
+
+
+def test_get_action_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "action_category",
+        "description": "description action_category"
+    }
+    add_action_category("", category_id, value)
+    action_category = get_action_category("", category_id)
+    assert action_category
+    assert len(action_category) == 1
+
+
+def test_delete_action_category(db):
+    category_id = "category_id1"
+    value = {
+        "name": "action_category",
+        "description": "description action_category"
+    }
+    add_action_category("", category_id, value)
+    action_category = delete_action_category("", category_id)
+    assert not action_category
+
+
+def test_delete_action_category_with_unkown_category_id(db):
+    category_id = "invalid_category_id"
+
+    with pytest.raises(Exception) as exception_info:
+        delete_action_category("", category_id)
+    assert str(exception_info.value) == '400: Action Category Unknown'
