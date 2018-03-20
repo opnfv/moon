@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from contextlib import contextmanager
 from sqlalchemy import types as sql_types
 from python_moonutilities import configuration
-from python_moonutilities.exceptions import *
+from python_moonutilities import exceptions
 from python_moondb.core import PDPDriver, PolicyDriver, ModelDriver
 
 logger = logging.getLogger("moon.db.driver.sql")
@@ -413,6 +413,8 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             return {_ref.id: _ref.to_return() for _ref in ref_list}
 
     def __set_perimeter(self, ClassType, policy_id, perimeter_id=None, value=None):
+        if "name" not in value or not value["name"]:
+            raise exceptions.PerimeterNameInvalid
         _perimeter = None
         with self.get_session_for_write() as session:
             if perimeter_id:
@@ -465,7 +467,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__set_perimeter(Subject, policy_id, perimeter_id=perimeter_id, value=value)
 
     def delete_subject(self, policy_id, perimeter_id):
-        self.__delete_perimeter(Subject, SubjectUnknown, policy_id, perimeter_id)
+        self.__delete_perimeter(Subject, exceptions.SubjectUnknown, policy_id, perimeter_id)
 
     def get_objects(self, policy_id, perimeter_id=None):
         return self.__get_perimeters(Object, policy_id, perimeter_id)
@@ -474,7 +476,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__set_perimeter(Object, policy_id, perimeter_id=perimeter_id, value=value)
 
     def delete_object(self, policy_id, perimeter_id):
-        self.__delete_perimeter(Object, ObjectUnknown, policy_id, perimeter_id)
+        self.__delete_perimeter(Object, exceptions.ObjectUnknown, policy_id, perimeter_id)
 
     def get_actions(self, policy_id, perimeter_id=None):
         return self.__get_perimeters(Action, policy_id, perimeter_id)
@@ -483,7 +485,7 @@ class PolicyConnector(BaseConnector, PolicyDriver):
         return self.__set_perimeter(Action, policy_id, perimeter_id=perimeter_id, value=value)
 
     def delete_action(self, policy_id, perimeter_id):
-        self.__delete_perimeter(Action, ActionUnknown, policy_id, perimeter_id)
+        self.__delete_perimeter(Action, exceptions.ActionUnknown, policy_id, perimeter_id)
 
     def __get_perimeter_data(self, ClassType, policy_id, data_id=None, category_id=None):
         logger.info("driver {} {} {}".format(policy_id, data_id, category_id))
@@ -853,6 +855,8 @@ class ModelConnector(BaseConnector, ModelDriver):
             return {_ref.id: _ref.to_dict() for _ref in ref_list}
 
     def __add_perimeter_category(self, ClassType, name, description, uuid=None):
+        if not name:
+            raise exceptions.CategoryNameInvalid
         with self.get_session_for_write() as session:
             query = session.query(ClassType)
             query = query.filter_by(name=name)
