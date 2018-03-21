@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import api.utilities as utilities
-import api.test_models as test_models
+import api.test_unit_models as test_models
 import api.test_policies as test_policies
 import api.test_perimeter as test_perimeter
 import api.meta_data_test as test_categories
