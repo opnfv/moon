@@ -203,13 +203,14 @@ class K8S(Driver):
             for key, value in pods.items():
                 # logger.info("ctx={}".format(active_context))
                 # logger.info("value={}".format(value))
-                if active_context["name"] == value[0].get('slave_name'):
-                    data = dict(active_context)
-                    data["wrapper_name"] = value[0]['name']
-                    data["ip"] = value[0].get("ip", "NC")
-                    data["port"] = value[0].get("external_port", "NC")
-                    slaves.append(data)
-                    break
+                if "name" in active_context and value and "name" in value[0]:
+                    if active_context["name"] == value[0].get('slave_name'):
+                        data = dict(active_context)
+                        data["wrapper_name"] = value[0]['name']
+                        data["ip"] = value[0].get("ip", "NC")
+                        data["port"] = value[0].get("external_port", "NC")
+                        slaves.append(data)
+                        break
             return slaves
         for ctx in contexts:
             data = dict(ctx)
@@ -217,12 +218,13 @@ class K8S(Driver):
             for key, value in pods.items():
                 # logger.info("ctx={}".format(ctx))
                 # logger.info("value={}".format(value))
-                if ctx["name"] == value[0].get('slave_name'):
-                    data["wrapper_name"] = value[0]['name']
-                    data["ip"] = value[0].get("ip", "NC")
-                    data["port"] = value[0].get("external_port", "NC")
-                    data["configured"] = True
-                    break
+                if "name" in ctx and value and "name" in value[0]:
+                    if ctx["name"] == value[0].get('slave_name'):
+                        data["wrapper_name"] = value[0]['name']
+                        data["ip"] = value[0].get("ip", "NC")
+                        data["port"] = value[0].get("external_port", "NC")
+                        data["configured"] = True
+                        break
             slaves.append(data)
         return slaves
 
