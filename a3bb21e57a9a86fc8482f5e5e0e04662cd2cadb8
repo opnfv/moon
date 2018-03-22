@@ -1,0 +1,73 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_40f2f56f",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-03-22T14:05:14Z",
+      "side": 1,
+      "message": "# get_pods(uuid) may return None, so response { \"pods\" : None }  is it okay to be like that ?",
+      "range": {
+        "startLine": 50,
+        "startChar": 16,
+        "endLine": 51,
+        "endChar": 16
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_60ef3188",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-03-22T14:05:14Z",
+      "side": 1,
+      "message": "pods object that was built in the loop was not used after that\nso i\u0027m wondering what\u0027s the important or the usage of the for loop here  ?",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 20
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_40cb151e",
+        "filename": "moon_orchestrator/moon_orchestrator/drivers.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 7131
+      },
+      "writtenOn": "2018-03-22T14:05:14Z",
+      "side": 1,
+      "message": "as you see here, we validate that the parameter keys before accessing like \"name\"  \n\nbut we don\u0027t raise an exception if not exists, what do you think about that \n\nthe same for the others",
+      "range": {
+        "startLine": 205,
+        "startChar": 53,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
