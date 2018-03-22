@@ -2,8 +2,8 @@ Project: Security Management Module (Moon)
 Project Creation Date: 07 Mai 2015
 Project Category: Collaborative Development
 Lifecycle State: Incubation
-Primary Contact: ruan.he@orange.com
-Project Lead: ruan.he@orange.com
+Primary Contact: thomas.duval@orange.com
+Project Lead: thomas.duval@orange.com
 Jira Project Name: Security Management Module
 Jira Project Prefix: MOON
 Mailing list tag: [moon]
@@ -11,18 +11,21 @@ IRC: #opnfv-moon
 Repository: moon
 
 Contributors:
-ruan.he@orange.com
+rebirthmonkey@gmail.com
 jamil.chawki@orange.com
 thomas.duval@orange.com
 loic.lagadec@ensta-bretagne.fr
 ad5939@att.com
 marcel.winandy@huawei.com
 pyegani@juniper.net
+jonathan.gourdin@orange.com
+rhanafy.ext@orange.com
+rfawzy.ext@orange.com
+mmagraby.ext@orange.com
+francois.cellier@orange.com
 
 Committers:
-ruan (Linux Foundation ID) ruan.he@orange.com
 asteroide (Linux Foundation ID) thomas.duval@orange.com: nomination July 3rd 2015
-WuKong (Linux Foundation ID) rebirthmonkey@gmail.com: nomination July 3rd 2015
 
 Link to TSC approval of the project: http://meetbot.opnfv.org/meetings/opnfv-meeting/2015/opnfv-meeting.2015-05-12-13.59.html
 Link(s) to approval of additional committers:
