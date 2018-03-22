@@ -108,7 +108,7 @@ function wait_for_moon_forming() {
 function wait_for_moon_manager() {
  echo "Waiting for moon (manager) ..."
  kube_namespace="moon"
- declare -a kube_pods=("manager # 3")
+ declare -a kube_pods=("manager # 1")
  check_pods_running "$kube_namespace" "${kube_pods[@]}"
 }
 
