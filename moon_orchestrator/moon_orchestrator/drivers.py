@@ -362,8 +362,6 @@ class K8S(Driver):
                 "models", dict())
         logger.debug("models={}".format(models))
 
-        if not policy_ids:
-            raise exceptions.PolicyUnknown
         for policy_id in policy_ids:
             if policy_id in policies:
                 genre = policies[policy_id].get("genre", "authz")

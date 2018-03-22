@@ -102,6 +102,10 @@ class Pods(Resource):
         if "security_pipeline" in request.json:
             if self.__get_pod_with_keystone_pid(request.json.get("keystone_project_id")):
                 raise exceptions.PipelineConflict
+            if not request.json.get("pdp_id"):
+                raise exceptions.PdpUnknown
+            if not request.json.get("security_pipeline"):
+                raise exceptions.PolicyUnknown
             self.driver.create_pipeline(
                 request.json.get("keystone_project_id"),
                 request.json.get("pdp_id"),
