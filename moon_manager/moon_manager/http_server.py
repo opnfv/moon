@@ -100,7 +100,7 @@ class Root(Resource):
                 if _method in dir(item):
                     _methods.append(_method)
             tree[item.__name__]["methods"] = _methods
-            tree[item.__name__]["description"] = item.__doc__.strip()
+            tree[item.__name__]["description"] = item.__doc__.strip() if item.__doc__ else ""
         return {
             "version": __version__,
             "tree": tree
@@ -147,7 +147,7 @@ class HTTPServer(Server):
         while True:
             try:
                 PDPManager.get_pdp(user_id="admin", pdp_id=None)
-            except sqlalchemy.exc.ProgrammingError:
+            except (sqlalchemy.exc.ProgrammingError, sqlalchemy.exc.InternalError):
                 time.sleep(1)
                 if first:
                     logger.warning("Waiting for the database...")
