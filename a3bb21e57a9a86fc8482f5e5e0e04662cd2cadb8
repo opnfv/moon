@@ -25,6 +25,30 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_362f33f8",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 51,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-23T09:37:31Z",
+      "side": 1,
+      "message": "The request is done from the Manager component and not from the GUI component so sending None or [] has the same result (because it is analyzed by a python script: moon_manager/api/slaves.py line 87 and 100)",
+      "parentUuid": "5a3f45e8_40f2f56f",
+      "range": {
+        "startLine": 50,
+        "startChar": 16,
+        "endLine": 51,
+        "endChar": 16
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_60ef3188",
         "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
         "patchSetId": 2
@@ -48,6 +72,53 @@
     },
     {
       "key": {
+        "uuid": "5a3f45e8_d63fef23",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 122,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-23T09:37:31Z",
+      "side": 1,
+      "message": "Yes, you are right. This loop can be deleted.\nI think I wanted to send back the pods which was created in the security pipeline but finally I send all pods in line 135",
+      "parentUuid": "5a3f45e8_60ef3188",
+      "range": {
+        "startLine": 122,
+        "startChar": 0,
+        "endLine": 122,
+        "endChar": 20
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_96360751",
+        "filename": "moon_orchestrator/moon_orchestrator/api/pods.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-23T09:37:31Z",
+      "side": 1,
+      "message": "Could you correct the name: salve -\u003e slave",
+      "range": {
+        "startLine": 127,
+        "startChar": 25,
+        "endLine": 127,
+        "endChar": 30
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "5a3f45e8_40cb151e",
         "filename": "moon_orchestrator/moon_orchestrator/drivers.py",
         "patchSetId": 2
@@ -59,6 +130,30 @@
       "writtenOn": "2018-03-22T14:05:14Z",
       "side": 1,
       "message": "as you see here, we validate that the parameter keys before accessing like \"name\"  \n\nbut we don\u0027t raise an exception if not exists, what do you think about that \n\nthe same for the others",
+      "range": {
+        "startLine": 205,
+        "startChar": 53,
+        "endLine": 205,
+        "endChar": 55
+      },
+      "revId": "a3bb21e57a9a86fc8482f5e5e0e04662cd2cadb8",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_765edb77",
+        "filename": "moon_orchestrator/moon_orchestrator/drivers.py",
+        "patchSetId": 2
+      },
+      "lineNbr": 205,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-03-23T09:37:31Z",
+      "side": 1,
+      "message": "It is OK for me. \nEventually you can use:\nif \"name\" in active_context and value and \"name\" in value[0]\ninstead of:\nif \"name\" in active_context and len(value) \u003e 0 and \"name\" in value[0]\nIt is shorter and increase code speed.",
+      "parentUuid": "5a3f45e8_40cb151e",
       "range": {
         "startLine": 205,
         "startChar": 53,
