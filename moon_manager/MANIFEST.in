@@ -3,7 +3,7 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-include README.rst
+include README.md
 include LICENSE
 include setup.py
 include requirements.txt
