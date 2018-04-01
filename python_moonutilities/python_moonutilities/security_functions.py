@@ -20,7 +20,10 @@ keystone_config = configuration.get_configuration("openstack/keystone")["opensta
 TOKENS = {}
 __targets = {}
 
-
+'''
+[Note] is the asseration done here ?
+what i mean that you have checked the content but you don't assert if true or not
+'''
 def filter_input(func_or_str):
 
     def __filter(string):
