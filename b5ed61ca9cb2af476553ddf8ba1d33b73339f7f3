@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_1baa12d4",
+        "filename": "moon_manager/moon_manager/api/perimeter.py",
+        "patchSetId": 11
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-03T08:06:03Z",
+      "side": 1,
+      "message": "- It is possible to add a subject without mapping it to a policy so the \"uuid\u003dNone\" is OK for me.\n- We already have a policyID in the URL: \"/policies/\u003cstring:uuid\u003e/subjects\"",
+      "range": {
+        "startLine": 70,
+        "startChar": 4,
+        "endLine": 70,
+        "endChar": 21
+      },
+      "revId": "b5ed61ca9cb2af476553ddf8ba1d33b73339f7f3",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
