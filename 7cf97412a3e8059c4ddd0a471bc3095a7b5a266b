@@ -22,6 +22,30 @@
       "revId": "7cf97412a3e8059c4ddd0a471bc3095a7b5a266b",
       "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_7b42363f",
+        "filename": "moon_orchestrator/tests/unit_python/test_pods.py",
+        "patchSetId": 3
+      },
+      "lineNbr": 183,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-03T07:57:33Z",
+      "side": 1,
+      "message": "Adding a new pod is used to add a new security pipeline (which is mapped to only one PDP and one Keystone project). So I think the Orchestrator should answer with a 409 error code. But I am not sure the server sends this reply now...",
+      "parentUuid": "5a3f45e8_0d9add13",
+      "range": {
+        "startLine": 183,
+        "startChar": 4,
+        "endLine": 183,
+        "endChar": 44
+      },
+      "revId": "7cf97412a3e8059c4ddd0a471bc3095a7b5a266b",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
     }
   ]
 }
