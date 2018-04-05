@@ -15,6 +15,8 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
+from python_moonutilities.security_functions import validate_input
+
 
 __version__ = "4.3.2"
 
@@ -35,6 +37,7 @@ class Subjects(Resource):
         "/policies/<string:uuid>/subjects/<string:perimeter_id>",
     )
 
+    @validate_input("get", kwargs_state=[False, False, False])
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
         """Retrieve all subjects or a specific one if perimeter_id is
@@ -64,6 +67,7 @@ class Subjects(Resource):
                     "error": str(e)}, 500
         return {"subjects": data}
 
+    @validate_input("post", body_state=[True, False, False, False])
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a subject.
@@ -106,6 +110,7 @@ class Subjects(Resource):
                     "error": str(e)}, 500
         return {"subjects": data}
 
+    @validate_input("patch", kwargs_state=[False, True, False], body_state=[True, False, False, False])
     @check_auth
     def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a subject.
@@ -148,6 +153,7 @@ class Subjects(Resource):
                     "error": str(e)}, 500
         return {"subjects": data}
 
+    @validate_input("delete", kwargs_state=[False, True, False])
     @check_auth
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a subject for a given policy
@@ -190,6 +196,7 @@ class Objects(Resource):
         "/policies/<string:uuid>/objects/<string:perimeter_id>",
     )
 
+    @validate_input("get", kwargs_state=[False, False, False])
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
         """Retrieve all objects or a specific one if perimeter_id is
@@ -218,6 +225,7 @@ class Objects(Resource):
                     "error": str(e)}, 500
         return {"objects": data}
 
+    @validate_input("post", body_state=[True, False, False, False])
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a object.
@@ -253,6 +261,7 @@ class Objects(Resource):
                     "error": str(e)}, 500
         return {"objects": data}
 
+    @validate_input("patch", kwargs_state=[False, True, False], body_state=[True, False, False, False])
     @check_auth
     def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a object.
@@ -288,6 +297,7 @@ class Objects(Resource):
                     "error": str(e)}, 500
         return {"objects": data}
 
+    @validate_input("delete", kwargs_state=[False, True, False])
     @check_auth
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a object for a given policy
@@ -327,6 +337,7 @@ class Actions(Resource):
         "/policies/<string:uuid>/actions/<string:perimeter_id>",
     )
 
+    @validate_input("get", kwargs_state=[False, False, False])
     @check_auth
     def get(self, uuid=None, perimeter_id=None, user_id=None):
         """Retrieve all actions or a specific one if perimeter_id
@@ -352,6 +363,7 @@ class Actions(Resource):
                     "error": str(e)}, 500
         return {"actions": data}
 
+    @validate_input("post", body_state=[True, False, False, False])
     @check_auth
     def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a action.
@@ -387,6 +399,7 @@ class Actions(Resource):
                     "error": str(e)}, 500
         return {"actions": data}
 
+    @validate_input("patch", kwargs_state=[False, True, False], body_state=[True, False, False, False])
     @check_auth
     def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a action.
@@ -422,6 +435,7 @@ class Actions(Resource):
                     "error": str(e)}, 500
         return {"actions": data}
 
+    @validate_input("delete", kwargs_state=[False, True, False])
     @check_auth
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a action for a given policy

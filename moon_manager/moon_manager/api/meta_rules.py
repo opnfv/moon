@@ -12,6 +12,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -30,6 +31,7 @@ class MetaRules(Resource):
         "/meta_rules/<string:meta_rule_id>/"
     )
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, meta_rule_id=None, user_id=None):
         """Retrieve all sub meta rules
@@ -58,6 +60,7 @@ class MetaRules(Resource):
                     "error": str(e)}, 500
         return {"meta_rules": data}
 
+    @validate_input("post", body_state=[True, True, True, True])
     @check_auth
     def post(self, meta_rule_id=None, user_id=None):
         """Add a meta rule
@@ -93,6 +96,7 @@ class MetaRules(Resource):
                     "error": str(e)}, 500
         return {"meta_rules": data}
 
+    @validate_input("patch", kwargs_state=[True, False], body_state=[True, True, True, True])
     @check_auth
     def patch(self, meta_rule_id=None, user_id=None):
         """Update a meta rule
@@ -128,6 +132,7 @@ class MetaRules(Resource):
                     "error": str(e)}, 500
         return {"meta_rules": data}
 
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, meta_rule_id=None, user_id=None):
         """Delete a meta rule

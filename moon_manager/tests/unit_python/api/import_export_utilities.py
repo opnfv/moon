@@ -35,8 +35,8 @@ def clean_policies(client):
 def clean_subjects(client):
     subjects = test_perimeter.get_subjects(client)
     logger.info("subjects {}".format(subjects))
-    for key in subjects["subjects"]:
-        subject = subjects["subjects"][key]
+    for key in subjects[1]["subjects"]:
+        subject = subjects[1]["subjects"][key]
         policy_keys = subject["policy_list"]
         logger.info("subjects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
@@ -48,8 +48,8 @@ def clean_subjects(client):
 def clean_objects(client):
     objects = test_perimeter.get_objects(client)
     logger.info("objects {}".format(objects))
-    for key in objects["objects"]:
-        object_ = objects["objects"][key]
+    for key in objects[1]["objects"]:
+        object_ = objects[1]["objects"][key]
         policy_keys = object_["policy_list"]
         logger.info("objects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
@@ -62,8 +62,8 @@ def clean_objects(client):
 def clean_actions(client):
     actions = test_perimeter.get_actions(client)
     logger.info("objects {}".format(actions))
-    for key in actions["actions"]:
-        action = actions["actions"][key]
+    for key in actions[1]["actions"]:
+        action = actions[1]["actions"][key]
         policy_keys = action["policy_list"]
         logger.info("action policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
