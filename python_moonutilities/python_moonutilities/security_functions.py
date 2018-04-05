@@ -93,6 +93,7 @@ def validated_input(func_or_str):
         if not string:
             raise ValueError('Empty String')
         '''
+        is it valid to contains space inbetween 
         '''
         for i in string:
             if i == ' ':
