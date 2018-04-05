@@ -17,14 +17,14 @@ def add_subject_assignment(client, policy_id, category_id):
         "category_id": category_id,
         "data_id": "data_id1"
     }
-    req = client.post("/policies/{}/subject_assignments/{}".format(policy_id, category_id), data=json.dumps(data),
+    req = client.post("/policies/{}/subject_assignments".format(policy_id), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     subject_assignment = utilities.get_json(req.data)
     return req, subject_assignment
 
 
-def delete_subject_assignment(client, policy_id):
-    req = client.delete("/policies/{}/subject_assignments".format(policy_id))
+def delete_subject_assignment(client, policy_id, sub_id, cat_id,data_id):
+    req = client.delete("/policies/{}/subject_assignments/{}/{}/{}".format(policy_id, sub_id, cat_id,data_id))
     return req
 
 
@@ -42,6 +42,14 @@ def test_add_subject_assignment():
     assert value[id]['subject_id'] == "id1"
 
 
+def test_add_subject_assignment_without_cat_id():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, subject_assignment = add_subject_assignment(client, policy_id, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == 'Empty String'
+
+
 def test_get_subject_assignment():
     policy_id = utilities.get_policy_id()
     client = utilities.register_client()
@@ -54,8 +62,18 @@ def test_get_subject_assignment():
 def test_delete_subject_assignment():
     client = utilities.register_client()
     policy_id = utilities.get_policy_id()
-    success_req = delete_subject_assignment(client, policy_id)
+    req, subject_assignment = get_subject_assignment(client, policy_id)
+    value = subject_assignment["subject_assignments"]
+    id = list(value.keys())[0]
+    success_req = delete_subject_assignment(client, policy_id, value[id]['subject_id'], value[id]['category_id'],value[id]['assignments'][0])
     assert success_req.status_code == 200
+
+
+def test_delete_subject_assignment_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_subject_assignment(client, "", "id1", "111" ,"data_id1")
+    assert success_req.status_code == 500
+
 
 # ---------------------------------------------------------------------------
 
@@ -80,8 +98,8 @@ def add_object_assignment(client, policy_id, category_id):
     return req, object_assignment
 
 
-def delete_object_assignment(client, policy_id):
-    req = client.delete("/policies/{}/object_assignments".format(policy_id))
+def delete_object_assignment(client, policy_id, obj_id, cat_id, data_id):
+    req = client.delete("/policies/{}/object_assignments/{}/{}/{}".format(policy_id, obj_id, cat_id, data_id))
     return req
 
 
@@ -108,11 +126,29 @@ def test_add_object_assignment():
     assert value[id]['object_id'] == "id1"
 
 
+def test_add_object_assignment_without_cat_id():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, object_assignment = add_object_assignment(client, policy_id, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == 'Empty String'
+
+
 def test_delete_object_assignment():
     client = utilities.register_client()
     policy_id = utilities.get_policy_id()
-    success_req = delete_object_assignment(client, policy_id)
+    req, object_assignment = get_object_assignment(client, policy_id)
+    value = object_assignment["object_assignments"]
+    id = list(value.keys())[0]
+    success_req = delete_object_assignment(client, policy_id, value[id]['object_id'], value[id]['category_id'],value[id]['assignments'][0])
     assert success_req.status_code == 200
+
+
+def test_delete_object_assignment_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_object_assignment(client, "", "id1", "111" ,"data_id1")
+    assert success_req.status_code == 500
+
 
 # ---------------------------------------------------------------------------
 
@@ -137,8 +173,8 @@ def add_action_assignment(client, policy_id, category_id):
     return req, action_assignment
 
 
-def delete_action_assignment(client, policy_id):
-    req = client.delete("/policies/{}/action_assignments".format(policy_id))
+def delete_action_assignment(client, policy_id, action_id, cat_id, data_id):
+    req = client.delete("/policies/{}/action_assignments/{}/{}/{}".format(policy_id, action_id, cat_id, data_id))
     return req
 
 
@@ -165,10 +201,27 @@ def test_add_action_assignment():
     assert value[id]['action_id'] == "id1"
 
 
+def test_add_action_assignment_without_cat_id():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, action_assignment = add_action_assignment(client, policy_id, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == 'Empty String'
+
+
 def test_delete_action_assignment():
     client = utilities.register_client()
     policy_id = utilities.get_policy_id()
-    success_req = delete_action_assignment(client, policy_id)
+    req, action_assignment = get_action_assignment(client, policy_id)
+    value = action_assignment["action_assignments"]
+    id = list(value.keys())[0]
+    success_req = delete_action_assignment(client, policy_id, value[id]['action_id'], value[id]['category_id'],value[id]['assignments'][0])
     assert success_req.status_code == 200
+
+
+def test_delete_action_assignment_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_action_assignment(client, "", "id1", "111" ,"data_id1")
+    assert success_req.status_code == 500
 
 # ---------------------------------------------------------------------------

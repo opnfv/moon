@@ -17,6 +17,7 @@ from python_moondb.core import PDPManager
 from python_moondb.core import PolicyManager
 from python_moondb.core import ModelManager
 from python_moonutilities import configuration, exceptions
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -96,6 +97,7 @@ class PDP(Resource):
         "/pdp/<string:uuid>/",
     )
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, uuid=None, user_id=None):
         """Retrieve all pdp
@@ -120,6 +122,7 @@ class PDP(Resource):
                     "error": str(e)}, 500
         return {"pdps": data}
 
+    @validate_input("post", body_state=[True, True, True, False])
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create pdp.
@@ -161,6 +164,7 @@ class PDP(Resource):
                     "error": str(e)}, 500
         return {"pdps": data}
 
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, uuid=None, user_id=None):
         """Delete a pdp
@@ -182,6 +186,7 @@ class PDP(Resource):
                     "error": str(e)}, 500
         return {"result": True}
 
+    @validate_input("patch", kwargs_state=[True, False], body_state=[True, True, True, False])
     @check_auth
     def patch(self, uuid=None, user_id=None):
         """Update a pdp

@@ -12,6 +12,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -31,6 +32,7 @@ class SubjectData(Resource):
         "<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all subject categories or a specific one if sid is given
@@ -63,6 +65,7 @@ class SubjectData(Resource):
                     "error": str(e)}, 500
         return {"subject_data": data}
 
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
     @check_auth
     def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a subject.
@@ -98,6 +101,7 @@ class SubjectData(Resource):
                     "error": str(e)}, 500
         return {"subject_data": data}
 
+    @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
     def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a subject for a given policy
@@ -136,6 +140,7 @@ class ObjectData(Resource):
         "<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all object categories or a specific one if sid is given
@@ -168,6 +173,7 @@ class ObjectData(Resource):
                     "error": str(e)}, 500
         return {"object_data": data}
 
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
     @check_auth
     def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a object.
@@ -203,6 +209,7 @@ class ObjectData(Resource):
                     "error": str(e)}, 500
         return {"object_data": data}
 
+    @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
     def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a object for a given policy
@@ -241,6 +248,7 @@ class ActionData(Resource):
         "<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
     def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all action categories or a specific one if sid is given
@@ -273,6 +281,7 @@ class ActionData(Resource):
                     "error": str(e)}, 500
         return {"action_data": data}
 
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
     @check_auth
     def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a action.
@@ -308,6 +317,7 @@ class ActionData(Resource):
                     "error": str(e)}, 500
         return {"action_data": data}
 
+    @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
     def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a action for a given policy

@@ -22,7 +22,6 @@ __targets = {}
 
 
 def filter_input(func_or_str):
-
     def __filter(string):
         if string and type(string) is str:
             return "".join(re.findall("[\w\- +]*", string))
@@ -82,15 +81,124 @@ def filter_input(func_or_str):
     return None
 
 
+""" 
+To do should check value of Dictionary but it's dependent on from where it's coming
+"""
+
+
+def validate_data(data):
+    def __validate_string(string):
+        if not string:
+            raise ValueError('Empty String')
+        '''
+                is it valid to contains space inbetween 
+
+        '''
+
+        if " " in string:
+                raise ValueError('String contains space')
+
+    def __validate_list_or_tuple(container):
+        if not container:
+            raise ValueError('Empty Container')
+        for i in container:
+            validate_data(i)
+
+    def __validate_dict(dictionary):
+        if not dictionary:
+            raise ValueError('Empty Dictionary')
+        for key in dictionary:
+            validate_data(dictionary[key])
+
+    if isinstance(data, str):
+        __validate_string(data)
+    elif isinstance(data, list) or isinstance(data, tuple):
+        __validate_list_or_tuple(data)
+    elif isinstance(data, dict):
+        __validate_dict(data)
+    else:
+        raise ValueError('Value is Not String or Container or Dictionary')
+
+
+def validate_input(type, args_state=[], kwargs_state=[], body_state=[]):
+    """
+    this fucntion works only on List or tuple or dictionary of Strings ,and String direct
+    Check if input of function is Valid or not, Valid if not has spaces and values is not None or empty.
+
+    :param type: type of request if function is used as decorator
+    :param args_state: list of Booleans for args,
+                        values must be order as target values of arguments,
+                        True if None is not Allowed and False if is allowed
+    :param kwargs_state: list of Booleans for kwargs as order of input kwargs,
+                          values must be order as target values of arguments,
+                          True if None is not Allowed and False if is allowed
+    :param body_state: list of Booleans for arguments in body of request if request is post,
+                        values must be order as target values of arguments,
+                        True if None is not Allowed and False if is allowed
+    :return:
+    """
+
+    def validate_input_decorator(func):
+        def wrapped(*args, **kwargs):
+
+            temp_args = []
+            """
+            this loop made to filter args from object class, 
+            when put this function as decorator in function control
+            then there is copy of this class add to front of args  
+            """
+            for arg in args:
+                if isinstance(arg, str) == True or \
+                        isinstance(arg, list) == True or \
+                        isinstance(arg, dict) == True:
+                    temp_args.append(arg)
+
+            while len(args_state) < len(temp_args):
+                args_state.append(True)
+
+            for i in range(0, len(temp_args)):
+                if args_state[i]:
+                    validate_data(temp_args[i])
+
+            while len(kwargs_state) < len(kwargs):
+                kwargs_state.append(True)
+            counter = 0
+            for i in kwargs:
+                if kwargs_state[counter]:
+                    validate_data({i: kwargs[i]})
+
+                counter = counter + 1
+
+            if type == "post" or type == "patch":
+                body = request.json
+                while len(body_state) < len(body):
+                    body_state.append(True)
+                counter = 0
+                for i in body:
+                    if body_state[counter]:
+                        validate_data({i: body[i]})
+
+                    counter = counter + 1
+
+            return func(*args, **kwargs)
+
+        return wrapped
+
+    return validate_input_decorator
+
+
 def enforce(action_names, object_name, **extra):
     """Fake version of the enforce decorator"""
+
     def wrapper_func(func):
         def wrapper_args(*args, **kwargs):
             # LOG.info("kwargs={}".format(kwargs))
             # kwargs['user_id'] = kwargs.pop('user_id', "admin")
             # LOG.info("Calling enforce on {} with args={} kwargs={}".format(func.__name__, args, kwargs))
             return func(*args, **kwargs)
+
         return wrapper_args
+
     return wrapper_func
 
 
@@ -221,4 +329,5 @@ def check_auth(function):
         user_id = kwargs.pop("user_id", token)
         result = function(*args, **kwargs, user_id=user_id)
         return result
+
     return wrapper

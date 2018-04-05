@@ -54,6 +54,20 @@ def test_add_subject_categories():
     assert value['description'] == "description of {}".format("testuser")
 
 
+def test_add_subject_categories_with_empty_user():
+    client = utilities.register_client()
+    req, subject_categories = add_subject_categories(client, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_subject_categories_with_user_contain_space():
+    client = utilities.register_client()
+    req, subject_categories = add_subject_categories(client, "test user")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
 def test_delete_subject_categories():
     client = utilities.register_client()
     req = delete_subject_categories(client, "testuser")
@@ -119,6 +133,20 @@ def test_add_object_categories():
     assert value['description'] == "description of {}".format("testuser")
 
 
+def test_add_object_categories_with_empty_user():
+    client = utilities.register_client()
+    req, object_categories = add_object_categories(client, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_object_categories_with_user_contain_space():
+    client = utilities.register_client()
+    req, object_categories = add_object_categories(client, "test user")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
 def test_delete_object_categories():
     client = utilities.register_client()
     req = delete_object_categories(client, "testuser")
@@ -182,6 +210,20 @@ def test_add_action_categories():
     assert "action_categories" in action_categories
     assert value['name'] == "testuser"
     assert value['description'] == "description of {}".format("testuser")
+
+
+def test_add_action_categories_with_empty_user():
+    client = utilities.register_client()
+    req, action_categories = add_action_categories(client, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_action_categories_with_user_contain_space():
+    client = utilities.register_client()
+    req, action_categories = add_action_categories(client, "test user")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
 
 
 def test_delete_action_categories():

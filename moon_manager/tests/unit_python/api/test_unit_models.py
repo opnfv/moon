@@ -25,6 +25,42 @@ def add_models(client, name):
     return req, models
 
 
+def update_model(client, name, model_id):
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": ["meta_rule_id1_update", "meta_rule_id2_update"]
+    }
+    req = client.patch("/models/{}".format(model_id), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    models = utilities.get_json(req.data)
+    return req, models
+
+
+def add_model_without_meta_rules_ids(client, name):
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": []
+    }
+    req = client.post("/models", data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    models = utilities.get_json(req.data)
+    return req, models
+
+
+def update_model_without_meta_rules_ids(client, name):
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": []
+    }
+    req = client.patch("/models", data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    models = utilities.get_json(req.data)
+    return req, models
+
+
 def delete_models(client, name):
     request, models = get_models(client)
     for key, value in models['models'].items():
@@ -46,6 +82,7 @@ def clean_models():
         print(key)
         print(value)
         client.delete("/models/{}".format(key))
+
 
 def test_get_models():
     client = utilities.register_client()
@@ -78,4 +115,61 @@ def test_delete_models_without_id():
     client = utilities.register_client()
     req = delete_models_without_id(client)
     assert req.status_code == 500
+
+
+def test_add_model_with_empty_user():
+    clean_models()
+    client = utilities.register_client()
+    req, models = add_models(client, "")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_model_with_user_contain_space():
+    clean_models()
+    client = utilities.register_client()
+    req, models = add_models(client, "test user")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
+def test_add_model_without_meta_rules():
+    clean_models()
+    client = utilities.register_client()
+    req, meta_rules = add_model_without_meta_rules_ids(client, "testuser")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == 'Empty Container'
+
+
+def test_update_model():
+    clean_models()
+    client = utilities.register_client()
+    req = add_models(client, "testuser")
+    model_id = list(req[1]['models'])[0]
+    req_update = update_model(client, "testuser", model_id)
+    assert req_update[0].status_code == 200
+    value = list(req_update[1]["models"].values())[0]
+    assert value["meta_rules"][0] == "meta_rule_id1_update"
+    delete_models(client, "testuser")
+
+
+def test_update_meta_rules_without_id():
+    clean_models()
+    client = utilities.register_client()
+    req_update = update_model(client, "testuser", "")
+    assert req_update[0].status_code == 500
+
+
+def test_update_meta_rules_without_user():
+    client = utilities.register_client()
+    req_update = update_model(client, "", "")
+    assert req_update[0].status_code == 500
+    assert json.loads(req_update[0].data)["message"] == "Empty String"
+
+
+def test_update_meta_rules_without_meta_rules():
+    client = utilities.register_client()
+    req_update = update_model_without_meta_rules_ids(client, "testuser")
+    assert req_update[0].status_code == 500
+    assert json.loads(req_update[0].data)["message"] == "Empty Container"
 
