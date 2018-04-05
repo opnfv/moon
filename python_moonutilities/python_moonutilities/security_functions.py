@@ -82,6 +82,67 @@ def filter_input(func_or_str):
     return None
 
 
+""" 
+To do should check value of Dictionary but it's dependent on from where it's coming
+"""
+
+
+def validated_input(func_or_str):
+
+    def __validated_string(string):
+        if not string:
+            raise ValueError('Empty String')
+        '''
+                is it valid to contains space inbetween 
+
+        '''
+        for i in string:
+            if i == ' ':
+                raise ValueError('String contains space')
+
+    def __validated_list_or_tuple(container):
+        if not container:
+            raise ValueError('Empty Container')
+        for i in container:
+            validated_input(i)
+
+    def __validated_dict(dictionary):
+        if not dictionary:
+            raise ValueError('Empty Dictionary')
+        for key in dictionary:
+            validated_input(key)
+
+    def wrapped(*args, **kwargs):
+        for arg in args:
+            if isinstance(arg, str):
+                __validated_string(arg)
+            elif isinstance(arg, list) or isinstance(arg, tuple):
+                __validated_list_or_tuple(arg)
+            elif isinstance(arg, dict):
+                __validated_dict(arg)
+
+        for arg in kwargs:
+            if isinstance(arg, str):
+                __validated_string(arg)
+            elif isinstance(arg, list) or isinstance(arg, tuple):
+                __validated_list_or_tuple(arg)
+            elif isinstance(arg, dict):
+                __validated_dict(arg)
+
+        return func_or_str(*args, **kwargs)
+
+    if isinstance(func_or_str, str):
+        __validated_string(func_or_str)
+    elif isinstance(func_or_str, list) or isinstance(func_or_str, tuple):
+        __validated_list_or_tuple(func_or_str)
+    elif isinstance(func_or_str, dict):
+        __validated_dict(func_or_str)
+    elif isinstance(func_or_str, types.FunctionType):
+        return wrapped
+    else:
+        raise ValueError('Value is Not String or Container or Dictionary')
+
+
 def enforce(action_names, object_name, **extra):
     """Fake version of the enforce decorator"""
     def wrapper_func(func):
