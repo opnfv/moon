@@ -23,6 +23,35 @@ def add_rules(client, policy_id):
     return req, rules
 
 
+def add_rules_without_meta_rule_id(client, policy_id):
+    data = {
+        "meta_rule_id": "",
+        "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],
+        "instructions": (
+            {"decision": "grant"},
+        ),
+        "enabled": True
+    }
+    req = client.post("/policies/{}/rules".format(policy_id), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    rules = utilities.get_json(req.data)
+    return req, rules
+
+
+def add_rules_without_rule(client, policy_id):
+    data = {
+        "meta_rule_id": "meta_rule_id1",
+        "instructions": (
+            {"decision": "grant"},
+        ),
+        "enabled": True
+    }
+    req = client.post("/policies/{}/rules".format(policy_id), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    rules = utilities.get_json(req.data)
+    return req, rules
+
+
 def delete_rules(client, policy_id, meta_rule_id):
     req = client.delete("/policies/{}/rules/{}".format(policy_id, meta_rule_id))
     return req
@@ -50,10 +79,37 @@ def test_add_rules():
     assert value[id]["meta_rule_id"] == "meta_rule_id1"
 
 
+def test_add_rules_without_policy_id():
+    client = utilities.register_client()
+    req, rules = add_rules(client, None)
+    assert req.status_code == 500
+
+
+def test_add_rules_without_meta_rule_id():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, rules = add_rules_without_meta_rule_id(client, policy_id)
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == 'Empty String'
+
+
+def test_add_rules_without_rule():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, rules = add_rules_without_rule(client, policy_id)
+    assert req.status_code == 500
+
+
 def test_delete_rules():
+    client = utilities.register_client()
+    rules = delete_rules(client, "", "")
+    assert rules.status_code == 500
+
+
+def test_delete_rules_without_policy_id():
     client = utilities.register_client()
     policy_id = utilities.get_policy_id()
     req, added_rules = get_rules(client, policy_id)
     id = added_rules["rules"]['rules'][0]['id']
-    rules = delete_rules(client, policy_id, id)
+    rules = delete_rules(client, None, id)
     assert rules.status_code == 200

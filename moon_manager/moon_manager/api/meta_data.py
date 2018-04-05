@@ -12,6 +12,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -29,6 +30,7 @@ class SubjectCategories(Resource):
         "/subject_categories/<string:category_id>",
     )
 
+    @validate_input("get",kwargs_state=[False,False])
     @check_auth
     def get(self, category_id=None, user_id=None):
         """Retrieve all subject categories or a specific one
@@ -52,6 +54,7 @@ class SubjectCategories(Resource):
                     "error": str(e)}, 500
         return {"subject_categories": data}
 
+    @validate_input("post",body_state=[True,False])
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a subject category.
@@ -79,6 +82,7 @@ class SubjectCategories(Resource):
                     "error": str(e)}, 500
         return {"subject_categories": data}
 
+    @validate_input("delete",kwargs_state=[True,False])
     @check_auth
     def delete(self, category_id=None, user_id=None):
         """Delete a subject category
@@ -112,6 +116,7 @@ class ObjectCategories(Resource):
         "/object_categories/<string:category_id>",
     )
 
+    @validate_input("get",kwargs_state=[False,False])
     @check_auth
     def get(self, category_id=None, user_id=None):
         """Retrieve all object categories or a specific one
@@ -135,6 +140,7 @@ class ObjectCategories(Resource):
                     "error": str(e)}, 500
         return {"object_categories": data}
 
+    @validate_input("post", body_state=[True, False])
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a object category.
@@ -162,6 +168,7 @@ class ObjectCategories(Resource):
                     "error": str(e)}, 500
         return {"object_categories": data}
 
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, category_id=None, user_id=None):
         """Delete an object category
@@ -195,6 +202,7 @@ class ActionCategories(Resource):
         "/action_categories/<string:category_id>",
     )
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, category_id=None, user_id=None):
         """Retrieve all action categories or a specific one
@@ -218,6 +226,7 @@ class ActionCategories(Resource):
                     "error": str(e)}, 500
         return {"action_categories": data}
 
+    @validate_input("post", body_state=[True, False])
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update an action category.
@@ -245,6 +254,7 @@ class ActionCategories(Resource):
                     "error": str(e)}, 500
         return {"action_categories": data}
 
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, category_id=None, user_id=None):
         """Delete an action
