@@ -7,6 +7,7 @@ import pytest
 import policies.mock_data as mock_data
 from python_moonutilities.exceptions import *
 
+
 def get_policies():
     from python_moondb.core import PolicyManager
     return PolicyManager.get_policies("admin")
@@ -99,7 +100,7 @@ def test_add_policies_twice_with_same_id(db):
     add_policies(policy_id, value)
     with pytest.raises(PolicyExisting) as exception_info:
         add_policies(policy_id, value)
-    #assert str(exception_info.value) == '409: Policy Error'
+    # assert str(exception_info.value) == '409: Policy Error'
 
 
 def test_delete_policies(db):
@@ -129,7 +130,29 @@ def test_delete_policies_with_invalid_id(db):
     policy_id = 'policy_id_1'
     with pytest.raises(PolicyUnknown) as exception_info:
         delete_policies(policy_id)
-    #assert str(exception_info.value) == '400: Policy Unknown'
+    # assert str(exception_info.value) == '400: Policy Unknown'
+
+
+def test_delete_policies_with_pdp(db):
+    from python_moondb.core import PDPManager
+    value = {
+        "name": "test_policy1",
+        "model_id": "",
+        "genre": "authz",
+        "description": "test",
+    }
+    policies = add_policies(value=value)
+    policy_id1 = list(policies.keys())[0]
+    pdp_id = "pdp_id1"
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": [policy_id1],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    PDPManager.add_pdp(user_id="admin" ,pdp_id=pdp_id, value=value)
+    with pytest.raises(DeletePolicyWithPdp) as exception_info:
+        delete_policies(policy_id1)
 
 
 def test_update_policy(db):
@@ -158,7 +181,7 @@ def test_update_policy_with_invalid_id(db):
     }
     with pytest.raises(PolicyUnknown) as exception_info:
         update_policy(policy_id, value)
-    #assert str(exception_info.value) == '400: Policy Unknown'
+    # assert str(exception_info.value) == '400: Policy Unknown'
 
 
 def test_get_policy_from_meta_rules(db):
@@ -173,7 +196,7 @@ def test_get_policy_from_meta_rules(db):
     policy = add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
-    pdp_ids = [policy_id,]
+    pdp_ids = [policy_id, ]
     pdp_obj = mock_data.create_pdp(pdp_ids)
     test_pdp.add_pdp(value=pdp_obj)
     matched_policy_id = get_policy_from_meta_rules(meta_rule_id)
@@ -199,7 +222,7 @@ def test_get_policy_from_meta_rules_with_no_policies(db):
     import test_pdp as test_pdp
     meta_rule_id = 'meta_rule_id'
     policy_id = 'invalid'
-    pdp_ids = [policy_id,]
+    pdp_ids = [policy_id, ]
     pdp_obj = mock_data.create_pdp(pdp_ids)
     test_pdp.add_pdp(value=pdp_obj)
     with pytest.raises(Exception) as exception_info:
@@ -217,7 +240,7 @@ def test_get_policy_from_meta_rules_with_no_models(db):
     policy = add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
-    pdp_ids = [policy_id,]
+    pdp_ids = [policy_id, ]
     pdp_obj = mock_data.create_pdp(pdp_ids)
     test_pdp.add_pdp(value=pdp_obj)
     with pytest.raises(Exception) as exception_info:
