@@ -9,6 +9,7 @@ from python_moonutilities import exceptions
 from python_moonutilities.security_functions import filter_input, enforce
 from python_moondb.api.managers import Managers
 
+# from python_moondb.core import PolicyManager
 
 logger = logging.getLogger("moon.db.api.model")
 
@@ -30,6 +31,10 @@ class ModelManager(Managers):
         if model_id not in self.driver.get_models(model_id=model_id):
             raise exceptions.ModelUnknown
         # TODO (asteroide): check that no policy is connected to this model
+        policies = Managers.PolicyManager.get_policies(user_id=user_id)
+        for policy in policies:
+            if policies[policy]['model_id'] == model_id:
+                raise exceptions.DeleteModelWithPolicy
         return self.driver.delete_model(model_id=model_id)
 
     @enforce(("read", "write"), "models")
@@ -65,6 +70,10 @@ class ModelManager(Managers):
         if meta_rule_id not in self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
             raise exceptions.MetaRuleUnknown
         # TODO (asteroide): check and/or delete data and assignments and rules linked to that meta_rule
+        models = self.get_models(user_id=user_id)
+        for model_id in models:
+            if models[model_id]['meta_rules'] == meta_rule_id:
+                raise exceptions.DeleteMetaRuleWithModel
         return self.driver.delete_meta_rule(meta_rule_id=meta_rule_id)
 
     @enforce("read", "meta_data")
@@ -83,6 +92,11 @@ class ModelManager(Managers):
         # TODO (asteroide): delete all meta_rules linked to that category
         if category_id not in self.driver.get_subject_categories(category_id=category_id):
             raise exceptions.SubjectCategoryUnknown
+        meta_rules = self.get_meta_rules(user_id=user_id)
+        for meta_rule_id in meta_rules:
+            for subject_category_id in meta_rules[meta_rule_id]['subject_categories']:
+                if subject_category_id == category_id:
+                    raise exceptions.DeleteCategoryWithMetaRule
         return self.driver.delete_subject_category(category_id=category_id)
 
     @enforce("read", "meta_data")
@@ -101,6 +115,11 @@ class ModelManager(Managers):
         # TODO (asteroide): delete all meta_rules linked to that category
         if category_id not in self.driver.get_object_categories(category_id=category_id):
             raise exceptions.ObjectCategoryUnknown
+        meta_rules = self.get_meta_rules(user_id=user_id)
+        for meta_rule_id in meta_rules:
+            for object_category_id in meta_rules[meta_rule_id]['object_categories']:
+                if object_category_id == category_id:
+                    raise exceptions.DeleteCategoryWithMetaRule
         return self.driver.delete_object_category(category_id=category_id)
 
     @enforce("read", "meta_data")
@@ -118,6 +137,10 @@ class ModelManager(Managers):
         # TODO (asteroide): delete all data linked to that category
         # TODO (asteroide): delete all meta_rules linked to that category
         if category_id not in self.driver.get_action_categories(category_id=category_id):
-            raise exceptions.ActionCategoryExisting
+            raise exceptions.ActionCategoryUnknown
+        meta_rules = self.get_meta_rules(user_id=user_id)
+        for meta_rule_id in meta_rules:
+            for action_category_id in meta_rules[meta_rule_id]['action_categories']:
+                if action_category_id == category_id:
+                    raise exceptions.DeleteCategoryWithMetaRule
         return self.driver.delete_action_category(category_id=category_id)
-
