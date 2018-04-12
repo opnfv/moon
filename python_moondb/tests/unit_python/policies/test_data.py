@@ -2,6 +2,7 @@ import policies.mock_data as mock_data
 import pytest
 import logging
 from python_moonutilities.exceptions import *
+from .test_assignments import *
 
 logger = logging.getLogger("python_moondb.tests.api.test_data")
 
@@ -178,6 +179,22 @@ def test_delete_action_data(db):
     assert len(new_action_data[0]['data']) == 0
 
 
+def test_delete_action_data_assigned_to_action_assignment(db):
+    policy_id = mock_data.get_policy_id()
+    get_available_metadata(policy_id)
+    data_id = "data_id_1"
+    category_id = "category_id_1"
+    value = {
+        "name": "action-type",
+        "description": {"vm-action": "", "storage-action": "", },
+    }
+    action_data = add_action_data(policy_id, data_id, category_id, value).get('data')
+    action_data_id = list(action_data.keys())[0]
+    add_action_assignment(policy_id, "action_id_1", category_id, action_data_id)
+    with pytest.raises(DeleteData) as exception_info:
+        delete_action_data(action_data[action_data_id].get('policy_id'), None)
+
+
 def test_get_object_data(db):
     policy_id = mock_data.get_policy_id()
     get_available_metadata(policy_id)
@@ -251,6 +268,22 @@ def test_delete_object_data(db):
     delete_object_data(object_data[object_data_id].get('policy_id'), data_id)
     new_object_data = get_object_data(policy_id)
     assert len(new_object_data[0]['data']) == 0
+
+
+def test_delete_object_data_assigned_to_object_assignment(db):
+    policy_id = mock_data.get_policy_id()
+    get_available_metadata(policy_id)
+    data_id = "data_id_1"
+    category_id = "category_id_1"
+    value = {
+        "name": "object-type",
+        "description": {"vm-action": "", "storage-action": "", },
+    }
+    object_data = add_object_data(policy_id, data_id, category_id, value).get('data')
+    object_data_id = list(object_data.keys())[0]
+    add_object_assignment(policy_id, "object_id_1", category_id, object_data_id)
+    with pytest.raises(DeleteData) as exception_info:
+        delete_object_data(object_data[object_data_id].get('policy_id'), None)
 
 
 def test_get_subject_data(db):
@@ -327,6 +360,22 @@ def test_delete_subject_data(db):
     assert len(new_subject_data[0]['data']) == 0
 
 
+def test_delete_subject_data_assigned_to_subject_assignment(db):
+    policy_id = mock_data.get_policy_id()
+    get_available_metadata(policy_id)
+    data_id = "data_id_1"
+    category_id = "category_id_1"
+    value = {
+        "name": "subject-type",
+        "description": {"vm-action": "", "storage-action": "", },
+    }
+    subject_data = add_subject_data(policy_id, data_id, category_id, value).get('data')
+    subject_data_id = list(subject_data.keys())[0]
+    add_subject_assignment(policy_id, "object_id_1", category_id, subject_data_id)
+    with pytest.raises(DeleteData) as exception_info:
+        delete_subject_data(subject_data[subject_data_id].get('policy_id'), None)
+
+
 def test_get_actions(db):
     policy_id = mock_data.get_policy_id()
     value = {
@@ -372,7 +421,9 @@ def test_add_action_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    action = add_action(mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2", category_prefix="_"), perimeter_id, value)
+    action = add_action(
+        mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2",
+                                category_prefix="_"), perimeter_id, value)
     logger.info("action : {}".format(action))
     assert action
     action_id = list(action.keys())[0]
@@ -444,7 +495,9 @@ def test_add_objects_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    added_object = add_object(mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2", category_prefix="_"), perimeter_id, value)
+    added_object = add_object(
+        mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2",
+                                category_prefix="_"), perimeter_id, value)
     assert added_object
     object_id = list(added_object.keys())[0]
     assert len(added_object[object_id].get('policy_list')) == 2
@@ -515,7 +568,9 @@ def test_add_subjects_multiple_times(db):
         "description": "test",
         "policy_list": ['policy_id_3', 'policy_id_4']
     }
-    subject = add_subject(mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2", category_prefix="_"), perimeter_id, value)
+    subject = add_subject(
+        mock_data.get_policy_id(model_name="test_model2", policy_name="policy_2", meta_rule_name="meta_rule2",
+                                category_prefix="_"), perimeter_id, value)
     assert subject
     subject_id = list(subject.keys())[0]
     assert len(subject[subject_id].get('policy_list')) == 2
