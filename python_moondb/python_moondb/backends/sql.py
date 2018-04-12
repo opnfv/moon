@@ -548,6 +548,16 @@ class PolicyConnector(BaseConnector, PolicyDriver):
     def delete_action(self, policy_id, perimeter_id):
         self.__delete_perimeter(Action, ActionUnknown, policy_id, perimeter_id)
 
+    def __is_perimeter_data_exist(self, ClassType ,data_id=None, category_id=None):
+        logger.info("driver {} {}".format( data_id, category_id))
+        with self.get_session_for_read() as session:
+            query = session.query(ClassType)
+            query = query.filter_by(category_id=category_id)
+            ref_list = query.all()
+            if ref_list:
+                return True
+            return False
+
     def __get_perimeter_data(self, ClassType, policy_id, data_id=None, category_id=None):
         logger.info("driver {} {} {}".format(policy_id, data_id, category_id))
         with self.get_session_for_read() as session:
@@ -602,6 +612,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
             if ref:
                 session.delete(ref)
 
+    def is_subject_data_exist(self, data_id=None, category_id=None):
+        return self.__is_perimeter_data_exist(SubjectData, data_id=data_id, category_id=category_id)
+
     def get_subject_data(self, policy_id, data_id=None, category_id=None):
         return self.__get_perimeter_data(SubjectData, policy_id, data_id=data_id, category_id=category_id)
 
@@ -614,6 +627,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
     def delete_subject_data(self, policy_id, data_id):
         return self.__delete_perimeter_data(SubjectData, policy_id, data_id)
 
+    def is_object_data_exist(self, data_id=None, category_id=None):
+        return self.__is_perimeter_data_exist(ObjectData, data_id=data_id, category_id=category_id)
+
     def get_object_data(self, policy_id, data_id=None, category_id=None):
         return self.__get_perimeter_data(ObjectData, policy_id, data_id=data_id, category_id=category_id)
 
@@ -625,6 +641,9 @@ class PolicyConnector(BaseConnector, PolicyDriver):
 
     def delete_object_data(self, policy_id, data_id):
         return self.__delete_perimeter_data(ObjectData, policy_id, data_id)
+
+    def is_action_data_exist(self, data_id=None,category_id=None):
+        return self.__is_perimeter_data_exist(ActionData, data_id=data_id, category_id=category_id)
 
     def get_action_data(self, policy_id, data_id=None, category_id=None):
         return self.__get_perimeter_data(ActionData, policy_id, data_id=data_id, category_id=category_id)

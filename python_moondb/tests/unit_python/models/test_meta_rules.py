@@ -1,4 +1,9 @@
-import pytest
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
+from .test_models import *
 
 
 def set_meta_rule(meta_rule_id, value=None):
@@ -51,7 +56,7 @@ def test_add_new_meta_rule_success(db):
         "object_categories": ["vm_security_level_id_1"],
         "action_categories": ["action_type_id_1"]
     }
-    metaRules = add_meta_rule();
+    metaRules = add_meta_rule()
     assert isinstance(metaRules, dict)
     assert metaRules
     assert len(metaRules) is 1
@@ -172,3 +177,26 @@ def test_delete_invalid_meta_rules_error(db):
     with pytest.raises(Exception) as exception_info:
         delete_meta_rules("INVALID_META_RULE_ID")
     assert str(exception_info.value) == '400: Sub Meta Rule Unknown'
+
+
+def test_delete_meta_rule_with_assigned_model(db):
+    value = {
+        "name": "MLS_meta_rule",
+        "description": "test",
+        "subject_categories": ["user_security_level_id_1"],
+        "object_categories": ["vm_security_level_id_1"],
+        "action_categories": ["action_type_id_1"]
+    }
+    metaRules = add_meta_rule()
+    assert isinstance(metaRules, dict)
+    assert metaRules
+    assert len(metaRules) is 1
+    meta_rule_id = list(metaRules.keys())[0]
+    model_value1 = {
+        "name": "MLS",
+        "description": "test",
+        "meta_rules": meta_rule_id
+    }
+    add_model(value=model_value1)
+    with pytest.raises(DeleteMetaRuleWithModel) as exception_info:
+        delete_meta_rules(meta_rule_id)

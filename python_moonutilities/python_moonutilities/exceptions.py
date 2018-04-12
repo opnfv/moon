@@ -651,3 +651,52 @@ class PolicyExisting(MoonError):
     code = 409
     title = 'Policy Error'
     logger = "Error"
+
+
+class DeleteData(MoonError):
+    description = _("Cannot delete data with assignment")
+    code = 400
+    title = 'Data Error'
+    logger = "Error"
+
+
+class DeleteCategoryWithData(MoonError):
+    description = _("Cannot delete category with data")
+    code = 400
+    title = 'Category Error'
+    logger = "Error"
+
+
+class DeleteCategoryWithMetaRule(MoonError):
+    description = _("Cannot delete category with meta rule")
+    code = 400
+    title = 'Category Error'
+    logger = "Error"
+
+
+class DeleteCategoryWithData(MoonError):
+    description = _("Cannot delete category with data")
+    code = 400
+    title = 'Category Error'
+    logger = "Error"
+
+
+class DeleteModelWithPolicy(MoonError):
+    description = _("Cannot delete model with policy")
+    code = 400
+    title = 'Model Error'
+    logger = "Error"
+
+
+class DeletePolicyWithPdp(MoonError):
+    description = _("Cannot delete policy with pdp")
+    code = 400
+    title = 'Policy Error'
+    logger = "Error"
+
+
+class DeleteMetaRuleWithModel(MoonError):
+    description = _("Cannot delete meta rule with model")
+    code = 400
+    title = 'Meta rule Error'
+    logger = "Error"

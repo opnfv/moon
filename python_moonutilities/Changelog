@@ -90,3 +90,7 @@ CHANGES
 1.4.8
 -----
 - Add SubjectScopeExisting, ObjectScopeExisting, ActionScopeExisting exceptions
+
+1.4.9
+-----
+- Add some exceptions when deletion of elements is impossible
