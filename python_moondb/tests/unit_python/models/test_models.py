@@ -1,11 +1,14 @@
 import pytest
 from python_moonutilities.exceptions import *
 import logging
+import policies.test_policies as test_policies
+
 logger = logging.getLogger("moon.db.tests.test_model")
+
 
 def get_models(model_id=None):
     from python_moondb.core import ModelManager
-    return ModelManager.get_models(user_id= None , model_id= model_id)
+    return ModelManager.get_models(user_id=None, model_id=model_id)
 
 
 def add_model(model_id=None, value=None):
@@ -62,6 +65,7 @@ def test_get_model(db):
     assert len(models) is 1
     delete_all_models()
 
+
 def test_get_specific_model(db):
     # prepare
     add_model(model_id="mls_model_id")
@@ -73,6 +77,7 @@ def test_get_specific_model(db):
     assert models  # assert model is not empty
     assert len(models) is 1
     delete_all_models()
+
 
 def test_add_model(db):
     # act
@@ -91,7 +96,7 @@ def test_add_same_model_twice(db):
     with pytest.raises(ModelExisting) as exception_info:
         add_model(model_id="model_1")
     delete_all_models()
-    #assert str(exception_info.value) == '409: Model Error'
+    # assert str(exception_info.value) == '409: Model Error'
 
 
 def test_add_model_generate_new_uuid(db):
@@ -176,3 +181,25 @@ def test_update_model(db):
         assert key in model[model_id]
         assert model[model_id][key] == new_model_value[key]
     delete_all_models()
+
+
+def test_delete_model_assigned_to_policy(db):
+    model_value1 = {
+        "name": "MLS",
+        "description": "test",
+        "meta_rules": "meta_rule_mls_1"
+    }
+    models = add_model(value=model_value1)
+    assert isinstance(models, dict)
+    assert models
+    assert len(models.keys()) == 1
+    model_id = list(models.keys())[0]
+    value = {
+        "name": "test_policy",
+        "model_id": model_id,
+        "genre": "authz",
+        "description": "test",
+    }
+    test_policies.add_policies(value=value)
+    with pytest.raises(DeleteModelWithPolicy) as exception_info:
+        delete_models(uuid=model_id)

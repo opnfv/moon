@@ -8,6 +8,7 @@ import logging
 from python_moonutilities.security_functions import enforce
 from python_moondb.api.managers import Managers
 from python_moonutilities import exceptions
+# from python_moondb.core import PDPManager
 
 logger = logging.getLogger("moon.db.api.policy")
 
@@ -46,6 +47,11 @@ class PolicyManager(Managers):
         # TODO (asteroide): unmap PDP linked to that policy
         if policy_id not in self.driver.get_policies(policy_id=policy_id):
             raise exceptions.PolicyUnknown
+        pdps = self.PDPManager.get_pdp(user_id=user_id)
+        for pdp in pdps:
+            for policy_id in pdps[pdp]['security_pipeline']:
+                if policy_id == policy_id:
+                    raise exceptions.DeletePolicyWithPdp
         return self.driver.delete_policy(policy_id=policy_id)
 
     @enforce(("read", "write"), "policies")
@@ -147,6 +153,9 @@ class PolicyManager(Managers):
     @enforce(("read", "write"), "data")
     def delete_subject_data(self, user_id, policy_id, data_id):
         # TODO (asteroide): check and/or delete assignments linked to that data
+        subject_assignments = self.get_subject_assignments(user_id=user_id, policy_id=policy_id, subject_id=data_id)
+        if subject_assignments:
+            raise exceptions.DeleteData
         return self.driver.delete_subject_data(policy_id=policy_id, data_id=data_id)
 
     @enforce("read", "data")
@@ -175,6 +184,9 @@ class PolicyManager(Managers):
     @enforce(("read", "write"), "data")
     def delete_object_data(self, user_id, policy_id, data_id):
         # TODO (asteroide): check and/or delete assignments linked to that data
+        object_assignments = self.get_object_assignments(user_id=user_id, policy_id=policy_id, object_id=data_id)
+        if object_assignments:
+            raise exceptions.DeleteData
         return self.driver.delete_object_data(policy_id=policy_id, data_id=data_id)
 
     @enforce("read", "data")
@@ -203,6 +215,9 @@ class PolicyManager(Managers):
     @enforce(("read", "write"), "data")
     def delete_action_data(self, user_id, policy_id, data_id):
         # TODO (asteroide): check and/or delete assignments linked to that data
+        action_assignments = self.get_action_assignments(user_id=user_id, policy_id=policy_id, action_id=data_id)
+        if action_assignments:
+            raise exceptions.DeleteData
         return self.driver.delete_action_data(policy_id=policy_id, data_id=data_id)
 
     @enforce("read", "assignments")
