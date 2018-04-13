@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_0743ba6c",
+        "filename": "moon_manager/moon_manager/api/perimeter.py",
+        "patchSetId": 12
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-13T10:05:42Z",
+      "side": 1,
+      "message": "We need to keep the default value here because a user can request \"POST /subjects\" to create a new subject. This request doesn\u0027t give an argument to the uuid attribute. See line 30 and 31 and in file tests/unit_python/api/test_perimeter.py line 23. Moreover GUI uses this request to create subjects... We need to discuss about this again on our next meeting.",
+      "range": {
+        "startLine": 68,
+        "startChar": 19,
+        "endLine": 68,
+        "endChar": 24
+      },
+      "revId": "f5885afc9fd9728322233e9d1fe74452da9598c5",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
