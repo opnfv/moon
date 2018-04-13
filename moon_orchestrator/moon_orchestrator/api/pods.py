@@ -52,27 +52,29 @@ class Pods(Resource):
             for _pod_key, _pod_values in self.driver.get_pods().items():
                 pods[_pod_key] = []
                 for _pod_value in _pod_values:
-                    if _pod_value['namespace'] != "moon":
+                    if "namespace" in _pod_value and _pod_value['namespace'] != "moon":
                         continue
                     pods[_pod_key].append(_pod_value)
             return {"pods": pods}
         except Exception as e:
             return {"result": False, "message": str(e)}, 500
 
-    def __get_pod_with_keystone_pid(self, keystone_pid):
+    def __validate_pod_with_keystone_pid(self, keystone_pid):
         for pod_key, pod_values in self.driver.get_pods().items():
-            if pod_values[0]['keystone_project_id'] == keystone_pid:
+            if pod_values and "keystone_project_id" in pod_values[0] \
+                    and pod_values[0]['keystone_project_id'] == keystone_pid:
                 return True
 
-    def __get_wrapper(self, slave_name):
+    def __is_slave_exist(self, slave_name):
         for slave in self.driver.get_slaves():
-            if slave_name == slave["name"] \
-                    and slave["configured"]:
+            if "name" in slave and "configured" in slave \
+                    and slave_name == slave["name"] and slave["configured"]:
                 return True
 
     def __get_slave_names(self):
         for slave in self.driver.get_slaves():
-            yield slave["name"]
+            if "name" in slave :
+                yield slave["name"]
 
     @check_auth
     def post(self, uuid=None, user_id=None):
@@ -98,27 +100,24 @@ class Pods(Resource):
             }
         }
         """
-        pods = {}
         if "security_pipeline" in request.json:
-            if self.__get_pod_with_keystone_pid(request.json.get("keystone_project_id")):
+            if self.__validate_pod_with_keystone_pid(request.json.get("keystone_project_id")):
                 raise exceptions.PipelineConflict
+            if not request.json.get("pdp_id"):
+                raise exceptions.PdpUnknown
+            if not request.json.get("security_pipeline"):
+                raise exceptions.PolicyUnknown
             self.driver.create_pipeline(
                 request.json.get("keystone_project_id"),
                 request.json.get("pdp_id"),
                 request.json.get("security_pipeline"),
                 manager_data=request.json,
                 slave_name=request.json.get("slave_name"))
-            for _pod_key, _pod_values in self.driver.get_pods().items():
-                pods[_pod_key] = []
-                for _pod_value in _pod_values:
-                    if _pod_value['namespace'] != "moon":
-                        continue
-                    pods[_pod_key].append(_pod_value)
         else:
             logger.info("------------------------------------")
             logger.info(list(self.__get_slave_names()))
             logger.info("------------------------------------")
-            if self.__get_wrapper(request.json.get("slave_name")):
+            if self.__is_slave_exist(request.json.get("slave_name")):
                 raise exceptions.WrapperConflict
             if request.json.get("slave_name") not in self.__get_slave_names():
                 raise exceptions.SlaveNameUnknown
@@ -144,8 +143,11 @@ class Pods(Resource):
             return {'result': True}
         except exceptions.PipelineUnknown:
             for slave in self.driver.get_slaves():
-                if uuid in (slave['name'], slave["wrapper_name"]):
-                    self.driver.delete_wrapper(name=slave["wrapper_name"])
+                if "name" in slave and "wrapper_name" in slave:
+                    if uuid in (slave['name'], slave["wrapper_name"]):
+                        self.driver.delete_wrapper(name=slave["wrapper_name"])
+                else :
+                    raise exceptions.SlaveNameUnknown
         except Exception as e:
             return {"result": False, "message": str(e)}, 500
 

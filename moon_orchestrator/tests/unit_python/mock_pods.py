@@ -208,11 +208,24 @@ def patch_k8s(monkeypatch):
                         'create_namespaced_deployment',
                         create_namespaced_deployment_mockreturn)
 
+    def delete_namespaced_deployment_mockreturn(*args, **kwargs):
+        return None
+
+    monkeypatch.setattr(client.ExtensionsV1beta1Api,
+                        'delete_namespaced_deployment',
+                        delete_namespaced_deployment_mockreturn)
+
     def create_namespaced_service_mockreturn(*args, **kwargs):
         return {}
     monkeypatch.setattr(client.CoreV1Api,
                         'create_namespaced_service',
                         create_namespaced_service_mockreturn)
+
+    def delete_namespaced_service_mockreturn(*args, **kwargs):
+        return {}
+    monkeypatch.setattr(client.CoreV1Api,
+                        'delete_namespaced_service',
+                        delete_namespaced_service_mockreturn)
 
 
 def register_pods(m):
