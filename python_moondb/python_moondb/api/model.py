@@ -97,6 +97,8 @@ class ModelManager(Managers):
             for subject_category_id in meta_rules[meta_rule_id]['subject_categories']:
                 if subject_category_id == category_id:
                     raise exceptions.DeleteCategoryWithMetaRule
+        if self.driver.is_subject_data_exist(category_id=category_id):
+            raise exceptions.DeleteCategoryWithData
         return self.driver.delete_subject_category(category_id=category_id)
 
     @enforce("read", "meta_data")
@@ -120,6 +122,8 @@ class ModelManager(Managers):
             for object_category_id in meta_rules[meta_rule_id]['object_categories']:
                 if object_category_id == category_id:
                     raise exceptions.DeleteCategoryWithMetaRule
+        if self.driver.is_object_data_exist(category_id=category_id):
+            raise exceptions.DeleteCategoryWithData
         return self.driver.delete_object_category(category_id=category_id)
 
     @enforce("read", "meta_data")
@@ -143,4 +147,6 @@ class ModelManager(Managers):
             for action_category_id in meta_rules[meta_rule_id]['action_categories']:
                 if action_category_id == category_id:
                     raise exceptions.DeleteCategoryWithMetaRule
+        if self.driver.is_action_data_exist(category_id=category_id):
+            raise exceptions.DeleteCategoryWithData
         return self.driver.delete_action_category(category_id=category_id)

@@ -674,6 +674,13 @@ class DeleteCategoryWithMetaRule(MoonError):
     logger = "Error"
 
 
+class DeleteCategoryWithData(MoonError):
+    description = _("Cannot delete category with data")
+    code = 400
+    title = 'Category Error'
+    logger = "Error"
+
+
 class DeleteModelWithPolicy(MoonError):
     description = _("Cannot delete model with policy")
     code = 400
