@@ -1,0 +1,119 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a3f45e8_8fb7dc39",
+        "filename": "python_moonutilities/python_moonutilities/security_functions.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-16T08:54:19Z",
+      "side": 1,
+      "message": "Do you really need this import ? (it is not used)",
+      "range": {
+        "startLine": 9,
+        "startChar": 7,
+        "endLine": 9,
+        "endChar": 14
+      },
+      "revId": "cd95285d9362241f3c11fe56c10c275979911947",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_6fb41035",
+        "filename": "python_moonutilities/python_moonutilities/security_functions.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-16T08:54:19Z",
+      "side": 1,
+      "message": "this one too is not used.",
+      "range": {
+        "startLine": 17,
+        "startChar": 7,
+        "endLine": 17,
+        "endChar": 11
+      },
+      "revId": "cd95285d9362241f3c11fe56c10c275979911947",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_6f2ff088",
+        "filename": "python_moonutilities/python_moonutilities/security_functions.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 100,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-16T08:54:19Z",
+      "side": 1,
+      "message": "It is easier and faster if you use:\nif \" \" not in string:\n    raise ...",
+      "range": {
+        "startLine": 99,
+        "startChar": 8,
+        "endLine": 100,
+        "endChar": 24
+      },
+      "revId": "cd95285d9362241f3c11fe56c10c275979911947",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_0f6d8ccc",
+        "filename": "python_moonutilities/python_moonutilities/security_functions.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 125,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-16T08:54:19Z",
+      "side": 1,
+      "message": "I think you could get the HTTP method from: \"request.method\" so you don\u0027t need to add the \"type\" argument here.",
+      "range": {
+        "startLine": 125,
+        "startChar": 19,
+        "endLine": 125,
+        "endChar": 29
+      },
+      "revId": "cd95285d9362241f3c11fe56c10c275979911947",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5a3f45e8_0f562c06",
+        "filename": "python_moonutilities/python_moonutilities/security_functions.py",
+        "patchSetId": 4
+      },
+      "lineNbr": 127,
+      "author": {
+        "id": 1384
+      },
+      "writtenOn": "2018-04-16T08:54:19Z",
+      "side": 1,
+      "message": "typo error",
+      "range": {
+        "startLine": 127,
+        "startChar": 9,
+        "endLine": 127,
+        "endChar": 17
+      },
+      "revId": "cd95285d9362241f3c11fe56c10c275979911947",
+      "serverId": "bbac25d2-bf60-4904-9ba8-a72fc000d6c5",
+      "unresolved": false
+    }
+  ]
+}
