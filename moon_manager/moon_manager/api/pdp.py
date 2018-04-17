@@ -127,10 +127,10 @@ class PDP(Resource):
         :param uuid: uuid of the pdp (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "name": "...",
-            "security_pipeline": [...],
-            "keystone_project_id": "keystone_project_id1",
-            "description": "... (optional)",
+            "name": "name of the PDP (mandatory)",
+            "security_pipeline": ["may be empty"],
+            "keystone_project_id": "keystone_project_id1 (may be empty)",
+            "description": "description of the PDP (optional)",
         }
         :return: {
             "pdp_id1": {
@@ -162,7 +162,7 @@ class PDP(Resource):
         return {"pdps": data}
 
     @check_auth
-    def delete(self, uuid=None, user_id=None):
+    def delete(self, uuid, user_id=None):
         """Delete a pdp
 
         :param uuid: uuid of the pdp to delete
@@ -183,17 +183,17 @@ class PDP(Resource):
         return {"result": True}
 
     @check_auth
-    def patch(self, uuid=None, user_id=None):
+    def patch(self, uuid, user_id=None):
         """Update a pdp
 
         :param uuid: uuid of the pdp to update
         :param user_id: user ID who do the request
         :return: {
             "pdp_id1": {
-                "name": "...",
-                "security_pipeline": [...],
-                "keystone_project_id": "keystone_project_id1",
-                "description": "... (optional)",
+                "name": "name of the PDP",
+                "security_pipeline": ["may be empty"],
+                "keystone_project_id": "keystone_project_id1 (may be empty)",
+                "description": "description of the PDP (optional)",
             }
         }
         :internal_api: update_pdp

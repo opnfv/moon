@@ -32,8 +32,8 @@ class SubjectData(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
-        """Retrieve all subject categories or a specific one if sid is given
+    def get(self, uuid, category_id=None, data_id=None, user_id=None):
+        """Retrieve all subject categories or a specific one if data_id is given
         for a given policy
 
         :param uuid: uuid of the policy
@@ -64,15 +64,15 @@ class SubjectData(Resource):
         return {"subject_data": data}
 
     @check_auth
-    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
         :param category_id: uuid of the subject category
-        :param data_id: uuid of the subject data
+        :param data_id: uuid of the subject data (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the data",
+            "name": "name of the data (mandatory)",
             "description": "description of the data (optional)"
         }
         :return: {
@@ -80,7 +80,7 @@ class SubjectData(Resource):
             "category_id": "category_id1",
             "data": {
                 "subject_data_id": {
-                    "name": "name of the data",
+                    "name": "name of the data (mandatory)",
                     "description": "description of the data (optional)"
                 }
             }
@@ -99,7 +99,7 @@ class SubjectData(Resource):
         return {"subject_data": data}
 
     @check_auth
-    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
         """Delete a subject for a given policy
 
         :param uuid: uuid of the policy
@@ -137,7 +137,7 @@ class ObjectData(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid, category_id=None, data_id=None, user_id=None):
         """Retrieve all object categories or a specific one if sid is given
         for a given policy
 
@@ -169,15 +169,15 @@ class ObjectData(Resource):
         return {"object_data": data}
 
     @check_auth
-    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a object.
 
         :param uuid: uuid of the policy
         :param category_id: uuid of the object category
-        :param data_id: uuid of the object data
+        :param data_id: uuid of the object data (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the data",
+            "name": "name of the data (mandatory)",
             "description": "description of the data (optional)"
         }
         :return: {
@@ -204,7 +204,7 @@ class ObjectData(Resource):
         return {"object_data": data}
 
     @check_auth
-    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
         """Delete a object for a given policy
 
         :param uuid: uuid of the policy
@@ -242,7 +242,7 @@ class ActionData(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid, category_id=None, data_id=None, user_id=None):
         """Retrieve all action categories or a specific one if sid is given
         for a given policy
 
@@ -274,7 +274,7 @@ class ActionData(Resource):
         return {"action_data": data}
 
     @check_auth
-    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a action.
 
         :param uuid: uuid of the policy
@@ -282,8 +282,8 @@ class ActionData(Resource):
         :param data_id: uuid of the action data
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the data",
-            "description": "description of the data"
+            "name": "name of the data (mandatory)",
+            "description": "description of the data (optional)"
         }
         :return: {
             "policy_id": "policy_id1",
@@ -309,7 +309,7 @@ class ActionData(Resource):
         return {"action_data": data}
 
     @check_auth
-    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
         """Delete a action for a given policy
 
         :param uuid: uuid of the policy

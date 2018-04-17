@@ -59,7 +59,7 @@ class SubjectCategories(Resource):
         :param category_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the category",
+            "name": "name of the category (mandatory)",
             "description": "description of the category (optional)"
         }
         :return: {
@@ -142,7 +142,7 @@ class ObjectCategories(Resource):
         :param category_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the category",
+            "name": "name of the category (mandatory)",
             "description": "description of the category (optional)"
         }
         :return: {
@@ -225,7 +225,7 @@ class ActionCategories(Resource):
         :param category_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the category",
+            "name": "name of the category (mandatory)",
             "description": "description of the category (optional)"
         }
         :return: {
