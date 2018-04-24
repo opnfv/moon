@@ -674,13 +674,6 @@ class DeleteCategoryWithMetaRule(MoonError):
     logger = "Error"
 
 
-class DeleteCategoryWithData(MoonError):
-    description = _("Cannot delete category with data")
-    code = 400
-    title = 'Category Error'
-    logger = "Error"
-
-
 class DeleteModelWithPolicy(MoonError):
     description = _("Cannot delete model with policy")
     code = 400
@@ -699,4 +692,18 @@ class DeleteMetaRuleWithModel(MoonError):
     description = _("Cannot delete meta rule with model")
     code = 400
     title = 'Meta rule Error'
+    logger = "Error"
+
+
+class MetaDataUnknown(MoonError):
+    description = _("The meta data unknown.")
+    code = 400
+    title = 'Meta data Unknown'
+    logger = "Error"
+
+
+class DataUnknown(MoonError):
+    description = _("The meta data unknown.")
+    code = 400
+    title = 'Meta data Unknown'
     logger = "Error"

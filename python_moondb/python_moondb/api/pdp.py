@@ -22,6 +22,10 @@ class PDPManager(Managers):
     def update_pdp(self, user_id, pdp_id, value):
         if pdp_id not in self.driver.get_pdp(pdp_id=pdp_id):
             raise exceptions.PdpUnknown
+        if value and 'security_pipeline' in value:
+            for policy_id in value['security_pipeline']:
+                if not Managers.PolicyManager.get_policies(user_id=user_id, policy_id=policy_id):
+                    raise exceptions.PolicyUnknown
         return self.driver.update_pdp(pdp_id=pdp_id, value=value)
 
     @enforce(("read", "write"), "pdp")
@@ -36,6 +40,10 @@ class PDPManager(Managers):
             raise exceptions.PdpExisting
         if not pdp_id:
             pdp_id = uuid4().hex
+        if value and 'security_pipeline' in value:
+            for policy_id in value['security_pipeline']:
+                if not Managers.PolicyManager.get_policies(user_id=user_id, policy_id=policy_id):
+                    raise exceptions.PolicyUnknown
         return self.driver.add_pdp(pdp_id=pdp_id, value=value)
 
     @enforce("read", "pdp")
