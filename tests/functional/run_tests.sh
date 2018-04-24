@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 
-echo "starting Moon Functional Tests"
+MOON_HOME=${1:-.}
 
-COMPONENTS="moon_authz, moon_interface, moon_manager, moon_orchestrator, moon_wrapper"
+echo "Starting Moon Functional Tests on ${MOON_HOME}"
+
+cd ${MOON_HOME}
+
+COMPONENTS="moon_manager moon_wrapper"
 
 for dir in ${COMPONENTS}; do
     echo "Testing component ${dir}"
     cd ${MOON_HOME}/${dir}
-    docker run --rm --volume $(pwd):/data wukongsun/moon_forming:latest /bin/bash /root/switch.sh functest
+    bash ../tests/functional/run_tests_for_component.sh
 done
 
 # TODO: download tests results
