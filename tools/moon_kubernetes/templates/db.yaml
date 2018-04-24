@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: db
-        image: mysql:latest
+        image: mysql:5.7
         env:
         - name: MYSQL_DATABASE
           value: "moon"
