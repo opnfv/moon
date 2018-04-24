@@ -8,6 +8,7 @@ import policies.mock_data as mock_data
 from python_moonutilities.exceptions import *
 
 
+
 def get_policies():
     from python_moondb.core import PolicyManager
     return PolicyManager.get_policies("admin")
