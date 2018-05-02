@@ -140,6 +140,20 @@ def test_add_models(db):
     delete_all_models()
 
 
+def test_add_models_with_same_name_twice(db):
+    model_value1 = {
+        "name": "MLS",
+        "description": "test",
+        "meta_rules": "meta_rule_mls_1"
+    }
+    models = add_model(value=model_value1)
+    assert isinstance(models, dict)
+    assert models
+    with pytest.raises(Exception) as exc_info:
+        add_model(value=model_value1)
+    delete_all_models()
+
+
 def test_delete_models(db):
     model_value1 = {
         "name": "MLS",

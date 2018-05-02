@@ -41,6 +41,7 @@ def delete_meta_rules(meta_rule_id=None):
     from python_moondb.core import ModelManager
     ModelManager.delete_meta_rule(user_id=None, meta_rule_id=meta_rule_id)
 
+
 def test_set_not_exist_meta_rule_error(db):
     # set not existing meta rule and expect to raise and error
     with pytest.raises(Exception) as exception_info:
@@ -64,6 +65,21 @@ def test_add_new_meta_rule_success(db):
     for key in ("name", "description", "subject_categories", "object_categories", "action_categories"):
         assert key in metaRules[meta_rule_id]
         assert metaRules[meta_rule_id][key] == value[key]
+
+
+def test_add_new_meta_rule_with_same_name_twice(db):
+    value = {
+        "name": "MLS_meta_rule",
+        "description": "test",
+        "subject_categories": ["user_security_level_id_1"],
+        "object_categories": ["vm_security_level_id_1"],
+        "action_categories": ["action_type_id_1"]
+    }
+    meta_rules = add_meta_rule(value=value)
+    assert isinstance(meta_rules, dict)
+    assert meta_rules
+    with pytest.raises(Exception) as exc_info:
+        add_meta_rule(value=value)
 
 
 def test_set_meta_rule_succes(db):
@@ -121,7 +137,7 @@ def test_get_meta_rule_success(db):
     # action
     meta_rules = get_meta_rules()
     # assert
-    assert isinstance(meta_rules , dict)
+    assert isinstance(meta_rules, dict)
     assert meta_rules
     assert len(meta_rules) is 2
     for meta_rule_id in meta_rules:
@@ -132,7 +148,7 @@ def test_get_meta_rule_success(db):
 
 def test_get_specific_meta_rule_success(db):
     # arrange
-    added_meta_rules  = add_meta_rule()
+    added_meta_rules = add_meta_rule()
     added_meta_rule_id = list(added_meta_rules.keys())[0]
     # action
     meta_rules = get_meta_rules(meta_rule_id=added_meta_rule_id)

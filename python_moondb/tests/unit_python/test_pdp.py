@@ -93,6 +93,19 @@ def test_add_pdp_twice_with_same_id(db):
     assert str(exception_info.value) == '409: Pdp Error'
 
 
+def test_add_pdp_twice_with_same_name(db):
+    value = {
+        "name": "test_pdp",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "keystone_project_id1",
+        "description": "...",
+    }
+    add_pdp(value=value)
+    with pytest.raises(Exception) as exception_info:
+        add_pdp(value=value)
+    assert str(exception_info.value) == '409: Pdp Error'
+
+
 def test_get_pdp(db):
     pdp_id = "pdp_id1"
     value = {

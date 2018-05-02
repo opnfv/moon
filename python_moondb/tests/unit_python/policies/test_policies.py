@@ -103,6 +103,19 @@ def test_add_policies_twice_with_same_id(db):
     # assert str(exception_info.value) == '409: Policy Error'
 
 
+def test_add_policies_twice_with_same_name(db):
+    value = {
+        "name": "test_policy",
+        "model_id": "",
+        "genre": "authz",
+        "description": "test",
+    }
+    add_policies(value=value)
+    with pytest.raises(Exception) as exception_info:
+        add_policies(value=value)
+    # assert str(exception_info.value) == '409: Policy Error'
+
+
 def test_delete_policies(db):
     value = {
         "name": "test_policy1",
