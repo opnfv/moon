@@ -62,14 +62,14 @@ class MetaRules(Resource):
     def post(self, meta_rule_id=None, user_id=None):
         """Add a meta rule
 
-        :param meta_rule_id: Meta rule ID
+        :param meta_rule_id: Meta rule ID (not used here)
         :param user_id: user ID who do the request
         :request body: post = {
-            "name": "name of the meta rule",
-            "subject_categories": ["subject_category_id1",
+            "name": "name of the meta rule (mandatory)",
+            "subject_categories": ["subject_category_id1 (mandatory)",
                                    "subject_category_id2"],
-            "object_categories": ["object_category_id1"],
-            "action_categories": ["action_category_id1"]
+            "object_categories": ["object_category_id1 (mandatory)"],
+            "action_categories": ["action_category_id1 (mandatory)"]
         }
         :return: {
             "meta_rules": {
@@ -94,7 +94,7 @@ class MetaRules(Resource):
         return {"meta_rules": data}
 
     @check_auth
-    def patch(self, meta_rule_id=None, user_id=None):
+    def patch(self, meta_rule_id, user_id=None):
         """Update a meta rule
 
         :param meta_rule_id: Meta rule ID
@@ -129,18 +129,11 @@ class MetaRules(Resource):
         return {"meta_rules": data}
 
     @check_auth
-    def delete(self, meta_rule_id=None, user_id=None):
+    def delete(self, meta_rule_id, user_id=None):
         """Delete a meta rule
 
         :param meta_rule_id: Meta rule ID
         :param user_id: user ID who do the request
-        :request body: delete = {
-            "name": "name of the meta rule",
-            "subject_categories": ["subject_category_id1",
-                                   "subject_category_id2"],
-            "object_categories": ["object_category_id1"],
-            "action_categories": ["action_category_id1"]
-        }
         :return: {
             "meta_rules": {
                 "meta_rule_id1": {

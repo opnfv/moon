@@ -59,14 +59,14 @@ class Models(Resource):
         :param uuid: uuid of the model (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "name": "...",
-            "description": "... (optional)",
+            "name": "name of the model (mandatory)",
+            "description": "description of the model (optional)",
             "meta_rules": ["meta_rule_id1", ]
         }
         :return: {
             "model_id1": {
-                "name": "...",
-                "description": "... (optional)",
+                "name": "name of the model",
+                "description": "description of the model (optional)",
                 "meta_rules": ["meta_rule_id1", ]
             }
         }
@@ -82,7 +82,7 @@ class Models(Resource):
         return {"models": data}
 
     @check_auth
-    def delete(self, uuid=None, user_id=None):
+    def delete(self, uuid, user_id=None):
         """Delete a model
 
         :param uuid: uuid of the model to delete
@@ -102,14 +102,14 @@ class Models(Resource):
         return {"result": True}
 
     @check_auth
-    def patch(self, uuid=None, user_id=None):
+    def patch(self, uuid, user_id=None):
         """Update a model
 
         :param uuid: uuid of the model to update
         :param user_id: user ID who do the request
         :return: {
             "model_id1": {
-                "name": "...",
+                "name": "name of the model",
                 "description": "... (optional)",
                 "meta_rules": ["meta_rule_id1", ]
             }

@@ -32,14 +32,14 @@ class SubjectAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None,
+    def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all subject assignments or a specific one for a given policy
 
         :param uuid: uuid of the policy
         :param perimeter_id: uuid of the subject
         :param category_id: uuid of the subject category
-        :param data_id: uuid of the subject scope
+        :param data_id: uuid of the subject scope (not used here)
         :param user_id: user ID who do the request
         :return: {
             "subject_data_id": {
@@ -62,7 +62,7 @@ class SubjectAssignments(Resource):
         return {"subject_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None,
+    def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create a subject assignment.
 
@@ -72,15 +72,15 @@ class SubjectAssignments(Resource):
         :param data_id: uuid of the subject scope (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "id": "UUID of the subject",
-            "category_id": "UUID of the category"
-            "data_id": "UUID of the scope"
+            "id": "UUID of the subject (mandatory)",
+            "category_id": "UUID of the category (mandatory)"
+            "data_id": "UUID of the scope (mandatory)"
         }
         :return: {
             "subject_data_id": {
                 "policy_id": "ID of the policy",
-                "subject_id": "ID of the subject",
-                "category_id": "ID of the category",
+                "subject_id": "ID of the subject (mandatory)",
+                "category_id": "ID of the category (mandatory)",
                 "assignments": "Assignments list (list of data_id)",
             }
         }
@@ -101,7 +101,7 @@ class SubjectAssignments(Resource):
         return {"subject_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+    def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a subject assignment for a given policy
 
@@ -142,14 +142,14 @@ class ObjectAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None,
+    def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all object assignment or a specific one for a given policy
 
         :param uuid: uuid of the policy
         :param perimeter_id: uuid of the object
         :param category_id: uuid of the object category
-        :param data_id: uuid of the object scope
+        :param data_id: uuid of the object scope (not used here)
         :param user_id: user ID who do the request
         :return: {
             "object_data_id": {
@@ -172,7 +172,7 @@ class ObjectAssignments(Resource):
         return {"object_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None,
+    def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create an object assignment.
 
@@ -182,9 +182,9 @@ class ObjectAssignments(Resource):
         :param data_id: uuid of the object scope (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "id": "UUID of the action",
-            "category_id": "UUID of the category"
-            "data_id": "UUID of the scope"
+            "id": "UUID of the action (mandatory)",
+            "category_id": "UUID of the category (mandatory)",
+            "data_id": "UUID of the scope (mandatory)"
         }
         :return: {
             "object_data_id": {
@@ -211,7 +211,7 @@ class ObjectAssignments(Resource):
         return {"object_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+    def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a object assignment for a given policy
 
@@ -252,7 +252,7 @@ class ActionAssignments(Resource):
     )
 
     @check_auth
-    def get(self, uuid=None, perimeter_id=None, category_id=None,
+    def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all action assignment or a specific one for a given policy
 
@@ -282,7 +282,7 @@ class ActionAssignments(Resource):
         return {"action_assignments": data}
 
     @check_auth
-    def post(self, uuid=None, perimeter_id=None, category_id=None,
+    def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create an action assignment.
 
@@ -292,9 +292,9 @@ class ActionAssignments(Resource):
         :param data_id: uuid of the action scope (not used here)
         :param user_id: user ID who do the request
         :request body: {
-            "id": "UUID of the action",
-            "category_id": "UUID of the category",
-            "data_id": "UUID of the scope"
+            "id": "UUID of the action (mandatory)",
+            "category_id": "UUID of the category (mandatory)",
+            "data_id": "UUID of the scope (mandatory)"
         }
         :return: {
             "action_data_id": {
@@ -321,7 +321,7 @@ class ActionAssignments(Resource):
         return {"action_assignments": data}
 
     @check_auth
-    def delete(self, uuid=None, perimeter_id=None, category_id=None,
+    def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a action assignment for a given policy
 

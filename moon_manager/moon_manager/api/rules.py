@@ -62,12 +62,12 @@ class Rules(Resource):
         """Add a rule to a meta rule
 
         :param uuid: policy ID
-        :param rule_id: rule ID
+        :param rule_id: rule ID (not used here)
         :param user_id: user ID who do the request
         :request body: post = {
-            "meta_rule_id": "meta_rule_id1",
-            "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],
-            "instructions": (
+            "meta_rule_id": "meta_rule_id1",  # mandatory
+            "rule": ["subject_data_id2", "object_data_id2", "action_data_id2"],  # mandatory
+            "instructions": (  # mandatory
                 {"decision": "grant"},
             )
             "enabled": True

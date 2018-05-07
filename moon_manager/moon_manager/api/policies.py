@@ -38,10 +38,10 @@ class Policies(Resource):
         :param user_id: user ID who do the request
         :return: {
             "policy_id1": {
-                "name": "...",
-                "model_id": "...",
-                "genre": "... (optional)",
-                "description": "... (optional)",
+                "name": "name of the policy (mandatory)",
+                "model_id": "ID of the model linked to this policy",
+                "genre": "authz of admin (optional, default to authz)",
+                "description": "description of the policy (optional)",
             }
         }
         :internal_api: get_policies
@@ -58,20 +58,20 @@ class Policies(Resource):
     def post(self, uuid=None, user_id=None):
         """Create policy.
 
-        :param uuid: uuid of the policy (not used here)
+        :param uuid: uuid of the policy (not used here if a new policy is created)
         :param user_id: user ID who do the request
         :request body: {
-            "name": "...",
-            "model_id": "...",
-            "genre": "... (optional)",
-            "description": "... (optional)",
+            "name": "name of the policy (mandatory)",
+            "model_id": "ID of the model linked to this policy",
+            "genre": "authz of admin (optional, default to authz)",
+            "description": "description of the policy (optional)",
         }
         :return: {
             "policy_id1": {
-                "name": "...",
-                "model_id": "...",
-                "genre": "... (optional)",
-                "description": "... (optional)",
+                "name": "name of the policy (mandatory)",
+                "model_id": "ID of the model linked to this policy",
+                "genre": "authz of admin (optional, default to authz)",
+                "description": "description of the policy (optional)",
             }
         }
         :internal_api: add_policy
@@ -86,7 +86,7 @@ class Policies(Resource):
         return {"policies": data}
 
     @check_auth
-    def delete(self, uuid=None, user_id=None):
+    def delete(self, uuid, user_id=None):
         """Delete a policy
 
         :param uuid: uuid of the policy to delete
@@ -106,17 +106,17 @@ class Policies(Resource):
         return {"result": True}
 
     @check_auth
-    def patch(self, uuid=None, user_id=None):
+    def patch(self, uuid, user_id=None):
         """Update a policy
 
         :param uuid: uuid of the policy to update
         :param user_id: user ID who do the request
         :return: {
             "policy_id1": {
-                "name": "...",
-                "model_id": "...",
-                "genre": "... (optional)",
-                "description": "... (optional)",
+                "name": "name of the policy (mandatory)",
+                "model_id": "ID of the model linked to this policy",
+                "genre": "authz of admin (optional, default to authz)",
+                "description": "description of the policy (optional)",
             }
         }
         :internal_api: update_policy

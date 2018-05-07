@@ -72,7 +72,7 @@ class Subjects(Resource):
         :param perimeter_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the subject",
+            "name": "name of the subject (mandatory)",
             "description": "description of the subject (optional)",
             "password": "password for the subject (optional)",
             "email": "email address of the subject (optional)"
@@ -107,7 +107,7 @@ class Subjects(Resource):
         return {"subjects": data}
 
     @check_auth
-    def patch(self, uuid=None, perimeter_id=None, user_id=None):
+    def patch(self, uuid, perimeter_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
@@ -152,8 +152,8 @@ class Subjects(Resource):
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a subject for a given policy
 
-        :param uuid: uuid of the policy
-        :param perimeter_id: uuid of the subject
+        :param uuid: uuid of the policy (mandatory if perimeter_id is not set)
+        :param perimeter_id: uuid of the subject (mandatory if uuid is not set)
         :param user_id: user ID who do the request
         :return: {
                 "subject_id": {
@@ -226,7 +226,7 @@ class Objects(Resource):
         :param perimeter_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "object_name": "name of the object",
+            "object_name": "name of the object (mandatory)",
             "object_description": "description of the object (optional)"
         }
         :return: {
@@ -254,7 +254,7 @@ class Objects(Resource):
         return {"objects": data}
 
     @check_auth
-    def patch(self, uuid=None, perimeter_id=None, user_id=None):
+    def patch(self, uuid, perimeter_id=None, user_id=None):
         """Create or update a object.
 
         :param uuid: uuid of the policy
@@ -292,8 +292,8 @@ class Objects(Resource):
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a object for a given policy
 
-        :param uuid: uuid of the policy
-        :param perimeter_id: uuid of the object
+        :param uuid: uuid of the policy (mandatory if perimeter_id is not set)
+        :param perimeter_id: uuid of the object (mandatory if uuid is not set)
         :param user_id: user ID who do the request
         :return: {
                 "object_id": {
@@ -360,7 +360,7 @@ class Actions(Resource):
         :param perimeter_id: must not be used here
         :param user_id: user ID who do the request
         :request body: {
-            "name": "name of the action",
+            "name": "name of the action (mandatory)",
             "description": "description of the action (optional)"
         }
         :return: {
@@ -388,7 +388,7 @@ class Actions(Resource):
         return {"actions": data}
 
     @check_auth
-    def patch(self, uuid=None, perimeter_id=None, user_id=None):
+    def patch(self, uuid, perimeter_id=None, user_id=None):
         """Create or update a action.
 
         :param uuid: uuid of the policy
@@ -426,8 +426,8 @@ class Actions(Resource):
     def delete(self, uuid=None, perimeter_id=None, user_id=None):
         """Delete a action for a given policy
 
-        :param uuid: uuid of the policy
-        :param perimeter_id: uuid of the action
+        :param uuid: uuid of the policy (mandatory if perimeter_id is not set)
+        :param perimeter_id: uuid of the action (mandatory if uuid is not set)
         :param user_id: user ID who do the request
         :return: {
                 "action_id": {
