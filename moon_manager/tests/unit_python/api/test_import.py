@@ -137,8 +137,6 @@ RULES = [{"rules": [{"meta_rule": {"name": "unknown meta rule"}, "policy": {"nam
          {"rules": [{"meta_rule": {"name": "good meta rule"}, "policy": {"name": "test policy"}, "instructions": {"decision": "grant"}, "enabled": True, "rule": {"subject_data": [{"name": "subject data"}], "object_data": [{"name": "object data"}], "action_data": [{"name": "action data"}]}}]}]
 
 
-
-
 def test_import_models_without_new_meta_rules():
     client = utilities.register_client()
     import_export_utilities.clean_all(client)
@@ -240,7 +238,7 @@ def test_import_subject_object_action():
 
             assert data == "Import ok !"
             get_elements = get_method(client)
-            get_elements = get_elements[type_element + "s"]
+            get_elements = get_elements[1][type_element + "s"]
 
             assert len(list(get_elements.keys())) == 1
             values = list(get_elements.values())

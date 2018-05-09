@@ -12,6 +12,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -31,6 +32,7 @@ class SubjectAssignments(Resource):
         "/policies/<string:uuid>/subject_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False,False,False])
     @check_auth
     def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
@@ -61,6 +63,7 @@ class SubjectAssignments(Resource):
                     "error": str(e)}, 500
         return {"subject_assignments": data}
 
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -100,6 +103,7 @@ class SubjectAssignments(Resource):
                     "error": str(e)}, 500
         return {"subject_assignments": data}
 
+    @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
     def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
@@ -141,6 +145,7 @@ class ObjectAssignments(Resource):
         "/policies/<string:uuid>/object_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False,False,False])
     @check_auth
     def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
@@ -171,6 +176,7 @@ class ObjectAssignments(Resource):
                     "error": str(e)}, 500
         return {"object_assignments": data}
 
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -210,6 +216,7 @@ class ObjectAssignments(Resource):
                     "error": str(e)}, 500
         return {"object_assignments": data}
 
+    @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
     def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
@@ -251,6 +258,7 @@ class ActionAssignments(Resource):
         "/policies/<string:uuid>/action_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
+    @validate_input("get", kwargs_state=[True, False, False,False,False])
     @check_auth
     def get(self, uuid, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
@@ -281,6 +289,7 @@ class ActionAssignments(Resource):
                     "error": str(e)}, 500
         return {"action_assignments": data}
 
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -320,6 +329,7 @@ class ActionAssignments(Resource):
                     "error": str(e)}, 500
         return {"action_assignments": data}
 
+    @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
     def delete(self, uuid, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):

@@ -11,6 +11,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import ModelManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -29,6 +30,7 @@ class Models(Resource):
         "/models/<string:uuid>/",
     )
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, uuid=None, user_id=None):
         """Retrieve all models
@@ -52,6 +54,7 @@ class Models(Resource):
                     "error": str(e)}, 500
         return {"models": data}
 
+    @validate_input("post", body_state=[True, False, True])
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create model.
@@ -81,6 +84,7 @@ class Models(Resource):
                     "error": str(e)}, 500
         return {"models": data}
 
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, uuid, user_id=None):
         """Delete a model
@@ -101,6 +105,7 @@ class Models(Resource):
                     "error": str(e)}, 500
         return {"result": True}
 
+    @validate_input("patch", kwargs_state=[True, False], body_state=[True, False, True])
     @check_auth
     def patch(self, uuid, user_id=None):
         """Update a model

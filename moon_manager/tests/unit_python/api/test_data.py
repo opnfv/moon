@@ -63,6 +63,28 @@ def test_delete_subject_data():
     success_req = delete_subject_data(client, policy_id)
     assert success_req.status_code == 200
 
+
+def test_add_subject_data_with_empty_user():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, subject_data = add_subject_data(client, "", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_subject_data_with_user_contain_space():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, subject_data = add_subject_data(client, "test user", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
+def test_delete_subject_data_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_subject_data(client, "")
+    assert success_req.status_code == 500
+
 # ---------------------------------------------------------------------------
 
 # object_categories_test
@@ -125,6 +147,27 @@ def test_delete_object_data():
     success_req = delete_object_data(client, policy_id)
     assert success_req.status_code == 200
 
+
+def test_add_object_data_with_empty_user():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, subject_data = add_subject_data(client, "", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_object_data_with_user_contain_space():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, object_data = add_object_data(client, "test user", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
+def test_delete_object_data_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_object_data(client, "")
+    assert success_req.status_code == 500
 # ---------------------------------------------------------------------------
 
 # action_categories_test
@@ -183,4 +226,25 @@ def test_delete_action_data():
     success_req = delete_action_data(client, policy_id)
     assert success_req.status_code == 200
 
+
+def test_add_action_data_with_empty_user():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, action_data = add_action_data(client, "", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "Empty String"
+
+
+def test_add_action_data_with_user_contain_space():
+    policy_id = utilities.get_policy_id()
+    client = utilities.register_client()
+    req, action_data = add_action_data(client, "test user", policy_id, "111")
+    assert req.status_code == 500
+    assert json.loads(req.data)["message"] == "String contains space"
+
+
+def test_delete_action_data_without_policy_id():
+    client = utilities.register_client()
+    success_req = delete_action_data(client, "")
+    assert success_req.status_code == 500
 # ---------------------------------------------------------------------------

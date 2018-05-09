@@ -11,6 +11,7 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
+from python_moonutilities.security_functions import validate_input
 
 __version__ = "4.3.2"
 
@@ -28,6 +29,7 @@ class Rules(Resource):
                 "/policies/<string:uuid>/rules/<string:rule_id>/",
                 )
 
+    @validate_input("get", kwargs_state=[False, False, False])
     @check_auth
     def get(self, uuid=None, rule_id=None, user_id=None):
         """Retrieve all rules or a specific one
@@ -57,6 +59,7 @@ class Rules(Resource):
                     "error": str(e)}, 500
         return {"rules": data}
 
+    @validate_input("post", kwargs_state=[True, False, False], body_state=[True, False, False, False])
     @check_auth
     def post(self, uuid=None, rule_id=None, user_id=None):
         """Add a rule to a meta rule
@@ -119,6 +122,7 @@ class Rules(Resource):
                     "error": str(e)}, 500
         return {"rules": data}
 
+    @validate_input("delete", kwargs_state=[True, True, False])
     @check_auth
     def delete(self, uuid=None, rule_id=None, user_id=None):
         """Delete one rule linked to a specific sub meta rule
