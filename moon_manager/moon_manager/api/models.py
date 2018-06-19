@@ -46,15 +46,11 @@ class Models(Resource):
         }
         :internal_api: get_models
         """
-        try:
-            data = ModelManager.get_models(user_id=user_id, model_id=uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.get_models(user_id=user_id, model_id=uuid)
+
         return {"models": data}
 
-    @validate_input("post", body_state=[True, False, True])
+    @validate_input("post", body_state={"name":True, "meta_rules":True})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create model.
@@ -75,18 +71,14 @@ class Models(Resource):
         }
         :internal_api: add_model
         """
-        try:
-            data = ModelManager.add_model(
-                user_id=user_id, model_id=uuid, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.add_model(
+            user_id=user_id, model_id=uuid, value=request.json)
+
         return {"models": data}
 
     @validate_input("delete", kwargs_state=[True, False])
     @check_auth
-    def delete(self, uuid, user_id=None):
+    def delete(self, uuid=None, user_id=None):
         """Delete a model
 
         :param uuid: uuid of the model to delete
@@ -97,17 +89,14 @@ class Models(Resource):
         }
         :internal_api: delete_model
         """
-        try:
-            data = ModelManager.delete_model(user_id=user_id, model_id=uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.delete_model(user_id=user_id, model_id=uuid)
+
         return {"result": True}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state=[True, False, True])
+    @validate_input("patch", kwargs_state=[True, False], body_state={"name":True, "meta_rules":True})
     @check_auth
-    def patch(self, uuid, user_id=None):
+    def patch(self, uuid=None, user_id=None):
         """Update a model
 
         :param uuid: uuid of the model to update
@@ -121,12 +110,8 @@ class Models(Resource):
         }
         :internal_api: update_model
         """
-        try:
-            data = ModelManager.update_model(
-                user_id=user_id, model_id=uuid, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.update_model(
+            user_id=user_id, model_id=uuid, value=request.json)
+
         return {"models": data}
 

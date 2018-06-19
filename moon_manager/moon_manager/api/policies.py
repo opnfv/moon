@@ -12,6 +12,8 @@ from flask_restful import Resource
 import logging
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
+from python_moonutilities.security_functions import validate_input
+
 
 __version__ = "4.3.2"
 
@@ -30,6 +32,7 @@ class Policies(Resource):
         "/policies/<string:uuid>/",
     )
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, uuid=None, user_id=None):
         """Retrieve all policies
@@ -46,14 +49,12 @@ class Policies(Resource):
         }
         :internal_api: get_policies
         """
-        try:
-            data = PolicyManager.get_policies(user_id=user_id, policy_id=uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.get_policies(user_id=user_id, policy_id=uuid)
+
         return {"policies": data}
 
+    @validate_input("post", body_state={"name": True, "model_id":True})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create policy.
@@ -76,17 +77,15 @@ class Policies(Resource):
         }
         :internal_api: add_policy
         """
-        try:
-            data = PolicyManager.add_policy(
-                user_id=user_id, policy_id=uuid, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.add_policy(
+            user_id=user_id, policy_id=uuid, value=request.json)
+
         return {"policies": data}
 
+    @validate_input("delete", kwargs_state=[ True, False])
     @check_auth
-    def delete(self, uuid, user_id=None):
+    def delete(self, uuid=None, user_id=None):
         """Delete a policy
 
         :param uuid: uuid of the policy to delete
@@ -97,16 +96,14 @@ class Policies(Resource):
         }
         :internal_api: delete_policy
         """
-        try:
-            data = PolicyManager.delete_policy(user_id=user_id, policy_id=uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.delete_policy(user_id=user_id, policy_id=uuid)
+
         return {"result": True}
 
+    @validate_input("patch", kwargs_state=[True, False], body_state={"name": True, "model_id":True})
     @check_auth
-    def patch(self, uuid, user_id=None):
+    def patch(self, uuid=None, user_id=None):
         """Update a policy
 
         :param uuid: uuid of the policy to update
@@ -121,12 +118,9 @@ class Policies(Resource):
         }
         :internal_api: update_policy
         """
-        try:
-            data = PolicyManager.update_policy(
-                user_id=user_id, policy_id=uuid, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.update_policy(
+            user_id=user_id, policy_id=uuid, value=request.json)
+
         return {"policies": data}
 

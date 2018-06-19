@@ -11,12 +11,11 @@ from flask import request
 from flask_restful import Resource
 import logging
 import requests
-import time
 from python_moonutilities.security_functions import check_auth
-from python_moondb.core import PDPManager
-from python_moondb.core import PolicyManager
-from python_moondb.core import ModelManager
-from python_moonutilities import configuration, exceptions
+
+from python_moonutilities import configuration
+from python_moonutilities.security_functions import validate_input
+
 
 __version__ = "4.3.0"
 
@@ -42,6 +41,7 @@ class Slaves(Resource):
         self.orchestrator_port = conf["components/orchestrator"].get("port",
                                                                      80)
 
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, uuid=None, user_id=None):
         """Retrieve all slaves
@@ -66,6 +66,8 @@ class Slaves(Resource):
         ))
         return {"slaves": req.json().get("slaves", dict())}
 
+    @validate_input("patch", kwargs_state=[False, False],
+                    body_state={"op": True, "variable": True, "value": True})
     @check_auth
     def patch(self, uuid=None, user_id=None):
         """Update a slave

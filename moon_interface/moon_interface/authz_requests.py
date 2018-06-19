@@ -65,6 +65,7 @@ class AuthzRequest:
                         "(with address - {})".format(req.status_code)
                     )
                 success = True
+                break
             except requests.exceptions.ConnectionError:
                 logger.error("Cannot connect to {}".format(
                     "http://{}:{}/authz".format(

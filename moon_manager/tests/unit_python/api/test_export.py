@@ -51,11 +51,11 @@ ASSIGNMENTS = {"models": [{"name": "test model", "description": "", "meta_rules"
                "action_data": [{"name": "test action data", "description": "action data description", "policies": [{"name": "test policy"}], "category": {"name": "test action categories"}}],
                "meta_rules": [{"name": "meta rule", "description": "valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "test action categories"}]}],
                "subjects": [{"name": "testuser", "description": "description of the subject", "extra": {"field_extra_subject": "value extra subject"}, "policies": [{"name": "test policy"}]}],
-               "objects": [{"name": "test object", "description": "description of the object", "extra": {"field_extra_object": "value extra object"}, "policies": [{"name": "test policy"}]}],
-               "actions": [{"name": "test action", "description": "description of the action", "extra": {"field_extra_action": "value extra action"}, "policies": [{"name": "test policy"}]}],
+               "objects": [{"name": "test object e0", "description": "description of the object", "extra": {"field_extra_object": "value extra object"}, "policies": [{"name": "test policy"}]}],
+               "actions": [{"name": "test action e0", "description": "description of the action", "extra": {"field_extra_action": "value extra action"}, "policies": [{"name": "test policy"}]}],
                "subject_assignments": [{"subject": {"name": "testuser"}, "category": {"name": "test subject categories"}, "assignments": [{"name": "test subject data"}]}],
-               "object_assignments": [{"object": {"name": "test object"}, "category": {"name": "test object categories"}, "assignments": [{"name": "test object data"}]}],
-               "action_assignments": [{"action": {"name": "test action"}, "category": {"name": "test action categories"}, "assignments": [{"name": "test action data"}]}]}
+               "object_assignments": [{"object": {"name": "test object e0"}, "category": {"name": "test object categories"}, "assignments": [{"name": "test object data"}]}],
+               "action_assignments": [{"action": {"name": "test action e0"}, "category": {"name": "test action categories"}, "assignments": [{"name": "test action data"}]}]}
 
 RULES = {"models": [{"name": "test model", "description": "", "meta_rules": [{"name": "meta rule"}]}],
          "policies": [{"name": "test policy", "genre": "authz", "description": "policy description", "model": {"name" : "test model"}}],
@@ -67,12 +67,12 @@ RULES = {"models": [{"name": "test model", "description": "", "meta_rules": [{"n
          "action_data": [{"name": "test action data", "description": "action data description", "policies": [{"name": "test policy"}], "category": {"name": "test action categories"}}],
          "meta_rules": [{"name": "meta rule", "description": "valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "test action categories"}]}],
          "subjects": [{"name": "testuser", "description": "description of the subject", "extra": {"field_extra_subject": "value extra subject"}, "policies": [{"name": "test policy"}]}],
-         "objects": [{"name": "test object", "description": "description of the object", "extra": {"field_extra_object": "value extra object"}, "policies": [{"name": "test policy"}]}],
-         "actions": [{"name": "test action", "description": "description of the action", "extra": {"field_extra_action": "value extra action"}, "policies": [{"name": "test policy"}]}],
+         "objects": [{"name": "test object e1", "description": "description of the object", "extra": {"field_extra_object": "value extra object"}, "policies": [{"name": "test policy"}]}],
+         "actions": [{"name": "test action e1", "description": "description of the action", "extra": {"field_extra_action": "value extra action"}, "policies": [{"name": "test policy"}]}],
          "subject_assignments": [{"subject": {"name": "testuser"}, "category": {"name": "test subject categories"}, "assignments": [{"name": "test subject data"}]}],
-         "object_assignments": [{"object": {"name": "test object"}, "category": {"name": "test object categories"}, "assignments": [{"name": "test object data"}]}],
-         "action_assignments": [{"action": {"name": "test action"}, "category": {"name": "test action categories"}, "assignments": [{"name": "test action data"}]}],
-         "rules": [{"meta_rule": {"name" : "meta rule"}, "rule": {"subject_data" : [{"name":"test subject data"}], "object_data": [{"name": "test object data"}], "action_data": [{"name": "test action data"}]}, "policy": {"name" :"test policy"}, "instructions" : {"decision" : "grant"}, "enabled": True}]
+         "object_assignments": [{"object": {"name": "test object e1"}, "category": {"name": "test object categories"}, "assignments": [{"name": "test object data"}]}],
+         "action_assignments": [{"action": {"name": "test action e1"}, "category": {"name": "test action categories"}, "assignments": [{"name": "test action data"}]}],
+         "rules": [{"meta_rule": {"name": "meta rule"}, "rule": {"subject_data": [{"name": "test subject data"}], "object_data": [{"name": "test object data"}], "action_data": [{"name": "test action data"}]}, "policy": {"name":"test policy"}, "instructions": {"decision": "grant"}, "enabled": True}]
         }
 
 
@@ -87,7 +87,6 @@ def test_export_models():
     assert req.status_code == 200
     data = utilities.get_json(req.data)
 
-    print(data)
     assert "content" in data
     assert "models" in data["content"]
     assert isinstance(data["content"]["models"], list)
@@ -110,7 +109,6 @@ def test_export_policies():
     assert req.status_code == 200
     data = utilities.get_json(req.data)
 
-    print(data)
     assert "content" in data
     assert "policies" in data["content"]
     assert isinstance(data["content"]["policies"], list)
@@ -136,7 +134,6 @@ def test_export_subject_object_action():
     assert req.status_code == 200
     data = utilities.get_json(req.data)
 
-    print(data)
     assert "content" in data
     type_elements = ["subject", "object", "action"]
     for type_element in type_elements:
@@ -158,10 +155,8 @@ def test_export_subject_object_action():
         assert isinstance(element["extra"], dict)
         key_dict = "field_extra_" + type_element
         value_dict = "value extra " + type_element
-        #TODO change this after bug fix on extra
-        if False:
-            assert key_dict in element["extra"]
-            assert element["extra"][key_dict] == value_dict
+        assert key_dict in element["extra"]
+        assert element["extra"][key_dict] == value_dict
 
 
 def test_export_subject_object_action_categories():
@@ -196,7 +191,6 @@ def test_export_subject_object_action_data():
     req = client.get("/export")
     assert req.status_code == 200
     data = utilities.get_json(req.data)
-    print(data)
     assert "content" in data
     type_elements = ["subject", "object", "action"]
     for type_element in type_elements:
@@ -207,9 +201,9 @@ def test_export_subject_object_action_data():
         data_elt = data["content"][key][0]
         assert data_elt["name"] == "test " + type_element + " data"
         assert data_elt["description"] == type_element + " data description"
-        assert isinstance(data_elt["policy"],dict)
+        assert isinstance(data_elt["policy"], dict)
         assert data_elt["policy"]["name"] == "test policy"
-        assert isinstance(data_elt["category"],dict)
+        assert isinstance(data_elt["category"], dict)
         assert data_elt["category"]["name"] == "test " + type_element + " categories"
 
 
@@ -223,7 +217,6 @@ def test_export_assignments():
     req = client.get("/export")
     assert req.status_code == 200
     data = utilities.get_json(req.data)
-    print(data)
     assert "content" in data
     type_elements = ["subject", "object", "action"]
     for type_element in type_elements:
@@ -237,7 +230,7 @@ def test_export_assignments():
         if type_element == "subject":
             assert assignment_elt[type_element]["name"] == "testuser"
         else:
-            assert assignment_elt[type_element]["name"] == "test " + type_element
+            assert assignment_elt[type_element]["name"] == "test " + type_element + " e0"
         assert "category" in assignment_elt
         assert isinstance(assignment_elt["category"], dict)
         assert assignment_elt["category"]["name"] == "test " + type_element + " categories"
@@ -245,6 +238,8 @@ def test_export_assignments():
         assert isinstance(assignment_elt["assignments"], list)
         assert len(assignment_elt["assignments"]) == 1
         assert assignment_elt["assignments"][0]["name"] == "test " + type_element + " data"
+
+    import_export_utilities.clean_all(client)
 
 
 def test_export_rules():
@@ -257,7 +252,6 @@ def test_export_rules():
     req = client.get("/export")
     assert req.status_code == 200
     data = utilities.get_json(req.data)
-    print(data)
     assert "content" in data
     assert "rules" in data["content"]
     assert isinstance(data["content"]["rules"], list)
@@ -267,7 +261,7 @@ def test_export_rules():
     assert "decision" in rule["instructions"]
     assert rule["instructions"]["decision"] == "grant"
     assert "enabled" in rule
-    assert rule["enabled"] == True
+    assert rule["enabled"]
     assert "meta_rule" in rule
     assert rule["meta_rule"]["name"] == "meta rule"
     assert "policy" in rule

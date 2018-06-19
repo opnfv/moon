@@ -1,10 +1,15 @@
 FROM python:3
 
+LABEL Name=Manager
+LABEL Description="Manager component for the Moon platform"
+LABEL Maintainer="Thomas Duval"
+LABEL Url="https://wiki.opnfv.org/display/moon/Moon+Project+Proposal"
+
+USER root
+
 ADD . /root
 WORKDIR /root/
-RUN pip3 install -r requirements.txt
-RUN if [ -d /root/dist ]; then for FILE in $(ls /root/dist/*.tar.gz); do pip install $FILE --upgrade; done; fi
-RUN if [ -d /root/dist ]; then for FILE in $(ls /root/dist/*.whl); do pip install $FILE --upgrade; done; fi
-RUN pip3 install .
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir .
 
 CMD ["python3", "-m", "moon_manager"]

@@ -7,7 +7,9 @@ def get_configuration(consul_host, consul_port, key):
     url = "http://{}:{}/v1/kv/{}".format(consul_host, consul_port, key)
     req = requests.get(url)
     if req.status_code != 200:
-        raise Exception("xxx")
+        raise Exception("Exception when retrieving configuration from Consul: {} {}".format(
+            req.status_code, req.text
+        ))
     data = req.json()
     if len(data) == 1:
         data = data[0]

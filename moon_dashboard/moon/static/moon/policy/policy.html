@@ -1,0 +1,158 @@
+<div ng-controller="moon.policy.controller as ctrl">
+  <div class="clearfix list-group">
+    <div class="pull-right">
+      <input type="search" class="form-control filter" placeholder="Filter" ng-model="filterText">
+      <button type="button" class="btn btn-default" ng-click="ctrl.createPolicy()">
+        <span class="fa fa-plus"></span>
+        <translate>Create Policy</translate>
+      </button>
+    </div>
+  </div>
+
+  <div class="list-group">
+    <div ng-repeat="policy in ctrl.model.policies | orderBy:'name' | filter:filterText" class="list-group-item">
+      <h3 class="list-group-item-heading inline">{$ policy.name $}</h3>
+      <div class="pull-right">
+        <button type="button" class="fa fa-trash" title="{$ 'Remove Policy' | translate $}" ng-click="ctrl.removePolicy(policy)"></button>
+        <button type="button" class="fa fa-edit" title="{$ 'Edit Policy' | translate $}" ng-click="ctrl.updatePolicy(policy)"></button>
+      </div>
+      <p class="list-group-item-text">{$ policy.description $}</p>
+      <h4 class="list-group-item-text">
+        <translate>Model: {$ policy.model ? policy.model.name : 'none' $}</translate>
+      </h4>
+      <h4 class="list-group-item-text">
+        <translate>Genre:</translate>
+        <translate>{$ policy.genre ? policy.genre : 'none' $}</translate>
+      </h4>
+      <details class="list-group-item-text">
+        <summary ng-click="ctrl.populatePolicy(policy)">
+          <h4 class="inline" translate>Rules</h4>
+          <button type="button" class="fa fa-plus " ng-click="ctrl.addRule(policy)" title="{$ 'Add Rule' | translate $}"></button>
+        </summary>
+        <div class="list-group">
+          <p ng-if="!policy.rules" class="list-group-item-text" translate>Loading rules...</p>
+          <div ng-if="policy.rules" ng-repeat="rule in policy.rules | orderBy:'name'" class="list-group-item">
+            <div class="list-group-item-heading" ng-if="ctrl.selectedRule != rule">
+              <div class="inline-block width-200">
+                <b>
+                  <translate>Metarule: </translate>
+                </b> {$ rule.metaRule.name $}
+              </div>
+              <b>
+                <translate>Rule: </translate>
+              </b>
+              <span ng-repeat="data in rule.subjectData">
+                <span>{$ data.name $}{$ $last ? '' : ', ' $}</span>
+              </span> |
+              <span ng-repeat="data in rule.actionData">
+                <span>{$ data.name $}{$ $last ? '' : ', ' $}</span>
+              </span> |
+              <span ng-repeat="data in rule.objectData">
+                <span>{$ data.name $}{$ $last ? '' : ', ' $}</span>
+              </span>
+              <div class="pull-right">
+                <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeRuleFromPolicy(policy, rule)" title="{$ 'Remove Rule' | translate $}"></button>
+                <button type="button" class="fa fa-eye pull-right" ng-click="ctrl.showRule(rule)" title="{$ 'Show Rule' | translate $}"></button>
+              </div>
+            </div>
+
+            <div ng-if="ctrl.selectedRule == rule">
+              <h3 class="list-group-item-heading inline">
+                <translate>Metarule: </translate> {$ rule.metaRule.name $}</h3>
+              <div class="pull-right">
+                <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeRuleFromPolicy(policy, rule)" title="{$ 'Remove Rule' | translate $}"></button>
+                <button type="button" class="fa fa-eye-slash pull-right" ng-click="ctrl.hideRule()" title="{$ 'Hide Rule' | translate $}"></button>
+              </div>
+              <p class="list-group-item-text">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>
+                        <span translate>Subjects</span>
+                      </th>
+                      <th>
+                        <span translate>Objects</span>
+                      </th>
+                      <th>
+                        <span translate>Actions</span>
+                      </th>
+                      <th>
+                        <span translate>Instructions</span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>
+                        <p ng-repeat="data in rule.subjectData">
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('subject', policy, data)"
+                            title="{$ 'Assign to perimeters' | translate $}"></button>
+                          <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
+                            title="{$ 'Close' | translate $}"></button>
+                        </p>
+                      </td>
+                      <td>
+                        <p ng-repeat="data in rule.objectData">
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('object', policy, data)"
+                            title="{$ 'Assign to perimeters' | translate $}"></button>
+                          <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
+                            title="{$ 'Close' | translate $}"></button>
+                        </p>
+                      </td>
+                      <td>
+                        <p ng-repeat="data in rule.actionData">
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('action', policy, data)"
+                            title="{$ 'Assign to perimeters' | translate $}"></button>
+                          <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
+                            title="{$ 'Close' | translate $}"></button>
+                        </p>
+                      </td>
+                      <td>
+                        <pre ng-bind="rule.instructions | json "></pre>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div ng-if="ctrl.currentData && ctrl.currentData.loading" class="row padding-10">
+                  <h4 translate>Loading...</h4>
+                </div>
+                <div ng-if="ctrl.currentData && !ctrl.currentData.loading" class="row">
+                  <div class="padding-10">
+                    <h3>
+                      <translate>Assign perimeters to</translate> {$ ctrl.currentData.data.name $}</h3>
+                    <input type="search" class="form-control filter" placeholder="Filter" ng-model="filterPerimeter">
+                    <button type="button" class="btn btn-default" ng-click="ctrl.createPerimeter(ctrl.currentData.type, policy)">
+                      <span class="fa fa-plus"></span>
+                      <translate>Create Perimeter</translate>
+                    </button>
+                  </div>
+                  <div>
+                    <div class="col-lg-4">
+                      <h4 translate>Available perimeters</h4>
+                      <div class="w-100 height-200 scroll list-group border">
+                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.perimeters | orderBy:'name' | filter:filterPerimeter" title="{$ perimeter.description $}"
+                          ng-click="ctrl.assign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)">{$ perimeter.name $}</button>
+                      </div>
+                      <p translate class="mt-5">Click to assign</p>
+                    </div>
+                    <div class="col-lg-4">
+                      <h4 translate>Assigned perimeters</h4>
+                      <div class="w-100 list-group border height-200 scroll">
+                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.assignments | orderBy:'name' | filter:filterPerimeter" title="{$ perimeter.description $}"
+                          ng-click="ctrl.unassign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)">{$ perimeter.name $}</button>
+                      </div>
+                      <p translate class="mt-5">Click to unassign</p>
+                    </div>
+                  </div>
+                </div>
+              </p>
+            </div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>

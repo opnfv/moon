@@ -187,12 +187,14 @@ def no_requests(monkeypatch):
             'DELETE', 'http://keystone:5000/v3/auth/tokens',
             headers={'X-Subject-Token': "111111111"}
         )
+
+        def match_request_text(request):
+            # request.url may be None, or '' prevents a TypeError.
+            return 'http://keystone:5000/v3/users?name=testuser' in request.url
+
         m.register_uri(
-            'POST', 'http://keystone:5000/v3/users?name=testuser&domain_id=default',
-            json={"users": {}}
-        )
-        m.register_uri(
-            'GET', 'http://keystone:5000/v3/users?name=testuser&domain_id=default',
+            requests_mock.ANY, '/v3/users',
+            additional_matcher=match_request_text,
             json={"users": {}}
         )
         m.register_uri(

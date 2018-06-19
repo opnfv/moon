@@ -81,17 +81,15 @@ class JsonImport(Resource):
 
     def _reorder_rules_ids(self, rule, ordered_perimeter_categories_ids, json_data_ids, policy_id, get_function):
         ordered_json_ids = [None]*len(ordered_perimeter_categories_ids)
-        logger.info("ordered_json_ids {}".format(ordered_json_ids))
-        logger.info("json_data_ids {}".format(json_data_ids))
         for json_id in json_data_ids:
-            logger.info("json_id {}".format(json_id))
             data = get_function(self._user_id, policy_id, data_id=json_id)
             data = data[0]
-            logger.info("data {}".format(data))
             if data["category_id"] not in ordered_perimeter_categories_ids:
-                raise InvalidJson("The category id {} of the rule {} does not match the meta rule".format(data["category_id"], rule))
+                raise InvalidJson("The category id {} of the rule {} does not match the meta rule".format(
+                    data["category_id"], rule))
             if ordered_json_ids[ordered_perimeter_categories_ids.index(data["category_id"])] is not None:
-                raise InvalidJson("The category id {} of the rule {} shall not be used twice in the same rule".format(data["category_id"], rule))
+                raise InvalidJson("The category id {} of the rule {} shall not be used twice in the same rule".format(
+                    data["category_id"], rule))
             ordered_json_ids[ordered_perimeter_categories_ids.index(data["category_id"])] = json_id
             logger.info(ordered_json_ids)
         return ordered_json_ids
@@ -106,7 +104,8 @@ class JsonImport(Resource):
             JsonUtils.copy_field_if_exists(json_rule, json_to_use, "enabled", bool, default_value=True)
 
             json_ids = dict()
-            JsonUtils.convert_name_to_id(json_rule, json_ids, "policy", "policy_id", "policy", PolicyManager, self._user_id)
+            JsonUtils.convert_name_to_id(json_rule, json_ids, "policy", "policy_id", "policy",
+                                         PolicyManager, self._user_id)
             JsonUtils.convert_name_to_id(json_rule, json_to_use, "meta_rule", "meta_rule_id", "meta_rule", ModelManager, self._user_id)
             json_subject_ids = dict()
             json_object_ids = dict()
@@ -124,7 +123,7 @@ class JsonImport(Resource):
             json_to_use_rule = json_to_use_rule + self._reorder_rules_ids(json_rule, meta_rule["action_categories"], json_action_ids["action"], json_ids["policy_id"], PolicyManager.get_action_data)
             json_to_use["rule"] = json_to_use_rule
             try:
-                logger.info("Adding / updating a rule from json {}".format(json_to_use))
+                logger.debug("Adding / updating a rule from json {}".format(json_to_use))
                 PolicyManager.add_rule(self._user_id, json_ids["policy_id"], json_to_use["meta_rule_id"], json_to_use)
             except exceptions.RuleExisting:
                 pass
@@ -135,15 +134,14 @@ class JsonImport(Resource):
         logger.info("Input meta rules : {}".format(json_meta_rules))
         for json_meta_rule in json_meta_rules:
             json_to_use = dict()
-            logger.info("Input meta rule : {}".format(json_meta_rule))
             JsonUtils.copy_field_if_exists(json_meta_rule, json_to_use, "name", str)
             JsonUtils.copy_field_if_exists(json_meta_rule, json_to_use, "description", str)
             JsonUtils.convert_names_to_ids(json_meta_rule, json_to_use, "subject_categories", "subject_categories", "subject_category", ModelManager, self._user_id)
             JsonUtils.convert_names_to_ids(json_meta_rule, json_to_use, "object_categories", "object_categories", "object_category", ModelManager, self._user_id)
             JsonUtils.convert_names_to_ids(json_meta_rule, json_to_use, "action_categories", "action_categories", "action_category", ModelManager, self._user_id)
-            logger.info("Adding / updating a metarule from json {}".format(json_meta_rule))
+            logger.debug("Adding / updating a metarule from json {}".format(json_meta_rule))
             meta_rule = ModelManager.add_meta_rule(self._user_id, meta_rule_id=None, value=json_to_use)
-            logger.info("Added / updated meta rule : {}".format(meta_rule))
+            logger.debug("Added / updated meta rule : {}".format(meta_rule))
 
     def _import_subject_object_action_assignments(self, json_item_assignments, type_element):
         import_method = getattr(PolicyManager, 'add_' + type_element + '_assignment')
@@ -178,14 +176,18 @@ class JsonImport(Resource):
                     # find the policy related to the current data
                     data = get_method(self._user_id, policy_id, data_id, json_assignment["category_id"])
                     if data is not None and len(data) == 1:
-                        logger.info("Adding / updating a {} assignment from json {}".format(type_element, json_assignment))
-                        import_method(self._user_id, policy_id, json_assignment["id"], json_assignment["category_id"], data_id)
+                        logger.debug("Adding / updating a {} assignment from json {}".format(type_element,
+                                                                                             json_assignment))
+                        import_method(self._user_id, policy_id, json_assignment["id"], json_assignment["category_id"],
+                                      data_id)
                     else:
                         raise UnknownData("Unknown data with id {}".format(data_id))
 
             # case the data has not been found in any policies
             if has_found_data is False:
-                raise InvalidJson("The json contains unknown {} data or category : {}".format(type_element,json_item_assignment))
+                raise InvalidJson("The json contains unknown {} data or category : {}".format(
+                    type_element,
+                    json_item_assignment))
 
     def _import_subject_object_action_datas(self, json_items_data,  mandatory_policy_ids, type_element):
         if type_element == "subject":
@@ -201,7 +203,6 @@ class JsonImport(Resource):
             item_override = JsonUtils.get_override(json_items_data)
             if item_override is True:
                 raise ForbiddenOverride("{} datas do not support override flag !".format(type_element))
-            logger.info("json_item_data {}".format(json_item_data))
             json_to_use = dict()
             JsonUtils.copy_field_if_exists(json_item_data, json_to_use, "name", str)
             JsonUtils.copy_field_if_exists(json_item_data, json_to_use, "description", str)
@@ -209,11 +210,9 @@ class JsonImport(Resource):
             # field_mandatory : not mandatory if there is some mandatory policies
             JsonUtils.convert_names_to_ids(json_item_data, json_policy, "policies", "policy_id", "policy",
                                          PolicyManager, self._user_id, field_mandatory=len(mandatory_policy_ids) == 0)
-            logger.info("json_policy {}".format(json_policy))
             json_category = dict()
             JsonUtils.convert_name_to_id(json_item_data, json_category, "category", "category_id", type_element+"_category",
                                          ModelManager, self._user_id)
-            logger.info("json_category {}".format(json_category))
             policy_ids = []
             if "policy_id" in json_policy:
                 policy_ids = json_policy["policy_id"]
@@ -232,15 +231,12 @@ class JsonImport(Resource):
 
             for policy_id in mandatory_policy_ids:
                 try:
-                    # existing_datas = get_method(self._user_id, policy_id,category_id=category_id)
-                    # logger.info(existing_datas)
-                    logger.info("Adding / updating a {} data with policy id {} and category id {} from json {}".format(type_element, policy_id, category_id, json_to_use))
                     data = import_method(self._user_id, policy_id,  category_id=category_id, value=json_to_use)
-                    logger.info("Added / updated {} data : {}".format(type_element, data))
                 except exceptions.PolicyUnknown:
                     raise UnknownPolicy("Unknown policy with id {}".format(policy_id))
                 except Exception as e:
-                    raise BaseException(str(e))
+                    logger.exception(str(e))
+                    raise e
 
     def _import_subject_object_action_categories(self, json_item_categories, type_element):
         import_method = getattr(ModelManager, 'add_' + type_element + '_category')
@@ -267,14 +263,13 @@ class JsonImport(Resource):
                 raise ForbiddenOverride("{} categories do not support override flag !".format(type_element))
 
             try:
-                logger.info("Adding a {} category from json {}".format(type_element, json_to_use))
                 category = import_method(self._user_id, existing_id, json_to_use)
-                logger.info("Added category {}".format(category))
             except (exceptions.SubjectCategoryExisting, exceptions.ObjectCategoryExisting, exceptions.ActionCategoryExisting):
                 # it already exists: do nothing
-                logger.info("Ignored {} category with name {} is already in the database".format(type_element, json_to_use["name"]))
+                logger.warning("Ignored {} category with name {} is already in the database".format(type_element, json_to_use["name"]))
             except Exception as e:
-                logger.info("Error while importing the category : {}".format(str(e)))
+                logger.warning("Error while importing the category : {}".format(str(e)))
+                logger.exception(str(e))
                 raise e
 
     def _import_subject_object_action(self, json_items, mandatory_policy_ids, type_element):
@@ -302,7 +297,7 @@ class JsonImport(Resource):
                 raise ForbiddenOverride("{} does not support override flag !".format(type_element))
 
             if len(policy_ids) == 0:
-                raise MissingPolicy("a {} needs at least one policy to be created or updated : {}".format(type_element,  json.dumps(json_item)))
+                raise MissingPolicy("a {} needs at least one policy to be created or updated : {}".format(type_element, json.dumps(json_item)))
 
             for policy_id in policy_ids:
                 try:
@@ -312,16 +307,13 @@ class JsonImport(Resource):
                         if items_in_db[key_in_db]["name"] == json_without_policy_name["name"]:
                             key = key_in_db
                             break
-                    if key is None:
-                        logger.info("Adding a {} from json {} to the policy with id {}".format(type_element, json_without_policy_name, policy_id))
-                    else:
-                        logger.info("Updating a {} from json {} to the policy with id {}".format(type_element, json_without_policy_name, policy_id))
                     element = import_method(self._user_id, policy_id, perimeter_id=key, value=json_without_policy_name)
-                    logger.info("Added / updated {} : {}".format(type_element, element))
+                    logger.debug("Added / updated {} : {}".format(type_element, element))
 
                 except exceptions.PolicyUnknown:
                     raise UnknownPolicy("Unknown policy when adding a {}!".format(type_element))
                 except Exception as e:
+                    logger.exception(str(e))
                     raise BaseException(str(e))
 
     def _import_policies(self, json_policies):
@@ -335,7 +327,7 @@ class JsonImport(Resource):
             # policy_in_db = PolicyManager.get_policies_by_name(json_without_model_name["name"])
             policies = PolicyManager.get_policies(self._user_id)
             policy_in_db = None
-            logger.info(policies)
+            policy_id = None
             for policy_key in policies:
                 if policies[policy_key]["name"] == json_policy["name"]:
                     policy_in_db = policies[policy_key]
@@ -350,9 +342,10 @@ class JsonImport(Resource):
             policy_mandatory = JsonUtils.get_mandatory(json_policy)
 
             if policy_override is False and policy_does_exist:
-                policy_mandatory_ids.append(policy_id)
-                logger.warning("Existing policy not updated because of the override option is not set !")
-                continue
+                if policy_id:
+                    policy_mandatory_ids.append(policy_id)
+                    logger.warning("Existing policy not updated because of the override option is not set !")
+                    continue
 
             json_without_model_name = dict()
             JsonUtils.copy_field_if_exists(json_policy, json_without_model_name, "name", str)
@@ -361,16 +354,14 @@ class JsonImport(Resource):
             JsonUtils.convert_name_to_id(json_policy, json_without_model_name, "model", "model_id", "model", ModelManager, self._user_id, field_mandatory=False)
 
             if not policy_does_exist:
-                logger.info("Creating policy {} ".format(json_without_model_name))
+                logger.debug("Creating policy {} ".format(json_without_model_name))
                 added_policy = PolicyManager.add_policy(self._user_id, None, json_without_model_name)
-                logger.info("Added policy {}".format(added_policy))
                 if policy_mandatory is True:
                     keys = list(added_policy.keys())
                     policy_mandatory_ids.append(keys[0])
             elif policy_override is True:
-                logger.info("Updating policy {} ".format(json_without_model_name))
+                logger.debug("Updating policy {} ".format(json_without_model_name))
                 updated_policy = PolicyManager.update_policy(self._user_id, policy_id, json_without_model_name)
-                logger.info("Updated policy {}".format(updated_policy))
                 if policy_mandatory is True:
                     policy_mandatory_ids.append(policy_id)
         return policy_mandatory_ids
@@ -380,7 +371,7 @@ class JsonImport(Resource):
             raise InvalidJson("models shall be a list!")
 
         for json_model in json_models:
-            logger.info("json_model {}".format(json_model))
+            logger.debug("json_model {}".format(json_model))
             models = ModelManager.get_models(self._user_id)
             model_in_db = None
             model_id = None
@@ -389,19 +380,16 @@ class JsonImport(Resource):
                     model_in_db = models[model_key]
                     model_id = model_key
 
-            logger.info("model in db".format(model_in_db))
             # this should not occur as the model has been put in db previously in _import_models_without_new_meta_rules
             if model_in_db is None:
-                raise UnknownModel("Unknwon model ")
+                raise UnknownModel("Unknown model ")
 
             json_key = dict()
             JsonUtils.convert_names_to_ids(json_model, json_key, "meta_rules", "meta_rule_id", "meta_rule", ModelManager, self._user_id)
-            logger.info("json_key {}".format(json_key))
             for meta_rule_id in json_key["meta_rule_id"]:
                 if meta_rule_id not in model_in_db["meta_rules"]:
                     model_in_db["meta_rules"].append(meta_rule_id)
 
-            logger.info("Updating model with id {} : {} ".format(model_id, model_in_db))
             ModelManager.update_model(self._user_id, model_id, model_in_db)
 
     def _import_models_without_new_meta_rules(self, json_models):
@@ -426,16 +414,14 @@ class JsonImport(Resource):
             if model_in_db is None:
                 model_does_exist = False
             else:
-                logger.info("model_in_db {}".format(model_in_db))
-                # JsonUtils.convert_names_to_ids(model_in_db, json_without_new_metarules, "meta_rules", "meta_rule_id", "meta_rule", ModelManager, self._user_id)
                 json_without_new_metarules["meta_rule_id"] = model_in_db["meta_rules"]
                 model_does_exist = True
             model_override = JsonUtils.get_override(json_model)
             if not model_does_exist:
-                logger.info("Creating model {} ".format(json_without_new_metarules))
+                logger.debug("Creating model {} ".format(json_without_new_metarules))
                 ModelManager.add_model(self._user_id, None, json_without_new_metarules)
             elif model_override is True:
-                logger.info("Updating model with id {} : {} ".format(model_id, json_without_new_metarules))
+                logger.debug("Updating model with id {} : {} ".format(model_id, json_without_new_metarules))
                 ModelManager.update_model(self._user_id, model_id, json_without_new_metarules)
 
     def _import_pdps(self, json_pdps):
@@ -462,11 +448,11 @@ class JsonImport(Resource):
         self._user_id = user_id
         if 'file' in request.files:
             file = request.files['file']
-            logger.info("Importing {} file...".format(file))
+            logger.debug("Importing {} file...".format(file))
             json_content = json.load(file)
         else:
             json_content = request.json
-        logger.info("Importing content:  {} ...".format(json_content))
+        logger.debug("Importing content:  {} ...".format(json_content))
 
         # first import the models without the meta rules as they are not yet defined
         if "models" in json_content:

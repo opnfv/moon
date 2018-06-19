@@ -68,3 +68,7 @@ CHANGES
     - moon object data list
     - moon action data list
     - moon metarule list
+
+1.4.1
+-----
+- Update exception during configuration

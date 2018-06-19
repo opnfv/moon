@@ -73,3 +73,36 @@ CHANGES
 1.2.9
 -----
 - Add some verifications when deleting some elements in database
+
+1.2.10
+-----
+- Update the migration script because of a bug introduced in 1.2.8 in rule table
+- Fix bugs due to the previous version
+
+1.2.11
+------
+- adding test cases for perimeter
+- adding subject_object_action to model_test
+- update import of exception
+- add unit_test to test_model
+- add validation for not accepting blank perimeter name or category name
+
+1.2.12
+------
+- Fix the SubjectExisting exception problem
+
+1.2.13
+------
+- Add validations and refactor test cases
+
+1.2.14
+------
+- Fix some bugs for the manager and clean the code
+
+1.2.15
+------
+- Fix test cases after removing syntax error in exceptions
+
+1.2.16
+------
+- Fix the "key length error" in meta_rule table

@@ -1,5 +1,5 @@
 import json
-
+from uuid import uuid4
 
 def get_json(data):
     return json.loads(data.decode("utf-8"))
@@ -13,16 +13,14 @@ def register_client():
 
 
 def get_policy_id():
-    import api.test_policies as policies
-    client = register_client()
-    policy_id = ''
-    req, policy = policies.get_policies(client)
-    for id in policy['policies']:
-        if id:
-            policy_id = id
-            break
-    print("policy id {}".format(policy_id))
-    if not policy_id:
-        policies.add_policies(client, "testuser")
-        policy_id = get_policy_id()
+    from helpers import policy_helper
+    value = {
+        "name": "test_policy"+uuid4().hex,
+        "model_id": "",
+        "genre": "authz",
+        "description": "test",
+        }
+    policy_helper.add_policies(value=value)
+    req = policy_helper.get_policies()
+    policy_id = list(req.keys())[0]
     return policy_id

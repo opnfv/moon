@@ -2,6 +2,8 @@
 # import moon_manager.api
 import json
 import api.utilities as utilities
+from helpers import data_builder as builder
+from uuid import uuid4
 
 
 def get_subjects(client):
@@ -11,13 +13,19 @@ def get_subjects(client):
 
 
 def add_subjects(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex,
+        model_name="model1" + uuid4().hex)
     data = {
-        "name": name,
+        "name": name + uuid4().hex,
         "description": "description of {}".format(name),
         "password": "password for {}".format(name),
         "email": "{}@moon".format(name)
     }
-    req = client.post("/subjects", data=json.dumps(data),
+    req = client.post("/policies/{}/subjects".format(policy_id), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     subjects = utilities.get_json(req.data)
     return req, subjects
@@ -25,11 +33,10 @@ def add_subjects(client, name):
 
 def delete_subject(client):
     subjects = get_subjects(client)
-    for key, value in subjects[1]['subjects'].items():
-        if value['name'] == "testuser":
-            req = client.delete("/subjects/{}".format(key))
-            break
-    return req
+    value = subjects[1]['subjects']
+    id = list(value.keys())[0]
+    policy_id = builder.get_policy_id_with_subject_assignment()
+    return client.delete("/policies/{}/subjects/{}".format(policy_id, id))
 
 
 def delete_subjects_without_perimeter_id(client):
@@ -48,25 +55,39 @@ def test_perimeter_get_subject():
 def test_perimeter_add_subject():
     client = utilities.register_client()
     req, subjects = add_subjects(client, "testuser")
-    assert req.status_code == 200
     value = list(subjects["subjects"].values())[0]
+    assert req.status_code == 200
     assert "subjects" in subjects
-    assert value['name'] == "testuser"
-    assert value["email"] == "{}@moon".format("testuser")
+    assert value["name"] is not None
+    assert value["email"] is not None
 
 
 def test_perimeter_add_subject_without_name():
     client = utilities.register_client()
-    req, subjects = add_subjects(client, "")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    data = {
+        "name": "",
+        "description": "description of {}".format(""),
+        "password": "password for {}".format(""),
+        "email": "{}@moon".format("")
+    }
+    req = client.post("/policies/{}/subjects".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_perimeter_add_subject_with_name_contain_spaces():
     client = utilities.register_client()
-    req, subjects = add_subjects(client, "test user")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    data = {
+        "name": "test user",
+        "description": "description of {}".format("test user"),
+        "password": "password for {}".format("test user"),
+        "email": "{}@moon".format("test user")
+    }
+    req = client.post("/policies/{}/subjects".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_perimeter_delete_subject():
@@ -78,7 +99,8 @@ def test_perimeter_delete_subject():
 def test_perimeter_delete_subjects_without_perimeter_id():
     client = utilities.register_client()
     req = delete_subjects_without_perimeter_id(client)
-    assert req.status_code == 500
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "400: Subject Unknown"
 
 
 def get_objects(client):
@@ -88,11 +110,17 @@ def get_objects(client):
 
 
 def add_objects(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policyId = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex,
+        model_name="model1" + uuid4().hex)
     data = {
-        "name": name,
+        "name": name + uuid4().hex,
         "description": "description of {}".format(name),
     }
-    req = client.post("/objects", data=json.dumps(data),
+    req = client.post("/policies/{}/objects/".format(policyId), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     objects = utilities.get_json(req.data)
     return req, objects
@@ -100,11 +128,10 @@ def add_objects(client, name):
 
 def delete_object(client):
     objects = get_objects(client)
-    for key, value in objects[1]['objects'].items():
-        if value['name'] == "testuser":
-            req = client.delete("/objects/{}".format(key))
-            break
-    return req
+    value = objects[1]['objects']
+    id = list(value.keys())[0]
+    policy_id = builder.get_policy_id_with_object_assignment()
+    return client.delete("/policies/{}/objects/{}".format(policy_id, id))
 
 
 def delete_objects_without_perimeter_id(client):
@@ -123,24 +150,34 @@ def test_perimeter_get_object():
 def test_perimeter_add_object():
     client = utilities.register_client()
     req, objects = add_objects(client, "testuser")
-    assert req.status_code == 200
     value = list(objects["objects"].values())[0]
+    assert req.status_code == 200
     assert "objects" in objects
-    assert value['name'] == "testuser"
+    assert value['name'] is not None
 
 
 def test_perimeter_add_object_without_name():
     client = utilities.register_client()
-    req, objects = add_objects(client, "")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    data = {
+        "name": "",
+        "description": "description of {}".format(""),
+    }
+    req = client.post("/policies/{}/objects/".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_perimeter_add_object_with_name_contain_spaces():
     client = utilities.register_client()
-    req, objects = add_objects(client, "test user")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    data = {
+        "name": "test user",
+        "description": "description of {}".format("test user"),
+    }
+    req = client.post("/policies/{}/objects/".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_perimeter_delete_object():
@@ -152,7 +189,8 @@ def test_perimeter_delete_object():
 def test_perimeter_delete_objects_without_perimeter_id():
     client = utilities.register_client()
     req = delete_objects_without_perimeter_id(client)
-    assert req.status_code == 500
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "400: Object Unknown"
 
 
 def get_actions(client):
@@ -162,11 +200,17 @@ def get_actions(client):
 
 
 def add_actions(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policyId = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex,
+        model_name="model1" + uuid4().hex)
     data = {
-        "name": name,
+        "name": name + uuid4().hex,
         "description": "description of {}".format(name),
     }
-    req = client.post("/actions", data=json.dumps(data),
+    req = client.post("/policies/{}/actions".format(policyId), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     actions = utilities.get_json(req.data)
     return req, actions
@@ -174,11 +218,10 @@ def add_actions(client, name):
 
 def delete_actions(client):
     actions = get_actions(client)
-    for key, value in actions[1]['actions'].items():
-        if value['name'] == "testuser":
-            req = client.delete("/actions/{}".format(key))
-            break
-    return req
+    value = actions[1]['actions']
+    id = list(value.keys())[0]
+    policy_id = builder.get_policy_id_with_action_assignment()
+    return client.delete("/policies/{}/actions/{}".format(policy_id, id))
 
 
 def delete_actions_without_perimeter_id(client):
@@ -197,24 +240,34 @@ def test_perimeter_get_actions():
 def test_perimeter_add_actions():
     client = utilities.register_client()
     req, actions = add_actions(client, "testuser")
-    assert req.status_code == 200
     value = list(actions["actions"].values())[0]
+    assert req.status_code == 200
     assert "actions" in actions
-    assert value['name'] == "testuser"
+    assert value['name'] is not None
 
 
 def test_perimeter_add_actions_without_name():
     client = utilities.register_client()
-    req, actions = add_actions(client, "")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    data = {
+        "name": "",
+        "description": "description of {}".format(""),
+    }
+    req = client.post("/policies/{}/actions".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_perimeter_add_actions_with_name_contain_spaces():
     client = utilities.register_client()
-    req, actions = add_actions(client, "test user")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    data = {
+        "name": "test user",
+        "description": "description of {}".format("test user"),
+    }
+    req = client.post("/policies/{}/actions".format("111"), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_perimeter_delete_actions():
@@ -226,5 +279,5 @@ def test_perimeter_delete_actions():
 def test_perimeter_delete_actions_without_perimeter_id():
     client = utilities.register_client()
     req = delete_actions_without_perimeter_id(client)
-    assert req.status_code == 500
-
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "400: Action Unknown"

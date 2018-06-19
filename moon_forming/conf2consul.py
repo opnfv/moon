@@ -6,6 +6,8 @@ import logging
 import json
 import base64
 
+__version__ = "1.4.1"
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger("moon.conf2consul")
 requests_log = logging.getLogger("requests.packages.urllib3")

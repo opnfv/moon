@@ -1,6 +1,7 @@
 import json
 import api.utilities as utilities
-import pytest
+from helpers import data_builder as builder
+from uuid import uuid4
 
 
 def get_pdp(client):
@@ -42,9 +43,15 @@ def test_get_pdp():
 
 
 def test_add_pdp():
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex,
+        model_name="model1" + uuid4().hex)
     data = {
         "name": "testuser",
-        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "security_pipeline": [policy_id],
         "keystone_project_id": "keystone_project_id",
         "description": "description of testuser"
     }
@@ -78,8 +85,8 @@ def test_add_pdp_with_empty_user():
     }
     client = utilities.register_client()
     req, models = add_pdp(client, data)
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_add_pdp_with_user_contain_space():
@@ -91,8 +98,8 @@ def test_add_pdp_with_user_contain_space():
     }
     client = utilities.register_client()
     req, models = add_pdp(client, data)
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_add_pdp_without_security_pipeline():
@@ -104,8 +111,8 @@ def test_add_pdp_without_security_pipeline():
     }
     client = utilities.register_client()
     req, meta_rules = add_pdp(client, data)
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == 'Empty Container'
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'security_pipeline', [Empty Container]"
 
 
 def test_add_pdp_without_keystone():
@@ -117,20 +124,33 @@ def test_add_pdp_without_keystone():
     }
     client = utilities.register_client()
     req, meta_rules = add_pdp(client, data)
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == 'Empty String'
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'keystone_project_id', [Empty String]"
 
 
 def test_update_pdp():
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1"+uuid4().hex,
+        object_category_name="object_category1"+uuid4().hex,
+        action_category_name="action_category1"+uuid4().hex,
+        meta_rule_name="meta_rule_1"+uuid4().hex,
+        model_name="model1"+uuid4().hex)
     data_add = {
         "name": "testuser",
-        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "security_pipeline": [policy_id],
         "keystone_project_id": "keystone_project_id",
         "description": "description of testuser"
     }
+
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id_update = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex,
+        model_name="model1" + uuid4().hex)
     data_update = {
         "name": "testuser",
-        "security_pipeline": ["policy_id_1_update", "policy_id_2_update"],
+        "security_pipeline": [policy_id_update],
         "keystone_project_id": "keystone_project_id_update",
         "description": "description of testuser"
     }
@@ -151,7 +171,8 @@ def test_update_pdp():
 def test_update_pdp_without_id():
     client = utilities.register_client()
     req_update = update_pdp(client, "testuser", "")
-    assert req_update[0].status_code == 500
+    assert req_update[0].status_code == 400
+    assert json.loads(req_update[0].data)["message"] == 'Invalid Key :name not found'
 
 
 def test_update_pdp_without_user():
@@ -163,8 +184,8 @@ def test_update_pdp_without_user():
     }
     client = utilities.register_client()
     req_update = update_pdp(client, data, "")
-    assert req_update[0].status_code == 500
-    assert json.loads(req_update[0].data)["message"] == "Empty String"
+    assert req_update[0].status_code == 400
+    assert json.loads(req_update[0].data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_update_pdp_without_security_pipeline():
@@ -176,5 +197,5 @@ def test_update_pdp_without_security_pipeline():
     }
     client = utilities.register_client()
     req_update = update_pdp(client, data, "")
-    assert req_update[0].status_code == 500
-    assert json.loads(req_update[0].data)["message"] == "Empty Container"
+    assert req_update[0].status_code == 400
+    assert json.loads(req_update[0].data)["message"] == "Key: 'security_pipeline', [Empty Container]"

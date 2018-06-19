@@ -26,3 +26,7 @@ CHANGES
 4.3.3
 -----
 - use the threading capability of Flask app
+
+4.3.3-1
+-----
+- Fix a bug in authz_requests

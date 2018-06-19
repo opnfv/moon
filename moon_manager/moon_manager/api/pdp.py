@@ -114,15 +114,12 @@ class PDP(Resource):
         }
         :internal_api: get_pdp
         """
-        try:
-            data = PDPManager.get_pdp(user_id=user_id, pdp_id=uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PDPManager.get_pdp(user_id=user_id, pdp_id=uuid)
+
         return {"pdps": data}
 
-    @validate_input("post", body_state=[True, True, True, False])
+    @validate_input("post", body_state={"name": True, "security_pipeline": True, "keystone_project_id": True})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create pdp.
@@ -145,23 +142,20 @@ class PDP(Resource):
         }
         :internal_api: add_pdp
         """
-        try:
-            data = dict(request.json)
-            if not data.get("keystone_project_id"):
-                data["keystone_project_id"] = None
-            else:
-                if check_keystone_pid(data.get("keystone_project_id")):
-                    raise exceptions.PdpKeystoneMappingConflict
-            data = PDPManager.add_pdp(
-                user_id=user_id, pdp_id=None, value=request.json)
-            uuid = list(data.keys())[0]
-            logger.debug("data={}".format(data))
-            logger.debug("uuid={}".format(uuid))
-            add_pod(uuid=uuid, data=data[uuid])
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = dict(request.json)
+        if not data.get("keystone_project_id"):
+            data["keystone_project_id"] = None
+        else:
+            if check_keystone_pid(data.get("keystone_project_id")):
+                raise exceptions.PdpKeystoneMappingConflict
+        data = PDPManager.add_pdp(
+            user_id=user_id, pdp_id=None, value=request.json)
+        uuid = list(data.keys())[0]
+        logger.debug("data={}".format(data))
+        logger.debug("uuid={}".format(uuid))
+        add_pod(uuid=uuid, data=data[uuid])
+
         return {"pdps": data}
 
     @validate_input("delete", kwargs_state=[True, False])
@@ -177,16 +171,12 @@ class PDP(Resource):
         }
         :internal_api: delete_pdp
         """
-        try:
-            data = PDPManager.delete_pdp(user_id=user_id, pdp_id=uuid)
-            delete_pod(uuid)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PDPManager.delete_pdp(user_id=user_id, pdp_id=uuid)
+        delete_pod(uuid)
+
         return {"result": True}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state=[True, True, True, False])
+    @validate_input("patch", kwargs_state=[True, False], body_state={"name": True, "security_pipeline": True, "keystone_project_id": True})
     @check_auth
     def patch(self, uuid, user_id=None):
         """Update a pdp
@@ -203,21 +193,18 @@ class PDP(Resource):
         }
         :internal_api: update_pdp
         """
-        try:
-            _data = dict(request.json)
-            if not _data.get("keystone_project_id"):
-                _data["keystone_project_id"] = None
-            else:
-                if check_keystone_pid(_data.get("keystone_project_id")):
-                    raise exceptions.PdpKeystoneMappingConflict
-            data = PDPManager.update_pdp(
-                user_id=user_id, pdp_id=uuid, value=_data)
-            logger.debug("data={}".format(data))
-            logger.debug("uuid={}".format(uuid))
-            add_pod(uuid=uuid, data=data[uuid])
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        _data = dict(request.json)
+        if not _data.get("keystone_project_id"):
+            _data["keystone_project_id"] = None
+        else:
+            if check_keystone_pid(_data.get("keystone_project_id")):
+                raise exceptions.PdpKeystoneMappingConflict
+        data = PDPManager.update_pdp(
+            user_id=user_id, pdp_id=uuid, value=_data)
+        logger.debug("data={}".format(data))
+        logger.debug("uuid={}".format(uuid))
+        add_pod(uuid=uuid, data=data[uuid])
+
         return {"pdps": data}
 

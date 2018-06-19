@@ -1,0 +1,54 @@
+.inline {
+    display: inline;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+summary{
+    outline:none;
+    margin-bottom: 10px;
+}
+
+details {
+    cursor: default;
+}
+
+.filter {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+}
+
+.categories td {
+    width: 33%;
+}
+
+.width-200 {
+    width: 200px; 
+}
+
+.height-200 {
+    height: 200px;
+}
+
+.border {
+    border: 1px #DDD solid;
+}
+
+.padding-10 {
+    padding: 10px;
+}
+
+.scroll {
+    overflow-y: auto;
+}
+
+.mt-5 {
+    margin-top: 5px;
+}
+
+.input-file {
+    display: none !important;
+}

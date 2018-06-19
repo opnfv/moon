@@ -28,3 +28,15 @@ CHANGES
 - use the threading capability of Flask app
 - set the number of manager to 1
 - update to the latest version of the python-moondb library
+
+4.5.2-1
+-----
+integrating validtion to send mandatory key names
+
+4.5.3
+-----
+- Removing try catch from all requets to allow raised exception to be passed to http server, to send actual error to client side
+- fixing test cases to assert on the expected exception after removing try-catch
+- allow 404 to be catched from our side instead of flask itself
+- revert the params in the get/post/patch/delete to be by default = None, so that we could catch the param if it was None
+instead of having not found url if the param is mandatory

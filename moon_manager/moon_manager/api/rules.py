@@ -49,17 +49,14 @@ class Rules(Resource):
         }
         :internal_api: get_rules
         """
-        try:
-            data = PolicyManager.get_rules(user_id=user_id,
+
+        data = PolicyManager.get_rules(user_id=user_id,
                                            policy_id=uuid,
                                            rule_id=rule_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
         return {"rules": data}
 
-    @validate_input("post", kwargs_state=[True, False, False], body_state=[True, False, False, False])
+    @validate_input("post", kwargs_state=[True, False, False], body_state={"meta_rule_id": True, "rule": True, "instructions": True})
     @check_auth
     def post(self, uuid=None, rule_id=None, user_id=None):
         """Add a rule to a meta rule
@@ -111,15 +108,12 @@ class Rules(Resource):
         :internal_api: add_rule
         """
         args = request.json
-        try:
-            data = PolicyManager.add_rule(user_id=user_id,
-                                          policy_id=uuid,
-                                          meta_rule_id=args['meta_rule_id'],
-                                          value=args)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.add_rule(user_id=user_id,
+                                      policy_id=uuid,
+                                      meta_rule_id=args['meta_rule_id'],
+                                      value=args)
+
         return {"rules": data}
 
     @validate_input("delete", kwargs_state=[True, True, False])
@@ -133,12 +127,9 @@ class Rules(Resource):
         :return: { "result": true }
         :internal_api: delete_rule
         """
-        try:
-            data = PolicyManager.delete_rule(
-                user_id=user_id, policy_id=uuid, rule_id=rule_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.delete_rule(
+            user_id=user_id, policy_id=uuid, rule_id=rule_id)
+
         return {"result": True}
 

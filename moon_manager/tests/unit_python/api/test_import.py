@@ -6,10 +6,9 @@
 import api.utilities as utilities
 import api.test_unit_models as test_models
 import api.test_policies as test_policies
-import api.test_perimeter as test_perimeter
-import api.meta_data_test as test_categories
+import api.test_meta_data as test_categories
 import api.test_data as test_data
-import api.meta_rules_test as test_meta_rules
+import api.test_meta_rules as test_meta_rules
 import api.test_assignemnt as test_assignments
 import api.test_rules as test_rules
 import api.import_export_utilities as import_export_utilities
@@ -37,11 +36,17 @@ SUBJECTS = [{"subjects": [{"name": "testuser", "description": "description of th
             {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "subjects": [{"name": "testuser", "description": "description of the subject", "extra": {}, "policies": [{"name": "test policy"}]}]}]
 
 
-OBJECTS = [{"objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"policies": [{"name": "test other policy", "genre": "authz", "description": "description", "model": {}, "mandatory": True}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-           {"objects": [{"name": "test object", "description": "new description of the object", "extra": {"test": "test extra"}, "policies": [{"name": "test other policy"}]}]},
-           {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}], "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}]}]
+OBJECTS = [
+    {"objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"policies": [{"name": "test other policy", "genre": "authz", "description": "description", "model": {}, "mandatory": True}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
+    {"objects": [{"name": "test object", "description": "new description of the object", "extra": {"test": "test extra"},
+                 "policies": [{"name": "test other policy"}]}]},
+    {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}],
+        "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}]},
+]
 
 
 ACTIONS = [{"actions": [{"name": "test action", "description": "description of the action", "extra": {}, "policies": []}]},
@@ -100,7 +105,8 @@ META_RULES = [{"meta_rules" :[{"name": "bad meta rule", "description": "not vali
               {"meta_rules": [{"name": "bad meta rule", "description": "not valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "not valid category"}]}]},
               {"meta_rules": [{"name": "good meta rule", "description": "valid meta rule", "subject_categories": [{"name": "test subject categories"}], "object_categories": [{"name": "test object categories"}], "action_categories": [{"name": "test action categories"}]}]}]
 
-PRE_ASSIGNMENTS = {"models": [{"name": "test model", "description": "", "meta_rules": [{"name" : "good meta rule"}]}],
+
+PRE_ASSIGNMENTS = {"models": [{"name": "test model", "description": "", "meta_rules": [{"name": "good meta rule"}]}],
                    "policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {"name" : "test model"}, "mandatory": True}],
                    "subject_categories": [{"name": "test subject categories", "description": "subject category description"}],
                    "object_categories": [{"name": "test object categories", "description": "object category description"}],
@@ -168,8 +174,8 @@ def test_import_policies():
         try:
             data = utilities.get_json(req.data)
             assert data == "Import ok !"
-        except Exception as e:
-            assert counter == 2 # this is an expected failure
+        except Exception:
+            assert counter == 2  # this is an expected failure
             continue
 
         req, policies = test_policies.get_policies(client)
@@ -189,7 +195,7 @@ def test_import_policies():
 
 def test_import_subject_object_action():
     client = utilities.register_client()
-    type_elements =["object", "action"]
+    type_elements = ["object", "action"]
 
     for type_element in type_elements:
         import_export_utilities.clean_all(client)
@@ -197,21 +203,18 @@ def test_import_subject_object_action():
         # set the getters and the comparison values
         if type_element == "subject":
             elements = SUBJECTS
-            get_method = test_perimeter.get_subjects
-            clean_method= import_export_utilities.clean_subjects
+            clean_method = import_export_utilities.clean_subjects
             name = "testuser"
             key_extra = "email"
             value_extra = "new-email@test.com"
         elif type_element == "object":
             elements = OBJECTS
-            get_method = test_perimeter.get_objects
             clean_method = import_export_utilities.clean_objects
             name = "test object"
             key_extra = "test"
             value_extra = "test extra"
         else:
             elements = ACTIONS
-            get_method = test_perimeter.get_actions
             clean_method = import_export_utilities.clean_actions
             name = "test action"
             key_extra = "test"
@@ -219,7 +222,6 @@ def test_import_subject_object_action():
 
         for element in elements:
             counter = counter + 1
-            print("counter {}".format(counter))
             if counter == 2 or counter == 4:
                 clean_method(client)
 
@@ -231,28 +233,23 @@ def test_import_subject_object_action():
             try:
                 data = utilities.get_json(req.data)
             except Exception as e:
-                print(str(e))
                 assert False
                 #assert counter < 2  #  this is an expected failure
                 #continue
 
             assert data == "Import ok !"
-            get_elements = get_method(client)
-            get_elements = get_elements[1][type_element + "s"]
+            get_elements = utilities.get_json(client.get("/"+type_element + "s").data)
+            get_elements = get_elements[type_element + "s"]
 
             assert len(list(get_elements.keys())) == 1
             values = list(get_elements.values())
             assert values[0]["name"] == name
-            print(values[0])
             if counter == 2 or counter == 4:
                 assert values[0]["description"] == "description of the " + type_element
-                print(values[0])
                 #assert not values[0]["extra"]
             if counter == 3:
-                #TODO uncomment this if update shall be done through import !
-                #assert values[0]["description"] == "new description of the " + type_element
-                #assert values[0]["extra"][key_extra] == value_extra
-                assert True
+                assert values[0]["description"] == "new description of the " + type_element
+                assert values[0]["extra"][key_extra] == value_extra
 
             # assert len(values[0]["policy_list"]) == 1
     import_export_utilities.clean_all(client)
@@ -309,10 +306,9 @@ def test_import_meta_rules():
             assert data == "Import ok !"
             assert req.status_code == 200
 
-        req ,meta_rules= test_meta_rules.get_meta_rules(client)
+        req, meta_rules = test_meta_rules.get_meta_rules(client)
         meta_rules = meta_rules["meta_rules"]
         key = list(meta_rules.keys())[0]
-        print(meta_rules)
         assert isinstance(meta_rules,dict)
         assert meta_rules[key]["name"] == "good meta rule"
         assert meta_rules[key]["description"] == "valid meta rule"
@@ -367,8 +363,6 @@ def test_import_subject_object_action_assignments():
                 assert req.status_code == 500
                 continue
             else:
-                print(data)
-                print(req)
                 assert data == "Import ok !"
                 assert req.status_code == 200
                 req, policies = test_policies.get_policies(client)
@@ -398,16 +392,13 @@ def test_import_rules():
 
         req, rules = test_rules.test_get_rules()
         rules = rules["rules"]
-        policy_key = rules["policy_id"]
         rules = rules["rules"]
-        print(rules)
         assert len(rules) == 1
         rules = rules[0]
-        assert rules["enabled"] == True
+        assert rules["enabled"]
         assert rules["instructions"]["decision"] == "grant"
 
         req, meta_rules = test_meta_rules.get_meta_rules(client)
-        print(meta_rules)
         assert meta_rules["meta_rules"][list(meta_rules["meta_rules"].keys())[0]]["name"] == "good meta rule"
 
 
@@ -439,7 +430,6 @@ def test_import_subject_object_action_data():
             if counter == 0 or counter == 1:
                 assert req.status_code == 500
                 continue
-            print(counter)
             assert req.status_code == 200
             data = utilities.get_json(req.data)
             assert data == "Import ok !"
@@ -448,29 +438,19 @@ def test_import_subject_object_action_data():
             policies = policies["policies"]
             req, categories = get_categories(client)
             categories = categories[type_element + "_categories"]
-            print("categories {}".format(categories))
-            print("policies {}".format(policies))
-            print("data in import {}".format(element))
             case_tested = False
             for policy_key in policies.keys():
-                print("policy in test {}".format(policy_key))
                 policy = policies[policy_key]
-                print("policy {}".format(policy))
                 for category_key in categories:
-                    print("category in test {}".format(category_key))
-                    print("looking for {} data with policy {} and category {}".format(type_element, policy_key,category_key))
                     req, get_elements = get_method(client, policy_id=policy_key, category_id=category_key)
                     if len(get_elements[type_element+"_data"]) == 0:
                         continue
 
-                    # do this because the backend gives an element with empty data if the policy_key, category_key couple does not have any data...
+                    # do this because the backend gives an element with empty data if the policy_key,
+                    # category_key couple does not have any data...
                     get_elements = get_elements[type_element+"_data"]
-                    print("test")
                     if len(get_elements[0]["data"]) == 0:
-                        print("test2")
                         continue
-
-                    print("get_elements {}".format(get_elements))
 
                     if policy["name"] == "test policy":
                         assert len(get_elements) == 1
@@ -481,7 +461,6 @@ def test_import_subject_object_action_data():
                             el = el["data"][list(el["data"].keys())[0]]
                             if "value" in el:
                                 el = el["value"]
-                            print(el)
                             assert el["name"] == "one valid " + type_element + " data"
                         if counter == 3:
                             assert len(el["data"].keys()) == 2
@@ -503,7 +482,6 @@ def test_import_subject_object_action_data():
                             assert isinstance(el["data"], dict)
                             assert len(el["data"].keys()) == 1
                             el = el["data"][list(el["data"].keys())[0]]
-                            print(el)
                             if "value" in el:
                                 el = el["value"]
                             assert el["name"] == "valid " + type_element + " data"

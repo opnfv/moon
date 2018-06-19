@@ -120,7 +120,7 @@ def validate_data(data):
         raise ValueError('Value is Not String or Container or Dictionary')
 
 
-def validate_input(type, args_state=[], kwargs_state=[], body_state=[]):
+def validate_input(type='get', args_state=[], kwargs_state=[], body_state=[]):
     """
     this fucntion works only on List or tuple or dictionary of Strings ,and String direct
     Check if input of function is Valid or not, Valid if not has spaces and values is not None or empty.

@@ -112,11 +112,12 @@ class CustomApi(Api):
     @staticmethod
     def handle_error(e):
         try:
-            error_message = dumps({'message': str(e), "code": getattr(e, "code", 500)})
+            error_message = dumps({"result": False, 'message': str(e), "code": getattr(e, "code", 500)})
+            logger.error(e, exc_info=True)
             logger.error(error_message)
             return make_response(error_message, getattr(e, "code", 500))
         except Exception as e2:  # unhandled exception in the api...
-            logger.error(str(e2))
+            logger.exception(str(e2))
             return make_response(error_message, 500)
 
 
@@ -132,7 +133,7 @@ class HTTPServer(Server):
         self.manager_port = conf["components/manager"].get("port", 80)
         # TODO : specify only few urls instead of *
         CORS(self.app)
-        self.api = CustomApi(self.app)
+        self.api = CustomApi(self.app, catch_all_404s=True)
         self.__set_route()
 
     def __set_route(self):

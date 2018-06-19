@@ -1,0 +1,41 @@
+<div ng-controller="moon.pdp.controller as ctrl">
+  <div class="clearfix list-group">
+    <div class="pull-right">
+      <input type="search" class="form-control filter" placeholder="Filter" ng-model="filterText">
+      <button type="button" class="btn btn-default" ng-click="ctrl.createPdp()">
+        <span class="fa fa-plus"></span>
+        <translate>Create PDP</translate>
+      </button>
+    </div>
+  </div>
+  <div class="list-group">
+    <div ng-repeat="pdp in ctrl.model.pdps | orderBy:'name' | filter:filterText " class="list-group-item">
+      <h3 class="list-group-item-heading inline">{$ pdp.name $}</h3>
+      <div class="pull-right">
+        <button type="button" class="fa fa-trash" ng-click="ctrl.removePdp(pdp)" title="{$ 'Remove PDP' | translate $}"></button>
+        <button type="button" class="fa fa-edit" ng-click="ctrl.updatePdp(pdp)" title="{$ 'Edit PDP' | translate $}"></button>
+      </div>
+      <p class="list-group-item-text">{$ pdp.description $}</p>
+      <h4 class="list-group-item-text">
+        <translate>Project: {$ pdp.project ? pdp.project.name : 'none' $}</translate>
+        <button type="button" class="fa fa-edit" ng-click="ctrl.changeProject(pdp)" title="{$ 'Change project' | translate $}"></button>
+      </h4>
+
+      <details class="list-group-item-text">
+        <summary>
+          <h4 class="inline">{$ pdp.security_pipeline.length $}
+            <translate>policy(ies)</translate>
+          </h4>
+          <button type="button" class="fa fa-plus " ng-click="ctrl.addPolicy(pdp)" title="{$ 'Add Policy' | translate $}"></button>
+        </summary>
+        <div class="list-group">
+          <div ng-repeat="policy in pdp.security_pipeline | orderBy:'name'" class="list-group-item">
+            <h3 class="list-group-item-heading inline">{$ policy.name $}</h3>
+            <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removePolicyFromPdp(pdp, policy)" title="{$ 'Remove Policy' | translate $}"></button>
+            <p class="list-group-item-text">{$ policy.description $}</p>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,143 @@
+<div ng-controller="moon.model.controller as ctrl">
+  <div ng-if="ctrl.model.orphanMetaRules.length  
+            || ctrl.model.orphanSubjectCategories.length
+            || ctrl.model.orphanActionCategories.length
+            || ctrl.model.orphanObjectCategories.length" class="alert alert-dismissable alert-warning">
+    <button type="button" class="close" data-dismiss="alert" ng-click="ctrl.showOrphan=false">×</button>
+    <h4 translate>Warning!</h4>
+    <p translate>
+      Some metarules or categories are orphan, please check them and delete them if necessary. 
+      <a href="" ng-click="ctrl.showOrphan=true" ng-show="!ctrl.showOrphan" translate>Show orphans</a>
+      <a href="" ng-click="ctrl.showOrphan=false" ng-show="ctrl.showOrphan"  translate>Hide orphans</a>
+    </p>
+  </div>
+
+  <div class="row" ng-show="ctrl.showOrphan">
+    <div class="list-group col-lg-3" ng-if="ctrl.model.orphanMetaRules.length">
+      <h3 class="list-group-item active" translate>Orphan Meta rules</h3>
+      <div ng-repeat="metaRule in ctrl.model.orphanMetaRules | orderBy:'name'" class="list-group-item">
+        <h4 class="list-group-item-heading inline">{$ metaRule.name $}</h4>
+        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeMetaRule(metaRule)" title="{$ 'Remove Meta rule' | translate $}"></button>
+        <p class="list-group-item-text">{$ metaRule.description $}</p>
+      </div>
+    </div>
+
+    <div class="list-group col-lg-3" ng-if="ctrl.model.orphanSubjectCategories.length">
+      <h3 class="list-group-item active" translate>Orphan Subject categories</h3>
+      <div ng-repeat="subject in ctrl.model.orphanSubjectCategories | orderBy:'name'" class="list-group-item">
+        <h4 class="list-group-item-heading inline">{$ subject.name $}</h4>
+        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategory('subject', subject)" title="{$ 'Remove Subject category' | translate $}"></button>
+        <p class="list-group-item-text">{$ subject.description $}</p>
+      </div>
+    </div>
+
+    <div class="list-group col-lg-3" ng-if="ctrl.model.orphanObjectCategories.length">
+      <h3 class="list-group-item active" translate>Orphan Object categories</h3>
+      <div ng-repeat="object in ctrl.model.orphanObjectCategories | orderBy:'name'" class="list-group-item">
+        <h4 class="list-group-item-heading inline">{$ object.name $}</h4>
+        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategory('object', object)" title="{$ 'Remove Object category' | translate $}"></button>
+        <p class="list-group-item-text">{$ object.description $}</p>
+      </div>
+    </div>
+
+    <div class="list-group col-lg-3" ng-if="ctrl.model.orphanActionCategories.length">
+      <h3 class="list-group-item active" translate>Orphan Action categories</h3>
+      <div ng-repeat="action in ctrl.model.orphanActionCategories | orderBy:'name'" class="list-group-item">
+        <h4 class="list-group-item-heading inline">{$ action.name $}</h4>
+        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategory('action', action)" title="{$ 'Remove Action category' | translate $}"></button>
+        <p class="list-group-item-text">{$ action.description $}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="clearfix list-group">
+    <div class="pull-right">
+      <input type="search" class="form-control filter" placeholder="Filter" ng-model="filterText">
+      <button type="button" class="btn btn-default" ng-click="ctrl.createModel()">
+        <span class="fa fa-plus"></span>
+        <translate>Create Model</translate>
+      </button>
+      <label for="file" class="label-file btn btn-primary">
+        <span class="fa fa-upload"></span>
+        <translate>Import</translate>
+      </label>
+      <input id="file" class="input-file" type="file" on-read-file="ctrl.importData(contents)" accept="application/json,.json"/>
+      <!--button type="button" class="btn btn-primary" ng-click="ctrl.createModel()">
+        <span class="fa fa-upload"></span>
+        <translate>Import</translate>
+      </button-->
+    </div>
+  </div>
+
+
+  <div class="list-group">
+    <div ng-repeat="model in ctrl.model.models | orderBy:'name' | filter:filterText " class="list-group-item">
+      <h3 class="list-group-item-heading inline">{$ model.name $}</h3>
+      <div class="pull-right">
+        <button type="button" class="fa fa-trash" ng-click="ctrl.removeModel(model)" title="{$ 'Remove Model' | translate $}"></button>
+        <button type="button" class="fa fa-edit" ng-click="ctrl.updateModel(model)" title="{$ 'Edit Model' | translate $}"></button>
+      </div>
+      <p class="list-group-item-text">{$ model.description $}</p>
+      <details class="list-group-item-text">
+        <summary>
+          <h4 class="inline">{$ model.meta_rules.length $}
+            <translate>meta rule(s)</translate>
+          </h4>
+          <button type="button" class="fa fa-plus " ng-click="ctrl.addMetaRule(model)" title="{$ 'Add Meta Rule' | translate $}"></button>
+        </summary>
+        <div class="list-group">
+          <div ng-repeat="metaRule in model.meta_rules | orderBy:'name'" class="list-group-item">
+            <h3 class="list-group-item-heading inline">{$ metaRule.name $}</h3>
+            <div class="pull-right">
+              <button type="button" class="fa fa-trash" ng-click="ctrl.removeMetaRuleFromModel(model, metaRule)" title="{$ 'Remove Meta Rule' | translate $}"></button>
+              <button type="button" class="fa fa-edit" ng-click="ctrl.updateMetaRule(metaRule)" title="{$ 'Edit Meta Rule' | translate $}"></button>
+            </div>
+            <p class="list-group-item-text">{$ metaRule.description $}</p>
+            <p class="list-group-item-text">
+              <table class="table categories">
+                <thead>
+                  <tr>
+                    <th>
+                      <span translate>Subjects</span>
+                      <button type="button" class="fa fa-plus pull-right" ng-click="ctrl.addCategory('subject', metaRule)" title="{$ 'Add Subject' | translate $}"></button>
+                    </th>
+                    <th>
+                      <span translate>Objects</span>
+                      <button type="button" class="fa fa-plus pull-right" ng-click="ctrl.addCategory('object', metaRule)" title="{$ 'Add Object' | translate $}"></button>
+                    </th>
+                    <th>
+                      <span translate>Actions</span>
+                      <button type="button" class="fa fa-plus pull-right" ng-click="ctrl.addCategory('action', metaRule)" title="{$ 'Add Action' | translate $}"></button>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <p ng-repeat="category in metaRule.subject_categories">
+                        <span>{$ category.name $}</span>
+                        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('subject', metaRule, category)" title="{$ 'Remove Subject' | translate $}"></button>
+                      </p>
+                    </td>
+                    <td>
+                      <p ng-repeat="category in metaRule.object_categories">
+                        <span>{$ category.name $}</span>
+                        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('object', metaRule, category)" title="{$ 'Remove Object' | translate $}"></button>
+                      </p>
+                    </td>
+                    <td>
+                      <p ng-repeat="category in metaRule.action_categories">
+                        <span>{$ category.name $}</span>
+                        <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('action', metaRule, category)" title="{$ 'Remove Action' | translate $}"></button>
+                      </p>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </p>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>

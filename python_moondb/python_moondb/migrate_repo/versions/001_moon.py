@@ -3,7 +3,19 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
+import json
 import sqlalchemy as sql
+from sqlalchemy import types as sql_types
+
+class JsonBlob(sql_types.TypeDecorator):
+
+    impl = sql.Text
+
+    def process_bind_param(self, value, dialect):
+        return json.dumps(value)
+
+    def process_result_value(self, value, dialect):
+        return json.loads(value)
 
 
 def upgrade(migrate_engine):
@@ -16,7 +28,7 @@ def upgrade(migrate_engine):
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
         sql.Column('keystone_project_id', sql.String(64), nullable=True, default=""),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', 'keystone_project_id', name='unique_constraint_models'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -28,7 +40,7 @@ def upgrade(migrate_engine):
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
         sql.Column('model_id', sql.String(64), nullable=True, default=""),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', 'model_id', name='unique_constraint_models'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -39,7 +51,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', name='unique_constraint_models'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -86,7 +98,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', name='unique_constraint_subjects'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -97,7 +109,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', name='unique_constraint_objects'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -108,7 +120,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', name='unique_constraint_actions'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
@@ -119,7 +131,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_subject_data'),
@@ -132,7 +144,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("object_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_object_data'),
@@ -145,7 +157,7 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("action_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_action_data'),
@@ -157,7 +169,7 @@ def upgrade(migrate_engine):
         'subject_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('assignments', sql.Text(), nullable=True),
+        sql.Column('assignments', sql.String(256), nullable=True),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('subject_id', sql.ForeignKey("subjects.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
@@ -170,7 +182,7 @@ def upgrade(migrate_engine):
         'object_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('assignments', sql.Text(), nullable=True),
+        sql.Column('assignments', sql.String(256), nullable=True),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('object_id', sql.ForeignKey("objects.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("object_categories.id"), nullable=False),
@@ -183,7 +195,7 @@ def upgrade(migrate_engine):
         'action_assignments',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('assignments', sql.Text(), nullable=True),
+        sql.Column('assignments', sql.String(256), nullable=True),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('action_id', sql.ForeignKey("actions.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("action_categories.id"), nullable=False),
@@ -197,12 +209,12 @@ def upgrade(migrate_engine):
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
         sql.Column('name', sql.String(256), nullable=False),
-        sql.Column('subject_categories', sql.Text(), nullable=False),
-        sql.Column('object_categories', sql.Text(), nullable=False),
-        sql.Column('action_categories', sql.Text(), nullable=False),
-        sql.Column('value', sql.Text(), nullable=True),
+        sql.Column('subject_categories', JsonBlob(), nullable=False),
+        sql.Column('object_categories', JsonBlob(), nullable=False),
+        sql.Column('action_categories', JsonBlob(), nullable=False),
+        sql.Column('value', JsonBlob(), nullable=True),
         sql.UniqueConstraint('name', name='unique_constraint_meta_rule_name'),
-        sql.UniqueConstraint('subject_categories', 'object_categories', 'action_categories', name='unique_constraint_meta_rule_def'),
+        # sql.UniqueConstraint('subject_categories', 'object_categories', 'action_categories', name='unique_constraint_meta_rule_def'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     meta_rules_table.create(migrate_engine, checkfirst=True)
@@ -211,10 +223,9 @@ def upgrade(migrate_engine):
         'rules',
         meta,
         sql.Column('id', sql.String(64), primary_key=True),
-        sql.Column('rule', sql.Text(), nullable=True),
+        sql.Column('rule', JsonBlob(), nullable=True),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('meta_rule_id', sql.ForeignKey("meta_rules.id"), nullable=False),
-        sql.UniqueConstraint('rule', 'policy_id', 'meta_rule_id', name='unique_constraint_rule'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     rules_table.create(migrate_engine, checkfirst=True)

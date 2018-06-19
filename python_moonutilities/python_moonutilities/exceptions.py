@@ -197,6 +197,11 @@ class AdminRule(AdminException):
     code = 400
     title = 'Rule Exception'
 
+class CategoryNameInvalid(AdminMetaData):
+    description = _("The given category name is invalid.")
+    code = 409
+    title = 'Category Name Invalid'
+    logger = "ERROR"
 
 class SubjectCategoryNameExisting(AdminMetaData):
     description = _("The given subject category name already exists.")
@@ -260,6 +265,12 @@ class ActionCategoryUnknown(AdminMetaData):
     title = 'Action Category Unknown'
     logger = "ERROR"
 
+
+class PerimeterNameInvalid(AdminPerimeter):
+    description = _("The given name is not valid.")
+    code = 400
+    title = 'Perimeter Name is Invalid'
+    logger = "ERROR"
 
 class SubjectUnknown(AdminPerimeter):
     description = _("The given subject is unknown.")
@@ -669,13 +680,6 @@ class DeleteCategoryWithData(MoonError):
 
 class DeleteCategoryWithMetaRule(MoonError):
     description = _("Cannot delete category with meta rule")
-    code = 400
-    title = 'Category Error'
-    logger = "Error"
-
-
-class DeleteCategoryWithData(MoonError):
-    description = _("Cannot delete category with data")
     code = 400
     title = 'Category Error'
     logger = "Error"

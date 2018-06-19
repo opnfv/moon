@@ -45,16 +45,12 @@ class SubjectCategories(Resource):
         }
         :internal_api: get_subject_categories
         """
-        try:
-            data = ModelManager.get_subject_categories(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.get_subject_categories(
+            user_id=user_id, category_id=category_id)
+
         return {"subject_categories": data}
 
-    @validate_input("post",body_state=[True,False])
+    @validate_input("post",body_state={"name":True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a subject category.
@@ -73,13 +69,9 @@ class SubjectCategories(Resource):
         }
         :internal_api: add_subject_category
         """
-        try:
-            data = ModelManager.add_subject_category(
-                user_id=user_id, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.add_subject_category(
+            user_id=user_id, value=request.json)
+
         return {"subject_categories": data}
 
     @validate_input("delete",kwargs_state=[True,False])
@@ -95,13 +87,10 @@ class SubjectCategories(Resource):
         }
         :internal_api: delete_subject_category
         """
-        try:
-            data = ModelManager.delete_subject_category(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.delete_subject_category(
+            user_id=user_id, category_id=category_id)
+
         return {"result": True}
 
 
@@ -131,16 +120,12 @@ class ObjectCategories(Resource):
         }
         :internal_api: get_object_categories
         """
-        try:
-            data = ModelManager.get_object_categories(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.get_object_categories(
+            user_id=user_id, category_id=category_id)
+
         return {"object_categories": data}
 
-    @validate_input("post", body_state=[True, False])
+    @validate_input("post", body_state={"name":True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a object category.
@@ -159,13 +144,10 @@ class ObjectCategories(Resource):
         }
         :internal_api: add_object_category
         """
-        try:
-            data = ModelManager.add_object_category(
-                user_id=user_id, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.add_object_category(
+            user_id=user_id, value=request.json)
+
         return {"object_categories": data}
 
     @validate_input("delete", kwargs_state=[True, False])
@@ -181,13 +163,10 @@ class ObjectCategories(Resource):
         }
         :internal_api: delete_object_category
         """
-        try:
-            data = ModelManager.delete_object_category(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.delete_object_category(
+            user_id=user_id, category_id=category_id)
+
         return {"result": True}
 
 
@@ -217,16 +196,13 @@ class ActionCategories(Resource):
         }
         :internal_api: get_action_categories
         """
-        try:
-            data = ModelManager.get_action_categories(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.get_action_categories(
+            user_id=user_id, category_id=category_id)
+
         return {"action_categories": data}
 
-    @validate_input("post", body_state=[True, False])
+    @validate_input("post", body_state={"name":True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update an action category.
@@ -245,13 +221,10 @@ class ActionCategories(Resource):
         }
         :internal_api: add_action_category
         """
-        try:
-            data = ModelManager.add_action_category(
-                user_id=user_id, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.add_action_category(
+            user_id=user_id, value=request.json)
+
         return {"action_categories": data}
 
     @validate_input("delete", kwargs_state=[True, False])
@@ -267,11 +240,7 @@ class ActionCategories(Resource):
         }
         :internal_api: delete_action_category
         """
-        try:
-            data = ModelManager.delete_action_category(
-                user_id=user_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.delete_action_category(
+            user_id=user_id, category_id=category_id)
+
         return {"result": True}

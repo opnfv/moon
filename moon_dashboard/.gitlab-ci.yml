@@ -1,0 +1,64 @@
+stages:
+  - lint
+  - build
+  - test
+  - publish
+
+variables:
+  http_proxy: "http://devwatt-proxy.si.fr.intraorange:8080"
+  https_proxy: "http://devwatt-proxy.si.fr.intraorange:8080"
+  no_proxy: dind, gitlab.forge.orange-labs.fr
+  DOCKER_DRIVER: overlay
+  DOCKER_HOST: tcp://dind:2375
+  CONTAINER_RELEASE_IMAGE: moonplatform/$CI_PROJECT_NAME
+  CONTAINER_TAG: dev
+  DOCKER_VERSION: "17.12"
+
+services:
+    - name: dockerproxy-iva.si.francetelecom.fr/docker:$DOCKER_VERSION-dind
+      alias: dind
+image: dockerproxy-iva.si.francetelecom.fr/docker:$DOCKER_VERSION
+
+lint-job:
+  image: dockerfactory-iva.si.francetelecom.fr/docker/orange-dockerfile-lint:0.2.7-alpine3.6-2
+  tags:
+    - rsc
+    - docker
+    - shared
+  stage: lint
+  script:
+    - dockerfile_lint -f Dockerfile
+
+build-job:
+  stage: build
+  tags:
+    - rsc
+    - docker-privileged
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker build -t $CONTAINER_RELEASE_IMAGE:$CONTAINER_TAG --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy .
+    - docker push $CONTAINER_RELEASE_IMAGE:$CONTAINER_TAG
+
+test-job:
+  stage: test
+  tags:
+    - rsc
+    - docker-privileged
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - docker run -e http_proxy=$http_proxy -e https_proxy=$http_proxy $CONTAINER_RELEASE_IMAGE:$CONTAINER_TAG curl http://localhost:8000
+
+publish-job:
+  stage: publish
+  tags:
+    - rsc
+    - docker-privileged
+  script:
+    - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+    - FINAL_TAG=$(grep version setup.cfg | cut -d "=" -f 2)
+    - echo FINAL_TAG=$FINAL_TAG
+    - docker pull $CONTAINER_RELEASE_IMAGE:$CONTAINER_TAG
+    - docker tag $CONTAINER_RELEASE_IMAGE:$CONTAINER_TAG $CONTAINER_RELEASE_IMAGE:$FINAL_TAG
+    - docker push $CONTAINER_RELEASE_IMAGE:$FINAL_TAG
+  only:
+    - master

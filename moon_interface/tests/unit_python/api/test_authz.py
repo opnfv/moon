@@ -23,7 +23,8 @@ def test_authz_true(context):
     assert "result" in data
     assert data['result'] is True
 
-def test_authz_False(context):
+
+def test_authz_false(context):
     import moon_interface.server
     server = moon_interface.server.create_server()
     client = server.app.test_client()
@@ -48,7 +49,7 @@ def test_authz_effect_unset(context, set_consul_and_db):
 
     set_consul_and_db.register_uri(
         'POST', 'http://127.0.0.1:8081/authz',
-        content = conftest.get_pickled_context_invalid()
+        content=conftest.get_pickled_context_invalid()
     )
 
     req = client.get("/authz/{p_id}/{s_id}/{o_id}/{a_id}".format(
@@ -62,6 +63,7 @@ def test_authz_effect_unset(context, set_consul_and_db):
     assert data
     assert "result" in data
     assert data['result'] is False
+
 
 def test_authz_invalid_ip(context, set_consul_and_db):
     import moon_interface.server

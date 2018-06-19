@@ -4,8 +4,9 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import json
-import api.utilities as utilities
 from uuid import uuid4
+import api.utilities as utilities
+from helpers import model_helper
 
 
 def get_policies(client):
@@ -15,10 +16,12 @@ def get_policies(client):
 
 
 def add_policies(client, name):
+    req = model_helper.add_model(model_id="mls_model_id"+uuid4().hex)
+    model_id = list(req.keys())[0]
     data = {
         "name": name,
         "description": "description of {}".format(name),
-        "model_id": "modelId",
+        "model_id": model_id,
         "genre": "genre"
     }
     req = client.post("/policies", data=json.dumps(data),
@@ -30,9 +33,8 @@ def add_policies(client, name):
 def delete_policies(client, name):
     request, policies = get_policies(client)
     for key, value in policies['policies'].items():
-        if value['name'] == name:
-            req = client.delete("/policies/{}".format(key))
-            break
+        req = client.delete("/policies/{}".format(key))
+        break
     return req
 
 
@@ -50,8 +52,8 @@ def test_get_policies():
 
 
 def test_add_policies():
-    client = utilities.register_client()
     policy_name = "testuser" + uuid4().hex
+    client = utilities.register_client()
     req, policies = add_policies(client, policy_name)
     assert req.status_code == 200
     assert isinstance(policies, dict)
@@ -59,8 +61,6 @@ def test_add_policies():
     assert "policies" in policies
     assert value['name'] == policy_name
     assert value["description"] == "description of {}".format(policy_name)
-    assert value["model_id"] == "modelId"
-    assert value["genre"] == "genre"
 
 
 def test_delete_policies():
@@ -72,5 +72,6 @@ def test_delete_policies():
 def test_delete_policies_without_id():
     client = utilities.register_client()
     req = delete_policies_without_id(client)
-    assert req.status_code == 500
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == '400: Policy Unknown'
 

@@ -3,13 +3,12 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
-import api.utilities as utilities
 import api.test_unit_models as test_models
 import api.test_policies as test_policies
 import api.test_perimeter as test_perimeter
-import api.meta_data_test as test_categories
+import api.test_meta_data as test_categories
 import api.test_data as test_data
-import api.meta_rules_test as test_meta_rules
+import api.test_meta_rules as test_meta_rules
 import api.test_assignemnt as test_assignments
 import api.test_rules as test_rules
 import logging
@@ -21,7 +20,6 @@ def clean_models(client):
     req, models = test_models.get_models(client)
     for key in models["models"]:
         client.delete("/models/{}".format(key))
-        print("deleted model with id {}".format(key))
 
 
 def clean_policies(client):
@@ -29,7 +27,6 @@ def clean_policies(client):
     for key in policies["policies"]:
         req = client.delete("/policies/{}".format(key))
         assert req.status_code == 200
-        print("deleted policy with id {}".format(key))
 
 
 def clean_subjects(client):
@@ -40,9 +37,8 @@ def clean_subjects(client):
         policy_keys = subject["policy_list"]
         logger.info("subjects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
-            client.delete("/policies/{}/subjects/{}".format(policy_key,key))
+            client.delete("/policies/{}/subjects/{}".format(policy_key, key))
         client.delete("/subjects/{}".format(key))
-        print("deleted subject with id {}".format(key))
 
 
 def clean_objects(client):
@@ -53,15 +49,13 @@ def clean_objects(client):
         policy_keys = object_["policy_list"]
         logger.info("objects policy_keys {}".format(policy_keys))
         for policy_key in policy_keys:
-            print("/policies/{}/objects/{}".format(policy_key, key))
-            req = client.delete("/policies/{}/objects/{}".format(policy_key, key))
+            client.delete("/policies/{}/objects/{}".format(policy_key, key))
         client.delete("/objects/{}".format(key))
-        print("deleted object with id {}".format(key))
 
 
 def clean_actions(client):
     actions = test_perimeter.get_actions(client)
-    logger.info("objects {}".format(actions))
+    logger.info("actions {}".format(actions))
     for key in actions[1]["actions"]:
         action = actions[1]["actions"][key]
         policy_keys = action["policy_list"]
@@ -69,7 +63,6 @@ def clean_actions(client):
         for policy_key in policy_keys:
             client.delete("/policies/{}/actions/{}".format(policy_key, key))
         client.delete("/actions/{}".format(key))
-        print("deleted action with id {}".format(key))
 
 
 def clean_subject_categories(client):
@@ -95,10 +88,12 @@ def clean_action_categories(client):
 
 def clean_subject_data(client):
     req, policies = test_policies.get_policies(client)
+    logger.info("clean_subject_data on {}".format(policies))
     for policy_key in policies["policies"]:
         req, data = test_data.get_subject_data(client, policy_id=policy_key)
-        print(data)
+        logger.info("============= data {}".format(data))
         for key in data["subject_data"]:
+            logger.info("============= Deleting {}/{}".format(policy_key, key))
             client.delete("/policies/{}/subject_data/{}".format(policy_key, key))
 
 
@@ -106,7 +101,6 @@ def clean_object_data(client):
     req, policies = test_policies.get_policies(client)
     for policy_key in policies["policies"]:
         req, data = test_data.get_object_data(client, policy_id=policy_key)
-        print(data)
         for key in data["object_data"]:
             client.delete("/policies/{}/object_data/{}".format(policy_key, key))
 
@@ -123,7 +117,8 @@ def clean_meta_rule(client):
     req, meta_rules = test_meta_rules.get_meta_rules(client)
     meta_rules = meta_rules["meta_rules"]
     for meta_rule_key in meta_rules:
-        print(meta_rule_key)
+        logger.info("clean_meta_rule.meta_rule_key={}".format(meta_rule_key))
+        logger.info("clean_meta_rule.meta_rule={}".format(meta_rules[meta_rule_key]))
         client.delete("/meta_rules/{}".format(meta_rule_key))
 
 
@@ -136,7 +131,8 @@ def clean_subject_assignments(client):
             cat_key = assignments["subject_assignments"][key]["category_id"]
             data_keys = assignments["subject_assignments"][key]["assignments"]
             for data_key in data_keys:
-                req = client.delete("/policies/{}/subject_assignments/{}/{}/{}".format(policy_key, subject_key, cat_key, data_key))
+                client.delete("/policies/{}/subject_assignments/{}/{}/{}".format(policy_key, subject_key,
+                                                                                 cat_key, data_key))
 
 
 def clean_object_assignments(client):
@@ -148,7 +144,8 @@ def clean_object_assignments(client):
             cat_key = assignments["object_assignments"][key]["category_id"]
             data_keys = assignments["object_assignments"][key]["assignments"]
             for data_key in data_keys:
-                req = client.delete("/policies/{}/object_assignments/{}/{}/{}".format(policy_key, object_key, cat_key, data_key))
+                client.delete("/policies/{}/object_assignments/{}/{}/{}".format(policy_key, object_key,
+                                                                                cat_key, data_key))
 
 
 def clean_action_assignments(client):
@@ -160,14 +157,14 @@ def clean_action_assignments(client):
             cat_key = assignments["action_assignments"][key]["category_id"]
             data_keys = assignments["action_assignments"][key]["assignments"]
             for data_key in data_keys:
-                req = client.delete("/policies/{}/action_assignments/{}/{}/{}".format(policy_key, action_key, cat_key, data_key))
+                client.delete("/policies/{}/action_assignments/{}/{}/{}".format(policy_key, action_key,
+                                                                                cat_key, data_key))
 
 
 def clean_rules(client):
     req, policies = test_policies.get_policies(client)
     for policy_key in policies["policies"]:
         req, rules = test_rules.get_rules(client, policy_key)
-        print(rules)
         rules = rules["rules"]
         rules = rules["rules"]
         for rule_key in rules:
@@ -183,10 +180,6 @@ def clean_all(client):
 
     clean_meta_rule(client)
 
-    clean_subject_categories(client)
-    clean_object_categories(client)
-    clean_action_categories(client)
-
     clean_subject_data(client)
     clean_object_data(client)
     clean_action_data(client)
@@ -194,6 +187,10 @@ def clean_all(client):
     clean_actions(client)
     clean_objects(client)
     clean_subjects(client)
+
+    clean_subject_categories(client)
+    clean_object_categories(client)
+    clean_action_categories(client)
 
     clean_policies(client)
     clean_models(client)

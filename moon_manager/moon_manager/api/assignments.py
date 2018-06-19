@@ -53,17 +53,14 @@ class SubjectAssignments(Resource):
         }
         :internal_api: get_subject_assignments
         """
-        try:
-            data = PolicyManager.get_subject_assignments(
-                user_id=user_id, policy_id=uuid,
-                subject_id=perimeter_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.get_subject_assignments(
+            user_id=user_id, policy_id=uuid,
+            subject_id=perimeter_id, category_id=category_id)
+
         return {"subject_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -89,18 +86,13 @@ class SubjectAssignments(Resource):
         }
         :internal_api: update_subject_assignment
         """
-        try:
-            data_id = request.json.get("data_id")
-            category_id = request.json.get("category_id")
-            perimeter_id = request.json.get("id")
-            data = PolicyManager.add_subject_assignment(
-                user_id=user_id, policy_id=uuid,
-                subject_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data_id = request.json.get("data_id")
+        category_id = request.json.get("category_id")
+        perimeter_id = request.json.get("id")
+        data = PolicyManager.add_subject_assignment(
+            user_id=user_id, policy_id=uuid,
+            subject_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
         return {"subject_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
@@ -120,15 +112,12 @@ class SubjectAssignments(Resource):
         }
         :internal_api: delete_subject_assignment
         """
-        try:
-            data = PolicyManager.delete_subject_assignment(
-                user_id=user_id, policy_id=uuid,
-                subject_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.delete_subject_assignment(
+            user_id=user_id, policy_id=uuid,
+            subject_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+
         return {"result": True}
 
 
@@ -166,17 +155,14 @@ class ObjectAssignments(Resource):
         }
         :internal_api: get_object_assignments
         """
-        try:
-            data = PolicyManager.get_object_assignments(
-                user_id=user_id, policy_id=uuid,
-                object_id=perimeter_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.get_object_assignments(
+            user_id=user_id, policy_id=uuid,
+            object_id=perimeter_id, category_id=category_id)
+
         return {"object_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -202,18 +188,15 @@ class ObjectAssignments(Resource):
         }
         :internal_api: update_object_assignment
         """
-        try:
-            data_id = request.json.get("data_id")
-            category_id = request.json.get("category_id")
-            perimeter_id = request.json.get("id")
-            data = PolicyManager.add_object_assignment(
-                user_id=user_id, policy_id=uuid,
-                object_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data_id = request.json.get("data_id")
+        category_id = request.json.get("category_id")
+        perimeter_id = request.json.get("id")
+        data = PolicyManager.add_object_assignment(
+            user_id=user_id, policy_id=uuid,
+            object_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+
         return {"object_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
@@ -233,15 +216,11 @@ class ObjectAssignments(Resource):
         }
         :internal_api: delete_object_assignment
         """
-        try:
-            data = PolicyManager.delete_object_assignment(
-                user_id=user_id, policy_id=uuid,
-                object_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.delete_object_assignment(
+            user_id=user_id, policy_id=uuid,
+            object_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+
         return {"result": True}
 
 
@@ -279,17 +258,13 @@ class ActionAssignments(Resource):
         }
         :internal_api: get_action_assignments
         """
-        try:
-            data = PolicyManager.get_action_assignments(
-                user_id=user_id, policy_id=uuid,
-                action_id=perimeter_id, category_id=category_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.get_action_assignments(
+            user_id=user_id, policy_id=uuid,
+            action_id=perimeter_id, category_id=category_id)
+
         return {"action_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state=[True, True, True])
+    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
     @check_auth
     def post(self, uuid, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
@@ -315,18 +290,15 @@ class ActionAssignments(Resource):
         }
         :internal_api: update_action_assignment
         """
-        try:
-            data_id = request.json.get("data_id")
-            category_id = request.json.get("category_id")
-            perimeter_id = request.json.get("id")
-            data = PolicyManager.add_action_assignment(
-                user_id=user_id, policy_id=uuid,
-                action_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data_id = request.json.get("data_id")
+        category_id = request.json.get("category_id")
+        perimeter_id = request.json.get("id")
+        data = PolicyManager.add_action_assignment(
+            user_id=user_id, policy_id=uuid,
+            action_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+
         return {"action_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
@@ -346,13 +318,10 @@ class ActionAssignments(Resource):
         }
         :internal_api: delete_action_assignment
         """
-        try:
-            data = PolicyManager.delete_action_assignment(
-                user_id=user_id, policy_id=uuid,
-                action_id=perimeter_id, category_id=category_id,
-                data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = PolicyManager.delete_action_assignment(
+            user_id=user_id, policy_id=uuid,
+            action_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+
         return {"result": True}

@@ -51,16 +51,13 @@ class MetaRules(Resource):
         }
         :internal_api: get_meta_rules
         """
-        try:
-            data = ModelManager.get_meta_rules(
-                user_id=user_id, meta_rule_id=meta_rule_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.get_meta_rules(
+            user_id=user_id, meta_rule_id=meta_rule_id)
+
         return {"meta_rules": data}
 
-    @validate_input("post", body_state=[True, True, True, True])
+    @validate_input("post", body_state={"name":True, "subject_categories":True, "object_categories":True, "action_categories":True})
     @check_auth
     def post(self, meta_rule_id=None, user_id=None):
         """Add a meta rule
@@ -87,18 +84,15 @@ class MetaRules(Resource):
         }
         :internal_api: add_meta_rules
         """
-        try:
-            data = ModelManager.add_meta_rule(
-                user_id=user_id, meta_rule_id=None, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.add_meta_rule(
+            user_id=user_id, meta_rule_id=None, value=request.json)
+
         return {"meta_rules": data}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state=[True, True, True, True])
+    @validate_input("patch", kwargs_state=[True, False], body_state={"name":True, "subject_categories":True, "object_categories":True, "action_categories":True})
     @check_auth
-    def patch(self, meta_rule_id, user_id=None):
+    def patch(self, meta_rule_id=None, user_id=None):
         """Update a meta rule
 
         :param meta_rule_id: Meta rule ID
@@ -123,18 +117,14 @@ class MetaRules(Resource):
         }
         :internal_api: set_meta_rules
         """
-        try:
-            data = ModelManager.set_meta_rule(
-                user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = ModelManager.set_meta_rule(
+            user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
+
         return {"meta_rules": data}
 
     @validate_input("delete", kwargs_state=[True, False])
     @check_auth
-    def delete(self, meta_rule_id, user_id=None):
+    def delete(self, meta_rule_id=None, user_id=None):
         """Delete a meta rule
 
         :param meta_rule_id: Meta rule ID
@@ -152,12 +142,9 @@ class MetaRules(Resource):
         }
         :internal_api: delete_meta_rules
         """
-        try:
-            data = ModelManager.delete_meta_rule(
-                user_id=user_id, meta_rule_id=meta_rule_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
+        data = ModelManager.delete_meta_rule(
+            user_id=user_id, meta_rule_id=meta_rule_id)
+
         return {"result": True}
 

@@ -1,11 +1,17 @@
+import helpers.model_helper as model_helper
+import helpers.meta_rule_helper as meta_rule_helper
+import helpers.policy_helper as policy_helper
+import helpers.category_helper as category_helper
+
+
 def create_meta_rule(meta_rule_name="meta_rule1", category_prefix=""):
     meta_rule_value = {
         "name": meta_rule_name,
         "algorithm": "name of the meta rule algorithm",
         "subject_categories": [category_prefix + "subject_category_id1",
                                category_prefix + "subject_category_id2"],
-        "object_categories": [category_prefix +"object_category_id1"],
-        "action_categories": [category_prefix +"action_category_id1"]
+        "object_categories": [category_prefix + "object_category_id1"],
+        "action_categories": [category_prefix + "action_category_id1"]
     }
     return meta_rule_value
 
@@ -41,15 +47,28 @@ def create_pdp(pdp_ids):
 
 
 def get_policy_id(model_name="test_model", policy_name="policy_1", meta_rule_name="meta_rule1", category_prefix=""):
-    import policies.test_policies as test_policies
-    import models.test_models as test_models
-    import models.test_meta_rules as test_meta_rules
-    meta_rule = test_meta_rules.add_meta_rule(value=create_meta_rule(meta_rule_name, category_prefix))
+    category_helper.add_subject_category(
+        category_prefix + "subject_category_id1",
+        value={"name": category_prefix + "subject_category_id1",
+               "description": "description 1"})
+    category_helper.add_subject_category(
+        category_prefix + "subject_category_id2",
+        value={"name": category_prefix + "subject_category_id2",
+               "description": "description 1"})
+    category_helper.add_object_category(
+        category_prefix + "object_category_id1",
+        value={"name": category_prefix + "object_category_id1",
+               "description": "description 1"})
+    category_helper.add_action_category(
+        category_prefix + "action_category_id1",
+        value={"name": category_prefix + "action_category_id1",
+               "description": "description 1"})
+    meta_rule = meta_rule_helper.add_meta_rule(value=create_meta_rule(meta_rule_name, category_prefix))
     meta_rule_id = list(meta_rule.keys())[0]
-    model = test_models.add_model(value=create_model(meta_rule_id, model_name))
+    model = model_helper.add_model(value=create_model(meta_rule_id, model_name))
     model_id = list(model.keys())[0]
     value = create_policy(model_id, policy_name)
-    policy = test_policies.add_policies(value=value)
+    policy = policy_helper.add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
     return policy_id

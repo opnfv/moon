@@ -5,7 +5,8 @@
 
 import api.utilities as utilities
 import json
-
+from helpers import data_builder as builder
+from uuid import uuid4
 
 # subject_categories_test
 
@@ -19,12 +20,17 @@ def get_subject_data(client, policy_id, category_id=None):
     return req, subject_data
 
 
-def add_subject_data(client, name, policy_id, category_id):
+def add_subject_data(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex)
     data = {
         "name": name,
         "description": "description of {}".format(name)
     }
-    req = client.post("/policies/{}/subject_data/{}".format(policy_id, category_id), data=json.dumps(data),
+    req = client.post("/policies/{}/subject_data/{}".format(policy_id, subject_category_id), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     subject_data = utilities.get_json(req.data)
     return req, subject_data
@@ -45,9 +51,8 @@ def test_get_subject_data():
 
 
 def test_add_subject_data():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "testuser", policy_id, "111")
+    req, subject_data = add_subject_data(client, "testuser")
     assert req.status_code == 200
     assert isinstance(subject_data, dict)
     value = subject_data["subject_data"]['data']
@@ -59,31 +64,29 @@ def test_add_subject_data():
 
 def test_delete_subject_data():
     client = utilities.register_client()
-    policy_id = utilities.get_policy_id()
+    subject_category_id, object_category_id, action_category_id, meta_rule_id,policy_id = builder.create_new_policy()
     success_req = delete_subject_data(client, policy_id)
     assert success_req.status_code == 200
 
 
 def test_add_subject_data_with_empty_user():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    req, subject_data = add_subject_data(client, "")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_add_subject_data_with_user_contain_space():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "test user", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    req, subject_data = add_subject_data(client, "test user")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_delete_subject_data_without_policy_id():
     client = utilities.register_client()
     success_req = delete_subject_data(client, "")
-    assert success_req.status_code == 500
+    assert success_req.status_code == 404
 
 # ---------------------------------------------------------------------------
 
@@ -99,12 +102,17 @@ def get_object_data(client, policy_id, category_id=None):
     return req, object_data
 
 
-def add_object_data(client, name, policy_id, category_id):
+def add_object_data(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex)
     data = {
         "name": name,
         "description": "description of {}".format(name)
     }
-    req = client.post("/policies/{}/object_data/{}".format(policy_id, category_id), data=json.dumps(data),
+    req = client.post("/policies/{}/object_data/{}".format(policy_id, object_category_id), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     object_data = utilities.get_json(req.data)
     return req, object_data
@@ -125,9 +133,8 @@ def test_get_object_data():
 
 
 def test_add_object_data():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, object_data = add_object_data(client, "testuser", policy_id, "111")
+    req, object_data = add_object_data(client, "testuser")
     assert req.status_code == 200
     assert isinstance(object_data, dict)
     value = object_data["object_data"]['data']
@@ -149,25 +156,23 @@ def test_delete_object_data():
 
 
 def test_add_object_data_with_empty_user():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    req, subject_data = add_object_data(client, "")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_add_object_data_with_user_contain_space():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, object_data = add_object_data(client, "test user", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    req, object_data = add_object_data(client, "test user")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_delete_object_data_without_policy_id():
     client = utilities.register_client()
     success_req = delete_object_data(client, "")
-    assert success_req.status_code == 500
+    assert success_req.status_code == 404
 # ---------------------------------------------------------------------------
 
 # action_categories_test
@@ -182,12 +187,17 @@ def get_action_data(client, policy_id, category_id=None):
     return req, action_data
 
 
-def add_action_data(client, name, policy_id, category_id):
+def add_action_data(client, name):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy(
+        subject_category_name="subject_category1" + uuid4().hex,
+        object_category_name="object_category1" + uuid4().hex,
+        action_category_name="action_category1" + uuid4().hex,
+        meta_rule_name="meta_rule_1" + uuid4().hex)
     data = {
         "name": name,
         "description": "description of {}".format(name)
     }
-    req = client.post("/policies/{}/action_data/{}".format(policy_id, category_id), data=json.dumps(data),
+    req = client.post("/policies/{}/action_data/{}".format(policy_id, action_category_id), data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     action_data = utilities.get_json(req.data)
     return req, action_data
@@ -208,9 +218,8 @@ def test_get_action_data():
 
 
 def test_add_action_data():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, action_data = add_action_data(client, "testuser", policy_id, "111")
+    req, action_data = add_action_data(client, "testuser")
     assert req.status_code == 200
     assert isinstance(action_data, dict)
     value = action_data["action_data"]['data']
@@ -228,23 +237,21 @@ def test_delete_action_data():
 
 
 def test_add_action_data_with_empty_user():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, action_data = add_action_data(client, "", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "Empty String"
+    req, action_data = add_action_data(client, "")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
 
 
 def test_add_action_data_with_user_contain_space():
-    policy_id = utilities.get_policy_id()
     client = utilities.register_client()
-    req, action_data = add_action_data(client, "test user", policy_id, "111")
-    assert req.status_code == 500
-    assert json.loads(req.data)["message"] == "String contains space"
+    req, action_data = add_action_data(client, "test user")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
 
 
 def test_delete_action_data_without_policy_id():
     client = utilities.register_client()
     success_req = delete_action_data(client, "")
-    assert success_req.status_code == 500
+    assert success_req.status_code == 404
 # ---------------------------------------------------------------------------

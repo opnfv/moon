@@ -54,18 +54,16 @@ class SubjectData(Resource):
         }]
         :internal_api: get_subject_data
         """
-        try:
-            data = PolicyManager.get_subject_data(user_id=user_id,
-                                                  policy_id=uuid,
-                                                  category_id=category_id,
-                                                  data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        logger.info("api.get {} {} {}".format(uuid, category_id, data_id))
+        data = PolicyManager.get_subject_data(user_id=user_id,
+                                              policy_id=uuid,
+                                              category_id=category_id,
+                                              data_id=data_id)
+        logger.info("api.get data = {}".format(data))
+
         return {"subject_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
     @check_auth
     def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a subject.
@@ -90,15 +88,11 @@ class SubjectData(Resource):
         }
         :internal_api: add_subject_data
         """
-        try:
-            data = PolicyManager.set_subject_data(user_id=user_id,
-                                                  policy_id=uuid,
+        data = PolicyManager.set_subject_data(user_id=user_id,
+                                              policy_id=uuid,
                                                   category_id=category_id,
                                                   value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+
         return {"subject_data": data}
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
@@ -116,14 +110,11 @@ class SubjectData(Resource):
         }]
         :internal_api: delete_subject_data
         """
-        try:
-            data = PolicyManager.delete_subject_data(user_id=user_id,
-                                                     policy_id=uuid,
-                                                     data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        logger.info("api.delete {} {}".format(uuid, data_id))
+        data = PolicyManager.delete_subject_data(user_id=user_id,
+                                                 policy_id=uuid,
+                                                 data_id=data_id)
+
         return {"result": True}
 
 
@@ -162,18 +153,14 @@ class ObjectData(Resource):
         }]
         :internal_api: get_object_data
         """
-        try:
-            data = PolicyManager.get_object_data(user_id=user_id,
-                                                 policy_id=uuid,
-                                                 category_id=category_id,
-                                                 data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.get_object_data(user_id=user_id,
+                                             policy_id=uuid,
+                                             category_id=category_id,
+                                             data_id=data_id)
+
         return {"object_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
     @check_auth
     def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a object.
@@ -198,15 +185,11 @@ class ObjectData(Resource):
         }
         :internal_api: add_object_data
         """
-        try:
-            data = PolicyManager.add_object_data(user_id=user_id,
-                                                 policy_id=uuid,
-                                                 category_id=category_id,
-                                                 value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.add_object_data(user_id=user_id,
+                                             policy_id=uuid,
+                                             category_id=category_id,
+                                             value=request.json)
+
         return {"object_data": data}
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
@@ -224,14 +207,10 @@ class ObjectData(Resource):
         }
         :internal_api: delete_object_data
         """
-        try:
-            data = PolicyManager.delete_object_data(user_id=user_id,
-                                                    policy_id=uuid,
-                                                    data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.delete_object_data(user_id=user_id,
+                                                policy_id=uuid,
+                                                data_id=data_id)
+
         return {"result": True}
 
 
@@ -270,18 +249,14 @@ class ActionData(Resource):
         }]
         :internal_api: get_action_data
         """
-        try:
-            data = PolicyManager.get_action_data(user_id=user_id,
-                                                 policy_id=uuid,
-                                                 category_id=category_id,
-                                                 data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.get_action_data(user_id=user_id,
+                                             policy_id=uuid,
+                                             category_id=category_id,
+                                             data_id=data_id)
+
         return {"action_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state=[True, False])
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
     @check_auth
     def post(self, uuid, category_id=None, data_id=None, user_id=None):
         """Create or update a action.
@@ -306,15 +281,10 @@ class ActionData(Resource):
         }
         :internal_api: add_action_data
         """
-        try:
-            data = PolicyManager.add_action_data(user_id=user_id,
-                                                 policy_id=uuid,
-                                                 category_id=category_id,
-                                                 value=request.json)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.add_action_data(user_id=user_id,
+                                             policy_id=uuid,
+                                             category_id=category_id,
+                                             value=request.json)
         return {"action_data": data}
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
@@ -332,14 +302,10 @@ class ActionData(Resource):
         }
         :internal_api: delete_action_data
         """
-        try:
-            data = PolicyManager.delete_action_data(user_id=user_id,
-                                                    policy_id=uuid,
-                                                    data_id=data_id)
-        except Exception as e:
-            logger.error(e, exc_info=True)
-            return {"result": False,
-                    "error": str(e)}, 500
+        data = PolicyManager.delete_action_data(user_id=user_id,
+                                                policy_id=uuid,
+                                                data_id=data_id)
+
         return {"result": True}
 
 

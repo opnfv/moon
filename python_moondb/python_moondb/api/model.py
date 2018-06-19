@@ -22,6 +22,10 @@ class ModelManager(Managers):
     def update_model(self, user_id, model_id, value):
         if model_id not in self.driver.get_models(model_id=model_id):
             raise exceptions.ModelUnknown
+        if value and 'meta_rules' in value:
+            for meta_rule_id in value['meta_rules']:
+                if not self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
+                    raise exceptions.MetaRuleUnknown
         return self.driver.update_model(model_id=model_id, value=value)
 
     @enforce(("read", "write"), "models")
@@ -41,6 +45,10 @@ class ModelManager(Managers):
             raise exceptions.ModelExisting
         if not model_id:
             model_id = uuid4().hex
+        if value and 'meta_rules' in value:
+            for meta_rule_id in value['meta_rules']:
+                if not self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
+                    raise exceptions.MetaRuleUnknown
         return self.driver.add_model(model_id=model_id, value=value)
 
     @enforce("read", "models")
@@ -51,6 +59,19 @@ class ModelManager(Managers):
     def set_meta_rule(self, user_id, meta_rule_id, value):
         if meta_rule_id not in self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
             raise exceptions.MetaRuleUnknown
+        if value:
+            if 'subject_categories' in value:
+                for subject_category_id in value['subject_categories']:
+                    if not self.driver.get_subject_categories(category_id=subject_category_id):
+                        raise exceptions.SubjectCategoryUnknown
+            if 'object_categories' in value:
+                for object_category_id in value['object_categories']:
+                    if not self.driver.get_object_categories(category_id=object_category_id):
+                        raise exceptions.ObjectCategoryUnknown
+            if 'action_categories' in value:
+                for action_category_id in value['action_categories']:
+                    if not self.driver.get_action_categories(category_id=action_category_id):
+                        raise exceptions.ActionCategoryUnknown
         return self.driver.set_meta_rule(meta_rule_id=meta_rule_id, value=value)
 
     @enforce("read", "meta_rules")
@@ -61,6 +82,19 @@ class ModelManager(Managers):
     def add_meta_rule(self, user_id, meta_rule_id=None, value=None):
         if meta_rule_id in self.driver.get_meta_rules(meta_rule_id=meta_rule_id):
             raise exceptions.MetaRuleExisting
+        if value:
+            if 'subject_categories' in value:
+                for subject_category_id in value['subject_categories']:
+                    if not self.driver.get_subject_categories(category_id=subject_category_id):
+                        raise exceptions.SubjectCategoryUnknown
+            if 'object_categories' in value:
+                for object_category_id in value['object_categories']:
+                    if not self.driver.get_object_categories(category_id=object_category_id):
+                        raise exceptions.ObjectCategoryUnknown
+            if 'action_categories' in value:
+                for action_category_id in value['action_categories']:
+                    if not self.driver.get_action_categories(category_id=action_category_id):
+                        raise exceptions.ActionCategoryUnknown
         return self.driver.set_meta_rule(meta_rule_id=meta_rule_id, value=value)
 
     @enforce(("read", "write"), "meta_rules")
@@ -93,8 +127,11 @@ class ModelManager(Managers):
         meta_rules = self.get_meta_rules(user_id=user_id)
         for meta_rule_id in meta_rules:
             for subject_category_id in meta_rules[meta_rule_id]['subject_categories']:
+                logger.info("delete_subject_category {} {}".format(subject_category_id, meta_rule_id))
+                logger.info("delete_subject_category {}".format(meta_rules[meta_rule_id]))
                 if subject_category_id == category_id:
-                    raise exceptions.DeleteCategoryWithMetaRule
+                    self.delete_meta_rule(user_id, meta_rule_id)
+                    # raise exceptions.DeleteCategoryWithMetaRule
         if self.driver.is_subject_data_exist(category_id=category_id):
             raise exceptions.DeleteCategoryWithData
         return self.driver.delete_subject_category(category_id=category_id)
@@ -119,7 +156,7 @@ class ModelManager(Managers):
         for meta_rule_id in meta_rules:
             for object_category_id in meta_rules[meta_rule_id]['object_categories']:
                 if object_category_id == category_id:
-                    raise exceptions.DeleteCategoryWithMetaRule
+                    self.delete_meta_rule(user_id, meta_rule_id)
         if self.driver.is_object_data_exist(category_id=category_id):
             raise exceptions.DeleteCategoryWithData
         return self.driver.delete_object_category(category_id=category_id)
@@ -144,7 +181,7 @@ class ModelManager(Managers):
         for meta_rule_id in meta_rules:
             for action_category_id in meta_rules[meta_rule_id]['action_categories']:
                 if action_category_id == category_id:
-                    raise exceptions.DeleteCategoryWithMetaRule
+                    self.delete_meta_rule(user_id, meta_rule_id)
         if self.driver.is_action_data_exist(category_id=category_id):
             raise exceptions.DeleteCategoryWithData
         return self.driver.delete_action_category(category_id=category_id)
