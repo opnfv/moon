@@ -42,4 +42,4 @@ moonclient/build
 moonclient/python_moonclient.egg-info
 
 # cache
-.cache
+docs/_build/*
