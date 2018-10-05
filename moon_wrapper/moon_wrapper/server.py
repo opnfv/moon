@@ -28,5 +28,5 @@ def main():
 
 
 if __name__ == '__main__':
-    server = main()
-    server.run()
+    SERVER = main()
+    SERVER.run()

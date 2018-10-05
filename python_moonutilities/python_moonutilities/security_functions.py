@@ -4,6 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 
+import html
 import re
 import os
 import types
@@ -22,6 +23,7 @@ __targets = {}
 
 
 def filter_input(func_or_str):
+
     def __filter(string):
         if string and type(string) is str:
             return "".join(re.findall("[\w\- +]*", string))
@@ -88,28 +90,22 @@ To do should check value of Dictionary but it's dependent on from where it's com
 
 def validate_data(data):
     def __validate_string(string):
-        if not string:
-            raise ValueError('Empty String')
-        '''
-                is it valid to contains space inbetween 
-
-        '''
-
-        if " " in string:
-                raise ValueError('String contains space')
+        temp_str = html.escape(string)
+        if string != temp_str:
+            raise exceptions.ValidationContentError('Forbidden characters in string')
 
     def __validate_list_or_tuple(container):
-        if not container:
-            raise ValueError('Empty Container')
         for i in container:
             validate_data(i)
 
     def __validate_dict(dictionary):
-        if not dictionary:
-            raise ValueError('Empty Dictionary')
         for key in dictionary:
             validate_data(dictionary[key])
 
+    if isinstance(data, bool):
+        return True
+    if data is None:
+        data = ""
     if isinstance(data, str):
         __validate_string(data)
     elif isinstance(data, list) or isinstance(data, tuple):
@@ -117,7 +113,7 @@ def validate_data(data):
     elif isinstance(data, dict):
         __validate_dict(data)
     else:
-        raise ValueError('Value is Not String or Container or Dictionary')
+        raise exceptions.ValidationContentError('Value is Not String or Container or Dictionary: {}'.format(data))
 
 
 def validate_input(type='get', args_state=[], kwargs_state=[], body_state=[]):
@@ -161,24 +157,30 @@ def validate_input(type='get', args_state=[], kwargs_state=[], body_state=[]):
                     validate_data(temp_args[i])
 
             while len(kwargs_state) < len(kwargs):
-                kwargs_state.append(True)
+                kwargs_state.append(False)
             counter = 0
             for i in kwargs:
                 if kwargs_state[counter]:
-                    validate_data({i: kwargs[i]})
+                    validate_data(kwargs[i])
 
                 counter = counter + 1
 
             if type == "post" or type == "patch":
                 body = request.json
-                while len(body_state) < len(body):
-                    body_state.append(True)
-                counter = 0
-                for i in body:
-                    if body_state[counter]:
-                        validate_data({i: body[i]})
+                # while len(body_state) < len(body):
+                #     body_state.append(True)
+                # counter = 0
+                for key in body_state:
+                    if key in body:
+                        if body_state[key]:
+                            try:
+                                validate_data(body.get(key))
+                            except exceptions.ValidationContentError as e:
+                                raise exceptions.ValidationContentError("Key: '{}', [{}]".format(key, str(e)))
+                    else:
+                        raise exceptions.ValidationKeyError('Invalid Key :{} not found'.format(key))
 
-                    counter = counter + 1
+                    # counter = counter + 1
 
             return func(*args, **kwargs)
 
@@ -189,16 +191,13 @@ def validate_input(type='get', args_state=[], kwargs_state=[], body_state=[]):
 
 def enforce(action_names, object_name, **extra):
     """Fake version of the enforce decorator"""
-
     def wrapper_func(func):
         def wrapper_args(*args, **kwargs):
             # LOG.info("kwargs={}".format(kwargs))
             # kwargs['user_id'] = kwargs.pop('user_id', "admin")
             # LOG.info("Calling enforce on {} with args={} kwargs={}".format(func.__name__, args, kwargs))
             return func(*args, **kwargs)
-
         return wrapper_args
-
     return wrapper_func
 
 
@@ -329,5 +328,4 @@ def check_auth(function):
         user_id = kwargs.pop("user_id", token)
         result = function(*args, **kwargs, user_id=user_id)
         return result
-
     return wrapper

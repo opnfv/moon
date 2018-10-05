@@ -8,7 +8,7 @@ import logging
 from moon_authz.http_server import HTTPServer as Server
 from python_moonutilities import configuration, exceptions
 
-logger = logging.getLogger("moon.authz.server")
+LOGGER = logging.getLogger("moon.authz.server")
 
 
 def create_server():
@@ -20,7 +20,7 @@ def create_server():
     pdp_id = os.getenv("PDP_ID")
     meta_rule_id = os.getenv("META_RULE_ID")
     keystone_project_id = os.getenv("KEYSTONE_PROJECT_ID")
-    logger.info("component_type={}".format(component_type))
+    LOGGER.info("component_type={}".format(component_type))
     conf = configuration.get_plugins()
     # conf = configuration.get_configuration("plugins/{}".format(component_type))
     # conf["plugins/{}".format(component_type)]['id'] = component_id
@@ -31,7 +31,7 @@ def create_server():
     port = conf[component_type].get('port', tcp_port)
     bind = conf[component_type].get('bind', "0.0.0.0")
 
-    logger.info("Starting server with IP {} on port {} bind to {}".format(
+    LOGGER.info("Starting server with IP {} on port {} bind to {}".format(
         hostname, port, bind))
     server = Server(
         host=bind,

@@ -1,152 +1,104 @@
+# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
+
 import pytest
 
 
 def test_valid_string():
     from python_moonutilities.security_functions import validate_data
     validate_data("CorrectString")
+    validate_data("Correct String")
+    validate_data("Correct String!")
+    validate_data("Correct String@")
+    validate_data(None)
+    validate_data(True)
 
-def test_unvalid_string():
+
+def test_invalid_string():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
-        validate_data("Notcorrect String")
+        validate_data("Notcorrect<a>String")
 
-    assert str(exception_info.value) == 'String contains space'
-
-def test_empty_string():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data("")
-
-    assert str(exception_info.value) == 'Empty String'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
 def test_none_value():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
-        validate_data(None)
+        validate_data(object)
 
-    assert str(exception_info.value) == 'Value is Not String or Container or Dictionary'
+    assert 'Value is Not String or Container or Dictionary' in str(exception_info.value)
 
 
-def test_int_value():
+def test_numeric_value():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
         validate_data(1)
+    assert 'Value is Not String or Container or Dictionary' in str(exception_info.value)
 
-    assert str(exception_info.value) == 'Value is Not String or Container or Dictionary'
-
-
-def test_float_value():
-    from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
         validate_data(1.23)
+    assert 'Value is Not String or Container or Dictionary' in str(exception_info.value)
 
-    assert str(exception_info.value) == 'Value is Not String or Container or Dictionary'
 
-
-def test_correct_list():
+def test_correct_list_one_element():
     from python_moonutilities.security_functions import validate_data
-    validate_data(["skjdnfa","dao","daosdjpw"])
+    validate_data(["test_1", "test_2", "test_3"])
 
 
-def test_correct_list():
+def test_correct_list_multiple_element():
     from python_moonutilities.security_functions import validate_data
-    validate_data(["skjdnfa"])
+    validate_data(["test"])
 
 
-def test_correct_instead_list():
+def test_correct_nested_list():
     from python_moonutilities.security_functions import validate_data
-    validate_data([["skjdnfa","daswi"],[["daskdlw"],["daklwo"]],["dawl","afioa"],["dawno"]])
-
-
-def test_empty_list():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data([])
-
-    assert str(exception_info.value) == 'Empty Container'
-
-
-def test_empty_list_inside_other_list():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data(["dajiwdj",[]])
-
-    assert str(exception_info.value) == 'Empty Container'
+    validate_data([["test_1", "test_2"], [["test_3"], ["test_4"]], ["test_5", "test_6"], ["test_7"]])
 
 
 def test_incorrect_string_inside_list():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
-        validate_data(["dajiwdj",["dakwe","daow awoepa"]])
+        validate_data(["test_1", ["test_2", "forbidden<a>character"]])
 
-    assert str(exception_info.value) == 'String contains space'
-
-
-def test_empty_string_inside_list():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data(["dajiwdj", ["dakwe", ""]])
-
-    assert str(exception_info.value) == 'Empty String'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
 def test_correct_tuples():
     from python_moonutilities.security_functions import validate_data
-    validate_data(("dasdw","dawdwa"))
+    validate_data(("test_1", "test_2"))
 
-
-def test_empty_tuples():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data(())
-
-    assert str(exception_info.value) == 'Empty Container'
 
 def test_correct_tuple_of_tuple():
     from python_moonutilities.security_functions import validate_data
-    validate_data(("gjosjefa",("diwajdi","oejfoea"),(("jwdi","fjia"),("nfioa","ifao"))))
+    validate_data(("test_1", ("test_2", "test_3"), (("test_4", "test_5"), ("test_6", "test_7"))))
 
 
-def test_incorrect_tuple():
+def test_incorrect_string_within_tuple():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
-        validate_data(("djawo","dowa afw"))
+        validate_data(("test_1", "forbidden<a>character"))
 
-    assert str(exception_info.value) == 'String contains space'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
 def test_correct_dictionary():
     from python_moonutilities.security_functions import validate_data
-    validate_data({"daiwdw":"dwioajd"})
+    validate_data({"test_1": "test_2"})
 
 
-def test_incorrect_dictionary():
+def test_incorrect_string_within_dictionary():
     from python_moonutilities.security_functions import validate_data
     with pytest.raises(Exception) as exception_info:
-        validate_data({"daiwdw":"dwioa jd"})
+        validate_data({"test_1": "forbidden<a>character"})
 
-    assert str(exception_info.value) == 'String contains space'
-
-def test_empty_dictionary():
-    from python_moonutilities.security_functions import validate_data
-    with pytest.raises(Exception) as exception_info:
-        validate_data({})
-
-    assert str(exception_info.value) == 'Empty Dictionary'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
 def test_correct_function_pass():
-    from python_moonutilities.security_functions import validate_input
-
-    @validate_input()
-    def temp_function(string,list,tuple):
-        if string!="teststring" :
-            raise ValueError("values which passed incorrect")
-
-    temp_function("teststring",["teststring",["teststring"]],("teststring",("teststring")))
-
-def test_incorrect_function_pass1():
     from python_moonutilities.security_functions import validate_input
 
     @validate_input()
@@ -154,13 +106,24 @@ def test_incorrect_function_pass1():
         if string != "teststring":
             raise ValueError("values which passed incorrect")
 
+    temp_function("teststring", ["teststring", ["teststring"]], ("teststring", ("teststring", )))
+
+
+def test_incorrect_validating_function_with_kwargs():
+    from python_moonutilities.security_functions import validate_input
+
+    @validate_input(kwargs_state=[True,True])
+    def temp_function(string, list, tuple):
+        if string != "teststring":
+            raise ValueError("values which passed incorrect")
+
     with pytest.raises(Exception) as exception_info:
-        temp_function("teststring",list=["teststring", ["testst ring"]],tuple=("teststring", ("teststri ng")))
+        temp_function("teststring", list=["teststring", ["testst<a>ring"]],tuple=("teststring", ("teststri<a>ng", )))
 
-    assert str(exception_info.value) == 'String contains space'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
-def test_incorrect_function_pass2():
+def test_incorrect_validating_function():
     from python_moonutilities.security_functions import validate_input
 
     @validate_input()
@@ -169,23 +132,23 @@ def test_incorrect_function_pass2():
             raise ValueError("values which passed incorrect")
 
     with pytest.raises(Exception) as exception_info:
-        temp_function("teststring", ["teststring", ["teststri ng"]], {"teststring": ("teststring")})
+        temp_function("teststring", ["teststring", ["teststri<a>ng"]], {"teststring": ("teststring", )})
 
-    assert str(exception_info.value) == 'String contains space'
+    assert str(exception_info.value) == 'Forbidden characters in string'
 
 
-def test_incorrect_function_pass3():
+def test_incorrect_validating_class_function():
     from python_moonutilities.security_functions import validate_input
 
-    class x:
+    class Testclass:
         @validate_input()
-        def temp_function(string, list, dictionary):
+        def temp_function(self, string, list, dictionary):
             if string != "teststring":
                 raise ValueError("values which passed incorrect")
 
-    e=x;
+    e = Testclass()
 
     with pytest.raises(Exception) as exception_info:
-        e.temp_function("teststring", ["teststring", ["teststri ng"]], {"teststring": ("teststring")})
+        e.temp_function("teststring", ["teststring", ["teststri<a>ng"]], {"teststring": ("teststring", )})
 
-    assert str(exception_info.value) == 'String contains space'
+    assert str(exception_info.value) == 'Forbidden characters in string'

@@ -11,7 +11,7 @@ from flask import request
 from flask_restful import Resource
 from python_moonutilities import exceptions
 
-logger = logging.getLogger("moon.authz.api." + __name__)
+LOGGER = logging.getLogger("moon.authz.api." + __name__)
 
 
 class Authz(Resource):
@@ -67,19 +67,23 @@ class Authz(Resource):
         self.context = pickle.loads(request.data)
         self.context.set_cache(self.cache)
         self.context.increment_index()
-        self.run()
+        self.context.update_target()
+        # FIXME (asteroide): force the update but we should not do that
+        #                    a better way is to build the bilateral link between Master and Slaves
+        self.cache.update()
+        if not self.run():
+            raise exceptions.MoonError("Error in the request status={}".format(
+                self.context.current_state))
         self.context.delete_cache()
         response = flask.make_response(pickle.dumps(self.context))
         response.headers['content-type'] = 'application/octet-stream'
         return response
 
     def run(self):
-        logger.debug("self.context.pdp_set={}".format(self.context.pdp_set))
         result, message = self.__check_rules()
         if result:
             return self.__exec_instructions(result)
-        else:
-            self.context.current_state = "deny"
+        self.context.current_state = "deny"
         # self.__exec_next_state(result)
         return
 
@@ -105,6 +109,9 @@ class Authz(Resource):
             raise exceptions.PdpContentError
         for category in category_list:
             scope = list(current_pdp['target'][category])
+            if not scope:
+                LOGGER.warning("Scope in category {} is empty".format(category))
+                raise exceptions.AuthzException
             scopes_list.append(scope)
         # policy_id = self.cache.get_policy_from_meta_rules("admin", current_header_id)
         if self.context.current_policy_id not in self.cache.rules:
@@ -114,58 +121,59 @@ class Authz(Resource):
         for item in itertools.product(*scopes_list):
             req = list(item)
             for rule in self.cache.rules[self.context.current_policy_id]["rules"]:
-                logger.info("rule={}".format(rule))
                 if req == rule['rule']:
                     return rule['instructions'], ""
-        logger.warning("No rule match the request...")
+        LOGGER.warning("No rule match the request...")
         return False, "No rule match the request..."
 
     def __update_subject_category_in_policy(self, operation, target):
         result = False
-        try:
-            policy_name, category_name, data_name = target.split(":")
-        except ValueError:
-            logger.error("Cannot understand value in instruction ({})".format(target))
-            return False
-        # pdp_set = self.payload["authz_context"]['pdp_set']
-        for meta_rule_id in self.context.pdp_set:
-            if meta_rule_id == "effect":
-                continue
-            if self.context.pdp_set[meta_rule_id]["meta_rules"]["name"] == policy_name:
-                for category_id, category_value in self.cache.subject_categories.items():
-                    if category_value["name"] == "role":
-                        subject_category_id = category_id
-                        break
-                else:
-                    logger.error("Cannot understand category in instruction ({})".format(target))
-                    return False
-                subject_data_id = None
-                for data in PolicyManager.get_subject_data("admin", policy_id, category_id=subject_category_id):
-                    for data_id, data_value in data['data'].items():
-                        if data_value["name"] == data_name:
-                            subject_data_id = data_id
-                            break
-                    if subject_data_id:
-                        break
-                else:
-                    logger.error("Cannot understand data in instruction ({})".format(target))
-                    return False
-                if operation == "add":
-                    self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][subject_category_id].append(
-                        subject_data_id)
-                elif operation == "delete":
-                    try:
-                        self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][subject_category_id].remove(
-                            subject_data_id)
-                    except ValueError:
-                        logger.warning("Cannot remove role {} from target".format(data_name))
-                result = True
-                break
+        # try:
+        #     policy_name, category_name, data_name = target.split(":")
+        # except ValueError:
+        #     LOGGER.error("Cannot understand value in instruction ({})".format(target))
+        #     return False
+        # # pdp_set = self.payload["authz_context"]['pdp_set']
+        # for meta_rule_id in self.context.pdp_set:
+        #     if meta_rule_id == "effect":
+        #         continue
+        #     if self.context.pdp_set[meta_rule_id]["meta_rules"]["name"] == policy_name:
+        #         for category_id, category_value in self.cache.subject_categories.items():
+        #             if category_value["name"] == "role":
+        #                 subject_category_id = category_id
+        #                 break
+        #         else:
+        #             LOGGER.error("Cannot understand category in instruction ({})".format(target))
+        #             return False
+        #         subject_data_id = None
+        #         for data in PolicyManager.get_subject_data("admin", policy_id,
+        #                                                    category_id=subject_category_id):
+        #             for data_id, data_value in data['data'].items():
+        #                 if data_value["name"] == data_name:
+        #                     subject_data_id = data_id
+        #                     break
+        #             if subject_data_id:
+        #                 break
+        #         else:
+        #             LOGGER.error("Cannot understand data in instruction ({})".format(target))
+        #             return False
+        #         if operation == "add":
+        #             self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][
+        #                 subject_category_id].append(subject_data_id)
+        #         elif operation == "delete":
+        #             try:
+        #                 self.payload["authz_context"]['pdp_set'][meta_rule_id]['target'][
+        #                     subject_category_id].remove(subject_data_id)
+        #             except ValueError:
+        #                 LOGGER.warning("Cannot remove role {} from target".format(data_name))
+        #         result = True
+        #         break
         return result
 
     def __update_container_chaining(self):
         for index in range(len(self.payload["authz_context"]['headers'])):
-            self.payload["container_chaining"][index]["meta_rule_id"] = self.payload["authz_context"]['headers'][index]
+            self.payload["container_chaining"][index]["meta_rule_id"] = \
+                self.payload["authz_context"]['headers'][index]
 
     def __get_container_from_meta_rule(self, meta_rule_id):
         for index in range(len(self.payload["authz_context"]['headers'])):
@@ -200,9 +208,10 @@ class Authz(Resource):
     #             if self.payload["authz_context"]['pdp_set'][next_meta_rule]['effect'] == "unset":
     #                 return notify(
     #                     request_id=self.payload["authz_context"]["request_id"],
-    #                     container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
-    #                     payload=self.payload)
-    #             # next will be delegation if current is deny and session is passed or deny and delegation is unset
+    #                     container_id=self.__get_container_from_meta_rule(next_meta_rule)[
+    #                                       'container_id'],payload=self.payload)
+    #             # next will be delegation if current is deny and session is passed or deny and
+    #               delegation is unset
     #             else:
     #                 LOG.error("Delegation is not developed!")
     #
@@ -215,8 +224,8 @@ class Authz(Resource):
     #         if self.payload["authz_context"]['pdp_set'][current_meta_rule]['effect'] == "passed":
     #             return notify(
     #                 request_id=self.payload["authz_context"]["request_id"],
-    #                 container_id=self.__get_container_from_meta_rule(next_meta_rule)['container_id'],
-    #                 payload=self.payload)
+    #                 container_id=self.__get_container_from_meta_rule(next_meta_rule)[
+    #                               'container_id'],payload=self.payload)
     #         # next will be None if current is grant and the request is sent to router
     #         else:
     #             return self.__return_to_router()
@@ -235,16 +244,19 @@ class Authz(Resource):
     #          args=self.payload["authz_context"])
 
     def __exec_instructions(self, instructions):
+        if type(instructions) is dict:
+            instructions = [instructions, ]
+        if type(instructions) not in (list, tuple):
+            raise exceptions.RuleContentError("Bad instructions format")
         for instruction in instructions:
             for key in instruction:
                 if key == "decision":
                     if instruction["decision"] == "grant":
                         self.context.current_state = "grant"
-                        logger.info("__exec_instructions True {}".format(
-                            self.context.current_state))
+                        LOGGER.info("__exec_instructions True %s" % self.context.current_state)
                         return True
-                    else:
-                        self.context.current_state = instruction["decision"].lower()
+
+                    self.context.current_state = instruction["decision"].lower()
                 elif key == "chain":
                     result = self.__update_headers(**instruction["chain"])
                     if not result:
@@ -257,7 +269,7 @@ class Authz(Resource):
                         self.context.current_state = "deny"
                     else:
                         self.context.current_state = "passed"
-        logger.info("__exec_instructions False {}".format(self.context.current_state))
+        LOGGER.info("__exec_instructions False %s" % self.context.current_state)
 
     # def __update_current_request(self):
     #     index = self.payload["authz_context"]["index"]
@@ -266,7 +278,8 @@ class Authz(Resource):
     #     current_policy_id = PolicyManager.get_policy_from_meta_rules("admin", current_header_id)
     #     previous_policy_id = PolicyManager.get_policy_from_meta_rules("admin", previous_header_id)
     #     # FIXME (asteroide): must change those lines to be ubiquitous against any type of policy
-    #     if self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules']['name'] == "session":
+    #     if self.payload["authz_context"]['pdp_set'][current_header_id]['meta_rules'][
+    #       'name'] == "session":
     #         subject = self.payload["authz_context"]['current_request'].get("subject")
     #         subject_category_id = None
     #         role_names = []
@@ -277,17 +290,20 @@ class Authz(Resource):
     #         for assignment_id, assignment_value in PolicyManager.get_subject_assignments(
     #                 "admin", previous_policy_id, subject, subject_category_id).items():
     #             for data_id in assignment_value["assignments"]:
-    #                 data = PolicyManager.get_subject_data("admin", previous_policy_id, data_id, subject_category_id)
+    #                 data = PolicyManager.get_subject_data(
+    #                                     "admin", previous_policy_id, data_id, subject_category_id)
     #                 for _data in data:
     #                     for key, value in _data["data"].items():
     #                         role_names.append(value["name"])
     #         new_role_ids = []
-    #         for perimeter_id, perimeter_value in PolicyManager.get_objects("admin", current_policy_id).items():
+    #         for perimeter_id, perimeter_value in PolicyManager.get_objects(
+    #                                                           "admin", current_policy_id).items():
     #             if perimeter_value["name"] in role_names:
     #                 new_role_ids.append(perimeter_id)
     #                 break
     #         perimeter_id = None
-    #         for perimeter_id, perimeter_value in PolicyManager.get_actions("admin", current_policy_id).items():
+    #         for perimeter_id, perimeter_value in PolicyManager.get_actions(
+    #                                                           "admin", current_policy_id).items():
     #             if perimeter_value["name"] == "*":
     #                 break
     #
@@ -353,8 +369,9 @@ class Authz(Resource):
             # else:
             #     self.payload["authz_context"]["index"] += 1
             #     self.__update_current_request()
-            result, message = self.__check_rules(self.payload["authz_context"])
-            current_header_id = self.payload["authz_context"]['headers'][self.payload["authz_context"]['index']]
+            result, message = self.__check_rules()
+            current_header_id = self.payload["authz_context"]['headers'][
+                self.payload["authz_context"]['index']]
             if result:
                 self.__exec_instructions(result)
             else:
@@ -366,15 +383,15 @@ class Authz(Resource):
                     "args": self.payload}
         except Exception as e:
             try:
-                logger.error(self.payload["authz_context"])
+                LOGGER.error(self.payload["authz_context"])
             except KeyError:
-                logger.error("Cannot find \"authz_context\" in context")
-            logger.error(e, exc_info=True)
+                LOGGER.error("Cannot find \"authz_context\" in context")
+            LOGGER.error(e, exc_info=True)
             return {"authz": False,
                     "error": str(e),
                     "pdp_id": self.pdp_id,
                     "args": self.payload}
 
     def head(self, uuid=None, subject_name=None, object_name=None, action_name=None):
-        logger.info("HEAD request")
+        LOGGER.info("HEAD request")
         return "", 200

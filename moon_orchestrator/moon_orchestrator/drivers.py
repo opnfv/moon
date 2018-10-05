@@ -209,6 +209,7 @@ class K8S(Driver):
                         data["wrapper_name"] = value[0]['name']
                         data["ip"] = value[0].get("ip", "NC")
                         data["port"] = value[0].get("external_port", "NC")
+                        data["internal_port"] = value[0].get("port", "NC")
                         slaves.append(data)
                         break
             return slaves
@@ -223,6 +224,7 @@ class K8S(Driver):
                         data["wrapper_name"] = value[0]['name']
                         data["ip"] = value[0].get("ip", "NC")
                         data["port"] = value[0].get("external_port", "NC")
+                        data["internal_port"] = value[0].get("port", "NC")
                         data["configured"] = True
                         break
             slaves.append(data)

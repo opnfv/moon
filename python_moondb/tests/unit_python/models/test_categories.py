@@ -10,13 +10,24 @@ from helpers import category_helper
 
 logger = logging.getLogger("moon.db.tests.models.test_categories")
 
+
 def test_add_subject_category_twice():
-    category = category_helper.add_subject_category(value={"name": "category name", "description": "description 1"})
+    category = category_helper.add_subject_category(
+        value={"name": "category name", "description": "description 1"})
     category_id = list(category.keys())[0]
     assert category is not None
     with pytest.raises(SubjectCategoryExisting):
         category_helper.add_subject_category(category_id,
-                                             value={"name": "category name", "description": "description 2"})
+                                             value={"name": "category name",
+                                                    "description": "description 2"})
+
+
+def test_add_subject_category_name_space():
+    with pytest.raises(CategoryNameInvalid) as exp:
+        category = category_helper.add_subject_category(value={"name": " ", "description":
+            "description 1"})
+    assert exp.value.code == 400
+    assert exp.value.description == 'The given category name is invalid.'
 
 
 def test_get_subject_categories():
@@ -34,12 +45,22 @@ def test_get_subject_categories_with_invalid_id():
 
 
 def test_add_object_category_twice():
-    category = category_helper.add_object_category(value={"name": "category name", "description": "description 1"})
+    category = category_helper.add_object_category(
+        value={"name": "category name", "description": "description 1"})
     category_id = list(category.keys())[0]
     assert category is not None
     with pytest.raises(ObjectCategoryExisting):
         category_helper.add_object_category(category_id,
-                                            value={"name": "category name", "description": "description 2"})
+                                            value={"name": "category name",
+                                                   "description": "description 2"})
+
+
+def test_add_object_category_name_space():
+    with pytest.raises(CategoryNameInvalid) as exp:
+        category = category_helper.add_object_category(value={"name": " ", "description":
+            "description 1"})
+    assert exp.value.code == 400
+    assert exp.value.description == 'The given category name is invalid.'
 
 
 def test_get_object_categories():
@@ -57,12 +78,23 @@ def test_get_object_categories_with_invalid_id():
 
 
 def test_add_action_category_twice():
-    category = category_helper.add_action_category(value={"name": "category name", "description": "description 1"})
+    category = category_helper.add_action_category(
+        value={"name": "category name", "description": "description 1"})
     category_id = list(category.keys())[0]
     assert category is not None
-    with pytest.raises(ActionCategoryExisting):
+    with pytest.raises(ActionCategoryExisting) as exp_info:
         category_helper.add_action_category(category_id,
-                                            value={"name": "category name", "description": "description 2"})
+                                            value={"name": "category name",
+                                                   "description": "description 2"})
+    assert str(exp_info.value)=='409: Action Category Existing'
+
+
+def test_add_action_category_name_space():
+    with pytest.raises(CategoryNameInvalid) as exp:
+        category = category_helper.add_action_category(value={"name": " ", "description":
+            "description 1"})
+    assert exp.value.code == 400
+    assert exp.value.description == 'The given category name is invalid.'
 
 
 def test_get_action_categories():

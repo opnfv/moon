@@ -8,6 +8,7 @@ from .policy_helper import *
 from .data_helper import *
 from .model_helper import *
 from .meta_rule_helper import *
+from uuid import uuid4
 
 
 def create_subject_category(name):
@@ -58,12 +59,19 @@ def create_pdp(policies_ids):
     return value
 
 
-def create_new_policy(subject_category_name=None, object_category_name=None, action_category_name=None,
-                      model_name="test_model", policy_name="policy_1", meta_rule_name="meta_rule1"):
+def create_new_policy(subject_category_name="subjectCategory", object_category_name="objectCategory",
+                      action_category_name="actionCategory",
+                      model_name="test_model", policy_name="policy_name",
+                      meta_rule_name="meta_rule_"):
+    if policy_name == "policy_name":
+        policy_name = "policy_name_" + uuid4().hex
+
     subject_category_id, object_category_id, action_category_id, meta_rule_id = create_new_meta_rule(
-        subject_category_name=subject_category_name,
-        object_category_name=object_category_name,
-        action_category_name=action_category_name, meta_rule_name=meta_rule_name)
+        subject_category_name=subject_category_name + uuid4().hex,
+        object_category_name=object_category_name + uuid4().hex,
+        action_category_name=action_category_name + uuid4().hex,
+        meta_rule_name=meta_rule_name + uuid4().hex
+    )
     model = add_model(value=create_model(meta_rule_id, model_name))
     model_id = list(model.keys())[0]
     value = create_policy(model_id, policy_name)
@@ -73,8 +81,12 @@ def create_new_policy(subject_category_name=None, object_category_name=None, act
     return subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id
 
 
-def create_new_meta_rule(subject_category_name=None, object_category_name=None, action_category_name=None,
-                         meta_rule_name="meta_rule1"):
+def create_new_meta_rule(subject_category_name="subject_category" + uuid4().hex,
+                         object_category_name="object_category" + uuid4().hex,
+                         action_category_name="action_category" + uuid4().hex,
+                         meta_rule_name="meta_rule" + uuid4().hex):
+    from python_moondb.core import ModelManager
+
     subject_category_id = create_subject_category(subject_category_name)
     object_category_id = create_object_category(object_category_name)
     action_category_id = create_action_category(action_category_name)
@@ -84,7 +96,8 @@ def create_new_meta_rule(subject_category_name=None, object_category_name=None, 
              "object_categories": [object_category_id],
              "action_categories": [action_category_id]
              }
-    meta_rule = add_meta_rule(value=value)
+    # meta_rule = add_meta_rule(value=value)
+    meta_rule = ModelManager.add_meta_rule(user_id=None, meta_rule_id=None, value=value)
     return subject_category_id, object_category_id, action_category_id, list(meta_rule.keys())[0]
 
 
@@ -117,8 +130,8 @@ def create_action(policy_id):
 
 def create_subject_data(policy_id, category_id):
     value = {
-        "name": "subject-security-level",
-        "description": {"low": "", "medium": "", "high": ""},
+        "name": uuid4().hex,
+        "description": {uuid4().hex: "", uuid4().hex: "", uuid4().hex: ""},
     }
     subject_data = add_subject_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
     assert subject_data
@@ -127,8 +140,8 @@ def create_subject_data(policy_id, category_id):
 
 def create_object_data(policy_id, category_id):
     value = {
-        "name": "object-security-level",
-        "description": {"low": "", "medium": "", "high": ""},
+        "name": uuid4().hex,
+        "description": {uuid4().hex: "", uuid4().hex: "", uuid4().hex: ""},
     }
     object_data = add_object_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
     return list(object_data.keys())[0]
@@ -136,9 +149,8 @@ def create_object_data(policy_id, category_id):
 
 def create_action_data(policy_id, category_id):
     value = {
-        "name": "action-type",
-        "description": {"vm-action": "", "storage-action": "", },
+        "name": uuid4().hex,
+        "description": {uuid4().hex: "", uuid4().hex: "", uuid4().hex: ""},
     }
     action_data = add_action_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
     return list(action_data.keys())[0]
-

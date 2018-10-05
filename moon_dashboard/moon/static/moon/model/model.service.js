@@ -205,6 +205,7 @@
                 return modelsMap[id];
             },
             createModel: function createModel(model) {
+                model.meta_rules = [];
                 modelResource.create(null, model, success, util.displayErrorFunction('Unable to create model'));
 
                 function success(data) {
@@ -235,6 +236,10 @@
                 return metaRulesMap[id];
             },
             createMetaRule: function createMetaRule(metaRule) {
+                metaRule.subject_categories = [];
+                metaRule.object_categories = [];
+                metaRule.action_categories = [];
+
                 return metaRuleResource.create(null, metaRule).$promise.then(function (data) {
                     util.displaySuccess('Meta Rule created');
                     return createMetaRuleInternal(data.meta_rules)[0];

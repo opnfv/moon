@@ -32,21 +32,23 @@
 
     function createAddDataButton(type, index, category, config, policy) {
       config.form.push({
-        "key": type + index + "Button",
-        "type": "button",
-        "title": "Add",
-        onClick: createDataFunction(type, category, policy)
+        key: type + index + "Button",
+        type: "button",
+        title: gettext("Create Data"),
+        icon: 'fa fa-plus',
+        onClick: createDataFunction(type, category, policy, config.model, type+index)
       })
     }
 
-    function createDataFunction(type, category, policy) {
+    function createDataFunction(type, category, policy, formModel, key) {
       return function () {
         var schema = {
           type: "object",
           properties: {
             name: { type: "string", minLength: 2, title: gettext("Name") },
             description: { type: "string", minLength: 2, title: gettext("Description") },
-          }
+          },
+          required: ['name', 'description']
         };
         var data = { name: '', description: '' };
         var config = {
@@ -61,6 +63,7 @@
           policyService.createData(type, policy, category, form.model).then(
             function (data) {
               util.pushAll(dataTitleMaps[category.id], util.arrayToTitleMap(data));
+              formModel[key] = data[0].id
             }
           );
         }
@@ -82,6 +85,7 @@
         var titleMap = getOrCreateDataTitleMap(category, data, policy);
         config.schema.properties[type + i] = { type: "string", title: gettext('Select ' + type + ' data of ' + category.name + ' category') };
         config.form.push({ key: type + i, type: 'select', titleMap: titleMap });
+        config.schema.required.push(type + i);
         createAddDataButton(type, i, category, config, policy);
       }
     }
@@ -102,7 +106,8 @@
           description: { type: "string", minLength: 2, title: gettext("Description") },
           genre: { type: "string", title: gettext("genre") },
           model_id: { type: "string", title: gettext("Select a Model:") }
-        }
+        },
+        required: ['name', 'description', 'genre', 'model_id']
       };
       var policy = { name: '', description: '', model_id: null, genre: '' };
       var titleMap = util.arrayToTitleMap(modelService.models)
@@ -126,7 +131,8 @@
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") },
           genre: { type: "string", title: gettext("Genre") },
-        }
+        },
+        required: ['name', 'description', 'genre']
       };
       var config = {
         title: gettext('Update Policy'),
@@ -146,7 +152,8 @@
         type: "object",
         properties: {
           instructions: { type: "string", title: gettext("Instructions") }
-        }
+        },
+        required: ['instructions']
       };
 
       var config = {
@@ -179,11 +186,16 @@
     }
 
     self.addRule = function addRule(policy) {
+      if (policy.model.meta_rules.length == 1) {
+        self.addRuleWithMetaRule(policy, policy.model.meta_rules[0]);
+        return;
+      }
       var schema = {
         type: "object",
         properties: {
           metaRuleId: { type: "string", title: gettext("Select a Metarule:") }
-        }
+        },
+        required: ['metaRuleId']
       };
       var rule = { metaRuleId: null };
       var titleMap = util.arrayToTitleMap(policy.model.meta_rules);
@@ -201,7 +213,7 @@
     }
 
     self.removePolicy = function removePolicy(policy) {
-      if (confirm(gettext('Are you sure to delete this Policy?')))
+      if (confirm(gettext('Are you sure to delete this Policy? (Associated perimeter, data an PDP will be deleted too)')))
         policyService.removePolicy(policy);
     }
 
@@ -216,6 +228,7 @@
 
     self.showRule = function showRule(rule) {
       self.selectedRule = rule;
+      self.currentData = null;
     }
 
     self.hideRule = function hideRule() {
@@ -229,14 +242,22 @@
         type: type,
         loading: true,
         perimeters: [],
-        assignments: []
+        allPerimeters: [],
+        assignments: [],
       }
 
       policyService.loadPerimetersAndAssignments(type, policy).then(function (values) {
         var category = categoryMap[type];
         self.currentData.loading = false;
         self.currentData.perimeters = values.perimeters;
-        for (var index = 0; index < values.assignments.length; index++) {
+        var index;
+        for (index = 0; index < values.allPerimeters.length; index++) {
+          var perimeter = values.allPerimeters[index];
+          if (perimeter.policy_list.indexOf(policy.id) < 0) {
+            self.currentData.allPerimeters.push(perimeter);
+          }
+        }
+        for (index = 0; index < values.assignments.length; index++) {
           var assignment = values.assignments[index];
           if (assignment.assignments.indexOf(data.id) >= 0) {
             var perimeter = values.perimetersMap[assignment[category.perimeterId]];
@@ -253,10 +274,12 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") },
-        }
+        },
+        required: ['name', 'description']
       };
       if (type == 'subject') {
         schema.properties.email = { type: "email", "type": "string", "pattern": "^\\S+@\\S+$", title: gettext("Email") }
+        schema.required.push('email');
       }
       var perimeter = { name: '', description: '' };
       var config = {
@@ -268,7 +291,7 @@
       if (type == 'subject') {
         config.form.push('email');
       }
-      
+
       ModalFormService.open(config).then(submit);
 
       function submit(form) {
@@ -276,6 +299,13 @@
           util.pushAll(self.currentData.perimeters, perimeters);
         })
       }
+    }
+
+    self.addPerimeter = function addPerimeter(type, policy, perimeter) {
+      policyService.addPerimeterToPolicy(type, policy, perimeter).then(function () {
+        self.currentData.allPerimeters.splice(self.currentData.allPerimeters.indexOf(perimeter), 1);
+        self.currentData.perimeters.push(perimeter);
+      })
     }
 
     self.assign = function assign(type, policy, perimeter, data) {
@@ -290,6 +320,22 @@
         self.currentData.perimeters.push(perimeter);
         self.currentData.assignments.splice(self.currentData.assignments.indexOf(perimeter), 1);
       })
+    }
+
+    self.removePerimeterFromPolicy = function removePerimeterFromPolicy(type, policy, perimeter) {
+      if (confirm(gettext('Are you sure to delete this Perimeter? (Associated assignments will be deleted too)')))
+        policyService.removePerimeterFromPolicy(type, policy, perimeter).then(function () {
+          self.currentData.perimeters.splice(self.currentData.perimeters.indexOf(perimeter), 1);
+          perimeter.policy_list.splice(perimeter.policy_list.indexOf(policy.id), 1);
+          if (perimeter.policy_list.length > 0) {
+            self.currentData.allPerimeters.push(perimeter);
+          }
+        })
+    }
+
+    self.removeData = function removeData(type, policy, data) {
+      if (confirm(gettext('Are you sure to delete this Data? (Associated assignments and rules will be deleted too)')))
+        policyService.removeData(type, policy, data)
     }
   }
 })();

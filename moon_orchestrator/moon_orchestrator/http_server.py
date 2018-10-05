@@ -19,7 +19,7 @@ logger = logging.getLogger("moon.orchestrator.http_server")
 
 __API__ = (
     Status,
- )
+)
 
 
 class Server:
@@ -70,7 +70,7 @@ class Root(Resource):
     """
     The root of the web service
     """
-    __urls__ = ("/", )
+    __urls__ = ("/",)
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
@@ -136,10 +136,12 @@ class HTTPServer(Server):
 
         def get_404_json(e):
             return jsonify({"result": False, "code": 404, "description": str(e)}), 404
+
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
             return jsonify({"result": False, "code": 400, "description": str(e)}), 400
+
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 
@@ -163,4 +165,3 @@ class HTTPServer(Server):
     @staticmethod
     def __filter_str(data):
         return data.replace("@", "-")
-

@@ -3,11 +3,11 @@ import requests
 import copy
 from python_moonclient.core import config
 
-
-logger = logging.getLogger("moonclient.core.import_json")
+LOGGER = logging.getLogger("moonclient.core.import_json")
 
 URL = None
 HEADERS = None
+
 
 def init(consul_host, consul_port):
     conf_data = config.get_config_data(consul_host, consul_port)
@@ -23,7 +23,7 @@ def import_json(file_name):
     files = {'file': open(file_name, 'rb')}
     req = requests.post(URL.format("/import"), files=files)
     result = req.json()
-    if isinstance(result,dict) and "message" in result:
+    if isinstance(result, dict) and "message" in result:
         req.reason = result["message"]
     req.raise_for_status()
     return result

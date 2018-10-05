@@ -6,7 +6,7 @@
 from helpers import mock_data
 
 
-def set_meta_rule(meta_rule_id, value=None):
+def update_meta_rule(meta_rule_id, value=None):
     from python_moondb.core import ModelManager
     if not value:
         action_category_id = mock_data.create_action_category("action_category_id1")
@@ -19,7 +19,7 @@ def set_meta_rule(meta_rule_id, value=None):
             "object_categories": [object_category_id],
             "action_categories": [action_category_id]
         }
-    return ModelManager.set_meta_rule(user_id=None, meta_rule_id=meta_rule_id, value=value)
+    return ModelManager.update_meta_rule(user_id=None, meta_rule_id=meta_rule_id, value=value)
 
 
 def add_meta_rule(meta_rule_id=None, value=None):

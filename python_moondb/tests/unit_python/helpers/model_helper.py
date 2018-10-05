@@ -4,7 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 from helpers import mock_data
-
+from uuid import  uuid4
 
 def get_models(model_id=None):
     from python_moondb.core import ModelManager
@@ -14,10 +14,7 @@ def get_models(model_id=None):
 def add_model(model_id=None, value=None):
     from python_moondb.core import ModelManager
     if not value:
-        subject_category_id, object_category_id, action_category_id, meta_rule_id = mock_data.create_new_meta_rule(
-            subject_category_name="subject_category1",
-            object_category_name="object_category1",
-            action_category_name="action_category1")
+        subject_category_id, object_category_id, action_category_id, meta_rule_id = mock_data.create_new_meta_rule()
         name = "MLS" if model_id is None else "MLS " + model_id
         value = {
             "name": name,

@@ -102,14 +102,14 @@ class Cache(object):
 
         if policy_id in self.subjects:
             for _subject_id, _subject_dict in self.subjects[policy_id].items():
-                if "name" in _subject_dict and _subject_dict["name"] == name:
+                if _subject_id == name or _subject_dict.get("name") == name:
                     return _subject_id
 
         self.__update_subjects(policy_id)
 
         if policy_id in self.subjects:
             for _subject_id, _subject_dict in self.subjects[policy_id].items():
-                if "name" in _subject_dict and _subject_dict["name"] == name:
+                if _subject_id == name or _subject_dict.get("name") == name:
                     return _subject_id
 
         raise exceptions.SubjectUnknown("Cannot find subject {}".format(name))
@@ -131,14 +131,14 @@ class Cache(object):
 
         if policy_id in self.objects:
             for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
-                if "name" in _object_dict and _object_dict["name"] == name:
+                if _object_id == name or _object_dict.get("name") == name:
                     return _object_id
 
         self.__update_objects(policy_id)
 
         if policy_id in self.objects:
             for _object_id, _object_dict in self.__OBJECTS[policy_id].items():
-                if "name" in _object_dict and _object_dict["name"] == name:
+                if _object_id == name or _object_dict.get("name") == name:
                     return _object_id
 
         raise exceptions.ObjectUnknown("Cannot find object {}".format(name))
@@ -161,13 +161,13 @@ class Cache(object):
 
         if policy_id in self.actions:
             for _action_id, _action_dict in self.__ACTIONS[policy_id].items():
-                if "name" in _action_dict and _action_dict["name"] == name:
+                if _action_id == name or _action_dict.get("name") == name:
                     return _action_id
 
         self.__update_actions(policy_id)
 
         for _action_id, _action_dict in self.__ACTIONS[policy_id].items():
-            if "name" in _action_dict and _action_dict["name"] == name:
+            if _action_id == name or _action_dict.get("name") == name:
                 return _action_id
 
         raise exceptions.ActionUnknown("Cannot find action {}".format(name))
@@ -218,6 +218,17 @@ class Cache(object):
 
     # assignment functions
 
+    def update_assignments(self, policy_id=None, perimeter_id=None):
+        if policy_id:
+            self.__update_subject_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+            self.__update_object_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+            self.__update_action_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+        else:
+            for policy_id in self.__POLICIES:
+                self.__update_subject_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+                self.__update_object_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+                self.__update_action_assignments(policy_id=policy_id, perimeter_id=perimeter_id)
+
     @property
     def subject_assignments(self):
         return self.__SUBJECT_ASSIGNMENTS
@@ -233,8 +244,7 @@ class Cache(object):
         if 'subject_assignments' in response.json():
             if policy_id not in self.subject_assignments:
                 self.__SUBJECT_ASSIGNMENTS[policy_id] = {}
-
-            self.__SUBJECT_ASSIGNMENTS[policy_id].update(response.json()['subject_assignments'])
+            self.__SUBJECT_ASSIGNMENTS[policy_id] = response.json()['subject_assignments']
         else:
             raise exceptions.SubjectAssignmentUnknown(
                 "Cannot find subject assignment within policy_id {}".format(policy_id))
@@ -251,7 +261,7 @@ class Cache(object):
                 if perimeter_id == value['subject_id'] and category_id == value['category_id']:
                     return value['assignments']
             else:
-                logger.warning("'subject_id' or 'category_id' or'assignments'"
+                logger.warning("'subject_id' or 'category_id' or 'assignments'"
                                " keys are not found in subject_assignments")
         return []
 
@@ -271,7 +281,7 @@ class Cache(object):
             if policy_id not in self.object_assignments:
                 self.__OBJECT_ASSIGNMENTS[policy_id] = {}
 
-            self.__OBJECT_ASSIGNMENTS[policy_id].update(response.json()['object_assignments'])
+            self.__OBJECT_ASSIGNMENTS[policy_id] = response.json()['object_assignments']
         else:
             raise exceptions.ObjectAssignmentUnknown(
                 "Cannot find object assignment within policy_id {}".format(policy_id))
@@ -308,7 +318,7 @@ class Cache(object):
             if policy_id not in self.__ACTION_ASSIGNMENTS:
                 self.__ACTION_ASSIGNMENTS[policy_id] = {}
 
-            self.__ACTION_ASSIGNMENTS[policy_id].update(response.json()['action_assignments'])
+            self.__ACTION_ASSIGNMENTS[policy_id] = response.json()['action_assignments']
         else:
             raise exceptions.ActionAssignmentUnknown(
                 "Cannot find action assignment within policy_id {}".format(policy_id))

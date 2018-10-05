@@ -57,7 +57,8 @@ class MetaRules(Resource):
 
         return {"meta_rules": data}
 
-    @validate_input("post", body_state={"name":True, "subject_categories":True, "object_categories":True, "action_categories":True})
+    @validate_input("post", body_state={"name": True, "subject_categories": False,
+                                        "object_categories": False, "action_categories": False})
     @check_auth
     def post(self, meta_rule_id=None, user_id=None):
         """Add a meta rule
@@ -90,7 +91,9 @@ class MetaRules(Resource):
 
         return {"meta_rules": data}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state={"name":True, "subject_categories":True, "object_categories":True, "action_categories":True})
+    @validate_input("patch", kwargs_state=[True, False],
+                    body_state={"name": True, "subject_categories": False,
+                                "object_categories": False, "action_categories": False})
     @check_auth
     def patch(self, meta_rule_id=None, user_id=None):
         """Update a meta rule
@@ -117,7 +120,7 @@ class MetaRules(Resource):
         }
         :internal_api: set_meta_rules
         """
-        data = ModelManager.set_meta_rule(
+        data = ModelManager.update_meta_rule(
             user_id=user_id, meta_rule_id=meta_rule_id, value=request.json)
 
         return {"meta_rules": data}
@@ -147,4 +150,3 @@ class MetaRules(Resource):
             user_id=user_id, meta_rule_id=meta_rule_id)
 
         return {"result": True}
-

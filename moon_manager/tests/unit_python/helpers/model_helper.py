@@ -15,11 +15,8 @@ def get_models(model_id=None):
 def add_model(model_id=None, value=None):
     from python_moondb.core import ModelManager
     if not value:
-        subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule(
-            subject_category_name="subject_category1"+uuid4().hex,
-            object_category_name="object_category1"+uuid4().hex,
-            action_category_name="action_category1"+uuid4().hex)
-        name = "MLS" if model_id is None else "MLS " + model_id
+        subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule()
+        name = "MLS"+uuid4().hex if model_id is None else "MLS " + model_id
         value = {
             "name": name,
             "description": "test",

@@ -27,3 +27,10 @@ CHANGES
 -----
 - the processing of a request is now performed in a thread
 
+4.4.2
+-----
+- apply pylint rules
+
+4.4.3
+-----
+- add "internal_port" key in slave API

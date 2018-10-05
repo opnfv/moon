@@ -10,6 +10,7 @@ from helpers import model_helper
 from .meta_rule_helper import *
 import api.utilities as utilities
 import json
+from uuid import uuid4
 
 
 def create_subject_category(name):
@@ -60,31 +61,57 @@ def create_pdp(policies_ids):
     return value
 
 
-def create_new_policy(subject_category_name="subjectCategory", object_category_name="objectCategory",
-                      action_category_name="actionCategory",
-                      model_name="test_model" + uuid4().hex, policy_name="policy_1" + uuid4().hex,
-                      meta_rule_name="meta_rule1" + uuid4().hex):
+def create_new_policy(subject_category_name=None, object_category_name=None,
+                      action_category_name=None, model_name=None, policy_name=None,
+                      meta_rule_name=None):
+    if not subject_category_name:
+        subject_category_name = "subjectCategory_" + uuid4().hex
+    if not object_category_name:
+        object_category_name = "objectCategory_" + uuid4().hex
+    if not action_category_name:
+        action_category_name = "actionCategory_" + uuid4().hex
+
+    if not meta_rule_name:
+        meta_rule_name = "meta_rule_" + uuid4().hex
+
+    if not model_name:
+        model_name = "model_name_" + uuid4().hex
+    if not policy_name:
+        policy_name = "policy_name_" + uuid4().hex
+
     subject_category_id, object_category_id, action_category_id, meta_rule_id = create_new_meta_rule(
         subject_category_name=subject_category_name + uuid4().hex,
         object_category_name=object_category_name + uuid4().hex,
-        action_category_name=action_category_name + uuid4().hex, meta_rule_name=meta_rule_name + uuid4().hex)
-    model = model_helper.add_model(value=create_model(meta_rule_id, model_name))
+        action_category_name=action_category_name + uuid4().hex,
+        meta_rule_name=meta_rule_name + uuid4().hex
+    )
+
+    model = model_helper.add_model(value=create_model(meta_rule_id, model_name + uuid4().hex))
     model_id = list(model.keys())[0]
-    value = create_policy(model_id, policy_name)
+    value = create_policy(model_id, policy_name + uuid4().hex)
     policy = add_policies(value=value)
     assert policy
     policy_id = list(policy.keys())[0]
     return subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id
 
 
-def create_new_meta_rule(subject_category_name="subjectCategory", object_category_name="objectCategory",
-                         action_category_name="actionCategory",
-                         meta_rule_name="meta_rule1" + uuid4().hex):
+def create_new_meta_rule(subject_category_name=None, object_category_name=None,
+                         action_category_name=None, meta_rule_name=None):
+    if not subject_category_name:
+        subject_category_name = "subjectCategory_" + uuid4().hex
+    if not object_category_name:
+        object_category_name = "objectCategory_" + uuid4().hex
+    if not action_category_name:
+        action_category_name = "actionCategory_" + uuid4().hex
+
+    if not meta_rule_name:
+        meta_rule_name = "meta_rule_" + uuid4().hex
+
     subject_category_id = create_subject_category(subject_category_name)
     object_category_id = create_object_category(object_category_name)
     action_category_id = create_action_category(action_category_name)
     value = {"name": meta_rule_name,
-             "algorithm": "name of the meta rule algorithm",
+             "description": "name of the meta rule algorithm",
              "subject_categories": [subject_category_id],
              "object_categories": [object_category_id],
              "action_categories": [action_category_id]
@@ -125,7 +152,8 @@ def create_subject_data(policy_id, category_id):
         "name": "subject-security-level",
         "description": {"low": "", "medium": "", "high": ""},
     }
-    subject_data = add_subject_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
+    subject_data = add_subject_data(policy_id=policy_id, category_id=category_id, value=value).get(
+        'data')
     assert subject_data
     return list(subject_data.keys())[0]
 
@@ -135,7 +163,8 @@ def create_object_data(policy_id, category_id):
         "name": "object-security-level",
         "description": {"low": "", "medium": "", "high": ""},
     }
-    object_data = add_object_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
+    object_data = add_object_data(policy_id=policy_id, category_id=category_id, value=value).get(
+        'data')
     return list(object_data.keys())[0]
 
 
@@ -144,7 +173,8 @@ def create_action_data(policy_id, category_id):
         "name": "action-type",
         "description": {"vm-action": "", "storage-action": "", },
     }
-    action_data = add_action_data(policy_id=policy_id, category_id=category_id, value=value).get('data')
+    action_data = add_action_data(policy_id=policy_id, category_id=category_id, value=value).get(
+        'data')
     return list(action_data.keys())[0]
 
 
@@ -207,3 +237,24 @@ def get_policy_id_with_action_assignment():
     client.post("/policies/{}/action_assignments".format(policy_id), data=json.dumps(data),
                 headers={'Content-Type': 'application/json'})
     return policy_id
+
+
+def add_rules(client):
+    sub_id, obj_id, act_id, meta_rule_id, policy_id = create_new_policy("sub_cat" + uuid4().hex,
+                                                                        "obj_cat" + uuid4().hex,
+                                                                        "act_cat" + uuid4().hex)
+    sub_data_id = create_subject_data(policy_id, sub_id)
+    obj_data_id = create_object_data(policy_id, obj_id)
+    act_data_id = create_action_data(policy_id, act_id)
+    data = {
+        "meta_rule_id": meta_rule_id,
+        "rule": [sub_data_id, obj_data_id, act_data_id],
+        "instructions": (
+            {"decision": "grant"},
+        ),
+        "enabled": True
+    }
+    req = client.post("/policies/{}/rules".format(policy_id), data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    rules = utilities.get_json(req.data)
+    return req, rules, policy_id

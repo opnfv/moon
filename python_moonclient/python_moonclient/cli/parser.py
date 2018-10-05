@@ -1,10 +1,13 @@
-
 class Parser:
 
     @staticmethod
     def add_common_options(parser):
-        parser.add_argument('--consul-host', help='Set the name of the consul server (default: 127.0.0.1)', default="127.0.0.1")
-        parser.add_argument('--consul-port', help='Set the port of the consult server (default: 30005)',default="30005")
+        parser.add_argument('--consul-host',
+                            help='Set the name of the consul server (default: 127.0.0.1)',
+                            default="127.0.0.1")
+        parser.add_argument('--consul-port',
+                            help='Set the port of the consult server (default: 30005)',
+                            default="30005")
         parser.add_argument("--verbose", "-v", action='store_true', help="verbose mode")
         parser.add_argument("--debug", "-d", action='store_true', help="debug mode")
 
@@ -30,7 +33,7 @@ class Parser:
 
     @staticmethod
     def add_id_or_name_argument(parser):
-        group = parser.add_mutually_exclusive_group(required=True) 
+        group = parser.add_mutually_exclusive_group(required=True)
         Parser._add_id_argument(group)
         Parser._add_name_argument(group)
 
@@ -44,7 +47,7 @@ class Parser:
 
     @staticmethod
     def add_id_or_name_pdp_argument(parser):
-        group = parser.add_mutually_exclusive_group(required=True) 
+        group = parser.add_mutually_exclusive_group(required=True)
         Parser._add_id_pdp_argument(group)
         Parser._add_name_pdp_argument(group)
 
@@ -55,10 +58,10 @@ class Parser:
     @staticmethod
     def _add_name_pdp_argument(parser):
         parser.add_argument('--name-pdp', help='name of the pdp')
-    
+
     @staticmethod
     def add_id_or_name_project_argument(parser):
-        group = parser.add_mutually_exclusive_group(required=True) 
+        group = parser.add_mutually_exclusive_group(required=True)
         Parser._add_id_project_argument(group)
         Parser._add_name_project_argument(group)
 
@@ -92,4 +95,4 @@ class Parser:
                             help="Execute stressing tests (warning delta measures "
                                  "will be false, implies -t)")
         parser.add_argument("--write", "-w", help="Write test data to a JSON file",
-                                default="/tmp/data.json")
+                            default="/tmp/data.json")

@@ -6,6 +6,8 @@
 import json
 import api.utilities as utilities
 from helpers import data_builder as builder
+from helpers import policy_helper
+from helpers import model_helper
 from uuid import uuid4
 
 
@@ -15,16 +17,15 @@ def get_models(client):
     return req, models
 
 
-def add_models(client, name):
-    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule(
-        subject_category_name="subject_category"+uuid4().hex,
-        object_category_name="object_category"+uuid4().hex, action_category_name="action_category"+uuid4().hex,
-        meta_rule_name="meta_rule" + uuid4().hex)
-    data = {
-        "name": name,
-        "description": "description of {}".format(name),
-        "meta_rules": [meta_rule_id]
-    }
+def add_models(client, name, data=None):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule()
+
+    if not data:
+        data = {
+            "name": name,
+            "description": "description of {}".format(name),
+            "meta_rules": [meta_rule_id]
+        }
     req = client.post("/models", data=json.dumps(data),
                       headers={'Content-Type': 'application/json'})
     models = utilities.get_json(req.data)
@@ -32,10 +33,7 @@ def add_models(client, name):
 
 
 def update_model(client, name, model_id):
-    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule(
-        subject_category_name="subject_category" + uuid4().hex,
-        object_category_name="object_category" + uuid4().hex, action_category_name="action_category" + uuid4().hex,
-        meta_rule_name="meta_rule" + uuid4().hex)
+    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule()
 
     data = {
         "name": name,
@@ -60,13 +58,26 @@ def add_model_without_meta_rules_ids(client, name):
     return req, models
 
 
-def update_model_without_meta_rules_ids(client, name):
+def add_model_with_empty_meta_rule_id(client, name):
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": [""]
+    }
+    req = client.post("/models", data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    models = utilities.get_json(req.data)
+    return req, models
+
+
+def update_model_without_meta_rules_ids(client, model_id):
+    name = "model_id" + uuid4().hex
     data = {
         "name": name,
         "description": "description of {}".format(name),
         "meta_rules": []
     }
-    req = client.patch("/models", data=json.dumps(data),
+    req = client.patch("/models/{}".format(model_id), data=json.dumps(data),
                        headers={'Content-Type': 'application/json'})
     models = utilities.get_json(req.data)
     return req, models
@@ -84,6 +95,24 @@ def delete_models(client, name):
 def delete_models_without_id(client):
     req = client.delete("/models/{}".format(""))
     return req
+
+
+def test_delete_model_assigned_to_policy():
+    policy_name = "testuser" + uuid4().hex
+    client = utilities.register_client()
+    req = model_helper.add_model(model_id="mls_model_id" + uuid4().hex)
+    model_id = list(req.keys())[0]
+    data = {
+        "name": policy_name,
+        "description": "description of {}".format(policy_name),
+        "model_id": model_id,
+        "genre": "genre"
+    }
+    req = client.post("/policies", data=json.dumps(data),
+                      headers={'Content-Type': 'application/json'})
+    req = client.delete("/models/{}".format(model_id))
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == '400: Model With Policy Error'
 
 
 def clean_models():
@@ -121,6 +150,64 @@ def test_delete_models():
     assert req.status_code == 200
 
 
+def test_update_models_with_assigned_policy():
+    client = utilities.register_client()
+
+    model = model_helper.add_model(model_id="mls_model_id" + uuid4().hex)
+    model_id = list(model.keys())[0]
+    value = {
+        "name": "test_policy" + uuid4().hex,
+        "model_id": model_id,
+        "description": "test",
+    }
+    policy = policy_helper.add_policies(value=value)
+    data = {
+        "name": "model_" + uuid4().hex,
+        "description": "description of model_2",
+        "meta_rules": []
+    }
+    req = client.patch("/models/{}".format(model_id), data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "400: Model With Policy Error"
+
+
+def test_update_models_with_no_assigned_policy():
+    client = utilities.register_client()
+
+    model = model_helper.add_model(model_id="mls_model_id" + uuid4().hex)
+    model_id = list(model.keys())[0]
+
+    data = {
+        "name": "model_" + uuid4().hex,
+        "description": "description of model_2",
+        "meta_rules": []
+    }
+    req = client.patch("/models/{}".format(model_id), data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+
+    assert req.status_code == 200
+
+
+def test_add_models_with_meta_rule_key():
+    client = utilities.register_client()
+
+    model = model_helper.add_model(model_id="mls_model_id" + uuid4().hex)
+    model_id = list(model.keys())[0]
+
+    data = {
+        "name": "model_" + uuid4().hex,
+        "description": "description of model_2",
+
+    }
+    req = client.patch("/models/{}".format(model_id), data=json.dumps(data),
+                       headers={'Content-Type': 'application/json'})
+
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == "Invalid Key :meta_rules not found"
+
+
 def test_delete_models_without_id():
     client = utilities.register_client()
     req = delete_models_without_id(client)
@@ -128,28 +215,80 @@ def test_delete_models_without_id():
     assert json.loads(req.data)["message"] == "400: Model Unknown"
 
 
-def test_add_model_with_empty_user():
+def test_add_model_with_empty_name():
     clean_models()
     client = utilities.register_client()
-    req, models = add_models(client, "")
+    req, models = add_models(client, "<br/>")
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
 
 
-def test_add_model_with_user_contain_space():
+def test_add_model_with_name_contain_space():
     clean_models()
     client = utilities.register_client()
-    req, models = add_models(client, "test user")
+    req, models = add_models(client, "test<br>user")
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
+
+
+def test_add_model_with_name_space():
+    clean_models()
+    client = utilities.register_client()
+    req, models = add_models(client, " ")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == '400: Model Unknown'
+
+
+def test_add_model_with_empty_meta_rule_id():
+    clean_models()
+    client = utilities.register_client()
+    req, meta_rules = add_model_with_empty_meta_rule_id(client, "testuser")
+    assert req.status_code == 400
+    assert json.loads(req.data)["message"] == '400: Meta Rule Unknown'
+
+
+def test_add_model_with_existed_name():
+    clean_models()
+    client = utilities.register_client()
+    name = uuid4().hex
+    req, models = add_models(client, name)
+    assert req.status_code == 200
+    req, models = add_models(client, name)
+    assert req.status_code == 409
+    assert json.loads(req.data)["message"] == '409: Model Error'
+
+
+def test_add_model_with_existed_meta_rules_list():
+    clean_models()
+    client = utilities.register_client()
+    name = uuid4().hex
+
+    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule()
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": [meta_rule_id]
+    }
+    name = uuid4().hex
+    req, models = add_models(client=client, name=name, data=data)
+    assert req.status_code == 200
+
+    data = {
+        "name": name,
+        "description": "description of {}".format(name),
+        "meta_rules": [meta_rule_id]
+    }
+    req, models = add_models(client=client, name=name, data=data)
+    assert req.status_code == 409
+    assert json.loads(req.data)["message"] == '409: Model Error'
 
 
 def test_add_model_without_meta_rules():
     clean_models()
     client = utilities.register_client()
     req, meta_rules = add_model_without_meta_rules_ids(client, "testuser")
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'meta_rules', [Empty Container]"
+    assert req.status_code == 200
+    # assert json.loads(req.data)["message"] == "Key: 'meta_rules', [Empty Container]"
 
 
 def test_update_model():
@@ -164,6 +303,26 @@ def test_update_model():
     delete_models(client, "testuser")
 
 
+def test_update_model_name_with_space():
+    clean_models()
+    client = utilities.register_client()
+    req = add_models(client, "testuser")
+    model_id = list(req[1]['models'])[0]
+    req_update = update_model(client, " ", model_id)
+    assert req_update[0].status_code == 400
+    assert req_update[1]["message"] == '400: Model Unknown'
+
+
+def test_update_model_with_empty_name():
+    clean_models()
+    client = utilities.register_client()
+    req = add_models(client, "testuser")
+    model_id = list(req[1]['models'])[0]
+    req_update = update_model(client, "", model_id)
+    assert req_update[0].status_code == 400
+    assert req_update[1]['message'] == '400: Model Unknown'
+
+
 def test_update_meta_rules_without_id():
     clean_models()
     client = utilities.register_client()
@@ -172,15 +331,22 @@ def test_update_meta_rules_without_id():
     assert json.loads(req_update[0].data)["message"] == "400: Model Unknown"
 
 
-def test_update_meta_rules_without_user():
+def test_update_meta_rules_without_name():
     client = utilities.register_client()
-    req_update = update_model(client, "", "")
+    req_update = update_model(client, "<a></a>", "1234567")
     assert req_update[0].status_code == 400
-    assert json.loads(req_update[0].data)["message"] == "Key: 'name', [Empty String]"
+    assert json.loads(req_update[0].data)[
+               "message"] == "Key: 'name', [Forbidden characters in string]"
 
 
 def test_update_meta_rules_without_meta_rules():
+    value = {
+        "name": "mls_model_id" + uuid4().hex,
+        "description": "test",
+        "meta_rules": []
+    }
+    model = model_helper.add_model(value=value)
+    model_id = list(model.keys())[0]
     client = utilities.register_client()
-    req_update = update_model_without_meta_rules_ids(client, "testuser")
-    assert req_update[0].status_code == 400
-    assert json.loads(req_update[0].data)["message"] == "Key: 'meta_rules', [Empty Container]"
+    req_update = update_model_without_meta_rules_ids(client, model_id)
+    assert req_update[0].status_code == 200

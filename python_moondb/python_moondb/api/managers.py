@@ -4,6 +4,7 @@
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
 import logging
+
 logger = logging.getLogger("moon.db.api.managers")
 
 

@@ -133,6 +133,13 @@ class ModelUnknown(MoonError):
     logger = "Error"
 
 
+class ModelContentError(MoonError):
+    description = _("The model content is invalid.")
+    code = 400
+    title = 'Model Unknown'
+    logger = "Error"
+
+
 class ModelExisting(MoonError):
     description = _("The model already exists.")
     code = 409
@@ -197,16 +204,11 @@ class AdminRule(AdminException):
     code = 400
     title = 'Rule Exception'
 
+
 class CategoryNameInvalid(AdminMetaData):
     description = _("The given category name is invalid.")
-    code = 409
+    code = 400
     title = 'Category Name Invalid'
-    logger = "ERROR"
-
-class SubjectCategoryNameExisting(AdminMetaData):
-    description = _("The given subject category name already exists.")
-    code = 409
-    title = 'Subject Category Name Existing'
     logger = "ERROR"
 
 
@@ -216,27 +218,11 @@ class SubjectCategoryExisting(AdminMetaData):
     title = 'Subject Category Existing'
     logger = "ERROR"
 
-
-class ObjectCategoryNameExisting(AdminMetaData):
-    description = _("The given object category name already exists.")
-    code = 409
-    title = 'Object Category Name Existing'
-    logger = "ERROR"
-
-
 class ObjectCategoryExisting(AdminMetaData):
     description = _("The given object category already exists.")
     code = 409
     title = 'Object Category Existing'
     logger = "ERROR"
-
-
-class ActionCategoryNameExisting(AdminMetaData):
-    description = _("The given action category name already exists.")
-    code = 409
-    title = 'Action Category Name Existing'
-    logger = "ERROR"
-
 
 class ActionCategoryExisting(AdminMetaData):
     description = _("The given action category already exists.")
@@ -252,11 +238,32 @@ class SubjectCategoryUnknown(AdminMetaData):
     logger = "ERROR"
 
 
+class DeleteSubjectCategoryWithMetaRule(MoonError):
+    description = _("Cannot delete subject category used in meta rule ")
+    code = 400
+    title = 'Subject Category With Meta Rule Error'
+    logger = "Error"
+
+
+class DeleteObjectCategoryWithMetaRule(MoonError):
+    description = _("Cannot delete Object category used in meta rule ")
+    code = 400
+    title = 'Object Category With Meta Rule Error'
+    logger = "Error"
+
+
 class ObjectCategoryUnknown(AdminMetaData):
     description = _("The given object category is unknown.")
     code = 400
     title = 'Object Category Unknown'
     logger = "ERROR"
+
+
+class DeleteActionCategoryWithMetaRule(MoonError):
+    description = _("Cannot delete Action category used in meta rule ")
+    code = 400
+    title = 'Action Category With Meta Rule Error'
+    logger = "Error"
 
 
 class ActionCategoryUnknown(AdminMetaData):
@@ -265,12 +272,19 @@ class ActionCategoryUnknown(AdminMetaData):
     title = 'Action Category Unknown'
     logger = "ERROR"
 
-
-class PerimeterNameInvalid(AdminPerimeter):
-    description = _("The given name is not valid.")
+class PerimeterContentError(AdminPerimeter):
+    description = _("Perimeter content is invalid.")
     code = 400
-    title = 'Perimeter Name is Invalid'
+    title = 'Perimeter content is invalid.'
     logger = "ERROR"
+
+
+class DeletePerimeterWithAssignment(MoonError):
+    description = _("Cannot delete perimeter with assignment")
+    code = 400
+    title = 'Perimeter With Assignment Error'
+    logger = "Error"
+
 
 class SubjectUnknown(AdminPerimeter):
     description = _("The given subject is unknown.")
@@ -313,23 +327,24 @@ class ActionExisting(AdminPerimeter):
     title = 'Action Existing'
     logger = "ERROR"
 
+
 class SubjectNameExisting(AdminPerimeter):
     description = _("The given subject name is existing.")
-    code = 400
+    code = 409
     title = 'Subject Name Existing'
     logger = "ERROR"
 
 
 class ObjectNameExisting(AdminPerimeter):
     description = _("The given object name is existing.")
-    code = 400
+    code = 409
     title = 'Object Name Existing'
     logger = "ERROR"
 
 
 class ActionNameExisting(AdminPerimeter):
     description = _("The given action name is existing.")
-    code = 400
+    code = 409
     title = 'Action Name Existing'
     logger = "ERROR"
 
@@ -392,21 +407,21 @@ class ActionScopeExisting(AdminScope):
 
 class SubjectScopeNameExisting(AdminScope):
     description = _("The given subject scope name is existing.")
-    code = 400
+    code = 409
     title = 'Subject Scope Name Existing'
     logger = "ERROR"
 
 
 class ObjectScopeNameExisting(AdminScope):
     description = _("The given object scope name is existing.")
-    code = 400
+    code = 409
     title = 'Object Scope Name Existing'
     logger = "ERROR"
 
 
 class ActionScopeNameExisting(AdminScope):
     description = _("The given action scope name is existing.")
-    code = 400
+    code = 409
     title = 'Action Scope Name Existing'
     logger = "ERROR"
 
@@ -434,21 +449,21 @@ class ActionAssignmentUnknown(AdminAssignment):
 
 class SubjectAssignmentExisting(AdminAssignment):
     description = _("The given subject assignment value is existing.")
-    code = 400
+    code = 409
     title = 'Subject Assignment Existing'
     logger = "ERROR"
 
 
 class ObjectAssignmentExisting(AdminAssignment):
     description = _("The given object assignment value is existing.")
-    code = 400
+    code = 409
     title = 'Object Assignment Existing'
     logger = "ERROR"
 
 
 class ActionAssignmentExisting(AdminAssignment):
     description = _("The given action assignment value is existing.")
-    code = 400
+    code = 409
     title = 'Action Assignment Existing'
     logger = "ERROR"
 
@@ -475,23 +490,37 @@ class SubMetaRuleAlgorithmNotExisting(AdminMetaRule):
 
 
 class MetaRuleUnknown(AdminMetaRule):
-    description = _("The given sub meta rule is unknown.")
+    description = _("The given meta rule is unknown.")
     code = 400
-    title = 'Sub Meta Rule Unknown'
+    title = 'Meta Rule Unknown'
     logger = "ERROR"
+
+
+class MetaRuleNotLinkedWithPolicyModel(MoonError):
+    description = _("The meta rule is not found in the model attached to the policy.")
+    code = 400
+    title = 'MetaRule Not Linked With Model - Policy'
+    logger = "Error"
+
+
+class CategoryNotAssignedMetaRule(MoonError):
+    description = _("The category is not found in the meta rules attached to the policy.")
+    code = 400
+    title = 'Category Not Linked With Meta Rule - Policy'
+    logger = "Error"
 
 
 class SubMetaRuleNameExisting(AdminMetaRule):
     description = _("The sub meta rule name already exists.")
-    code = 400
+    code = 409
     title = 'Sub Meta Rule Name Existing'
     logger = "ERROR"
 
 
 class MetaRuleExisting(AdminMetaRule):
-    description = _("The sub meta rule already exists.")
-    code = 400
-    title = 'Sub Meta Rule Existing'
+    description = _("The meta rule already exists.")
+    code = 409
+    title = 'Meta Rule Existing'
     logger = "ERROR"
 
 
@@ -502,10 +531,24 @@ class MetaRuleContentError(AdminMetaRule):
     logger = "ERROR"
 
 
+class MetaRuleUpdateError(AdminMetaRule):
+    description = _("Meta_rule is used in Rule.")
+    code = 400
+    title = 'Meta_Rule Update Error'
+    logger = "ERROR"
+
+
 class RuleExisting(AdminRule):
     description = _("The rule already exists.")
-    code = 400
+    code = 409
     title = 'Rule Existing'
+    logger = "ERROR"
+
+
+class RuleContentError(AdminRule):
+    description = _("Invalid content of rule.")
+    code = 400
+    title = 'Rule Error'
     logger = "ERROR"
 
 
@@ -569,6 +612,7 @@ class ConsulComponentContentError(ConsulError):
     code = 500
     title = 'Consul Content error'
     logger = "WARNING"
+
 
 # Containers exceptions
 
@@ -638,7 +682,7 @@ class PdpExisting(MoonError):
 
 class PdpContentError(MoonError):
     description = _("Invalid content of pdp.")
-    code = 409
+    code = 400
     title = 'Pdp Error'
     logger = "Error"
 
@@ -656,11 +700,24 @@ class PolicyUnknown(MoonError):
     title = 'Policy Unknown'
     logger = "Error"
 
+class PolicyContentError(MoonError):
+    description = _("The policy content is invalid.")
+    code = 400
+    title = 'Policy Content Error'
+    logger = "Error"
+
 
 class PolicyExisting(MoonError):
     description = _("The policy already exists.")
     code = 409
-    title = 'Policy Error'
+    title = 'Policy Already Exists'
+    logger = "Error"
+
+
+class PolicyUpdateError(MoonError):
+    description = _("The policy data is used.")
+    code = 400
+    title = 'Policy update error'
     logger = "Error"
 
 
@@ -674,33 +731,103 @@ class DeleteData(MoonError):
 class DeleteCategoryWithData(MoonError):
     description = _("Cannot delete category with data")
     code = 400
-    title = 'Category Error'
+    title = 'Category With Data Error'
     logger = "Error"
 
 
 class DeleteCategoryWithMetaRule(MoonError):
     description = _("Cannot delete category with meta rule")
     code = 400
-    title = 'Category Error'
+    title = 'Category With MetaRule Error'
+    logger = "Error"
+
+
+class DeleteCategoryWithAssignment(MoonError):
+    description = _("Cannot delete category with assignment ")
+    code = 400
+    title = 'Category With Assignment Error'
     logger = "Error"
 
 
 class DeleteModelWithPolicy(MoonError):
     description = _("Cannot delete model with policy")
     code = 400
-    title = 'Model Error'
+    title = 'Model With Policy Error'
     logger = "Error"
 
 
 class DeletePolicyWithPdp(MoonError):
     description = _("Cannot delete policy with pdp")
     code = 400
-    title = 'Policy Error'
+    title = 'Policy With PDP Error'
+    logger = "Error"
+
+
+class DeletePolicyWithPerimeter(MoonError):
+    description = _("Cannot delete policy with perimeter")
+    code = 400
+    title = 'Policy With Perimeter Error'
+    logger = "Error"
+
+
+class DeletePolicyWithData(MoonError):
+    description = _("Cannot delete policy with data")
+    code = 400
+    title = 'Policy With Data Error'
+    logger = "Error"
+
+
+class DeletePolicyWithRules(MoonError):
+    description = _("Cannot delete policy with rules")
+    code = 400
+    title = 'Policy With Rule Error'
     logger = "Error"
 
 
 class DeleteMetaRuleWithModel(MoonError):
     description = _("Cannot delete meta rule with model")
     code = 400
-    title = 'Meta rule Error'
+    title = 'Meta rule With Model Error'
     logger = "Error"
+
+
+class DeleteMetaRuleWithRule(MoonError):
+    description = _("Cannot delete meta rule with rule")
+    code = 400
+    title = 'Meta rule With Model Error'
+    logger = "Error"
+
+
+class DataUnknown(MoonError):
+    description = _("The data unknown.")
+    code = 400
+    title = 'Data Unknown'
+    logger = "Error"
+
+
+class ValidationContentError(MoonError):
+    description = _("The Content validation incorrect.")
+    code = 400
+    title = 'Invalid Content'
+    logger = "Error"
+
+    def __init__(self, message=""):
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        return self.message
+
+
+class ValidationKeyError(MoonError):
+    description = _("The Key validation incorrect.")
+    code = 400
+    title = 'Invalid Key'
+    logger = "Error"
+
+    def __init__(self, message=""):
+        self.message = message
+        super().__init__(message)
+
+    def __str__(self):
+        return self.message

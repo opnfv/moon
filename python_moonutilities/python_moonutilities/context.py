@@ -59,19 +59,19 @@ class Context:
 
     @property
     def current_state(self):
-        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        self.__validate_meta_rule_content(self.__pdp_set[self.__meta_rule_ids[self.__index]])
         return self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect']
 
     @current_state.setter
     def current_state(self, state):
         if state not in ("grant", "deny", "passed"):
             state = "passed"
-        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        self.__validate_meta_rule_content(self.__pdp_set[self.__meta_rule_ids[self.__index]])
         self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect'] = state
 
     @current_state.deleter
     def current_state(self):
-        self.__validate_meta_rule_content(self.__meta_rule_ids[self.__index])
+        self.__validate_meta_rule_content(self.__pdp_set[self.__meta_rule_ids[self.__index]])
         self.__pdp_set[self.__meta_rule_ids[self.__index]]['effect'] = "unset"
 
     @property
@@ -110,38 +110,46 @@ class Context:
             self.__pdp_set[meta_rule_id]["effect"] = "unset"
         self.__pdp_set["effect"] = "deny"
 
-    # def update_target(self, context):
-    #     # result = dict()
-    #     current_request = context['current_request']
-    #     _subject = current_request.get("subject")
-    #     _object = current_request.get("object")
-    #     _action = current_request.get("action")
-    #     meta_rule_id = context['headers'][context['index']]
-    #     policy_id = self.cache.get_policy_from_meta_rules(meta_rule_id)
-    #     meta_rules = self.cache.meta_rules()
-    #     # for meta_rule_id in meta_rules:
-    #     for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
-    #         if sub_cat not in context["pdp_set"][meta_rule_id]["target"]:
-    #             context["pdp_set"][meta_rule_id]["target"][sub_cat] = []
-    #         for assign in self.cache.get_subject_assignments(policy_id, _subject, sub_cat).values():
-    #             for assign in assign["assignments"]:
-    #                 if assign not in context["pdp_set"][meta_rule_id]["target"][sub_cat]:
-    #                     context["pdp_set"][meta_rule_id]["target"][sub_cat].append(assign)
-    #     for obj_cat in meta_rules[meta_rule_id]['object_categories']:
-    #         if obj_cat not in context["pdp_set"][meta_rule_id]["target"]:
-    #             context["pdp_set"][meta_rule_id]["target"][obj_cat] = []
-    #         for assign in self.cache.get_object_assignments(policy_id, _object, obj_cat).values():
-    #             for assign in assign["assignments"]:
-    #                 if assign not in context["pdp_set"][meta_rule_id]["target"][obj_cat]:
-    #                     context["pdp_set"][meta_rule_id]["target"][obj_cat].append(assign)
-    #     for act_cat in meta_rules[meta_rule_id]['action_categories']:
-    #         if act_cat not in context["pdp_set"][meta_rule_id]["target"]:
-    #             context["pdp_set"][meta_rule_id]["target"][act_cat] = []
-    #         for assign in self.cache.get_action_assignments(policy_id, _action, act_cat).values():
-    #             for assign in assign["assignments"]:
-    #                 if assign not in context["pdp_set"][meta_rule_id]["target"][act_cat]:
-    #                     context["pdp_set"][meta_rule_id]["target"][act_cat].append(assign)
-    #     # context["pdp_set"][meta_rule_id]["target"].update(result)
+    def update_target(self):
+        for meta_rule_id in self.__meta_rule_ids:
+            result = dict()
+            _subject = self.__current_request["subject"]
+            _object = self.__current_request["object"]
+            _action = self.__current_request["action"]
+
+            meta_rules = self.cache.meta_rules
+            policy_id = self.cache.get_policy_from_meta_rules(meta_rule_id)
+
+            if 'subject_categories' not in meta_rules[meta_rule_id]:
+                raise exceptions.MetaRuleContentError(" 'subject_categories' key not found ")
+
+            self.cache.update_assignments(policy_id)
+
+            for sub_cat in meta_rules[meta_rule_id]['subject_categories']:
+                if sub_cat not in result:
+                    result[sub_cat] = []
+                result[sub_cat].extend(
+                    self.cache.get_subject_assignments(policy_id, _subject, sub_cat))
+
+            if 'object_categories' not in meta_rules[meta_rule_id]:
+                raise exceptions.MetaRuleContentError(" 'object_categories' key not found ")
+
+            for obj_cat in meta_rules[meta_rule_id]['object_categories']:
+                if obj_cat not in result:
+                    result[obj_cat] = []
+                result[obj_cat].extend(
+                    self.cache.get_object_assignments(policy_id, _object, obj_cat))
+
+            if 'action_categories' not in meta_rules[meta_rule_id]:
+                raise exceptions.MetaRuleContentError(" 'action_categories' key not found ")
+
+            for act_cat in meta_rules[meta_rule_id]['action_categories']:
+                if act_cat not in result:
+                    result[act_cat] = []
+                result[act_cat].extend(
+                    self.cache.get_action_assignments(policy_id, _action, act_cat))
+
+            self.__pdp_set[meta_rule_id]["target"] = result
 
     def __add_target(self, meta_rule_id):
         """build target from meta_rule
@@ -341,4 +349,5 @@ pdp_set: {pdp_set}
 
     def __validate_meta_rule_content(self, meta_rules):
         if 'effect' not in meta_rules:
-            raise exceptions.PdpContentError
+            logger.error("meta_rules={}".format(meta_rules))
+            raise exceptions.PdpContentError("effect not in meta_rules")

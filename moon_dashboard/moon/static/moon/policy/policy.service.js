@@ -26,34 +26,55 @@
             remove: { method: 'DELETE' }
         });
 
-        var policySubjectDataResource = $resource(host + '/policies/' + ':policy_id' + '/subject_data/' + ':category_id', {}, {
+        var policySubjectDataResource = $resource(host + '/policies/' + ':policy_id' + '/subject_data/' + ':category_id' + '/' + ':data_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
         })
 
-        var policyObjectDataResource = $resource(host + '/policies/' + ':policy_id' + '/object_data/' + ':category_id', {}, {
+        var policyObjectDataResource = $resource(host + '/policies/' + ':policy_id' + '/object_data/' + ':category_id' + '/' + ':data_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
         })
 
-        var policyActionDataResource = $resource(host + '/policies/' + ':policy_id' + '/action_data/' + ':category_id', {}, {
+        var policyActionDataResource = $resource(host + '/policies/' + ':policy_id' + '/action_data/' + ':category_id' + '/' + ':data_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
         })
 
-        var policySubjectPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/subjects', {}, {
+        var policySubjectPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/subjects/' + ':perimeter_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
         })
 
-        var policyObjectPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/objects', {}, {
+        var policyObjectPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/objects/' + ':perimeter_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
         })
 
-        var policyActionPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/actions', {}, {
+        var policyActionPerimetersResource = $resource(host + '/policies/' + ':policy_id' + '/actions/' + ':perimeter_id', {}, {
             query: {method: 'GET'},
             create: { method: 'POST' },
+            remove: { method: 'DELETE' }
+        })
+
+        var subjectPerimetersResource = $resource(host + '/subjects/' + ':perimeter_id', {}, {
+            query: {method: 'GET'},
+            update: { method: 'PATCH' }
+        })
+
+        var objectPerimetersResource = $resource(host + '/objects/' + ':perimeter_id', {}, {
+            query: {method: 'GET'},
+            update: { method: 'PATCH' }
+        })
+
+        var actionPerimetersResource = $resource(host + '/actions/' + ':perimeter_id', {}, {
+            query: {method: 'GET'},
+            update: { method: 'PATCH' }
         })
 
         var policySubjectAssignmentsResource = $resource(host + '/policies/' + ':policy_id' + '/subject_assignments/' + ':perimeter_id' + '/' + ':category_id' + '/' + ':data_id', {}, {
@@ -81,30 +102,36 @@
                 arrayName: "subjectData",
                 mapName: "subjectDataMap",
                 responseName: "subject_data",
-                perimeterResource: policySubjectPerimetersResource,
+                policyPerimeterResource: policySubjectPerimetersResource,
+                perimeterResource: subjectPerimetersResource,
                 assignmentResource: policySubjectAssignmentsResource,
                 perimeterResponseName: "subjects",
                 assignmentResponseName: "subject_assignments",
+                unusedArrayName: "unusedSubjectData",
             },
             'object': {
                 resource: policyObjectDataResource,
                 arrayName: "objectData",
                 mapName: "objectDataMap",
                 responseName: "object_data",
-                perimeterResource: policyObjectPerimetersResource,
+                policyPerimeterResource: policyObjectPerimetersResource,
+                perimeterResource: objectPerimetersResource,
                 assignmentResource: policyObjectAssignmentsResource,
                 perimeterResponseName: "objects",
                 assignmentResponseName: "object_assignments",
+                unusedArrayName: "unusedObjectData",
             },
             'action': {
                 resource: policyActionDataResource,
                 arrayName: "actionData",
                 mapName: "actionDataMap",
                 responseName: "action_data",
-                perimeterResource: policyActionPerimetersResource,
+                policyPerimeterResource: policyActionPerimetersResource,
+                perimeterResource: actionPerimetersResource,
                 assignmentResource: policyActionAssignmentsResource,
                 perimeterResponseName: "actions",
                 assignmentResponseName: "action_assignments",
+                unusedArrayName: "unusedActionData",
             }
         }
 
@@ -149,6 +176,7 @@
 
         function removeRuleInternal(policy, rule) {
             policy.rules.splice(policy.rules.indexOf(rule), 1);
+            updateUnusedData(policy);
         }
 
         function loadPolicyRule(policy) {
@@ -161,8 +189,37 @@
                 }
     
                 $q.all(queries).then(function (result) {
-                    createRules(policy, result.rules, result.subjectData, result.objectData, result.actionData)
+                    createRules(policy, result.rules, result.subjectData, result.objectData, result.actionData);
+                    updateUnusedData(policy);
                 }, util.displayErrorFunction('Unable to load rules'))
+            }
+        }
+
+        function updateUnusedData(policy) {
+            policy.unusedSubjectData.splice(0, policy.unusedSubjectData.length);
+            util.pushAll(policy.unusedSubjectData, policy.subjectData);
+
+            policy.unusedObjectData.splice(0, policy.unusedObjectData.length);
+            util.pushAll(policy.unusedObjectData, policy.objectData);
+
+            policy.unusedActionData.splice(0, policy.unusedActionData.length);
+            util.pushAll(policy.unusedActionData, policy.actionData);
+
+            for (var i = 0; i < policy.rules.length; i++) {
+                var rule = policy.rules[i];
+                removeUsedData(rule.subjectData, policy.unusedSubjectData);
+                removeUsedData(rule.objectData, policy.unusedObjectData);
+                removeUsedData(rule.actionData, policy.unusedActionData);
+            }
+        }
+
+        function removeUsedData(list, orphanList) {
+            for (var j = 0; j < list.length; j++) {
+                var data = list[j];
+                var notOrphanIndex = util.indexOf(orphanList, "id", data.id);
+                if (notOrphanIndex >= 0) {
+                    orphanList.splice(notOrphanIndex, 1);
+                }
             }
         }
 
@@ -174,6 +231,9 @@
             policy.objectData = util.mapToArray(policy.objectDataMap);
             policy.actionDataMap = actionsData.action_data.length > 0 ? actionsData.action_data[0].data : [];
             policy.actionData = util.mapToArray(policy.actionDataMap);
+            policy.unusedSubjectData = [];
+            policy.unusedObjectData = [];
+            policy.unusedActionData = [];
             for (var i = 0; i < policy.rules.length; i++) {
                 var rule = policy.rules[i];
                 populateRule(policy, rule);
@@ -251,6 +311,7 @@
                         policy.rules.push(populateRule(policy, rule))
                     }
                     util.displaySuccess('Rule created');
+                    updateUnusedData(policy);
                 }
             },
             removeRuleFromPolicy: function removeRuleFromPolicy(policy, rule) {
@@ -267,14 +328,27 @@
                     function (data) {
                         var result = util.createInternal(data[categoryValue.responseName].data, policy[categoryValue.arrayName], policy[categoryValue.mapName]);
                         util.displaySuccess('Data created');
+                        util.pushAll(policy[categoryValue.unusedArrayName], result);
                         return result;
                     }, 
                     util.displayErrorFunction('Unable to create Data')
                 );
             },
+            removeData: function removeData(type, policy, data) {
+                var categoryValue = categoryMap[type];
+                return categoryValue.resource.remove({ policy_id: policy.id, category_id: data.category_id, data_id: data.id }).$promise.then(
+                    function (data) {
+                        policy[categoryValue.arrayName].splice(policy.subjectData.indexOf(data), 1);
+                        policy[categoryValue.unusedArrayName].splice(policy.unusedSubjectData.indexOf(data), 1);
+                        delete policy[categoryValue.mapName][data.id];
+                        util.displaySuccess('Data removed');
+                    }, 
+                    util.displayErrorFunction('Unable to remove Data')
+                );
+            },
             createPerimeter: function createPerimeter(type, policy, perimeter) {
                 var categoryValue = categoryMap[type];
-                return categoryValue.perimeterResource.create({ policy_id: policy.id }, perimeter).$promise.then(
+                return categoryValue.policyPerimeterResource.create({ policy_id: policy.id }, perimeter).$promise.then(
                     function (data) {
                         util.displaySuccess('Perimeter created');
                         return util.mapToArray(data[categoryValue.perimeterResponseName]);
@@ -282,10 +356,33 @@
                     util.displayErrorFunction('Unable to create Perimeter')
                 );
             },
+            removePerimeterFromPolicy: function removePerimeterFromPolicy(type, policy, perimeter) {
+                var categoryValue = categoryMap[type];
+
+                return categoryValue.policyPerimeterResource.remove({ policy_id: policy.id, perimeter_id: perimeter.id }, null).$promise.then(
+                    function (data) {
+                        util.displaySuccess('Perimeter removed');
+                        return perimeter;
+                    },
+                    util.displayErrorFunction('Unable to remove Perimeter')
+                )
+            },
+            addPerimeterToPolicy: function addPerimeterToPolicy(type, policy, perimeter) {
+                var categoryValue = categoryMap[type];
+                perimeter.policy_list.push(policy.id); 
+
+                return categoryValue.perimeterResource.update({ perimeter_id: perimeter.id }, perimeter).$promise.then(
+                    function (data) {
+                        util.displaySuccess('Perimeter added');
+                    },
+                    util.displayErrorFunction('Unable to add Perimeter')
+                )
+            },
             loadPerimetersAndAssignments: function loadPerimetersAndAssignments(type, policy) {
                 var categoryValue = categoryMap[type];
                 var queries = {
-                    perimeters: categoryValue.perimeterResource.query({ policy_id: policy.id }).$promise,
+                    allPerimeters: categoryValue.perimeterResource.query().$promise,
+                    perimeters: categoryValue.policyPerimeterResource.query({ policy_id: policy.id }).$promise,
                     assignments: categoryValue.assignmentResource.query({ policy_id: policy.id }).$promise,
                 }
     
@@ -294,6 +391,7 @@
                     result.assignments = util.mapToArray(data.assignments[categoryValue.assignmentResponseName]);
                     result.perimetersMap = data.perimeters[categoryValue.perimeterResponseName];
                     result.perimeters = util.mapToArray(result.perimetersMap);
+                    result.allPerimeters = util.mapToArray(data.allPerimeters[categoryValue.perimeterResponseName]);
                     return result;
                 }, util.displayErrorFunction('Unable to load Perimeters'))
                 

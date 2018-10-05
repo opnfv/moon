@@ -10,7 +10,7 @@
   </div>
 
   <div class="list-group">
-    <div ng-repeat="policy in ctrl.model.policies | orderBy:'name' | filter:filterText" class="list-group-item">
+    <div ng-repeat="policy in ctrl.model.policies | orderBy:'name' | filter:filterText" class="list-group-item" ng-init="toggle = {};toggle.showUnused = false">
       <h3 class="list-group-item-heading inline">{$ policy.name $}</h3>
       <div class="pull-right">
         <button type="button" class="fa fa-trash" title="{$ 'Remove Policy' | translate $}" ng-click="ctrl.removePolicy(policy)"></button>
@@ -24,6 +24,46 @@
         <translate>Genre:</translate>
         <translate>{$ policy.genre ? policy.genre : 'none' $}</translate>
       </h4>
+      <div ng-if="policy.unusedSubjectData.length  
+            || policy.unusedSubjectData.length
+            || policy.unusedSubjectData.length" class="alert alert-dismissable alert-warning">
+        <button type="button" class="close" data-dismiss="alert" ng-click="toggle.showUnused=false">×</button>
+        <h4 translate>Warning!</h4>
+        <p translate>
+          Some data are unused, please check them and delete them if necessary.
+          <a href="" ng-click="toggle.showUnused=true" ng-show="!toggle.showUnused" translate>Show unused data</a>
+          <a href="" ng-click="toggle.showUnused=false" ng-show="toggle.showUnused" translate>Hide unused data</a>
+        </p>
+      </div>
+
+      <div ng-if="toggle.showUnused" class="list-group-item-text overflow-hidden">
+        <div class="list-group col-lg-3" ng-if="policy.unusedSubjectData.length">
+          <h3 class="list-group-item active" translate>Unused Subject data</h3>
+          <div ng-repeat="subject in policy.unusedSubjectData | orderBy:'name'" class="list-group-item">
+            <h4 class="list-group-item-heading inline" title="{$ subject.description $}">{$ subject.name $}</h4>
+            <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeData('subject', policy, subject)" title="{$ 'Remove Subject data' | translate $}"></button>
+          </div>
+        </div>
+
+        <div class="list-group col-lg-3" ng-if="policy.unusedObjectData.length">
+          <h3 class="list-group-item active" translate>Unused Object data</h3>
+          <div ng-repeat="object in policy.unusedObjectData | orderBy:'name'" class="list-group-item">
+            <h4 class="list-group-item-heading inline" title="{$ object.description $}">{$ object.name $}</h4>
+            <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeData('object', policy, object)" title="{$ 'Remove Object data' | translate $}"></button>
+          </div>
+        </div>
+
+        <div class="list-group col-lg-3" ng-if="policy.unusedActionData.length">
+          <h3 class="list-group-item active" translate>Unused Action data</h3>
+          <div ng-repeat="action in policy.unusedActionData | orderBy:'name'" class="list-group-item">
+            <h4 class="list-group-item-heading inline" title="{$ action.description $}">{$ action.name $}</h4>
+            <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeData('action', policy, action)" title="{$ 'Remove Action data' | translate $}"></button>
+          </div>
+        </div>
+        
+      </div>
+
+
       <details class="list-group-item-text">
         <summary ng-click="ctrl.populatePolicy(policy)">
           <h4 class="inline" translate>Rules</h4>
@@ -85,7 +125,7 @@
                     <tr>
                       <td>
                         <p ng-repeat="data in rule.subjectData">
-                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}" title="{$ data.description $}">{$ data.name $}</span>
                           <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('subject', policy, data)"
                             title="{$ 'Assign to perimeters' | translate $}"></button>
                           <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
@@ -94,7 +134,7 @@
                       </td>
                       <td>
                         <p ng-repeat="data in rule.objectData">
-                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}" title="{$ data.description $}">{$ data.name $}</span>
                           <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('object', policy, data)"
                             title="{$ 'Assign to perimeters' | translate $}"></button>
                           <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
@@ -103,7 +143,7 @@
                       </td>
                       <td>
                         <p ng-repeat="data in rule.actionData">
-                          <span ng-class="{'text-primary': ctrl.currentData.data == data}">{$ data.name $}</span>
+                          <span ng-class="{'text-primary': ctrl.currentData.data == data}" title="{$ data.description $}">{$ data.name $}</span>
                           <button ng-if="ctrl.currentData.data != data" type="button" class="fa fa-exchange pull-right" ng-click="ctrl.assignData('action', policy, data)"
                             title="{$ 'Assign to perimeters' | translate $}"></button>
                           <button ng-if="ctrl.currentData.data == data" type="button" class="fa fa-times pull-right" ng-click="ctrl.currentData = null"
@@ -131,18 +171,34 @@
                   </div>
                   <div>
                     <div class="col-lg-4">
-                      <h4 translate>Available perimeters</h4>
+                      <h4 translate>All perimeters</h4>
                       <div class="w-100 height-200 scroll list-group border">
-                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.perimeters | orderBy:'name' | filter:filterPerimeter" title="{$ perimeter.description $}"
-                          ng-click="ctrl.assign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)">{$ perimeter.name $}</button>
+                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.allPerimeters | orderBy:'name' | filter:filterPerimeter"
+                          title="{$ perimeter.description $}" ng-click="ctrl.addPerimeter(ctrl.currentData.type, policy, perimeter)">{$ perimeter.name $}</button>
+
+                      </div>
+                      <p translate class="mt-5">Click to add</p>
+                    </div>
+
+                    <div class="col-lg-4">
+                      <h4 translate>Policy perimeters</h4>
+                      <div class="w-100 height-200 scroll list-group border">
+                        <div ng-click="ctrl.assign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)" class="list-group-item" ng-repeat="perimeter in ctrl.currentData.perimeters | orderBy:'name' | filter:filterPerimeter">
+                          <span title="{$ perimeter.description $}">
+                            {$ perimeter.name $}
+                          </span>
+                          <button type="button" class="fa fa-trash pull-right" ng-click="$event.stopPropagation();ctrl.removePerimeterFromPolicy(ctrl.currentData.type, policy, perimeter)"
+                            title="{$ 'Remove Perimeter' | translate $}"></button>
+                        </div>
+
                       </div>
                       <p translate class="mt-5">Click to assign</p>
                     </div>
                     <div class="col-lg-4">
                       <h4 translate>Assigned perimeters</h4>
                       <div class="w-100 list-group border height-200 scroll">
-                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.assignments | orderBy:'name' | filter:filterPerimeter" title="{$ perimeter.description $}"
-                          ng-click="ctrl.unassign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)">{$ perimeter.name $}</button>
+                        <button class="list-group-item" ng-repeat="perimeter in ctrl.currentData.assignments | orderBy:'name' | filter:filterPerimeter"
+                          title="{$ perimeter.description $}" ng-click="ctrl.unassign(ctrl.currentData.type, policy, perimeter, ctrl.currentData.data)">{$ perimeter.name $}</button>
                       </div>
                       <p translate class="mt-5">Click to unassign</p>
                     </div>

@@ -1,4 +1,4 @@
 from moon_wrapper.server import main
 
-server = main()
-server.run()
+SERVER = main()
+SERVER.run()

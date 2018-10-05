@@ -2,6 +2,8 @@
 # This software is distributed under the terms and conditions of the 'Apache-2.0'
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+from  helpers import mock_data as mock_data
+from helpers import meta_rule_helper
 
 def get_policies():
     from python_moondb.core import PolicyManager
@@ -45,11 +47,20 @@ def get_rules(policy_id=None, meta_rule_id=None, rule_id=None):
     return PolicyManager.get_rules("", policy_id, meta_rule_id, rule_id)
 
 
-def add_rule(policy_id=None, meta_rule_id=None, value=None):
+def add_rule(policy_id, meta_rule_id, value=None):
     from python_moondb.core import PolicyManager
     if not value:
+        meta_rule = meta_rule_helper.get_meta_rules(meta_rule_id)
+        sub_cat_id = meta_rule[meta_rule_id]['subject_categories'][0]
+        ob_cat_id = meta_rule[meta_rule_id]['object_categories'][0]
+        act_cat_id = meta_rule[meta_rule_id]['action_categories'][0]
+
+        subject_data_id = mock_data.create_subject_data(policy_id=policy_id, category_id=sub_cat_id)
+        object_data_id = mock_data.create_object_data(policy_id=policy_id, category_id=ob_cat_id)
+        action_data_id = mock_data.create_action_data(policy_id=policy_id, category_id=act_cat_id)
+
         value = {
-            "rule": ("high", "medium", "vm-action"),
+            "rule": (subject_data_id, object_data_id, action_data_id),
             "instructions": ({"decision": "grant"}),
             "enabled": "",
         }

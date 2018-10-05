@@ -1,13 +1,12 @@
 import logging
+from importlib.machinery import SourceFileLoader
 from cliff.lister import Lister
 from cliff.command import Command
-from importlib.machinery import SourceFileLoader
-
 from python_moonclient.core import models, policies, pdp
 from python_moonclient.cli.parser import Parser
 from python_moonclient.cli.projects import ProjectsUtils
 
-logger = logging.getLogger("moonclient.cli.pdps")
+LOGGER = logging.getLogger("moonclient.cli.pdps")
 
 
 class ModelUtils:
@@ -19,7 +18,8 @@ class ModelUtils:
         modelz = models.check_model()
         for _model_key, _model_value in modelz["models"].items():
             if _model_key == parsed_id or _model_value['name'] == parsed_name:
-                # logger.info("Found pdp : [key='{}' , name='{}']".format(_pdp_key, _pdp_value['name']))
+                # LOGGER.info(
+                # "Found pdp : [key='{}' , name='{}']".format(_pdp_key, _pdp_value['name']))
                 return _model_key
         return None
 
@@ -28,7 +28,8 @@ class ModelUtils:
         modelz = models.check_model()
         for _model_key, _model_value in modelz["models"].items():
             if _model_key == parsed_id or _model_value['name'] == parsed_name:
-                # logger.info("Found pdp : [key='{}' , name='{}']".format(_pdp_key, _pdp_value['name']))
+                # LOGGER.info(
+                # "Found pdp : [key='{}' , name='{}']".format(_pdp_key, _pdp_value['name']))
                 return _model_value['name']
         return None
 
@@ -156,6 +157,3 @@ class SubjectCategoryAdd(Command):
         else:
             print("Error while creating subject category")
         # subject_categories = models.check_subject_category(subject_category_id)
-
-
-

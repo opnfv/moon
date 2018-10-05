@@ -73,7 +73,7 @@ class Pods(Resource):
 
     def __get_slave_names(self):
         for slave in self.driver.get_slaves():
-            if "name" in slave :
+            if "name" in slave:
                 yield slave["name"]
 
     @check_auth
@@ -146,7 +146,7 @@ class Pods(Resource):
                 if "name" in slave and "wrapper_name" in slave:
                     if uuid in (slave['name'], slave["wrapper_name"]):
                         self.driver.delete_wrapper(name=slave["wrapper_name"])
-                else :
+                else:
                     raise exceptions.SlaveNameUnknown
         except Exception as e:
             return {"result": False, "message": str(e)}, 500

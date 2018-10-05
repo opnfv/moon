@@ -62,10 +62,6 @@
         <translate>Import</translate>
       </label>
       <input id="file" class="input-file" type="file" on-read-file="ctrl.importData(contents)" accept="application/json,.json"/>
-      <!--button type="button" class="btn btn-primary" ng-click="ctrl.createModel()">
-        <span class="fa fa-upload"></span>
-        <translate>Import</translate>
-      </button-->
     </div>
   </div>
 
@@ -115,19 +111,19 @@
                   <tr>
                     <td>
                       <p ng-repeat="category in metaRule.subject_categories">
-                        <span>{$ category.name $}</span>
+                        <span title="{$ category.description $}">{$ category.name $}</span>
                         <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('subject', metaRule, category)" title="{$ 'Remove Subject' | translate $}"></button>
                       </p>
                     </td>
                     <td>
                       <p ng-repeat="category in metaRule.object_categories">
-                        <span>{$ category.name $}</span>
+                        <span title="{$ category.description $}">{$ category.name $}</span>
                         <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('object', metaRule, category)" title="{$ 'Remove Object' | translate $}"></button>
                       </p>
                     </td>
                     <td>
                       <p ng-repeat="category in metaRule.action_categories">
-                        <span>{$ category.name $}</span>
+                        <span title="{$ category.description $}">{$ category.name $}</span>
                         <button type="button" class="fa fa-trash pull-right" ng-click="ctrl.removeCategoryFromMetaRule('action', metaRule, category)" title="{$ 'Remove Action' | translate $}"></button>
                       </p>
                     </td>

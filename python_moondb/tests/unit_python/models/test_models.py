@@ -10,6 +10,8 @@ import helpers.mock_data as mock_data
 import helpers.model_helper as model_helper
 import helpers.category_helper as category_helper
 import helpers.policy_helper as policy_helper
+import helpers.assignment_helper as assignment_helper
+from uuid import uuid4
 
 logger = logging.getLogger("moon.db.tests.test_model")
 
@@ -83,7 +85,7 @@ def test_add_same_model_twice(db):
     with pytest.raises(ModelExisting) as exception_info:
         model_helper.add_model(model_id="model_1", value=value)
     model_helper.delete_all_models()
-    # assert str(exception_info.value) == '409: Model Error'
+    assert str(exception_info.value) == '409: Model Error'
 
 
 def test_add_model_generate_new_uuid(db):
@@ -148,9 +150,34 @@ def test_add_models_with_same_name_twice(db):
     models = model_helper.add_model(value=model_value1)
     assert isinstance(models, dict)
     assert models
-    with pytest.raises(Exception) as exc_info:
+    with pytest.raises(Exception) as exception_info:
         model_helper.add_model(value=model_value1)
     model_helper.delete_all_models()
+    assert str(exception_info.value) == '409: Model Error'
+
+def test_add_model_with_existed_meta_rules_list(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id = mock_data.create_new_meta_rule(
+        subject_category_name=uuid4().hex,
+        object_category_name=uuid4().hex,
+        action_category_name=uuid4().hex)
+    model_value1 = {
+        "name": uuid4().hex,
+        "description": "test",
+        "meta_rules": [meta_rule_id]
+    }
+    models = model_helper.add_model(value=model_value1)
+    assert isinstance(models, dict)
+    assert models
+    model_value1 = {
+        "name": uuid4().hex,
+        "description": "test",
+        "meta_rules": [meta_rule_id]
+    }
+    with pytest.raises(Exception) as exception_info:
+        model_helper.add_model(value=model_value1)
+    model_helper.delete_all_models()
+    assert str(exception_info.value) == '409: Model Error'
+    assert str(exception_info.value.description)=='Meta Rules List Existed in another Model'
 
 
 def test_delete_models(db):
@@ -240,6 +267,7 @@ def test_delete_model_assigned_to_policy(db):
     policy_helper.add_policies(value=value)
     with pytest.raises(DeleteModelWithPolicy) as exception_info:
         model_helper.delete_models(uuid=model_id)
+    assert str(exception_info.value) == '400: Model With Policy Error'
 
 
 def test_add_subject_category(db):
@@ -253,13 +281,32 @@ def test_add_subject_category(db):
     assert len(subject_category) == 1
 
 
+def test_add_subject_categories_with_existed_name(db):
+    name = uuid4().hex
+    value = {
+        "name": name,
+        "description": "description subject_category"
+    }
+    subject_category = category_helper.add_subject_category(value=value)
+    assert subject_category
+    assert len(subject_category) == 1
+
+    value = {
+        "name": name,
+        "description": "description subject_category"
+    }
+    with pytest.raises(SubjectCategoryExisting) as exception_info:
+        category_helper.add_subject_category(value=value)
+    assert str(exception_info.value) == '409: Subject Category Existing'
+
+
 def test_add_subject_category_with_empty_name(db):
     category_id = "category_id1"
     value = {
         "name": "",
         "description": "description subject_category"
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(CategoryNameInvalid) as exception_info:
         category_helper.add_subject_category(category_id, value)
     assert str(exception_info.value) == '400: Category Name Invalid'
 
@@ -271,7 +318,7 @@ def test_add_subject_category_with_same_category_id(db):
         "description": "description subject_category"
     }
     category_helper.add_subject_category(category_id, value)
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(SubjectCategoryExisting) as exception_info:
         category_helper.add_subject_category(category_id, value)
     assert str(exception_info.value) == '409: Subject Category Existing'
 
@@ -299,10 +346,41 @@ def test_delete_subject_category(db):
     assert not subject_category
 
 
+def test_delete_subject_category_with_data(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+
+    mock_data.create_subject_data(policy_id, subject_category_id)
+
+    with pytest.raises(DeleteSubjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_subject_category(subject_category_id)
+    assert str(exception_info.value) == '400: Subject Category With Meta Rule Error'
+
+
+def test_delete_subject_category_with_assignment(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+
+    subject_id = mock_data.create_subject(policy_id)
+    data_id = mock_data.create_subject_data(policy_id, subject_category_id)
+    assignment_helper.add_subject_assignment(policy_id, subject_id, subject_category_id, data_id)
+
+    with pytest.raises(DeleteSubjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_subject_category(subject_category_id)
+    assert str(exception_info.value) == '400: Subject Category With Meta Rule Error'
+
+
+def test_delete_subject_category_with_rule(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    policy_helper.add_rule(policy_id=policy_id, meta_rule_id=meta_rule_id)
+
+    with pytest.raises(DeleteSubjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_subject_category(subject_category_id)
+    assert str(exception_info.value) == '400: Subject Category With Meta Rule Error'
+
+
 def test_delete_subject_category_with_unkown_category_id(db):
     category_id = "invalid_category_id"
 
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(SubjectCategoryUnknown) as exception_info:
         category_helper.delete_subject_category(category_id)
     assert str(exception_info.value) == '400: Subject Category Unknown'
 
@@ -318,6 +396,20 @@ def test_add_object_category(db):
     assert len(object_category) == 1
 
 
+def test_add_object_categories_with_existed_name(db):
+    name = uuid4().hex
+    value = {
+        "name": name,
+        "description": "description object_category"
+    }
+    object_category = category_helper.add_object_category(value=value)
+    assert object_category
+    assert len(object_category) == 1
+    with pytest.raises(ObjectCategoryExisting) as exception_info:
+        category_helper.add_object_category(value=value)
+    assert str(exception_info.value) == '409: Object Category Existing'
+
+
 def test_add_object_category_with_same_category_id(db):
     category_id = "category_id1"
     value = {
@@ -325,7 +417,7 @@ def test_add_object_category_with_same_category_id(db):
         "description": "description object_category"
     }
     category_helper.add_object_category(category_id, value)
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ObjectCategoryExisting) as exception_info:
         category_helper.add_object_category(category_id, value)
     assert str(exception_info.value) == '409: Object Category Existing'
 
@@ -336,7 +428,7 @@ def test_add_object_category_with_empty_name(db):
         "name": "",
         "description": "description object_category"
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(CategoryNameInvalid) as exception_info:
         category_helper.add_object_category(category_id, value)
     assert str(exception_info.value) == '400: Category Name Invalid'
 
@@ -364,10 +456,42 @@ def test_delete_object_category(db):
     assert not object_category
 
 
+def test_delete_object_category_with_data(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    mock_data.create_subject_data(policy_id, subject_category_id)
+
+    mock_data.create_object_data(policy_id, object_category_id)
+
+    with pytest.raises(DeleteObjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_object_category(object_category_id)
+    assert str(exception_info.value) == '400: Object Category With Meta Rule Error'
+
+
+def test_delete_object_category_with_assignment(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+
+    object_id = mock_data.create_object(policy_id)
+    data_id = mock_data.create_object_data(policy_id, object_category_id)
+    assignment_helper.add_object_assignment(policy_id, object_id, object_category_id, data_id)
+
+    with pytest.raises(DeleteObjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_object_category(object_category_id)
+    assert str(exception_info.value) == '400: Object Category With Meta Rule Error'
+
+
+def test_delete_object_category_with_rule(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    policy_helper.add_rule(policy_id=policy_id, meta_rule_id=meta_rule_id)
+
+    with pytest.raises(DeleteObjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_object_category(object_category_id)
+    assert str(exception_info.value) == '400: Object Category With Meta Rule Error'
+
+
 def test_delete_object_category_with_unkown_category_id(db):
     category_id = "invalid_category_id"
 
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ObjectCategoryUnknown) as exception_info:
         category_helper.delete_object_category(category_id)
     assert str(exception_info.value) == '400: Object Category Unknown'
 
@@ -383,6 +507,20 @@ def test_add_action_category(db):
     assert len(action_category) == 1
 
 
+def test_add_action_categories_with_existed_name(db):
+    name = uuid4().hex
+    value = {
+        "name": name,
+        "description": "description action_category"
+    }
+    action_category = category_helper.add_action_category(value=value)
+    assert action_category
+    assert len(action_category) == 1
+    with pytest.raises(ActionCategoryExisting) as exception_info:
+        category_helper.add_action_category(value=value)
+    assert str(exception_info.value) == '409: Action Category Existing'
+
+
 def test_add_action_category_with_same_category_id(db):
     category_id = "category_id1"
     value = {
@@ -390,7 +528,7 @@ def test_add_action_category_with_same_category_id(db):
         "description": "description action_category"
     }
     category_helper.add_action_category(category_id, value)
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ActionCategoryExisting) as exception_info:
         category_helper.add_action_category(category_id, value)
     assert str(exception_info.value) == '409: Action Category Existing'
 
@@ -401,7 +539,7 @@ def test_add_action_category_with_empty_name(db):
         "name": "",
         "description": "description action_category"
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(CategoryNameInvalid) as exception_info:
         category_helper.add_action_category(category_id, value)
     assert str(exception_info.value) == '400: Category Name Invalid'
 
@@ -429,9 +567,56 @@ def test_delete_action_category(db):
     assert not action_category
 
 
+def test_delete_action_category_with_data(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    mock_data.create_subject_data(policy_id, subject_category_id)
+
+    mock_data.create_action_data(policy_id, action_category_id)
+
+    with pytest.raises(DeleteActionCategoryWithMetaRule) as exception_info:
+        category_helper.delete_action_category(action_category_id)
+    assert str(exception_info.value) == '400: Action Category With Meta Rule Error'
+
+
+def test_delete_action_category_with_assignment(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+
+    action_id = mock_data.create_action(policy_id)
+    data_id = mock_data.create_action_data(policy_id, action_category_id)
+    assignment_helper.add_action_assignment(policy_id, action_id, action_category_id, data_id)
+
+    with pytest.raises(DeleteActionCategoryWithMetaRule) as exception_info:
+        category_helper.delete_action_category(action_category_id)
+    assert str(exception_info.value) == '400: Action Category With Meta Rule Error'
+
+
+def test_delete_action_category_with_rule(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    policy_helper.add_rule(policy_id=policy_id, meta_rule_id=meta_rule_id)
+
+    with pytest.raises(DeleteActionCategoryWithMetaRule) as exception_info:
+        category_helper.delete_action_category(action_category_id)
+    assert str(exception_info.value) == '400: Action Category With Meta Rule Error'
+
+
 def test_delete_action_category_with_unkown_category_id(db):
     category_id = "invalid_category_id"
 
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ActionCategoryUnknown) as exception_info:
         category_helper.delete_action_category(category_id)
     assert str(exception_info.value) == '400: Action Category Unknown'
+
+
+def test_delete_data_categories_connected_to_meta_rule(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy()
+    with pytest.raises(DeleteSubjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_subject_category(subject_category_id)
+    assert str(exception_info.value) == '400: Subject Category With Meta Rule Error'
+
+    with pytest.raises(DeleteObjectCategoryWithMetaRule) as exception_info:
+        category_helper.delete_object_category(object_category_id)
+    assert str(exception_info.value) == '400: Object Category With Meta Rule Error'
+
+    with pytest.raises(DeleteActionCategoryWithMetaRule) as exception_info:
+        category_helper.delete_action_category(action_category_id)
+    assert str(exception_info.value) == '400: Action Category With Meta Rule Error'

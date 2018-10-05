@@ -6,14 +6,14 @@
 Those API are helping API used to manage the Moon platform.
 """
 
-from flask_restful import Resource, request
 import logging
+from flask_restful import Resource, request
 import moon_wrapper.api
 from python_moonutilities.security_functions import check_auth
 
 __version__ = "0.1.0"
 
-logger = logging.getLogger("moon.manager.api." + __name__)
+LOGGER = logging.getLogger("moon.manager.api." + __name__)
 
 
 class Status(Resource):
@@ -35,7 +35,7 @@ class Status(Resource):
           }
         }
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class Logs(Resource):
@@ -70,7 +70,7 @@ class Logs(Resource):
         args["to"] = to_str
         args["event_number"] = event_number
 
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class API(Resource):
@@ -112,20 +112,23 @@ class API(Resource):
             if "__version__" in dir(group_api_obj):
                 api_desc[api_name]["version"] = group_api_obj.__version__
             object_list = list(filter(lambda x: "__" not in x, dir(group_api_obj)))
-            for obj in map(lambda x: eval("moon_interface.api.{}.{}".format(api_name, x)), object_list):
+            for obj in map(lambda x: eval("moon_interface.api.{}.{}".format(api_name, x)),
+                           object_list):
                 if "__urls__" in dir(obj):
                     api_desc[api_name][obj.__name__] = dict()
                     api_desc[api_name][obj.__name__]["urls"] = obj.__urls__
                     api_desc[api_name][obj.__name__]["methods"] = dict()
                     for _method in filter(lambda x: x in __methods, dir(obj)):
-                        docstring = eval("moon_interface.api.{}.{}.{}.__doc__".format(api_name, obj.__name__, _method))
+                        docstring = eval(
+                            "moon_interface.api.{}.{}.{}.__doc__".format(api_name, obj.__name__,
+                                                                         _method))
                         api_desc[api_name][obj.__name__]["methods"][_method] = docstring
                     api_desc[api_name][obj.__name__]["description"] = str(obj.__doc__)
         if group_id in api_desc:
             if endpoint_id in api_desc[group_id]:
                 return {group_id: {endpoint_id: api_desc[group_id][endpoint_id]}}
             elif len(endpoint_id) > 0:
-                logger.error("Unknown endpoint_id {}".format(endpoint_id))
+                LOGGER.error("Unknown endpoint_id {}".format(endpoint_id))
                 return {"error": "Unknown endpoint_id {}".format(endpoint_id)}
             return {group_id: api_desc[group_id]}
         return api_desc

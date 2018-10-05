@@ -50,7 +50,7 @@ class Models(Resource):
 
         return {"models": data}
 
-    @validate_input("post", body_state={"name":True, "meta_rules":True})
+    @validate_input("post", body_state={"name": True, "meta_rules": False})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create model.
@@ -94,7 +94,8 @@ class Models(Resource):
 
         return {"result": True}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state={"name":True, "meta_rules":True})
+    @validate_input("patch", kwargs_state=[True, False],
+                    body_state={"name": True, "meta_rules": False})
     @check_auth
     def patch(self, uuid=None, user_id=None):
         """Update a model
@@ -114,4 +115,3 @@ class Models(Resource):
             user_id=user_id, model_id=uuid, value=request.json)
 
         return {"models": data}
-

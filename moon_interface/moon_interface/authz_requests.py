@@ -53,7 +53,9 @@ class AuthzRequest:
             raise exceptions.AuthzException(
                 "error in address no hostname or hostip"
             )
+        tried_hostnames = []
         while tries < 2:
+            tried_hostnames.append(hostname)
             try:
                 req = requests.post("http://{}:{}/authz".format(
                     hostname,
@@ -62,18 +64,20 @@ class AuthzRequest:
                 if req.status_code != 200:
                     raise exceptions.AuthzException(
                         "Receive bad response from Authz function "
-                        "(with address - {})".format(req.status_code)
+                        "(with {} -> {})".format(hostname, req.status_code)
                     )
                 success = True
-                break
             except requests.exceptions.ConnectionError:
-                logger.error("Cannot connect to {}".format(
-                    "http://{}:{}/authz".format(
-                        hostname,
-                        self.container_chaining[0]["port"]
-                    )))
-            except:
-                logger.error("Unexpected error:", sys.exc_info()[0])
+                if tries > 1:
+                    logger.error("Cannot connect to {}".format(
+                        "http://[{}]:{}/authz".format(
+                            ", ".join(tried_hostnames),
+                            self.container_chaining[0]["port"]
+                        )))
+            except Exception as e:
+                logger.exception(e)
+            else:
+                break
             hostname = self.container_chaining[0]["hostname"],
             tries += 1
 

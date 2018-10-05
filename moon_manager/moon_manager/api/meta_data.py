@@ -30,7 +30,7 @@ class SubjectCategories(Resource):
         "/subject_categories/<string:category_id>",
     )
 
-    @validate_input("get",kwargs_state=[False,False])
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, category_id=None, user_id=None):
         """Retrieve all subject categories or a specific one
@@ -50,7 +50,7 @@ class SubjectCategories(Resource):
 
         return {"subject_categories": data}
 
-    @validate_input("post",body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a subject category.
@@ -74,7 +74,7 @@ class SubjectCategories(Resource):
 
         return {"subject_categories": data}
 
-    @validate_input("delete",kwargs_state=[True,False])
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, category_id=None, user_id=None):
         """Delete a subject category
@@ -105,7 +105,7 @@ class ObjectCategories(Resource):
         "/object_categories/<string:category_id>",
     )
 
-    @validate_input("get",kwargs_state=[False,False])
+    @validate_input("get", kwargs_state=[False, False])
     @check_auth
     def get(self, category_id=None, user_id=None):
         """Retrieve all object categories or a specific one
@@ -125,7 +125,7 @@ class ObjectCategories(Resource):
 
         return {"object_categories": data}
 
-    @validate_input("post", body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update a object category.
@@ -202,7 +202,7 @@ class ActionCategories(Resource):
 
         return {"action_categories": data}
 
-    @validate_input("post", body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
     def post(self, category_id=None, user_id=None):
         """Create or update an action category.

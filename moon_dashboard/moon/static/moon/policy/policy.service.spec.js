@@ -329,6 +329,157 @@
 
         });
 
+        it('should create perimeter', function () {
+            var perimeterCreatedData = {
+                subjects: {
+                    'subjectId1': { name: 'subject1', description: 'sDescription1' },
+                }
+            };
+
+            $httpBackend.expectPOST(URI.API + '/policies/policyId1/subjects').respond(200, perimeterCreatedData);
+            var type = 'subject';
+            var policy = { id: 'policyId1' };
+            var perimeter = { name: 'subject1', description: 'sDescription1' };
+
+            var promise = service.createPerimeter(type, policy, perimeter);
+            $httpBackend.flush();
+
+            promise.then(function (result) {
+                expect(result.length).toBe(1);
+                var perimeter = result[0];
+                expect(perimeter.id).toBe('subjectId1');
+                expect(perimeter.name).toBe('subject1');
+                expect(perimeter.description).toBe('sDescription1');
+            })
+        });
+
+        it('should remove perimeter', function () {
+            $httpBackend.expectDELETE(URI.API + '/policies/policyId1/subjects/subjectId1').respond(200);
+            var type = 'subject';
+            var policy = { id: 'policyId1' };
+            var perimeter = { id: 'subjectId1' };
+
+            var promise = service.removePerimeterFromPolicy(type, policy, perimeter);
+            $httpBackend.flush();
+
+            promise.then(function (result) {
+                expect(result.id).toBe('subjectId1');
+            })
+        });
+
+        it('should load perimeters and assignments', function () {
+            var assignmentsData = {
+                subject_assignments: {
+                    'subjectAssignmentId1': { 
+                        id: 'subjectAssignmentId1',
+                        policy_id: 'policyId1',
+                        subject_id: 'subjectId1',
+                        category_id: 'subjectCategoryId1',
+                        assignments: ['subjectDataId1']
+                    },
+                }
+            };
+
+            var perimetersData = {
+                subjects: {
+                    'subjectId1': { name: 'subject1', description: 'sDescription1' },
+                }
+            };
+
+            var allPerimetersData = {
+                subjects: {
+                    'subjectId1': { name: 'subject1', description: 'sDescription1' },
+                    'subjectId2': { name: 'subject2', description: 'sDescription2' },
+                }
+            };
+
+            var type = 'subject';
+            var policy = { id: 'policyId1' };
+            $httpBackend.expectGET(URI.API + '/subjects').respond(200, allPerimetersData);
+            $httpBackend.expectGET(URI.API + '/policies/policyId1/subjects').respond(200, perimetersData);
+            $httpBackend.expectGET(URI.API + '/policies/policyId1/subject_assignments').respond(200, assignmentsData);
+
+            var promise = service.loadPerimetersAndAssignments(type, policy);
+
+            $httpBackend.flush();
+
+            promise.then(function (result) {
+                expect(result.perimeters.length).toBe(1);
+                var perimeter = result.perimeters[0];
+                expect(perimeter.id).toBe('subjectId1');
+                expect(perimeter.name).toBe('subject1');
+                expect(perimeter.description).toBe('sDescription1');
+
+                expect(result.allPerimeters.length).toBe(2);
+                perimeter = result.allPerimeters[0];
+                expect(perimeter.id).toBe('subjectId1');
+                expect(perimeter.name).toBe('subject1');
+                expect(perimeter.description).toBe('sDescription1');
+
+                perimeter = result.allPerimeters[1];
+                expect(perimeter.id).toBe('subjectId2');
+                expect(perimeter.name).toBe('subject2');
+                expect(perimeter.description).toBe('sDescription2');
+
+
+                expect(result.assignments.length).toBe(1);
+                var assignment = result.assignments[0];
+                expect(assignment.id).toBe('subjectAssignmentId1');
+                expect(assignment.policy_id).toBe('policyId1');
+                expect(assignment.subject_id).toBe('subjectId1');
+                expect(assignment.category_id).toBe('subjectCategoryId1');
+                expect(assignment.assignments.length).toBe(1);
+                expect(assignment.assignments[0]).toBe('subjectDataId1');
+            })
+            
+        });
+
+        it('should create assignment', function () {
+            var assignmentCreatedData = {
+                subject_assignments: {
+                    'subjectAssignmentId1': { 
+                        id: 'subjectAssignmentId1',
+                        policy_id: 'policyId1',
+                        subject_id: 'subjectId1',
+                        category_id: 'subjectCategoryId1',
+                        assignments: ['subjectDataId1']
+                    },
+                }
+            };
+
+            var type = 'subject';
+            var policy = { id: 'policyId1' };
+            var perimeter = { id: 'subjectId1' };
+            var data = { id: 'subjectDataId1', category_id: 'subjectCategoryId1'};
+
+            $httpBackend.expectPOST(URI.API + '/policies/policyId1/subject_assignments').respond(200, assignmentCreatedData);
+            var promise = service.createAssignment(type, policy, perimeter, data);
+
+            $httpBackend.flush();
+
+            promise.then(function (result) {
+                expect(result.length).toBe(1);
+                var assignment = result[0];
+                expect(assignment.id).toBe('subjectAssignmentId1');
+                expect(assignment.policy_id).toBe('policyId1');
+                expect(assignment.subject_id).toBe('subjectId1');
+                expect(assignment.category_id).toBe('subjectCategoryId1');
+                expect(assignment.assignments.length).toBe(1);
+                expect(assignment.assignments[0]).toBe('subjectDataId1');
+            })
+        });
+
+        it('should remove assignment', function () {
+            var type = 'subject';
+            var policy = { id: 'policyId1' };
+            var perimeter = { id: 'subjectId1' };
+            var data = { id: 'subjectDataId1', category_id: 'subjectCategoryId1'};
+
+            $httpBackend.expectDELETE(URI.API + '/policies/policyId1/subject_assignments/subjectId1/subjectCategoryId1/subjectDataId1').respond(200);
+            service.removeAssignment(type, policy, perimeter, data);
+            $httpBackend.flush();
+        });
+
 
     });
 

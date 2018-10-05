@@ -26,7 +26,6 @@ from moon_manager.api.json_export import JsonExport
 from python_moonutilities import configuration
 from python_moondb.core import PDPManager
 
-
 logger = logging.getLogger("moon.manager.http_server")
 
 __API__ = (
@@ -36,7 +35,7 @@ __API__ = (
     SubjectAssignments, ObjectAssignments, ActionAssignments,
     SubjectData, ObjectData, ActionData,
     Models, Policies, PDP, Slaves, JsonImport, JsonExport
- )
+)
 
 
 class Server:
@@ -87,7 +86,7 @@ class Root(Resource):
     """
     The root of the web service
     """
-    __urls__ = ("/", )
+    __urls__ = ("/",)
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
@@ -112,7 +111,8 @@ class CustomApi(Api):
     @staticmethod
     def handle_error(e):
         try:
-            error_message = dumps({"result": False, 'message': str(e), "code": getattr(e, "code", 500)})
+            error_message = dumps(
+                {"result": False, 'message': str(e), "code": getattr(e, "code", 500)})
             logger.error(e, exc_info=True)
             logger.error(error_message)
             return make_response(error_message, getattr(e, "code", 500))

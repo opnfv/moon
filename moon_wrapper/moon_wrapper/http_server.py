@@ -10,17 +10,17 @@ import logging
 from moon_wrapper import __version__
 from moon_wrapper.api.generic import Status, Logs, API
 from moon_wrapper.api.oslowrapper import OsloWrapper
+from moon_wrapper.api.slaveupdate import SlaveUpdate
 from python_moonutilities.cache import Cache
 from python_moonutilities import configuration, exceptions
 
-logger = logging.getLogger("moon.wrapper.http_server")
-
+LOGGER = logging.getLogger("moon.wrapper.http_server")
 
 CACHE = Cache()
 
 __API__ = (
     Status, Logs, API
- )
+)
 
 
 class Server:
@@ -71,7 +71,7 @@ class Root(Resource):
     """
     The root of the web service
     """
-    __urls__ = ("/", )
+    __urls__ = ("/",)
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
@@ -111,7 +111,6 @@ class HTTPServer(Server):
         self.__hook_errors()
 
     def __hook_errors(self):
-
         def get_404_json(e):
             return flask.make_response("False")
 
@@ -134,7 +133,12 @@ class HTTPServer(Server):
                                   "cache": CACHE,
                               }
                               )
+        self.api.add_resource(SlaveUpdate, *SlaveUpdate.__urls__,
+                              resource_class_kwargs={
+                                  "orchestrator_url": self.orchestrator_url,
+                                  "cache": CACHE,
+                              }
+                              )
 
     def run(self):
         self.app.run(host=self._host, port=self._port, threaded=True)  # nosec
-

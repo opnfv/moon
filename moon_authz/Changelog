@@ -28,3 +28,12 @@ CHANGES
 - use the threading capability of Flask app
 - set the number of manager to 1
 - update to the latest version of the python-moondb library
+
+4.3.4
+-----
+- apply PyLint rules
+- fix a bug in instructions management
+
+4.4.0
+-----
+- add the update API
