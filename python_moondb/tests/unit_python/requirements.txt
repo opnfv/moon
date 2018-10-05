@@ -1,4 +1,4 @@
 sqlalchemy
 pymysql
 requests_mock
-python_moonutilities
+python_moonutilities==1.4.20

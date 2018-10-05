@@ -26,3 +26,22 @@ CHANGES
 4.5.1
 -----
 - use the threading capability of Flask app
+
+4.5.2
+-----
+- apply pylint rules
+
+4.5.3
+-----
+- Fix bug when OpenStack requests Moon
+    - bug on Keystone project ID
+    - bug when filtering the pipeline container name
+
+4.5.4
+-----
+- Fix a bug in retrieval of object from OpenStack
+- Fix a bug in rule element
+
+4.6.0
+-----
+- Add the Update API

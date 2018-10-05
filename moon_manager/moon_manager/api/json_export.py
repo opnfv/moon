@@ -17,7 +17,6 @@ logger = logging.getLogger("moon.manager.api." + __name__)
 
 
 class JsonExport(Resource):
-
     __urls__ = (
         "/export",
         "/export/",
@@ -35,22 +34,37 @@ class JsonExport(Resource):
                 rule_dict = dict()
                 JsonUtils.copy_field_if_exists(rule, rule_dict, "instructions", dict)
                 JsonUtils.copy_field_if_exists(rule, rule_dict, "enabled", True)
-                JsonUtils.convert_id_to_name(rule["meta_rule_id"], rule_dict, "meta_rule", "meta_rule", ModelManager, self._user_id)
-                JsonUtils.convert_id_to_name(policy_key, rule_dict, "policy", "policy", PolicyManager, self._user_id)
+                JsonUtils.convert_id_to_name(rule["meta_rule_id"], rule_dict, "meta_rule",
+                                             "meta_rule", ModelManager, self._user_id)
+                JsonUtils.convert_id_to_name(policy_key, rule_dict, "policy", "policy",
+                                             PolicyManager, self._user_id)
                 ids = rule["rule"]
                 rule_description = dict()
                 meta_rule = ModelManager.get_meta_rules(self._user_id, rule["meta_rule_id"])
                 meta_rule = [v for v in meta_rule.values()]
                 meta_rule = meta_rule[0]
-                index_subject_data = len(meta_rule["subject_categories"])-1
-                index_object_data = len(meta_rule["subject_categories"]) + len(meta_rule["object_categories"])-1
-                index_action_data = len(meta_rule["subject_categories"]) + len(meta_rule["object_categories"]) + len(meta_rule["action_categories"])-1
-                ids_subject_data = [ids[0]] if len(meta_rule["subject_categories"]) == 1 else ids[0:index_subject_data]
-                ids_object_data = [ids[index_object_data]] if len(meta_rule["object_categories"]) == 1 else ids[index_subject_data+1:index_object_data]
-                ids_action_date = [ids[index_action_data]] if len(meta_rule["action_categories"]) == 1 else ids[index_object_data+1:index_action_data]
-                JsonUtils.convert_ids_to_names(ids_subject_data, rule_description, "subject_data", "subject_data",  PolicyManager, self._user_id, policy_key)
-                JsonUtils.convert_ids_to_names(ids_object_data, rule_description, "object_data", "object_data", PolicyManager, self._user_id, policy_key)
-                JsonUtils.convert_ids_to_names(ids_action_date, rule_description, "action_data", "action_data", PolicyManager, self._user_id, policy_key)
+                index_subject_data = len(meta_rule["subject_categories"]) - 1
+                index_object_data = len(meta_rule["subject_categories"]) + len(
+                    meta_rule["object_categories"]) - 1
+                index_action_data = len(meta_rule["subject_categories"]) + len(
+                    meta_rule["object_categories"]) + len(meta_rule["action_categories"]) - 1
+                ids_subject_data = [ids[0]] if len(meta_rule["subject_categories"]) == 1 else ids[
+                                                                                              0:index_subject_data]
+                ids_object_data = [ids[index_object_data]] if len(
+                    meta_rule["object_categories"]) == 1 else ids[
+                                                              index_subject_data + 1:index_object_data]
+                ids_action_date = [ids[index_action_data]] if len(
+                    meta_rule["action_categories"]) == 1 else ids[
+                                                              index_object_data + 1:index_action_data]
+                JsonUtils.convert_ids_to_names(ids_subject_data, rule_description, "subject_data",
+                                               "subject_data", PolicyManager, self._user_id,
+                                               policy_key)
+                JsonUtils.convert_ids_to_names(ids_object_data, rule_description, "object_data",
+                                               "object_data", PolicyManager, self._user_id,
+                                               policy_key)
+                JsonUtils.convert_ids_to_names(ids_action_date, rule_description, "action_data",
+                                               "action_data", PolicyManager, self._user_id,
+                                               policy_key)
                 rule_dict["rule"] = rule_description
                 rules_array.append(rule_dict)
 
@@ -62,13 +76,20 @@ class JsonExport(Resource):
         meta_rules_array = []
         # logger.info(meta_rules)
         for meta_rule_key in meta_rules:
-            #logger.info(meta_rules[meta_rule_key])
+            # logger.info(meta_rules[meta_rule_key])
             meta_rule_dict = dict()
             JsonUtils.copy_field_if_exists(meta_rules[meta_rule_key], meta_rule_dict, "name", str)
-            JsonUtils.copy_field_if_exists(meta_rules[meta_rule_key], meta_rule_dict, "description", str)
-            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["subject_categories"], meta_rule_dict, "subject_categories", "subject_category", ModelManager, self._user_id)
-            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["object_categories"], meta_rule_dict, "object_categories", "object_category", ModelManager, self._user_id)
-            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["action_categories"], meta_rule_dict, "action_categories", "action_category", ModelManager, self._user_id)
+            JsonUtils.copy_field_if_exists(meta_rules[meta_rule_key], meta_rule_dict, "description",
+                                           str)
+            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["subject_categories"],
+                                           meta_rule_dict, "subject_categories", "subject_category",
+                                           ModelManager, self._user_id)
+            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["object_categories"],
+                                           meta_rule_dict, "object_categories", "object_category",
+                                           ModelManager, self._user_id)
+            JsonUtils.convert_ids_to_names(meta_rules[meta_rule_key]["action_categories"],
+                                           meta_rule_dict, "action_categories", "action_category",
+                                           ModelManager, self._user_id)
             logger.info("Exporting meta rule {}".format(meta_rule_dict))
             meta_rules_array.append(meta_rule_dict)
         if len(meta_rules_array) > 0:
@@ -80,12 +101,20 @@ class JsonExport(Resource):
         element_assignments_array = []
         for policy_key in policies:
             assignments = export_method_data(self._user_id, policy_key)
-            #logger.info(assignments)
+            # logger.info(assignments)
             for assignment_key in assignments:
                 assignment_dict = dict()
-                JsonUtils.convert_id_to_name(assignments[assignment_key][type_element + "_id"], assignment_dict, type_element, type_element , PolicyManager, self._user_id, policy_key)
-                JsonUtils.convert_id_to_name(assignments[assignment_key]["category_id"], assignment_dict, "category", type_element + "_category", ModelManager, self._user_id, policy_key)
-                JsonUtils.convert_ids_to_names(assignments[assignment_key]["assignments"], assignment_dict, "assignments", type_element + "_data", PolicyManager, self._user_id, policy_key)
+                JsonUtils.convert_id_to_name(assignments[assignment_key][type_element + "_id"],
+                                             assignment_dict, type_element, type_element,
+                                             PolicyManager, self._user_id, policy_key)
+                JsonUtils.convert_id_to_name(assignments[assignment_key]["category_id"],
+                                             assignment_dict, "category",
+                                             type_element + "_category", ModelManager,
+                                             self._user_id, policy_key)
+                JsonUtils.convert_ids_to_names(assignments[assignment_key]["assignments"],
+                                               assignment_dict, "assignments",
+                                               type_element + "_data", PolicyManager, self._user_id,
+                                               policy_key)
                 element_assignments_array.append(assignment_dict)
                 logger.info("Exporting {} assignment {}".format(type_element, assignment_dict))
         if len(element_assignments_array) > 0:
@@ -97,7 +126,7 @@ class JsonExport(Resource):
         element_datas_array = []
         for policy_key in policies:
             datas = export_method_data(self._user_id, policy_key)
-            #logger.info("data found : {}".format(datas))
+            # logger.info("data found : {}".format(datas))
             for data_group in datas:
                 policy_id = data_group["policy_id"]
                 category_id = data_group["category_id"]
@@ -105,14 +134,21 @@ class JsonExport(Resource):
                 for data_key in data_group["data"]:
                     data_dict = dict()
                     if type_element == 'subject':
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict,
+                                                       "name", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict,
+                                                       "description", str)
                     else:
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "name", str)
-                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict, "description", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict,
+                                                       "name", str)
+                        JsonUtils.copy_field_if_exists(data_group["data"][data_key], data_dict,
+                                                       "description", str)
 
-                    JsonUtils.convert_id_to_name(policy_id, data_dict, "policy", "policy", PolicyManager, self._user_id)
-                    JsonUtils.convert_id_to_name(category_id, data_dict, "category", type_element + "_category", ModelManager, self._user_id, policy_key)
+                    JsonUtils.convert_id_to_name(policy_id, data_dict, "policy", "policy",
+                                                 PolicyManager, self._user_id)
+                    JsonUtils.convert_id_to_name(category_id, data_dict, "category",
+                                                 type_element + "_category", ModelManager,
+                                                 self._user_id, policy_key)
                     logger.info("Exporting {} data {}".format(type_element, data_dict))
                     element_datas_array.append(data_dict)
 
@@ -125,8 +161,10 @@ class JsonExport(Resource):
         element_categories_array = []
         for element_category_key in element_categories:
             element_category = dict()
-            JsonUtils.copy_field_if_exists(element_categories[element_category_key], element_category, "name", str)
-            JsonUtils.copy_field_if_exists(element_categories[element_category_key], element_category, "description", str)
+            JsonUtils.copy_field_if_exists(element_categories[element_category_key],
+                                           element_category, "name", str)
+            JsonUtils.copy_field_if_exists(element_categories[element_category_key],
+                                           element_category, "description", str)
             element_categories_array.append(element_category)
             logger.info("Exporting {} category {}".format(type_element, element_category))
         if len(element_categories_array) > 0:
@@ -140,7 +178,7 @@ class JsonExport(Resource):
         for policy_key in policies:
             elements = export_method(self._user_id, policy_key)
             for element_key in elements:
-                #logger.info("Exporting {}".format(elements[element_key]))
+                # logger.info("Exporting {}".format(elements[element_key]))
                 element = dict()
                 JsonUtils.copy_field_if_exists(elements[element_key], element, "name", str)
                 JsonUtils.copy_field_if_exists(elements[element_key], element, "description", str)
@@ -149,7 +187,8 @@ class JsonExport(Resource):
                     element["policies"] = []
                     element_dict[element["name"]] = element
                 current_element = element_dict[element["name"]]
-                current_element["policies"].append({"name": JsonUtils.convert_id_to_name_string(policy_key, "policy", PolicyManager, self._user_id)})
+                current_element["policies"].append({"name": JsonUtils.convert_id_to_name_string(
+                    policy_key, "policy", PolicyManager, self._user_id)})
 
         for key in element_dict:
             logger.info("Exporting {} {}".format(type_element, element_dict[key]))
@@ -166,7 +205,8 @@ class JsonExport(Resource):
             JsonUtils.copy_field_if_exists(policies[policy_key], policy, "name", str)
             JsonUtils.copy_field_if_exists(policies[policy_key], policy, "genre", str)
             JsonUtils.copy_field_if_exists(policies[policy_key], policy, "description", str)
-            JsonUtils.convert_id_to_name(policies[policy_key]["model_id"], policy, "model", "model", ModelManager, self._user_id)
+            JsonUtils.convert_id_to_name(policies[policy_key]["model_id"], policy, "model", "model",
+                                         ModelManager, self._user_id)
             logger.info("Exporting policy {}".format(policy))
             policies_array.append(policy)
         if len(policies_array) > 0:
@@ -180,7 +220,8 @@ class JsonExport(Resource):
             JsonUtils.copy_field_if_exists(models[model_key], model, "name", str)
             JsonUtils.copy_field_if_exists(models[model_key], model, "description", str)
             # logger.info(models[model_key]["meta_rules"])
-            JsonUtils.convert_ids_to_names(models[model_key]["meta_rules"], model, "meta_rules", "meta_rule", ModelManager, self._user_id)
+            JsonUtils.convert_ids_to_names(models[model_key]["meta_rules"], model, "meta_rules",
+                                           "meta_rule", ModelManager, self._user_id)
             logger.info("Exporting model {}".format(model))
             models_array.append(model)
         if len(models_array) > 0:

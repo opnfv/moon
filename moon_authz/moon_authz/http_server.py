@@ -3,15 +3,16 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
+import logging
 from flask import Flask
 from flask_restful import Resource, Api
-import logging
 from moon_authz import __version__
 from moon_authz.api.authorization import Authz
+from moon_authz.api.update import Update
 from python_moonutilities.cache import Cache
 from python_moonutilities import exceptions
 
-logger = logging.getLogger("moon.authz.http_server")
+LOGGER = logging.getLogger("moon.authz.http_server")
 
 CACHE = Cache()
 CACHE.update()
@@ -62,15 +63,15 @@ class Server:
 
 
 __API__ = (
-    Authz,
- )
+    Authz, Update
+)
 
 
 class Root(Resource):
     """
     The root of the web service
     """
-    __urls__ = ("/", )
+    __urls__ = ("/",)
     __methods = ("get", "post", "put", "delete", "options")
 
     def get(self):
@@ -97,7 +98,7 @@ class HTTPServer(Server):
     def __init__(self, host="localhost", port=38001, **kwargs):
         super(HTTPServer, self).__init__(host=host, port=port, **kwargs)
         self.component_data = kwargs.get("component_data", {})
-        logger.info("HTTPServer port={} {}".format(port, kwargs))
+        LOGGER.info("HTTPServer port={} {}".format(port, kwargs))
         self.app = Flask(__name__)
         self._port = port
         self._host = host
@@ -106,6 +107,7 @@ class HTTPServer(Server):
         self.container_chaining = kwargs.get("container_chaining")
         self.api = Api(self.app)
         self.__set_route()
+
         # self.__hook_errors()
 
         @self.app.errorhandler(exceptions.AuthException)
@@ -116,10 +118,12 @@ class HTTPServer(Server):
         # FIXME (dthom): it doesn't work
         def get_404_json(e):
             return {"error": "Error", "code": 404, "description": e}
+
         self.app.register_error_handler(404, get_404_json)
 
         def get_400_json(e):
             return {"error": "Error", "code": 400, "description": e}
+
         self.app.register_error_handler(400, lambda e: get_400_json)
         self.app.register_error_handler(403, exceptions.AuthException)
 

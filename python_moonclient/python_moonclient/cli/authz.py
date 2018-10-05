@@ -1,12 +1,13 @@
 import logging
-from cliff.command import Command
+
 from importlib.machinery import SourceFileLoader
+from cliff.command import Command
 
 from python_moonclient.core import models, policies, pdp, authz
 from python_moonclient.cli.parser import Parser
 from python_moonclient.cli.projects import ProjectsUtils
 
-logger = logging.getLogger("moonclient.cli.authz")
+LOGGER = logging.getLogger("moonclient.cli.authz")
 
 
 class SendAuthz(Command):
@@ -29,13 +30,14 @@ class SendAuthz(Command):
         pdp.init(consul_host, consul_port)
 
         if parsed_args.filename:
-            logger.info("Loading: {}".format(parsed_args.filename))
+            LOGGER.info("Loading: {}".format(parsed_args.filename))
         m = SourceFileLoader("scenario", parsed_args.filename)
         scenario = m.load_module()
 
-        keystone_project_id = ProjectsUtils.get_project_id(pdp, parsed_args.id_project, parsed_args.name_project)
+        keystone_project_id = ProjectsUtils.get_project_id(pdp, parsed_args.id_project,
+                                                           parsed_args.name_project)
         if keystone_project_id is None:
-            logger.error("Project not found !")
+            LOGGER.error("Project not found !")
 
         keystone_project_id = pdp.get_keystone_id(keystone_project_id)
         time_data = authz.send_requests(

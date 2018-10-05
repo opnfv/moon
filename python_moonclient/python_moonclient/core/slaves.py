@@ -3,8 +3,7 @@ import requests
 from python_moonclient.core import config
 from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.core.slaves")
-
+LOGGER = logging.getLogger("moonclient.core.slaves")
 
 URL = None
 HEADERS = None
@@ -18,8 +17,6 @@ def init(consul_host, consul_port):
         conf_data['manager_port'])
     URL = URL + "{}"
     HEADERS = {"content-type": "application/json"}
-
-
 
 
 def get_slaves():
@@ -36,10 +33,10 @@ def set_slave(name):
     req = requests.patch(URL.format("/slaves/{}".format(name)),
                          headers=HEADERS,
                          json={
-                            "op": "replace",
-                            "variable": "configured",
-                            "value": True
-                        })
+                             "op": "replace",
+                             "variable": "configured",
+                             "value": True
+                         })
     req.raise_for_status()
     result = req.json()
     check_slaves_in_result(result)
@@ -52,10 +49,10 @@ def delete_slave(name):
     req = requests.patch(URL.format("/slaves/{}".format(name)),
                          headers=HEADERS,
                          json={
-                            "op": "replace",
-                            "variable": "configured",
-                            "value": False
-                        })
+                             "op": "replace",
+                             "variable": "configured",
+                             "value": False
+                         })
     req.raise_for_status()
     result = req.json()
     check_slaves_in_result(result)

@@ -6,10 +6,11 @@
 Assignments allow to connect data with elements of perimeter
 
 """
-
+import flask
 from flask import request
 from flask_restful import Resource
 import logging
+import requests
 from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 from python_moonutilities.security_functions import validate_input
@@ -17,6 +18,35 @@ from python_moonutilities.security_functions import validate_input
 __version__ = "4.3.2"
 
 logger = logging.getLogger("moon.manager.api." + __name__)
+
+
+def invalidate_data_in_slaves(
+        policy_id,
+        perimeter_id,
+        category_id,
+        data_id):
+    slaves = requests.get("http://{}/slaves".format(request.host)).json().get("slaves")
+    for slave in slaves:
+        if not slave.get("configured", False):
+            continue
+        try:
+            update = requests.put("http://{}:{}/update".format(
+                slave.get("wrapper_name"), slave.get("internal_port")),
+                data={
+                    "policy_id": policy_id,
+                    "perimeter_id": perimeter_id,
+                    "category_id": category_id,
+                    "data_id": data_id
+                },
+                timeout=1
+            )
+            logger.info("result {} {}:{} = {}".format(
+                update.status_code,
+                slave.get("wrapper_name"),
+                slave.get("internal_port"),
+                update.text))
+        except requests.exceptions.ConnectionError:
+            logger.warning("Cannot reach {}:{}".format(slave.get("wrapper_name"), slave.get("port")))
 
 
 class SubjectAssignments(Resource):
@@ -32,9 +62,9 @@ class SubjectAssignments(Resource):
         "/policies/<string:uuid>/subject_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
-    @validate_input("get", kwargs_state=[True, False, False,False,False])
+    @validate_input("get", kwargs_state=[True, False, False, False, False])
     @check_auth
-    def get(self, uuid, perimeter_id=None, category_id=None,
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all subject assignments or a specific one for a given policy
 
@@ -60,9 +90,10 @@ class SubjectAssignments(Resource):
 
         return {"subject_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
+    @validate_input("post", kwargs_state=[True, False, False, False, False],
+                    body_state={"id": True, "category_id": True, "data_id": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, category_id=None,
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create a subject assignment.
 
@@ -93,11 +124,17 @@ class SubjectAssignments(Resource):
             user_id=user_id, policy_id=uuid,
             subject_id=perimeter_id, category_id=category_id,
             data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
+            data_id=data_id)
+
         return {"subject_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
-    def delete(self, uuid, perimeter_id=None, category_id=None,
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a subject assignment for a given policy
 
@@ -117,6 +154,11 @@ class SubjectAssignments(Resource):
             user_id=user_id, policy_id=uuid,
             subject_id=perimeter_id, category_id=category_id,
             data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
+            data_id=data_id)
 
         return {"result": True}
 
@@ -134,9 +176,9 @@ class ObjectAssignments(Resource):
         "/policies/<string:uuid>/object_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
-    @validate_input("get", kwargs_state=[True, False, False,False,False])
+    @validate_input("get", kwargs_state=[True, False, False, False, False])
     @check_auth
-    def get(self, uuid, perimeter_id=None, category_id=None,
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all object assignment or a specific one for a given policy
 
@@ -162,9 +204,10 @@ class ObjectAssignments(Resource):
 
         return {"object_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
+    @validate_input("post", kwargs_state=[True, False, False, False, False],
+                    body_state={"id": True, "category_id": True, "data_id": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, category_id=None,
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create an object assignment.
 
@@ -196,12 +239,17 @@ class ObjectAssignments(Resource):
             user_id=user_id, policy_id=uuid,
             object_id=perimeter_id, category_id=category_id,
             data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
+            data_id=data_id)
 
         return {"object_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
-    def delete(self, uuid, perimeter_id=None, category_id=None,
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a object assignment for a given policy
 
@@ -220,6 +268,11 @@ class ObjectAssignments(Resource):
             user_id=user_id, policy_id=uuid,
             object_id=perimeter_id, category_id=category_id,
             data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
+            data_id=data_id)
 
         return {"result": True}
 
@@ -237,9 +290,9 @@ class ActionAssignments(Resource):
         "/policies/<string:uuid>/action_assignments/<string:perimeter_id>/<string:category_id>/<string:data_id>",
     )
 
-    @validate_input("get", kwargs_state=[True, False, False,False,False])
+    @validate_input("get", kwargs_state=[True, False, False, False, False])
     @check_auth
-    def get(self, uuid, perimeter_id=None, category_id=None,
+    def get(self, uuid=None, perimeter_id=None, category_id=None,
             data_id=None, user_id=None):
         """Retrieve all action assignment or a specific one for a given policy
 
@@ -264,9 +317,10 @@ class ActionAssignments(Resource):
 
         return {"action_assignments": data}
 
-    @validate_input("post", kwargs_state=[True, False, False, False, False], body_state={"id":True, "category_id":True, "data_id":True})
+    @validate_input("post", kwargs_state=[True, False, False, False, False],
+                    body_state={"id": True, "category_id": True, "data_id": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, category_id=None,
+    def post(self, uuid=None, perimeter_id=None, category_id=None,
              data_id=None, user_id=None):
         """Create an action assignment.
 
@@ -298,12 +352,17 @@ class ActionAssignments(Resource):
             user_id=user_id, policy_id=uuid,
             action_id=perimeter_id, category_id=category_id,
             data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
+            data_id=data_id)
 
         return {"action_assignments": data}
 
     @validate_input("delete", kwargs_state=[True, True, True, True, False])
     @check_auth
-    def delete(self, uuid, perimeter_id=None, category_id=None,
+    def delete(self, uuid=None, perimeter_id=None, category_id=None,
                data_id=None, user_id=None):
         """Delete a action assignment for a given policy
 
@@ -322,6 +381,11 @@ class ActionAssignments(Resource):
         data = PolicyManager.delete_action_assignment(
             user_id=user_id, policy_id=uuid,
             action_id=perimeter_id, category_id=category_id,
+            data_id=data_id)
+        invalidate_data_in_slaves(
+            policy_id=uuid,
+            perimeter_id=perimeter_id,
+            category_id=category_id,
             data_id=data_id)
 
         return {"result": True}

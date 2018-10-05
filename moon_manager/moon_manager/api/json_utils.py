@@ -6,28 +6,24 @@ logger = logging.getLogger("moon.manager.api." + __name__)
 
 class UnknownName(BaseException):
     def __init__(self, message):
-
         # Call the base class constructor with the parameters it needs
         super(UnknownName, self).__init__(message)
 
 
 class UnknownId(BaseException):
     def __init__(self, message):
-
         # Call the base class constructor with the parameters it needs
         super(UnknownId, self).__init__(message)
 
 
 class MissingIdOrName(BaseException):
     def __init__(self, message):
-
         # Call the base class constructor with the parameters it needs
         super(MissingIdOrName, self).__init__(message)
 
 
 class UnknownField(BaseException):
     def __init__(self, message):
-
         # Call the base class constructor with the parameters it needs
         super(UnknownField, self).__init__(message)
 
@@ -64,7 +60,8 @@ class JsonUtils:
                 json_out[field_name] = []
 
     @staticmethod
-    def _get_element_in_db_from_id(element_type, element_id, user_id, policy_id, category_id, meta_rule_id, manager):
+    def _get_element_in_db_from_id(element_type, element_id, user_id, policy_id, category_id,
+                                   meta_rule_id, manager):
         # the item is supposed to be in the db, we check it exists!
         if element_type == "model":
             data_db = manager.get_models(user_id, model_id=element_id)
@@ -85,11 +82,14 @@ class JsonUtils:
         elif element_type == "meta_rule":
             data_db = manager.get_meta_rules(user_id, meta_rule_id=element_id)
         elif element_type == "subject_data":
-            data_db = manager.get_subject_data(user_id, policy_id, data_id=element_id, category_id=category_id)
+            data_db = manager.get_subject_data(user_id, policy_id, data_id=element_id,
+                                               category_id=category_id)
         elif element_type == "object_data":
-            data_db = manager.get_object_data(user_id, policy_id, data_id=element_id, category_id=category_id)
+            data_db = manager.get_object_data(user_id, policy_id, data_id=element_id,
+                                              category_id=category_id)
         elif element_type == "action_data":
-            data_db = manager.get_action_data(user_id, policy_id, data_id=element_id, category_id=category_id)
+            data_db = manager.get_action_data(user_id, policy_id, data_id=element_id,
+                                              category_id=category_id)
         elif element_type == "meta_rule":
             data_db = manager.get_meta_rules(user_id, meta_rule_id=meta_rule_id)
         else:
@@ -101,15 +101,16 @@ class JsonUtils:
         if element_type == "subject_data" or element_type == "object_data" or element_type == "action_data":
             if data_db is not None and isinstance(data_db, list):
                 # TODO remove comments after fixing the bug on moondb when adding metarule : we can have several identical entries !
-                #if len(data_db) > 1:
+                # if len(data_db) > 1:
                 #    raise Exception("Several {} with the same id : {}".format(element_type, data_db))
                 data_db = data_db[0]
 
-            if data_db is not None and data_db["data"] is not None and isinstance(data_db["data"], dict):
+            if data_db is not None and data_db["data"] is not None and isinstance(data_db["data"],
+                                                                                  dict):
                 # TODO remove comments after fixing the bug on moondb when adding metarule : we can have several identical entries !
-                #if len(data_db["data"].values()) != 1:
+                # if len(data_db["data"].values()) != 1:
                 #    raise Exception("Several {} with the same id : {}".format(element_type, data_db))
-                #data_db = data_db["data"]
+                # data_db = data_db["data"]
                 # TODO remove these two lines after fixing the bug on moondb when adding metarule : we can have several identical entries !
                 list_values = list(data_db["data"].values())
                 data_db = list_values[0]
@@ -117,7 +118,8 @@ class JsonUtils:
         return data_db
 
     @staticmethod
-    def _get_element_id_in_db_from_name(element_type, element_name, user_id, policy_id, category_id, meta_rule_id, manager):
+    def _get_element_id_in_db_from_name(element_type, element_name, user_id, policy_id, category_id,
+                                        meta_rule_id, manager):
         if element_type == "model":
             data_db = manager.get_models(user_id)
         elif element_type == "policy":
@@ -156,7 +158,8 @@ class JsonUtils:
                         return key_id
         else:
             for elt in data_db:
-                if isinstance(elt, dict) and "data" in elt: # we handle here subject_data, object_data and action_data...
+                if isinstance(elt,
+                              dict) and "data" in elt:  # we handle here subject_data, object_data and action_data...
                     for data_key in elt["data"]:
                         # logger.info("data from the db {} ".format(elt["data"][data_key]))
                         data = elt["data"][data_key]
@@ -167,20 +170,31 @@ class JsonUtils:
         return None
 
     @staticmethod
-    def convert_name_to_id(json_in, json_out, field_name_in, field_name_out, element_type, manager, user_id, policy_id=None, category_id=None, meta_rule_id=None, field_mandatory=True):
+    def convert_name_to_id(json_in, json_out, field_name_in, field_name_out, element_type, manager,
+                           user_id, policy_id=None, category_id=None, meta_rule_id=None,
+                           field_mandatory=True):
         if field_name_in not in json_in:
             raise UnknownField("The field {} is not in the input json".format(field_name_in))
 
         if "id" in json_in[field_name_in]:
-            data_db = JsonUtils._get_element_in_db_from_id(element_type, json_in[field_name_in]["id"], user_id, policy_id, category_id, meta_rule_id, manager)
+            data_db = JsonUtils._get_element_in_db_from_id(element_type,
+                                                           json_in[field_name_in]["id"], user_id,
+                                                           policy_id, category_id, meta_rule_id,
+                                                           manager)
             if data_db is None:
-                raise UnknownId("No {} with id {} found in database".format(element_type, json_in[field_name_in]["id"]))
+                raise UnknownId("No {} with id {} found in database".format(element_type,
+                                                                    json_in[field_name_in]["id"]))
             json_out[field_name_out] = json_in[field_name_in]["id"]
 
         elif "name" in json_in[field_name_in]:
-            id_in_db = JsonUtils._get_element_id_in_db_from_name(element_type, json_in[field_name_in]["name"], user_id, policy_id, category_id, meta_rule_id, manager)
+            id_in_db = JsonUtils._get_element_id_in_db_from_name(element_type,
+                                                                 json_in[field_name_in]["name"],
+                                                                 user_id, policy_id, category_id,
+                                                                 meta_rule_id, manager)
             if id_in_db is None:
-                raise UnknownName("No {} with name {} found in database".format(element_type,json_in[field_name_in]["name"]))
+                raise UnknownName(
+                    "No {} with name {} found in database".format(element_type,
+                                                                  json_in[field_name_in]["name"]))
             json_out[field_name_out] = id_in_db
         elif field_mandatory is True:
             raise MissingIdOrName("No id or name found in the input json {}".format(json_in))
@@ -188,7 +202,9 @@ class JsonUtils:
     @staticmethod
     def convert_id_to_name(id_, json_out, field_name_out, element_type, manager, user_id,
                            policy_id=None, category_id=None, meta_rule_id=None):
-        json_out[field_name_out] = {"name": JsonUtils.convert_id_to_name_string(id_, element_type, manager, user_id, policy_id, category_id, meta_rule_id)}
+        json_out[field_name_out] = {
+            "name": JsonUtils.convert_id_to_name_string(id_, element_type, manager, user_id,
+                                                        policy_id, category_id, meta_rule_id)}
 
     @staticmethod
     def __convert_results_to_element(element):
@@ -203,9 +219,10 @@ class JsonUtils:
 
     @staticmethod
     def convert_id_to_name_string(id_, element_type, manager, user_id,
-                           policy_id=None, category_id=None, meta_rule_id=None):
+                                  policy_id=None, category_id=None, meta_rule_id=None):
 
-        element = JsonUtils._get_element_in_db_from_id(element_type, id_, user_id, policy_id, category_id, meta_rule_id, manager)
+        element = JsonUtils._get_element_in_db_from_id(element_type, id_, user_id, policy_id,
+                                                       category_id, meta_rule_id, manager)
         # logger.info(element)
         if element is None:
             raise UnknownId("No {} with id {} found in database".format(element_type, id_))
@@ -218,31 +235,42 @@ class JsonUtils:
         return None
 
     @staticmethod
-    def convert_names_to_ids(json_in, json_out, field_name_in, field_name_out, element_type, manager, user_id, policy_id=None, category_id=None, meta_rule_id=None, field_mandatory=True):
+    def convert_names_to_ids(json_in, json_out, field_name_in, field_name_out, element_type,
+                             manager, user_id, policy_id=None, category_id=None, meta_rule_id=None,
+                             field_mandatory=True):
         ids = []
         if field_name_in not in json_in:
             raise UnknownField("The field {} is not in the input json".format(field_name_in))
 
         for elt in json_in[field_name_in]:
             if "id" in elt:
-                data_db = JsonUtils._get_element_in_db_from_id(element_type, elt["id"], user_id, policy_id, category_id, meta_rule_id, manager)
+                data_db = JsonUtils._get_element_in_db_from_id(element_type, elt["id"], user_id,
+                                                               policy_id, category_id,
+                                                               meta_rule_id, manager)
                 if data_db is None:
-                    raise UnknownId("No {} with id {} found in database".format(element_type, elt["id"]))
+                    raise UnknownId(
+                        "No {} with id {} found in database".format(element_type, elt["id"]))
                 ids.append(elt["id"])
             elif "name" in elt:
-                id_in_db = JsonUtils._get_element_id_in_db_from_name(element_type, elt["name"], user_id, policy_id, category_id, meta_rule_id, manager)
+                id_in_db = JsonUtils._get_element_id_in_db_from_name(element_type, elt["name"],
+                                                                     user_id, policy_id,
+                                                                     category_id, meta_rule_id,
+                                                                     manager)
                 if id_in_db is None:
-                    raise UnknownName("No {} with name {} found in database".format(element_type, elt["name"]))
+                    raise UnknownName(
+                        "No {} with name {} found in database".format(element_type, elt["name"]))
                 ids.append(id_in_db)
             elif field_mandatory is True:
                 raise MissingIdOrName("No id or name found in the input json {}".format(elt))
         json_out[field_name_out] = ids
 
     @staticmethod
-    def convert_ids_to_names(ids, json_out, field_name_out, element_type, manager, user_id, policy_id=None, category_id=None, meta_rule_id=None):
+    def convert_ids_to_names(ids, json_out, field_name_out, element_type, manager, user_id,
+                             policy_id=None, category_id=None, meta_rule_id=None):
         res_array = []
         for id_ in ids:
-            element = JsonUtils._get_element_in_db_from_id(element_type, id_, user_id, policy_id, category_id, meta_rule_id, manager)
+            element = JsonUtils._get_element_in_db_from_id(element_type, id_, user_id, policy_id,
+                                                           category_id, meta_rule_id, manager)
             if element is None:
                 raise UnknownId("No {} with id {} found in database".format(element_type, id_))
             res = JsonUtils.__convert_results_to_element(element)
@@ -252,4 +280,3 @@ class JsonUtils:
             if "value" in res and "name" in res["value"]:
                 res_array.append({"name": res["value"]["name"]})
         json_out[field_name_out] = res_array
-

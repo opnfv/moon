@@ -3,7 +3,7 @@ import requests
 from python_moonclient.core import models, config
 from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.core.policies")
+LOGGER = logging.getLogger("moonclient.core.policies")
 
 URL = None
 HEADERS = None
@@ -108,13 +108,13 @@ def delete_policy(policy_id):
 def add_subject(policy_id=None, name="test_subject"):
     subject_template['name'] = name
     if policy_id:
-        logger.debug(URL.format("/policies/{}/subjects".format(policy_id)))
+        LOGGER.debug(URL.format("/policies/{}/subjects".format(policy_id)))
         req = requests.post(URL.format("/policies/{}/subjects".format(policy_id)),
                             json=subject_template, headers=HEADERS)
     else:
-        logger.debug(URL.format("/subjects"))
+        LOGGER.debug(URL.format("/subjects"))
         req = requests.post(URL.format("/subjects"), json=subject_template, headers=HEADERS)
-    logger.debug(req.text)
+    LOGGER.debug(req.text)
     req.raise_for_status()
     result = req.json()
     check_subject_in_result(result)
@@ -186,11 +186,12 @@ def add_object(policy_id=None, name="test_object"):
 
 
 def update_object(object_id, policy_id):
-    req = requests.patch(URL.format("/policies/{}/objects/{}".format(policy_id, object_id)), json={})
+    req = requests.patch(URL.format("/policies/{}/objects/{}".format(policy_id, object_id)),
+                         json={})
     req.raise_for_status()
     result = req.json()
     check_object_in_result(result)
-    check_object_name(object_template["name"] , object_id, result)
+    check_object_name(object_template["name"], object_id, result)
     check_object_policy(policy_id, result["objects"][object_id])
 
 
@@ -244,7 +245,8 @@ def add_action(policy_id=None, name="test_action"):
 
 
 def update_action(action_id, policy_id):
-    req = requests.patch(URL.format("/policies/{}/actions/{}".format(policy_id, action_id)), json={})
+    req = requests.patch(URL.format("/policies/{}/actions/{}".format(policy_id, action_id)),
+                         json={})
     req.raise_for_status()
     result = req.json()
     check_action_in_result(result)
@@ -310,8 +312,9 @@ def check_subject_data(policy_id, data_id, category_id):
 
 
 def delete_subject_data(policy_id, category_id, data_id):
-    req = requests.delete(URL.format("/policies/{}/subject_data/{}/{}".format(policy_id, category_id, data_id)),
-                          headers=HEADERS)
+    req = requests.delete(
+        URL.format("/policies/{}/subject_data/{}/{}".format(policy_id, category_id, data_id)),
+        headers=HEADERS)
     req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/subject_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
@@ -340,9 +343,11 @@ def check_object_data(policy_id, data_id, category_id):
     check_category_id_in_object_data_data(category_id, result)
     return result
 
+
 def delete_object_data(policy_id, category_id, data_id):
-    req = requests.delete(URL.format("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id)),
-                          headers=HEADERS)
+    req = requests.delete(
+        URL.format("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id)),
+        headers=HEADERS)
     req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/object_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
@@ -372,9 +377,11 @@ def check_action_data(policy_id, data_id, category_id):
     check_category_id_in_action_data_data(category_id, result)
     return result
 
+
 def delete_action_data(policy_id, category_id, data_id):
-    req = requests.delete(URL.format("/policies/{}/action_data/{}/{}".format(policy_id, category_id, data_id)),
-                          headers=HEADERS)
+    req = requests.delete(
+        URL.format("/policies/{}/action_data/{}/{}".format(policy_id, category_id, data_id)),
+        headers=HEADERS)
     req.raise_for_status()
     req = requests.get(URL.format("/policies/{}/action_data/{}".format(policy_id, category_id)))
     req.raise_for_status()
@@ -386,10 +393,10 @@ def delete_action_data(policy_id, category_id, data_id):
 def add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id):
     req = requests.post(URL.format("/policies/{}/subject_assignments".format(policy_id)),
                         json={
-                                "id": subject_id,
-                                "category_id": subject_cat_id,
-                                "data_id": subject_data_id
-                            }, headers=HEADERS)
+                            "id": subject_id,
+                            "category_id": subject_cat_id,
+                            "data_id": subject_data_id
+                        }, headers=HEADERS)
     req.raise_for_status()
     result = req.json()
     check_subject_assignment_in_result(result)
@@ -425,10 +432,10 @@ def check_action_assignments(policy_id, action_id, action_cat_id, action_data_id
 def add_object_assignments(policy_id, object_id, object_cat_id, object_data_id):
     req = requests.post(URL.format("/policies/{}/object_assignments".format(policy_id)),
                         json={
-                                "id": object_id,
-                                "category_id": object_cat_id,
-                                "data_id": object_data_id
-                            }, headers=HEADERS)
+                            "id": object_id,
+                            "category_id": object_cat_id,
+                            "data_id": object_data_id
+                        }, headers=HEADERS)
     req.raise_for_status()
     result = req.json()
     check_object_assignment_in_result(result)
@@ -437,10 +444,10 @@ def add_object_assignments(policy_id, object_id, object_cat_id, object_data_id):
 def add_action_assignments(policy_id, action_id, action_cat_id, action_data_id):
     req = requests.post(URL.format("/policies/{}/action_assignments".format(policy_id)),
                         json={
-                                "id": action_id,
-                                "category_id": action_cat_id,
-                                "data_id": action_data_id
-                            }, headers=HEADERS)
+                            "id": action_id,
+                            "category_id": action_cat_id,
+                            "data_id": action_data_id
+                        }, headers=HEADERS)
     req.raise_for_status()
     result = req.json()
     check_action_assignment_in_result(result)
@@ -491,7 +498,8 @@ def delete_action_assignment(policy_id, action_id, action_cat_id, action_data_id
     check_not_action_assignements(action_id, action_cat_id, action_data_id, result)
 
 
-def add_rule(policy_id, meta_rule_id, rule, instructions={"chain": [{"security_pipeline": "rbac"}]}):
+def add_rule(policy_id, meta_rule_id, rule,
+             instructions={"chain": [{"security_pipeline": "rbac"}]}):
     req = requests.post(URL.format("/policies/{}/rules".format(policy_id)),
                         json={
                             "meta_rule_id": meta_rule_id,
@@ -539,8 +547,9 @@ def check_meta_rule():
     print(result)
     return result
 
+
 def create_policy(scenario, model_id, meta_rule_list):
-    logger.info("Creating policy {}".format(scenario.policy_name))
+    LOGGER.info("Creating policy {}".format(scenario.policy_name))
     _policies = check_policy()
     for _policy_id, _policy_value in _policies["policies"].items():
         if _policy_value['name'] == scenario.policy_name:
@@ -552,24 +561,24 @@ def create_policy(scenario, model_id, meta_rule_list):
     update_policy(policy_id, model_id)
 
     for meta_rule_id in meta_rule_list:
-        logger.debug("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
+        LOGGER.debug("add_meta_rule_to_model {} {}".format(model_id, meta_rule_id))
         models.add_meta_rule_to_model(model_id, meta_rule_id)
 
-    logger.info("Add subject data")
+    LOGGER.info("Add subject data")
     for subject_cat_name in scenario.subject_data:
         for subject_data_name in scenario.subject_data[subject_cat_name]:
             data_id = scenario.subject_data[subject_cat_name][subject_data_name] = add_subject_data(
                 policy_id=policy_id,
                 category_id=scenario.subject_categories[subject_cat_name], name=subject_data_name)
             scenario.subject_data[subject_cat_name][subject_data_name] = data_id
-    logger.info("Add object data")
+    LOGGER.info("Add object data")
     for object_cat_name in scenario.object_data:
         for object_data_name in scenario.object_data[object_cat_name]:
             data_id = scenario.object_data[object_cat_name][object_data_name] = add_object_data(
                 policy_id=policy_id,
                 category_id=scenario.object_categories[object_cat_name], name=object_data_name)
             scenario.object_data[object_cat_name][object_data_name] = data_id
-    logger.info("Add action data")
+    LOGGER.info("Add action data")
     for action_cat_name in scenario.action_data:
         for action_data_name in scenario.action_data[action_cat_name]:
             data_id = scenario.action_data[action_cat_name][action_data_name] = add_action_data(
@@ -577,17 +586,17 @@ def create_policy(scenario, model_id, meta_rule_list):
                 category_id=scenario.action_categories[action_cat_name], name=action_data_name)
             scenario.action_data[action_cat_name][action_data_name] = data_id
 
-    logger.info("Add subjects")
+    LOGGER.info("Add subjects")
     for name in scenario.subjects:
         scenario.subjects[name] = add_subject(policy_id, name=name)
-    logger.info("Add objects")
+    LOGGER.info("Add objects")
     for name in scenario.objects:
         scenario.objects[name] = add_object(policy_id, name=name)
-    logger.info("Add actions")
+    LOGGER.info("Add actions")
     for name in scenario.actions:
         scenario.actions[name] = add_action(policy_id, name=name)
 
-    logger.info("Add subject assignments")
+    LOGGER.info("Add subject assignments")
     for subject_name in scenario.subject_assignments:
         if type(scenario.subject_assignments[subject_name]) in (list, tuple):
             for items in scenario.subject_assignments[subject_name]:
@@ -595,16 +604,19 @@ def create_policy(scenario, model_id, meta_rule_list):
                     subject_id = scenario.subjects[subject_name]
                     subject_cat_id = scenario.subject_categories[subject_category_name]
                     for data in scenario.subject_assignments[subject_name]:
-                        subject_data_id = scenario.subject_data[subject_category_name][data[subject_category_name]]
-                        add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id)
+                        subject_data_id = scenario.subject_data[subject_category_name][
+                            data[subject_category_name]]
+                        add_subject_assignments(policy_id, subject_id, subject_cat_id,
+                                                subject_data_id)
         else:
             for subject_category_name in scenario.subject_assignments[subject_name]:
                 subject_id = scenario.subjects[subject_name]
                 subject_cat_id = scenario.subject_categories[subject_category_name]
-                subject_data_id = scenario.subject_data[subject_category_name][scenario.subject_assignments[subject_name][subject_category_name]]
+                subject_data_id = scenario.subject_data[subject_category_name][
+                    scenario.subject_assignments[subject_name][subject_category_name]]
                 add_subject_assignments(policy_id, subject_id, subject_cat_id, subject_data_id)
 
-    logger.info("Add object assignments")
+    LOGGER.info("Add object assignments")
     for object_name in scenario.object_assignments:
         if type(scenario.object_assignments[object_name]) in (list, tuple):
             for items in scenario.object_assignments[object_name]:
@@ -612,16 +624,18 @@ def create_policy(scenario, model_id, meta_rule_list):
                     object_id = scenario.objects[object_name]
                     object_cat_id = scenario.object_categories[object_category_name]
                     for data in scenario.object_assignments[object_name]:
-                        object_data_id = scenario.object_data[object_category_name][data[object_category_name]]
+                        object_data_id = scenario.object_data[object_category_name][
+                            data[object_category_name]]
                         add_object_assignments(policy_id, object_id, object_cat_id, object_data_id)
         else:
             for object_category_name in scenario.object_assignments[object_name]:
                 object_id = scenario.objects[object_name]
                 object_cat_id = scenario.object_categories[object_category_name]
-                object_data_id = scenario.object_data[object_category_name][scenario.object_assignments[object_name][object_category_name]]
+                object_data_id = scenario.object_data[object_category_name][
+                    scenario.object_assignments[object_name][object_category_name]]
                 add_object_assignments(policy_id, object_id, object_cat_id, object_data_id)
 
-    logger.info("Add action assignments")
+    LOGGER.info("Add action assignments")
     for action_name in scenario.action_assignments:
         if type(scenario.action_assignments[action_name]) in (list, tuple):
             for items in scenario.action_assignments[action_name]:
@@ -629,16 +643,18 @@ def create_policy(scenario, model_id, meta_rule_list):
                     action_id = scenario.actions[action_name]
                     action_cat_id = scenario.action_categories[action_category_name]
                     for data in scenario.action_assignments[action_name]:
-                        action_data_id = scenario.action_data[action_category_name][data[action_category_name]]
+                        action_data_id = scenario.action_data[action_category_name][
+                            data[action_category_name]]
                         add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
         else:
             for action_category_name in scenario.action_assignments[action_name]:
                 action_id = scenario.actions[action_name]
                 action_cat_id = scenario.action_categories[action_category_name]
-                action_data_id = scenario.action_data[action_category_name][scenario.action_assignments[action_name][action_category_name]]
+                action_data_id = scenario.action_data[action_category_name][
+                    scenario.action_assignments[action_name][action_category_name]]
                 add_action_assignments(policy_id, action_id, action_cat_id, action_data_id)
 
-    logger.info("Add rules")
+    LOGGER.info("Add rules")
     for meta_rule_name in scenario.rules:
         meta_rule_value = scenario.meta_rule[meta_rule_name]
         for rule in scenario.rules[meta_rule_name]:
@@ -655,4 +671,3 @@ def create_policy(scenario, model_id, meta_rule_list):
             instructions = rule["instructions"]
             add_rule(policy_id, meta_rule_value["id"], data_list, instructions)
     return policy_id
-

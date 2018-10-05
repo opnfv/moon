@@ -1,4 +1,3 @@
-
 class BaseException(Exception):
     def __init__(self, message):
         self._code = 500

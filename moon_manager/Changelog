@@ -31,7 +31,7 @@ CHANGES
 
 4.5.2-1
 -----
-integrating validtion to send mandatory key names
+- integrating validation to send mandatory key names
 
 4.5.3
 -----
@@ -40,3 +40,34 @@ integrating validtion to send mandatory key names
 - allow 404 to be catched from our side instead of flask itself
 - revert the params in the get/post/patch/delete to be by default = None, so that we could catch the param if it was None
 instead of having not found url if the param is mandatory
+
+4.5.4
+-----
+- fixing test cases after validation dependencies added in moondb
+
+4.5.5
+-----
+- removing validation on meta_rule categories
+- Update to python_moonutilities 1.4.17 and fix tests
+- adding extra test cases for update requests
+- adding None to requests ( to avoid request not found)
+- removing validation on categories, meta_rules so that can be added empty
+
+4.5.5-1
+-------
+- Update to python_moonutilities 1.4.18
+
+4.5.5-2
+-------
+- Update to python_moonutilities 1.4.19
+
+4.5.6
+----
+apply pyLint
+adding extra test cases for policy update
+- separate perimeter add/update with validation
+
+4.6.0
+-----
+- Add a connection to the Update endpoint in Wrapper
+>>>>>>> Stashed changes

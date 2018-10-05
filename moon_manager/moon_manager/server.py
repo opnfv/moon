@@ -7,7 +7,6 @@ import logging
 from python_moonutilities import configuration, exceptions
 from moon_manager.http_server import HTTPServer
 
-
 logger = logging.getLogger("moon.manager.server")
 
 

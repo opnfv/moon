@@ -1,13 +1,13 @@
 import logging
-import requests
 import copy
+import requests
 from python_moonclient.core import config
 
-
-logger = logging.getLogger("moonclient.core.export_json")
+LOGGER = logging.getLogger("moonclient.core.export_json")
 
 URL = None
 HEADERS = None
+
 
 def init(consul_host, consul_port):
     conf_data = config.get_config_data(consul_host, consul_port)

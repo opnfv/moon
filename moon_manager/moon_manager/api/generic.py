@@ -122,13 +122,16 @@ class API(Resource):
                 api_desc[api_name]["version"] = group_api_obj.__version__
             object_list = list(filter(lambda x: "__" not in x,
                                       dir(group_api_obj)))
-            for obj in map(lambda x: eval("moon_manager.api.{}.{}".format(api_name, x)), object_list):
+            for obj in map(lambda x: eval("moon_manager.api.{}.{}".format(api_name, x)),
+                           object_list):
                 if "__urls__" in dir(obj):
                     api_desc[api_name][obj.__name__] = dict()
                     api_desc[api_name][obj.__name__]["urls"] = obj.__urls__
                     api_desc[api_name][obj.__name__]["methods"] = dict()
                     for _method in filter(lambda x: x in __methods, dir(obj)):
-                        docstring = eval("moon_manager.api.{}.{}.{}.__doc__".format(api_name, obj.__name__, _method))
+                        docstring = eval(
+                            "moon_manager.api.{}.{}.{}.__doc__".format(api_name, obj.__name__,
+                                                                       _method))
                         api_desc[api_name][obj.__name__]["methods"][_method] = docstring
                     api_desc[api_name][obj.__name__]["description"] = str(obj.__doc__)
         if group_id in api_desc:

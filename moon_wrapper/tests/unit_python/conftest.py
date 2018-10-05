@@ -288,10 +288,10 @@ def set_consul_and_db(monkeypatch):
                     "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
                     "port": 8080,
                     "genre": "interface",
-                    "name": "interface-paltry",
+                    "name": "pipeline-paltry",
                     "keystone_project_id": "a64beb1cc224474fb4badd43173e7101",
                     "namespace": "moon",
-                    "container": "wukongsun/moon_interface:v4.3"
+                    "container": "wukongsun/moon_pipeline:v4.3"
                   },
                   {
                     "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
@@ -308,7 +308,7 @@ def set_consul_and_db(monkeypatch):
                     "pdp_id": "invalid_pdp_id",
                     "port": 8080,
                     "genre": "interface",
-                    "name": "interface-paltry",
+                    "name": "pipeline-paltry",
                     "keystone_project_id": "invalid_project_id",
                     "namespace": "moon",
                     "container": "wukongsun/moon_authz:v4.3"
@@ -696,7 +696,7 @@ def set_consul_and_db(monkeypatch):
             content=get_pickled_context()
         )
         m.register_uri(
-            'GET', 'http://interface-paltry:8080/authz/{}/{}/{}/{}'.format(
+            'GET', 'http://pipeline-paltry:8080/authz/{}/{}/{}/{}'.format(
                 CONTEXT.get("pdp_id"),
                 CONTEXT.get("subject_name"),
                 CONTEXT.get("object_name"),
@@ -705,7 +705,7 @@ def set_consul_and_db(monkeypatch):
             json={"result": True, "message": "================"}
         )
         m.register_uri(
-            'GET', 'http://interface-paltry:8080/authz/{}/{}/{}/{}'.format(
+            'GET', 'http://pipeline-paltry:8080/authz/{}/{}/{}/{}'.format(
                 CONTEXT.get("invalid_pdp_id"),
                 CONTEXT.get("subject_name"),
                 CONTEXT.get("object_name"),

@@ -3,6 +3,8 @@
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
 
+from uuid import uuid4
+
 def get_policies():
     from python_moondb.core import PolicyManager
     return PolicyManager.get_policies("admin")
@@ -12,7 +14,7 @@ def add_policies(policy_id=None, value=None):
     from python_moondb.core import PolicyManager
     if not value:
         value = {
-            "name": "test_policy",
+            "name": "test_policy"+ uuid4().hex,
             "model_id": "",
             "genre": "authz",
             "description": "test",

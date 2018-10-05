@@ -19,7 +19,7 @@ class Driver(DriverManager):
             namespace='moon_db.driver',
             name=driver_name,
             invoke_on_load=True,
-            invoke_args=(engine_name, ),
+            invoke_args=(engine_name,),
         )
 
 

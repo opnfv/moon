@@ -6,17 +6,17 @@
 Authz is the endpoint to get authorization response
 """
 
+import logging
+import json
 import flask
 from flask import request
 from flask_restful import Resource
-import logging
-import json
 import requests
 from python_moonutilities import exceptions
 
 __version__ = "0.1.0"
 
-logger = logging.getLogger("moon.wrapper.api." + __name__)
+LOGGER = logging.getLogger("moon.wrapper.api." + __name__)
 
 
 class OsloWrapper(Resource):
@@ -35,15 +35,15 @@ class OsloWrapper(Resource):
         self.TIMEOUT = 5
 
     def post(self):
-        logger.debug("POST {}".format(request.form))
+        LOGGER.debug("POST {}".format(request.form))
         response = flask.make_response("False")
         try:
             if self.manage_data():
                 response = flask.make_response("True")
-        except exceptions.AuthzException as e:
-            logger.error(e, exc_info=True)
-        except Exception as e:
-            logger.error(e, exc_info=True)
+        except exceptions.AuthzException as exception:
+            LOGGER.error(exception, exc_info=True)
+        except Exception as exception:
+            LOGGER.error(exception, exc_info=True)
 
         response.headers['content-type'] = 'application/octet-stream'
         return response
@@ -64,20 +64,22 @@ class OsloWrapper(Resource):
             pass
 
         # note: default case
-        return target.get("project_id", "none")
+        return "none"
 
     @staticmethod
     def __get_project_id(target, credentials):
-        logger.info("__get_project_id {}".format(target))
-        return target.get("project_id", "none")
+        project_id = target.get("project_id", None)
+        if not project_id:
+            project_id = credentials.get("project_id", None)
+        return project_id
 
     def get_interface_url(self, project_id):
-        logger.debug("project_id {}".format(project_id))
+        LOGGER.debug("project_id {}".format(project_id))
         for containers in self.CACHE.containers.values():
-            logger.info("containers {}".format(containers))
+            LOGGER.info("containers {}".format(containers))
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "interface" in container['name']:
+                    if "pipeline" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])
@@ -86,7 +88,7 @@ class OsloWrapper(Resource):
         for containers in self.CACHE.containers.values():
             for container in containers:
                 if container.get("keystone_project_id") == project_id:
-                    if "interface" in container['name']:
+                    if "pipeline" in container['name']:
                         return "http://{}:{}".format(
                             container['name'],
                             container['port'])
@@ -100,14 +102,15 @@ class OsloWrapper(Resource):
             data = json.loads(request.data.decode("utf-8"))
         target = json.loads(data.get('target', {}))
         credentials = json.loads(data.get('credentials', {}))
-        rule = data.get('rule', "")
+        rule = data.get('rule', "").strip('"').strip("'")
         _subject = self.__get_subject(target, credentials)
         _object = self.__get_object(target, credentials)
         _action = rule
+        LOGGER.info("authz {} {} {}".format(_subject, _object, _action))
         _project_id = self.__get_project_id(target, credentials)
         _pdp_id = self.CACHE.get_pdp_from_keystone_project(_project_id)
         interface_url = self.get_interface_url(_project_id)
-        logger.debug("interface_url={}".format(interface_url))
+        LOGGER.debug("interface_url={}".format(interface_url))
         req = requests.get("{}/authz/{}/{}/{}/{}".format(
             interface_url,
             _pdp_id,
@@ -116,7 +119,7 @@ class OsloWrapper(Resource):
             _action
         ))
 
-        logger.debug("Get interface {}".format(req.text))
+        LOGGER.debug("Get interface {}".format(req.text))
         if req.status_code == 200:
             if req.json().get("result", False):
                 return True

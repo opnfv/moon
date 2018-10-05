@@ -42,9 +42,11 @@ def delete_pod(uuid):
         for pod_value in pod_list:
             if "pdp_id" in pod_value:
                 if pod_value["pdp_id"] == uuid:
-                    req = requests.delete("{}://{}:{}/pods/{}".format(proto, hostname, port, pod_key))
+                    req = requests.delete(
+                        "{}://{}:{}/pods/{}".format(proto, hostname, port, pod_key))
                     if req.status_code != 200:
-                        logger.warning("Cannot delete pod {} - {}".format(pod_key, pod_value['name']))
+                        logger.warning(
+                            "Cannot delete pod {} - {}".format(pod_key, pod_value['name']))
                         logger.debug(req.content)
                     # Note (Asteroide): no need to go further if one match
                     break
@@ -119,7 +121,8 @@ class PDP(Resource):
 
         return {"pdps": data}
 
-    @validate_input("post", body_state={"name": True, "security_pipeline": True, "keystone_project_id": True})
+    @validate_input("post", body_state={"name": True, "security_pipeline": True,
+                                        "keystone_project_id": True})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create pdp.
@@ -176,7 +179,9 @@ class PDP(Resource):
 
         return {"result": True}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state={"name": True, "security_pipeline": True, "keystone_project_id": True})
+    @validate_input("patch", kwargs_state=[True, False],
+                    body_state={"name": True, "security_pipeline": True,
+                                "keystone_project_id": True})
     @check_auth
     def patch(self, uuid, user_id=None):
         """Update a pdp
@@ -207,4 +212,3 @@ class PDP(Resource):
         add_pod(uuid=uuid, data=data[uuid])
 
         return {"pdps": data}
-

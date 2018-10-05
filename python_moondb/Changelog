@@ -106,3 +106,23 @@ CHANGES
 1.2.16
 ------
 - Fix the "key length error" in meta_rule table
+
+1.2.17
+------
+- adding extra validation for addition and deletion dependencies
+
+1.2.18
+------
+- adding changelog
+
+1.2.19
+------
+- adding extra validation for update requests
+
+1.2.20
+------
+- adding extra validation of rule content
+- update validation for category with meta-rule dependencies
+- update validation on updating meta-rule
+- applying PyLint
+- fixing Jira issues related to update policy

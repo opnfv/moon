@@ -3,7 +3,7 @@ from python_moonclient.core import models, policies, pdp
 from python_moonclient.cli.parser import Parser
 from cliff.lister import Lister
 
-logger = logging.getLogger("moonclient.cli.projects")
+LOGGER = logging.getLogger("moonclient.cli.projects")
 
 
 class ProjectsUtils:
@@ -15,7 +15,8 @@ class ProjectsUtils:
         projects = pdp.get_keystone_projects()
         for _project_value in projects['projects']:
             if _project_value['id'] == parsed_id or _project_value['name'] == parsed_name:
-                #logger.info("Found project : [key='{}' , name='{}']".format(_project_value['id'], _project_value['name']))
+                # LOGGER.info(
+                # "Found project : [key='{}' , name='{}']".format(_project_value['id'], _project_value['name']))
                 return _project_value['id']
         return None
 
@@ -24,7 +25,8 @@ class ProjectsUtils:
         projects = pdp.get_keystone_projects()
         for _project_value in projects['projects']:
             if _project_value['id'] == parsed_id or _project_value['name'] == parsed_name:
-                #logger.info("Found project : [key='{}' , name='{}']".format(_project_value['id'], _project_value['name']))
+                # LOGGER.info(
+                # "Found project : [key='{}' , name='{}']".format(_project_value['id'], _project_value['name']))
                 return _project_value['name']
         return None
 
@@ -47,10 +49,6 @@ class Projects(Lister):
 
         projects = pdp.get_keystone_projects()
 
-        return (('Id' , 'Name'),
-                   ((_project['id'],  _project['name']) for _project in projects['projects'])
-               )
-
-        
-
-
+        return (('Id', 'Name'),
+                ((_project['id'], _project['name']) for _project in projects['projects'])
+                )

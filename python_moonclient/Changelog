@@ -72,3 +72,7 @@ CHANGES
 1.4.1
 -----
 - Update exception during configuration
+
+1.4.2
+-----
+- apply PyLint rules

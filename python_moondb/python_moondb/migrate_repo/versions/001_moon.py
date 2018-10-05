@@ -7,8 +7,8 @@ import json
 import sqlalchemy as sql
 from sqlalchemy import types as sql_types
 
-class JsonBlob(sql_types.TypeDecorator):
 
+class JsonBlob(sql_types.TypeDecorator):
     impl = sql.Text
 
     def process_bind_param(self, value, dialect):
@@ -134,7 +134,8 @@ def upgrade(migrate_engine):
         sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
-        sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_subject_data'),
+        sql.UniqueConstraint('name', 'category_id', 'policy_id',
+                             name='unique_constraint_subject_data'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     subject_data_table.create(migrate_engine, checkfirst=True)
@@ -147,7 +148,8 @@ def upgrade(migrate_engine):
         sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("object_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
-        sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_object_data'),
+        sql.UniqueConstraint('name', 'category_id', 'policy_id',
+                             name='unique_constraint_object_data'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     object_data_table.create(migrate_engine, checkfirst=True)
@@ -160,7 +162,8 @@ def upgrade(migrate_engine):
         sql.Column('value', JsonBlob(), nullable=True),
         sql.Column('category_id', sql.ForeignKey("action_categories.id"), nullable=False),
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
-        sql.UniqueConstraint('name', 'category_id', 'policy_id', name='unique_constraint_action_data'),
+        sql.UniqueConstraint('name', 'category_id', 'policy_id',
+                             name='unique_constraint_action_data'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     action_data_table.create(migrate_engine, checkfirst=True)
@@ -173,7 +176,8 @@ def upgrade(migrate_engine):
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('subject_id', sql.ForeignKey("subjects.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("subject_categories.id"), nullable=False),
-        sql.UniqueConstraint('policy_id', 'subject_id', 'category_id', name='unique_constraint_subject_assignment'),
+        sql.UniqueConstraint('policy_id', 'subject_id', 'category_id',
+                             name='unique_constraint_subject_assignment'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     subject_assignments_table.create(migrate_engine, checkfirst=True)
@@ -186,7 +190,8 @@ def upgrade(migrate_engine):
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('object_id', sql.ForeignKey("objects.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("object_categories.id"), nullable=False),
-        sql.UniqueConstraint('policy_id', 'object_id', 'category_id', name='unique_constraint_object_assignment'),
+        sql.UniqueConstraint('policy_id', 'object_id', 'category_id',
+                             name='unique_constraint_object_assignment'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     object_assignments_table.create(migrate_engine, checkfirst=True)
@@ -199,7 +204,8 @@ def upgrade(migrate_engine):
         sql.Column('policy_id', sql.ForeignKey("policies.id"), nullable=False),
         sql.Column('action_id', sql.ForeignKey("actions.id"), nullable=False),
         sql.Column('category_id', sql.ForeignKey("action_categories.id"), nullable=False),
-        sql.UniqueConstraint('policy_id', 'action_id', 'category_id', name='unique_constraint_action_assignment'),
+        sql.UniqueConstraint('policy_id', 'action_id', 'category_id',
+                             name='unique_constraint_action_assignment'),
         mysql_engine='InnoDB',
         mysql_charset='utf8')
     action_assignments_table.create(migrate_engine, checkfirst=True)
@@ -236,28 +242,26 @@ def downgrade(migrate_engine):
     meta.bind = migrate_engine
 
     for _table in (
-        'rules',
-        'meta_rules',
-        'action_assignments',
-        'object_assignments',
-        'subject_assignments',
-        'action_data',
-        'object_data',
-        'subject_data',
-        'actions',
-        'objects',
-        'subjects',
-        'action_categories',
-        'object_categories',
-        'subject_categories',
-        'models',
-        'policies',
-        'pdp'
+            'rules',
+            'meta_rules',
+            'action_assignments',
+            'object_assignments',
+            'subject_assignments',
+            'action_data',
+            'object_data',
+            'subject_data',
+            'actions',
+            'objects',
+            'subjects',
+            'action_categories',
+            'object_categories',
+            'subject_categories',
+            'models',
+            'policies',
+            'pdp'
     ):
         try:
             table = sql.Table(_table, meta, autoload=True)
             table.drop(migrate_engine, checkfirst=True)
         except Exception as e:
             print(e)
-
-

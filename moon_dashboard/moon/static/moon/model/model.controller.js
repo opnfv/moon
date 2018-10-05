@@ -17,13 +17,13 @@
       link: function (scope, element, attrs) {
         element.bind('change', function (e) {
 
-          var onFileReadFn = $parse(attrs.onReadFile);
+          var onFileRead = $parse(attrs.onReadFile);
           var reader = new FileReader();
 
           reader.onload = function () {
             var fileContents = reader.result;
             scope.$apply(function () {
-              onFileReadFn(scope, {
+              onFileRead(scope, {
                 'contents': fileContents
               });
             });
@@ -65,8 +65,10 @@
     modelService.initialize();
 
     self.importData = function importData(text) {
+      horizon.modals.modal_spinner(gettext("Loading"))
       importService.importData(JSON.parse(text)).then(function () {
         modelService.initialize();
+        horizon.modals.spinner.modal('hide');
       })
     }
 
@@ -76,7 +78,8 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") }
-        }
+        },
+        required: ['name', 'description']
       };
       var model = { name: '', description: '' };
       var config = {
@@ -98,7 +101,8 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") }
-        }
+        },
+        required: ['name', 'description']
       };
       var config = {
         title: gettext('Update Model'),
@@ -118,37 +122,73 @@
         modelService.removeModel(model);
     }
 
+    self.createMetaRuleFunction = function createMetaRuleFunction(model, titleMap) {
+      return function () {
+        var schema = {
+          type: "object",
+          properties: {
+            name: { type: "string", minLength: 2, title: gettext("Name") },
+            description: { type: "string", minLength: 2, title: gettext("Description") },
+          },
+          required: ['name', 'description']
+        };
+        var metaRule = { name: '', description: '' };
+        var config = {
+          title: gettext('Create Meta Rule'),
+          schema: schema,
+          form: [
+            'name',
+            { key: 'description', type: 'textarea' }
+          ],
+          model: metaRule
+        };
+        ModalFormService.open(config).then(submit);
+
+        function submit(form) {
+          modelService.createMetaRule(form.model).then(function (metaRule) {
+            titleMap.push({ value: metaRule.id, name: metaRule.name })
+            model.id = metaRule.id
+          })
+        }
+      }
+    }
+
     self.addMetaRule = function addMetaRule(model) {
       var schema = {
         type: "object",
         properties: {
-          name: { type: "string", minLength: 2, title: gettext("Name") },
-          description: { type: "string", minLength: 2, title: gettext("Description") },
           id: { type: "string", title: gettext("Select a Meta Rule:") }
-        }
+        },
+        required: ['id']
       };
-      var metaRule = { name: '', description: '' };
       var titleMap = util.arrayToTitleMap(modelService.metaRules)
+      var formModel = { id: null }
       var config = {
         title: gettext('Add Meta Rule'),
         schema: schema,
-        form: [{ key: 'id', type: 'select', titleMap: titleMap }, { type: 'help', helpvalue: gettext("Or create a new one:") }, 'name', { key: 'description', type: 'textarea' }],
-        model: metaRule
+        form: [
+          { key: 'id', type: 'select', titleMap: titleMap },
+          {
+            key: 'createButton',
+            type: 'button',
+            title: gettext('Create Meta Rule'),
+            icon: 'fa fa-plus',
+            onClick: self.createMetaRuleFunction(formModel, titleMap)
+          }
+        ],
+        model: formModel
       };
+      if (modelService.metaRules.length == 1) {
+        formModel.id = modelService.metaRules[0].id
+      }
+
       ModalFormService.open(config).then(submit);
 
       function submit(form) {
-        function addMetaRuleToModel(metaRule) {
-          var modelCopy = angular.copy(model);
-          modelCopy.meta_rules.push(metaRule);
-          modelService.updateModel(modelCopy);
-        }
-
-        if (form.model.name) {
-          modelService.createMetaRule(form.model).then(addMetaRuleToModel)
-        } else if (form.model.id) {
-          addMetaRuleToModel(modelService.getMetaRule(form.model.id));
-        }
+        var metaRule = modelService.getMetaRule(form.model.id);
+        var modelCopy = angular.copy(model);
+        modelCopy.meta_rules.push(metaRule);
+        modelService.updateModel(modelCopy);
       }
     }
 
@@ -158,7 +198,8 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") }
-        }
+        },
+        required: ['name', 'description']
       };
       var metaRuleCopy = angular.copy(metaRule);
       var config = {
@@ -188,38 +229,69 @@
       }
     }
 
+    self.createCategoryFunction = function createCategoryFunction(type, formModel, titleMap) {
+      return function () {
+        var schema = {
+          type: "object",
+          properties: {
+            name: { type: "string", minLength: 2, title: gettext("Name") },
+            description: { type: "string", minLength: 2, title: gettext("Description") },
+          },
+          required: ['name', 'description']
+        };
+        var metaRule = { name: '', description: '' };
+        var config = {
+          title: gettext('Create Category'),
+          schema: schema,
+          form: [
+            'name',
+            { key: 'description', type: 'textarea' }
+          ],
+          model: metaRule
+        };
+        ModalFormService.open(config).then(submit);
+
+        function submit(form) {
+          modelService.createCategory(type, form.model).then(function (category) {
+            titleMap.push({ value: category.id, name: category.name })
+            formModel.id = category.id
+          })
+        }
+      }
+    }
+
     self.addCategory = function addCategory(type, metaRule) {
       var typeValue = categoryMap[type];
       var schema = {
         type: "object",
         properties: {
-          name: { type: "string", minLength: 2, title: gettext("Name") },
-          description: { type: "string", minLength: 2, title: gettext("Description") },
           id: { type: "string", title: gettext("Select a Category:") }
-        }
+        },
+        required: ['id']
       };
-      var category = { name: '', description: '' };
       var titleMap = util.arrayToTitleMap(modelService[typeValue.serviceListName])
+      var formModel = { id: null }
       var config = {
         title: gettext(typeValue.addTitle),
         schema: schema,
-        form: [{ key: 'id', type: 'select', titleMap: titleMap }, { type: 'help', helpvalue: gettext("Or create a new one:") }, 'name', { key: 'description', type: 'textarea' }],
-        model: category
+        form: [
+          { key: 'id', type: 'select', titleMap: titleMap },
+          {
+            key: 'createButton',
+            type: 'button',
+            title: gettext('Create Category'),
+            icon: 'fa fa-plus',
+            onClick: self.createCategoryFunction(type, formModel, titleMap)
+          }],
+        model: formModel
       };
       ModalFormService.open(config).then(submit);
 
       function submit(form) {
-        function addCategoryToMetaRule(category) {
-          var metaRuleCopy = angular.copy(metaRule);
-          metaRuleCopy[typeValue.listName].push(category);
-          modelService.updateMetaRule(metaRuleCopy)
-        }
-
-        if (form.model.name) {
-          modelService.createCategory(type, form.model).then(addCategoryToMetaRule)
-        } else if (form.model.id) {
-          addCategoryToMetaRule(modelService.getCategory(type, form.model.id));
-        }
+        var category = modelService.getCategory(type, form.model.id);
+        var metaRuleCopy = angular.copy(metaRule);
+        metaRuleCopy[typeValue.listName].push(category);
+        modelService.updateMetaRule(metaRuleCopy)
       }
     }
 

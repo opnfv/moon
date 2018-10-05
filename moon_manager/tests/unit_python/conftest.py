@@ -153,6 +153,24 @@ PODS = {
     }
 }
 
+SLAVES = {
+    "slaves": [
+        {
+            "context":
+                {
+                    "cluster": "kubernetes",
+                    "user": "kubernetes-admin"
+                },
+            "name": "kubernetes-admin@kubernetes",
+            "configured": True,
+            "wrapper_name": "mywrapper",
+            "ip": "NC",
+            "port": 31002,
+            "internal_port": 8080
+        }
+    ]
+}
+
 
 def get_b64_conf(component=None):
     if component in CONF:
@@ -209,6 +227,10 @@ def no_requests(monkeypatch):
         m.register_uri(
             'GET', 'http://orchestrator:8083/pods',
             json=PODS
+        )
+        m.register_uri(
+            'GET', 'http://localhost/slaves',
+            json=SLAVES
         )
         m.register_uri(
             'DELETE', 'http://orchestrator:8083/pods/{}'.format(list([PODS['pods'].keys()])[0]),

@@ -117,8 +117,12 @@
             },
 
             displayErrorFunction: function displayErrorFunction(message) {
-                return function() {
-                    toast.add('error', gettext(message));
+                return function(response) {
+                    var text = gettext(message);
+                    if (response && response.data && response.data.message) {
+                        text += ' (' + response.data.message + ')'
+                    }
+                    toast.add('error', text);
                 }
             },
     

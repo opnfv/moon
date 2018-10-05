@@ -1,4 +1,3 @@
-
 from python_moonclient.core import models, policies, pdp, json_import
 from python_moonclient.cli.parser import Parser
 from python_moonclient.cli.projects import ProjectsUtils
@@ -8,6 +7,7 @@ from cliff.command import Command
 
 class Import(Command):
     """import a json file describing pdps """
+
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         Parser.add_common_options(parser)
@@ -26,4 +26,3 @@ class Import(Command):
         if "message" in res:
             return res["message"]
         return res
-

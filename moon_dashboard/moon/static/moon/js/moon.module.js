@@ -23,7 +23,7 @@
 		.module('moon', [
 			'ngResource',
 		]).constant('moon.URI', {
-			API: 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}',
+			API: 'http://{{MANAGER_HOST}}:{{MANAGER_PORT}}', 
 		})
 
 })();

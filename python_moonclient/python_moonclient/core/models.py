@@ -1,11 +1,10 @@
 import logging
-import requests
 import copy
+import requests
 from python_moonclient.core import config
 from python_moonclient.core.check_tools import *
 
-logger = logging.getLogger("moonclient.core.models")
-
+LOGGER = logging.getLogger("moonclient.core.models")
 
 URL = None
 HEADERS = None
@@ -241,17 +240,17 @@ def add_meta_rule_to_model(model_id, meta_rule_id):
 
 
 def create_model(scenario, model_id=None):
-    logger.info("Creating model {}".format(scenario.model_name))
+    LOGGER.info("Creating model {}".format(scenario.model_name))
     if not model_id:
-        logger.info("Add model")
+        LOGGER.info("Add model")
         model_id = add_model(name=scenario.model_name)
-    logger.info("Add subject categories")
+    LOGGER.info("Add subject categories")
     for cat in scenario.subject_categories:
         scenario.subject_categories[cat] = add_subject_category(name=cat)
-    logger.info("Add object categories")
+    LOGGER.info("Add object categories")
     for cat in scenario.object_categories:
         scenario.object_categories[cat] = add_object_category(name=cat)
-    logger.info("Add action categories")
+    LOGGER.info("Add action categories")
     for cat in scenario.action_categories:
         scenario.action_categories[cat] = add_action_category(name=cat)
     sub_cat = []
@@ -272,7 +271,7 @@ def create_model(scenario, model_id=None):
                 meta_rule_id = _meta_rule_id
                 break
         else:
-            logger.info("Add meta rule")
+            LOGGER.info("Add meta rule")
             meta_rule_id = add_meta_rule(item_name, sub_cat, ob_cat, act_cat)
         item_value["id"] = meta_rule_id
         if meta_rule_id not in meta_rule_list:

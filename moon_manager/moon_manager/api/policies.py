@@ -14,7 +14,6 @@ from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 from python_moonutilities.security_functions import validate_input
 
-
 __version__ = "4.3.2"
 
 logger = logging.getLogger("moon.manager.api." + __name__)
@@ -54,7 +53,7 @@ class Policies(Resource):
 
         return {"policies": data}
 
-    @validate_input("post", body_state={"name": True, "model_id":True})
+    @validate_input("post", body_state={"name": True, "model_id": False})
     @check_auth
     def post(self, uuid=None, user_id=None):
         """Create policy.
@@ -83,7 +82,7 @@ class Policies(Resource):
 
         return {"policies": data}
 
-    @validate_input("delete", kwargs_state=[ True, False])
+    @validate_input("delete", kwargs_state=[True, False])
     @check_auth
     def delete(self, uuid=None, user_id=None):
         """Delete a policy
@@ -101,7 +100,8 @@ class Policies(Resource):
 
         return {"result": True}
 
-    @validate_input("patch", kwargs_state=[True, False], body_state={"name": True, "model_id":True})
+    @validate_input("patch", kwargs_state=[True, False],
+                    body_state={"name": True, "model_id": False})
     @check_auth
     def patch(self, uuid=None, user_id=None):
         """Update a policy
@@ -123,4 +123,3 @@ class Policies(Resource):
             user_id=user_id, policy_id=uuid, value=request.json)
 
         return {"policies": data}
-

@@ -16,7 +16,6 @@ from python_moonutilities.security_functions import check_auth
 from python_moonutilities import configuration
 from python_moonutilities.security_functions import validate_input
 
-
 __version__ = "4.3.0"
 
 logger = logging.getLogger("moon.manager.api." + __name__)
@@ -84,11 +83,11 @@ class Slaves(Resource):
         """
         logger.info("Will made a request for {}".format(uuid))
         if request.json.get("op") == "replace" \
-            and request.json.get("variable") == "configured" \
+                and request.json.get("variable") == "configured" \
                 and request.json.get("value"):
             req = requests.post("http://{}:{}/pods".format(
                 self.orchestrator_hostname, self.orchestrator_port,
-                ),
+            ),
                 json={"slave_name": uuid}
             )
             if req.status_code != 200:
@@ -97,7 +96,7 @@ class Slaves(Resource):
                 ))
                 return "Orchestrator: " + str(req.reason), req.status_code
         elif request.json.get("op") == "replace" \
-            and request.json.get("variable") == "configured" \
+                and request.json.get("variable") == "configured" \
                 and not request.json.get("value"):
             req = requests.delete("http://{}:{}/pods/{}".format(
                 self.orchestrator_hostname, self.orchestrator_port, uuid

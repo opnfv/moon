@@ -28,13 +28,12 @@ class SubjectData(Resource):
         "/policies/<string:uuid>/subject_data",
         "/policies/<string:uuid>/subject_data/",
         "/policies/<string:uuid>/subject_data/<string:category_id>",
-        "/policies/<string:uuid>/subject_data/<string:category_id>/"
-        "<string:data_id>",
+        "/policies/<string:uuid>/subject_data/<string:category_id>/<string:data_id>",
     )
 
     @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
-    def get(self, uuid, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all subject categories or a specific one if data_id is given
         for a given policy
 
@@ -63,9 +62,9 @@ class SubjectData(Resource):
 
         return {"subject_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name": True})
     @check_auth
-    def post(self, uuid, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
@@ -90,14 +89,14 @@ class SubjectData(Resource):
         """
         data = PolicyManager.set_subject_data(user_id=user_id,
                                               policy_id=uuid,
-                                                  category_id=category_id,
-                                                  value=request.json)
+                                              category_id=category_id,
+                                              value=request.json)
 
         return {"subject_data": data}
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
-    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a subject for a given policy
 
         :param uuid: uuid of the policy
@@ -113,6 +112,7 @@ class SubjectData(Resource):
         logger.info("api.delete {} {}".format(uuid, data_id))
         data = PolicyManager.delete_subject_data(user_id=user_id,
                                                  policy_id=uuid,
+                                                 category_id=category_id,
                                                  data_id=data_id)
 
         return {"result": True}
@@ -133,7 +133,7 @@ class ObjectData(Resource):
 
     @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
-    def get(self, uuid, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all object categories or a specific one if sid is given
         for a given policy
 
@@ -160,9 +160,9 @@ class ObjectData(Resource):
 
         return {"object_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name": True})
     @check_auth
-    def post(self, uuid, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a object.
 
         :param uuid: uuid of the policy
@@ -194,7 +194,7 @@ class ObjectData(Resource):
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
-    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a object for a given policy
 
         :param uuid: uuid of the policy
@@ -209,6 +209,7 @@ class ObjectData(Resource):
         """
         data = PolicyManager.delete_object_data(user_id=user_id,
                                                 policy_id=uuid,
+                                                category_id=category_id,
                                                 data_id=data_id)
 
         return {"result": True}
@@ -229,7 +230,7 @@ class ActionData(Resource):
 
     @validate_input("get", kwargs_state=[True, False, False, False])
     @check_auth
-    def get(self, uuid, category_id=None, data_id=None, user_id=None):
+    def get(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Retrieve all action categories or a specific one if sid is given
         for a given policy
 
@@ -256,9 +257,9 @@ class ActionData(Resource):
 
         return {"action_data": data}
 
-    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name":True})
+    @validate_input("post", kwargs_state=[True, True, False, False], body_state={"name": True})
     @check_auth
-    def post(self, uuid, category_id=None, data_id=None, user_id=None):
+    def post(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Create or update a action.
 
         :param uuid: uuid of the policy
@@ -289,7 +290,7 @@ class ActionData(Resource):
 
     @validate_input("delete", kwargs_state=[True, False, False, False])
     @check_auth
-    def delete(self, uuid, category_id=None, data_id=None, user_id=None):
+    def delete(self, uuid=None, category_id=None, data_id=None, user_id=None):
         """Delete a action for a given policy
 
         :param uuid: uuid of the policy
@@ -304,8 +305,7 @@ class ActionData(Resource):
         """
         data = PolicyManager.delete_action_data(user_id=user_id,
                                                 policy_id=uuid,
+                                                category_id=category_id,
                                                 data_id=data_id)
 
         return {"result": True}
-
-

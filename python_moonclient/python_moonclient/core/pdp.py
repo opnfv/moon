@@ -4,8 +4,7 @@ import requests
 from python_moonclient.core import config
 from python_moonclient.core.check_tools import *
 
-
-logger = logging.getLogger("python_moonclient.core.pdp")
+LOGGER = logging.getLogger("python_moonclient.core.pdp")
 
 URL = None
 HEADERS = None
@@ -13,7 +12,6 @@ KEYSTONE_USER = None
 KEYSTONE_PASSWORD = None
 KEYSTONE_PROJECT = None
 KEYSTONE_SERVER = None
-
 
 pdp_template = {
     "name": "test_pdp",
@@ -63,11 +61,11 @@ def get_keystone_projects():
     }
 
     req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
-    logger.debug("{}/auth/tokens".format(KEYSTONE_SERVER))
-    logger.debug(req.text)
+    LOGGER.debug("{}/auth/tokens".format(KEYSTONE_SERVER))
+    LOGGER.debug(req.text)
     req.raise_for_status()
-    TOKEN = req.headers['X-Subject-Token']
-    HEADERS['X-Auth-Token'] = TOKEN
+    token = req.headers['X-Subject-Token']
+    HEADERS['X-Auth-Token'] = token
     req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
     if req.status_code not in (200, 201):
         data_auth["auth"]["scope"] = {
@@ -78,10 +76,11 @@ def get_keystone_projects():
                 }
             }
         }
-        req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth, headers=HEADERS)
+        req = requests.post("{}/auth/tokens".format(KEYSTONE_SERVER), json=data_auth,
+                            headers=HEADERS)
         req.raise_for_status()
-        TOKEN = req.headers['X-Subject-Token']
-        HEADERS['X-Auth-Token'] = TOKEN
+        token = req.headers['X-Subject-Token']
+        HEADERS['X-Auth-Token'] = token
         req = requests.get("{}/projects".format(KEYSTONE_SERVER), headers=HEADERS)
     req.raise_for_status()
     return req.json()
@@ -94,21 +93,21 @@ def get_keystone_id(pdp_name):
             if pdp_name != pdp_value["name"]:
                 continue
         if pdp_value['security_pipeline'] and pdp_value["keystone_project_id"]:
-            logger.debug("Found pdp with keystone_project_id={}".format(pdp_value["keystone_project_id"]))
+            LOGGER.debug(
+                "Found pdp with keystone_project_id={}".format(pdp_value["keystone_project_id"]))
             keystone_project_id = pdp_value["keystone_project_id"]
 
     if not keystone_project_id:
-        logger.error("Cannot find PDP with keystone project ID")
+        LOGGER.error("Cannot find PDP with keystone project ID")
         sys.exit(1)
     return keystone_project_id
 
 
-
 def check_pdp(pdp_id=None, keystone_project_id=None, moon_url=None):
-    _URL = URL
+    _url = URL
     if moon_url:
-        _URL = moon_url
-    req = requests.get(_URL + "/pdp")
+        _url = moon_url
+    req = requests.get(_url + "/pdp")
     req.raise_for_status()
     result = req.json()
     check_pdp_in_result(result)
@@ -124,8 +123,8 @@ def add_pdp(name="test_pdp", policy_id=None):
     if policy_id:
         pdp_template['security_pipeline'].append(policy_id)
     req = requests.post(URL + "/pdp", json=pdp_template, headers=HEADERS)
-    logger.debug(req.status_code)
-    logger.debug(req)
+    LOGGER.debug(req.status_code)
+    LOGGER.debug(req)
     req.raise_for_status()
     result = req.json()
     check_pdp_in_result(result)
@@ -175,7 +174,7 @@ def delete_pdp(pdp_id):
 
 
 def create_pdp(scenario, policy_id=None, project_id=None):
-    logger.info("Creating PDP {}".format(scenario.pdp_name))
+    LOGGER.info("Creating PDP {}".format(scenario.pdp_name))
     projects = get_keystone_projects()
     # if not project_id:
     #     for _project in projects['projects']:
@@ -186,7 +185,9 @@ def create_pdp(scenario, policy_id=None, project_id=None):
     for pdp_id, pdp_value in pdps.items():
         if scenario.pdp_name == pdp_value["name"]:
             update_pdp(pdp_id, policy_id=policy_id)
-            logger.debug("Found existing PDP named {} (will add policy {})".format(scenario.pdp_name, policy_id))
+            LOGGER.debug(
+                "Found existing PDP named {} (will add policy {})".format(scenario.pdp_name,
+                                                                          policy_id))
             return pdp_id
     _pdp_id = add_pdp(name=scenario.pdp_name, policy_id=policy_id)
     # map_to_keystone(pdp_id=_pdp_id, keystone_project_id=project_id)

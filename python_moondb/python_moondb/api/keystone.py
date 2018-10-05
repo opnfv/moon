@@ -103,4 +103,3 @@ class KeystoneManager(Managers):
                                _exception=exceptions.KeystoneUserError)
         except exceptions.KeystoneUserConflict:
             return True
-

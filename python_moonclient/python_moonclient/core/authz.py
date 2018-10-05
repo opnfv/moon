@@ -1,19 +1,19 @@
+from uuid import uuid4
 import copy
 import logging
 import threading
-import requests
 import time
 import json
 import random
-from uuid import uuid4
+import requests
 
 HOST_MANAGER = None
 PORT_MANAGER = None
 HOST_KEYSTONE = None
 PORT_KEYSTONE = None
 
-lock = threading.Lock()
-logger = logging.getLogger("moonclient.core.authz")
+LOCK = threading.Lock()
+LOGGER = logging.getLogger("moonclient.core.authz")
 
 
 def _construct_payload(creds, current_rule, enforcer, target):
@@ -43,15 +43,16 @@ def _send(url, data=None, stress_test=False):
     try:
         if stress_test:
             current_request['start'] = time.time()
-            # with lock:
+            # with LOCK:
             res = requests.get(url)
             current_request['end'] = time.time()
             current_request['delta'] = current_request["end"] - current_request["start"]
         else:
-            with lock:
+            with LOCK:
                 current_request['start'] = time.time()
                 if data:
-                    data, _ = _construct_payload(data['credentials'], data['rule'], True, data['target'])
+                    data, _ = _construct_payload(data['credentials'], data['rule'], True,
+                                                 data['target'])
                     res = requests.post(url, json=data,
                                         headers={'content-type': "application/x-www-form-urlencode"}
                                         )
@@ -60,34 +61,34 @@ def _send(url, data=None, stress_test=False):
                 current_request['end'] = time.time()
                 current_request['delta'] = current_request["end"] - current_request["start"]
     except requests.exceptions.ConnectionError:
-        logger.warning("Unable to connect to server")
+        LOGGER.warning("Unable to connect to server")
         return {}
     if not stress_test:
         try:
             j = res.json()
             if res.status_code == 200:
-                logger.warning("\033[1m{}\033[m \033[32mGrant\033[m".format(url))
+                LOGGER.warning("\033[1m{}\033[m \033[32mGrant\033[m".format(url))
             elif res.status_code == 401:
-                logger.warning("\033[1m{}\033[m \033[31mDeny\033[m".format(url))
+                LOGGER.warning("\033[1m{}\033[m \033[31mDeny\033[m".format(url))
             else:
-                logger.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
+                LOGGER.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
         except Exception as e:
             if res.text == "True":
-                logger.warning("\033[1m{}\033[m \033[32mGrant\033[m".format(url))
+                LOGGER.warning("\033[1m{}\033[m \033[32mGrant\033[m".format(url))
             elif res.text == "False":
-                logger.warning("\033[1m{}\033[m \033[31mDeny\033[m".format(url))
+                LOGGER.warning("\033[1m{}\033[m \033[31mDeny\033[m".format(url))
             else:
-                logger.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
-                logger.exception(e)
-                logger.error(res.text)
+                LOGGER.error("\033[1m{}\033[m {} {}".format(url, res.status_code, res.text))
+                LOGGER.exception(e)
+                LOGGER.error(res.text)
         else:
             if j.get("result"):
                 # logger.warning("{} \033[32m{}\033[m".format(url, j.get("result")))
-                logger.debug("{}".format(j.get("error", "")))
+                LOGGER.debug("{}".format(j.get("error", "")))
                 current_request['result'] = "Grant"
             else:
                 # logger.warning("{} \033[31m{}\033[m".format(url, "Deny"))
-                logger.debug("{}".format(j))
+                LOGGER.debug("{}".format(j))
                 current_request['result'] = "Deny"
     return current_request
 
@@ -110,35 +111,37 @@ class AsyncGet(threading.Thread):
         self.result['index'] = self.index
 
 
-def send_requests(scenario, authz_host, authz_port, keystone_project_id, request_second=1, limit=500,
+def send_requests(scenario, authz_host, authz_port, keystone_project_id, request_second=1,
+                  limit=500,
                   dry_run=None, stress_test=False, destination="wrapper"):
     backgrounds = []
     time_data = list()
     start_timing = time.time()
     request_cpt = 0
-    SUBJECTS = tuple(scenario.subjects.keys())
-    OBJECTS = tuple(scenario.objects.keys())
-    ACTIONS = tuple(scenario.actions.keys())
+    subjects = tuple(scenario.subjects.keys())
+    objects = tuple(scenario.objects.keys())
+    actions = tuple(scenario.actions.keys())
     while request_cpt < limit:
-        rule = (random.choice(SUBJECTS), random.choice(OBJECTS), random.choice(ACTIONS))
+        rule = (random.choice(subjects), random.choice(objects), random.choice(actions))
         if destination.lower() == "wrapper":
             url = "http://{}:{}/authz/oslo".format(authz_host, authz_port)
             data = {
                 'target': {
-                    "user_id": random.choice(SUBJECTS),
+                    "user_id": random.choice(subjects),
                     "target": {
-                        "name": random.choice(OBJECTS)
+                        "name": random.choice(objects)
                     },
                     "project_id": keystone_project_id
                 },
                 'credentials': None,
-                'rule': random.choice(ACTIONS)
+                'rule': random.choice(actions)
             }
         else:
-            url = "http://{}:{}/authz/{}/{}".format(authz_host, authz_port, keystone_project_id, "/".join(rule))
+            url = "http://{}:{}/authz/{}/{}".format(authz_host, authz_port, keystone_project_id,
+                                                    "/".join(rule))
             data = None
         if dry_run:
-            logger.info(url)
+            LOGGER.info(url)
             continue
         request_cpt += 1
         if stress_test:
@@ -150,9 +153,9 @@ def send_requests(scenario, authz_host, authz_port, keystone_project_id, request
             background.start()
         if request_second > 0:
             if request_cpt % request_second == 0:
-                if time.time()-start_timing < 1:
+                if time.time() - start_timing < 1:
                     while True:
-                        if time.time()-start_timing > 1:
+                        if time.time() - start_timing > 1:
                             break
                 start_timing = time.time()
     if not stress_test:
@@ -175,4 +178,3 @@ def get_delta(time_data):
         time_delta_sum1 += item['delta']
     time_delta_average1 = time_delta_sum1 / len(time_data)
     return time_delta, time_delta_average1
-

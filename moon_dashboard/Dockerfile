@@ -8,19 +8,21 @@ LABEL Url="https://wiki.opnfv.org/display/moon/Moon+Project+Proposal"
 ENV MANAGER_HOST="127.0.0.1"
 ENV MANAGER_PORT=30001
 ENV KEYSTONE_HOST="127.0.0.1"
-ENV KEYSTONE_PORT=30005
+ENV KEYSTONE_PORT=5000
 ENV OPENSTACK_HOST="127.0.0.1"
-ENV OPENSTACK_KEYSTONE_URL="http://${KEYSTONE_HOST}:${KEYSTONE_PORT}/v2.0"
+ENV OPENSTACK_KEYSTONE_URL="http://${KEYSTONE_HOST}:${KEYSTONE_PORT}/identity/v3"
+ENV SERVER_IP_ADDR="0.0.0.0"
 
 USER root
 
 WORKDIR /root/
 ADD . /root
 
-RUN git clone https://git.openstack.org/openstack/horizon
+RUN [ -d horizon ] || git clone https://git.openstack.org/openstack/horizon
 
 WORKDIR /root/horizon
 
+# RUN pip install --no-cache-dir pip
 RUN pip install --no-cache-dir -c http://git.openstack.org/cgit/openstack/requirements/plain/upper-constraints.txt .
 
 RUN cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
@@ -30,5 +32,7 @@ WORKDIR /root/
 
 RUN cp -v moon/enabled/_32000_moon.py horizon/openstack_dashboard/local/enabled/_32000_moon.py
 RUN cp -rv moon/ horizon/openstack_dashboard/dashboards/
+
+EXPOSE 8000
 
 CMD ["/bin/sh", "/root/run.sh"]

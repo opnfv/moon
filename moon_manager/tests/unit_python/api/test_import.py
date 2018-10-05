@@ -9,7 +9,7 @@ import api.test_policies as test_policies
 import api.test_meta_data as test_categories
 import api.test_data as test_data
 import api.test_meta_rules as test_meta_rules
-import api.test_assignemnt as test_assignments
+import api.test_assignement as test_assignments
 import api.test_rules as test_rules
 import api.import_export_utilities as import_export_utilities
 
@@ -42,7 +42,8 @@ OBJECTS = [
         "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
     {"policies": [{"name": "test other policy", "genre": "authz", "description": "description", "model": {}, "mandatory": True}],
         "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": []}]},
-    {"objects": [{"name": "test object", "description": "new description of the object", "extra": {"test": "test extra"},
+    {"objects": [{"name": "test object", "description": "new description of the object",
+                  "extra": {"test": "test extra"},
                  "policies": [{"name": "test other policy"}]}]},
     {"policies": [{"name": "test policy", "genre": "authz", "description": "description", "model": {}, "mandatory": False}],
         "objects": [{"name": "test object", "description": "description of the object", "extra": {}, "policies": [{"name": "test policy"}]}]},
@@ -225,7 +226,14 @@ def test_import_subject_object_action():
             if counter == 2 or counter == 4:
                 clean_method(client)
 
-            req = client.post("/import", content_type='application/json', data=json.dumps(element))
+
+            if counter == 3:
+                req = client.patch("/{}s/{}".format(type_element,perimeter_id), content_type='application/json',
+                               data=json.dumps(
+                    element["{}s".format(type_element)][0]))
+            else :
+                req = client.post("/import", content_type='application/json',
+                                  data=json.dumps(element))
             if counter < 2:
                 assert req.status_code == 500
                 continue
@@ -237,9 +245,12 @@ def test_import_subject_object_action():
                 #assert counter < 2  #  this is an expected failure
                 #continue
 
-            assert data == "Import ok !"
+            if counter != 3:
+                assert data == "Import ok !"
             get_elements = utilities.get_json(client.get("/"+type_element + "s").data)
             get_elements = get_elements[type_element + "s"]
+
+            perimeter_id = list(get_elements.keys())[0]
 
             assert len(list(get_elements.keys())) == 1
             values = list(get_elements.values())
@@ -338,6 +349,7 @@ def test_import_meta_rules():
 def test_import_subject_object_action_assignments():
     client = utilities.register_client()
     import_export_utilities.clean_all(client)
+
     req = client.post("/import", content_type='application/json', data=json.dumps(PRE_ASSIGNMENTS))
     data = utilities.get_json(req.data)
     assert data == "Import ok !"

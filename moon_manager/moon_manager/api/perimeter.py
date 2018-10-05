@@ -17,7 +17,6 @@ from python_moonutilities.security_functions import check_auth
 from python_moondb.core import PolicyManager
 from python_moonutilities.security_functions import validate_input
 
-
 __version__ = "4.3.2"
 
 logger = logging.getLogger("moon.manager.api." + __name__)
@@ -64,9 +63,9 @@ class Subjects(Resource):
 
         return {"subjects": data}
 
-    @validate_input("post", body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
@@ -90,23 +89,15 @@ class Subjects(Resource):
         :internal_api: set_subject
         """
 
-        if not perimeter_id:
-            data = PolicyManager.get_subjects(user_id=user_id,
-                                              policy_id=uuid)
-            if 'name' in request.json:
-                for data_id, data_value in data.items():
-                    if data_value['name'] == request.json['name']:
-                        perimeter_id = data_id
-                        break
         data = PolicyManager.add_subject(
             user_id=user_id, policy_id=uuid,
             perimeter_id=perimeter_id, value=request.json)
 
         return {"subjects": data}
 
-    @validate_input("patch", kwargs_state=[False, True, False], body_state={"name":True})
+    @validate_input("patch", kwargs_state=[False, True, False])
     @check_auth
-    def patch(self, uuid, perimeter_id=None, user_id=None):
+    def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a subject.
 
         :param uuid: uuid of the policy
@@ -129,19 +120,8 @@ class Subjects(Resource):
         }
         :internal_api: set_subject
         """
-
-        if not perimeter_id:
-            data = PolicyManager.get_subjects(user_id=user_id,
-                                              policy_id=None)
-            if 'name' in request.json:
-                for data_id, data_value in data.items():
-                    if data_value['name'] == request.json['name']:
-                        perimeter_id = data_id
-                        break
-        data = PolicyManager.add_subject(
-            user_id=user_id, policy_id=uuid,
-            perimeter_id=perimeter_id, value=request.json)
-
+        data = PolicyManager.update_subject(user_id=user_id, perimeter_id=perimeter_id,
+                                            value=request.json)
         return {"subjects": data}
 
     @validate_input("delete", kwargs_state=[False, True, False])
@@ -210,9 +190,9 @@ class Objects(Resource):
 
         return {"objects": data}
 
-    @validate_input("post", body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a object.
 
         :param uuid: uuid of the policy
@@ -230,22 +210,15 @@ class Objects(Resource):
         }
         :internal_api: set_object
         """
-
-        data = PolicyManager.get_objects(user_id=user_id, policy_id=uuid)
-        if 'name' in request.json:
-            for data_id, data_value in data.items():
-                if data_value['name'] == request.json['name']:
-                    perimeter_id = data_id
-                    break
         data = PolicyManager.add_object(
             user_id=user_id, policy_id=uuid,
             perimeter_id=perimeter_id, value=request.json)
 
         return {"objects": data}
 
-    @validate_input("patch", kwargs_state=[False, True, False], body_state={"name":True})
+    @validate_input("patch", kwargs_state=[False, True, False])
     @check_auth
-    def patch(self, uuid, perimeter_id=None, user_id=None):
+    def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a object.
 
         :param uuid: uuid of the policy
@@ -263,16 +236,8 @@ class Objects(Resource):
         }
         :internal_api: set_object
         """
-
-        data = PolicyManager.get_objects(user_id=user_id, policy_id=uuid)
-        if 'name' in request.json:
-            for data_id, data_value in data.items():
-                if data_value['name'] == request.json['name']:
-                    perimeter_id = data_id
-                    break
-        data = PolicyManager.add_object(
-            user_id=user_id, policy_id=uuid,
-            perimeter_id=perimeter_id, value=request.json)
+        data = PolicyManager.update_object(user_id=user_id, perimeter_id=perimeter_id,
+                                           value=request.json)
 
         return {"objects": data}
 
@@ -336,9 +301,9 @@ class Actions(Resource):
 
         return {"actions": data}
 
-    @validate_input("post", body_state={"name":True})
+    @validate_input("post", body_state={"name": True})
     @check_auth
-    def post(self, uuid, perimeter_id=None, user_id=None):
+    def post(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a action.
 
         :param uuid: uuid of the policy
@@ -356,22 +321,15 @@ class Actions(Resource):
         }
         :internal_api: set_action
         """
-
-        data = PolicyManager.get_actions(user_id=user_id, policy_id=uuid)
-        if 'name' in request.json:
-            for data_id, data_value in data.items():
-                if data_value['name'] == request.json['name']:
-                    perimeter_id = data_id
-                    break
         data = PolicyManager.add_action(
             user_id=user_id, policy_id=uuid,
             perimeter_id=perimeter_id, value=request.json)
 
         return {"actions": data}
 
-    @validate_input("patch", kwargs_state=[False, True, False], body_state={"name":True})
+    @validate_input("patch", kwargs_state=[False, True, False])
     @check_auth
-    def patch(self, uuid, perimeter_id=None, user_id=None):
+    def patch(self, uuid=None, perimeter_id=None, user_id=None):
         """Create or update a action.
 
         :param uuid: uuid of the policy
@@ -389,16 +347,8 @@ class Actions(Resource):
         }
         :internal_api: set_action
         """
-
-        data = PolicyManager.get_actions(user_id=user_id, policy_id=uuid)
-        if 'name' in request.json:
-            for data_id, data_value in data.items():
-                if data_value['name'] == request.json['name']:
-                    perimeter_id = data_id
-                    break
-        data = PolicyManager.add_action(
-            user_id=user_id, policy_id=uuid,
-            perimeter_id=perimeter_id, value=request.json)
+        data = PolicyManager.update_action(user_id=user_id, perimeter_id=perimeter_id,
+                                           value=request.json)
 
         return {"actions": data}
 

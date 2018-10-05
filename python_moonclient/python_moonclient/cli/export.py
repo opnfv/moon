@@ -8,6 +8,7 @@ from cliff.command import Command
 
 class Export(Command):
     """dump the complete moon database into a json file"""
+
     def get_parser(self, prog_name):
         parser = super().get_parser(prog_name)
         Parser.add_filename_argument(parser)
@@ -27,6 +28,5 @@ class Export(Command):
             json_file = open(parsed_args.filename, "w")
             json.dump(res["content"], json_file)
             return "Export ok!"
-        else:
-            return "Unexpected results : the returned json does not have the correct syntax"
 
+        return "Unexpected results : the returned json does not have the correct syntax"

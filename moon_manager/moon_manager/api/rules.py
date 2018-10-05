@@ -51,12 +51,13 @@ class Rules(Resource):
         """
 
         data = PolicyManager.get_rules(user_id=user_id,
-                                           policy_id=uuid,
-                                           rule_id=rule_id)
+                                       policy_id=uuid,
+                                       rule_id=rule_id)
 
         return {"rules": data}
 
-    @validate_input("post", kwargs_state=[True, False, False], body_state={"meta_rule_id": True, "rule": True, "instructions": True})
+    @validate_input("post", kwargs_state=[True, False, False],
+                    body_state={"meta_rule_id": True, "rule": True, "instructions": True})
     @check_auth
     def post(self, uuid=None, rule_id=None, user_id=None):
         """Add a rule to a meta rule
@@ -132,4 +133,3 @@ class Rules(Resource):
             user_id=user_id, policy_id=uuid, rule_id=rule_id)
 
         return {"result": True}
-

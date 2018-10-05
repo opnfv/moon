@@ -69,16 +69,18 @@ def test_add_pdp():
 def test_delete_pdp():
     client = utilities.register_client()
     request, pdp = get_pdp(client)
+    success_req = None
     for key, value in pdp['pdps'].items():
         if value['name'] == "testuser":
             success_req = delete_pdp(client, key)
             break
+    assert success_req
     assert success_req.status_code == 200
 
 
-def test_add_pdp_with_empty_user():
+def test_add_pdp_with_forbidden_char_in_user():
     data = {
-        "name": "",
+        "name": "<a>",
         "security_pipeline": ["policy_id_1", "policy_id_2"],
         "keystone_project_id": "keystone_project_id",
         "description": "description of testuser"
@@ -86,46 +88,20 @@ def test_add_pdp_with_empty_user():
     client = utilities.register_client()
     req, models = add_pdp(client, data)
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
 
 
-def test_add_pdp_with_user_contain_space():
-    data = {
-        "name": "test user",
-        "security_pipeline": ["policy_id_1", "policy_id_2"],
-        "keystone_project_id": "keystone_project_id",
-        "description": "description of testuser"
-    }
-    client = utilities.register_client()
-    req, models = add_pdp(client, data)
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
-
-
-def test_add_pdp_without_security_pipeline():
+def test_add_pdp_with_forbidden_char_in_keystone():
     data = {
         "name": "testuser",
-        "security_pipeline": [],
-        "keystone_project_id": "keystone_project_id",
+        "security_pipeline": ["policy_id_1", "policy_id_2"],
+        "keystone_project_id": "<a>",
         "description": "description of testuser"
     }
     client = utilities.register_client()
     req, meta_rules = add_pdp(client, data)
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'security_pipeline', [Empty Container]"
-
-
-def test_add_pdp_without_keystone():
-    data = {
-        "name": "testuser",
-        "security_pipeline": ["policy_id_1", "policy_id_2"],
-        "keystone_project_id": "",
-        "description": "description of testuser"
-    }
-    client = utilities.register_client()
-    req, meta_rules = add_pdp(client, data)
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'keystone_project_id', [Empty String]"
+    assert json.loads(req.data)["message"] == "Key: 'keystone_project_id', [Forbidden characters in string]"
 
 
 def test_update_pdp():
@@ -183,19 +159,6 @@ def test_update_pdp_without_user():
         "description": "description of testuser"
     }
     client = utilities.register_client()
-    req_update = update_pdp(client, data, "")
+    req_update = update_pdp(client, data, "<a>")
     assert req_update[0].status_code == 400
-    assert json.loads(req_update[0].data)["message"] == "Key: 'name', [Empty String]"
-
-
-def test_update_pdp_without_security_pipeline():
-    data = {
-        "name": "testuser",
-        "security_pipeline": [],
-        "keystone_project_id": "keystone_project_id",
-        "description": "description of testuser"
-    }
-    client = utilities.register_client()
-    req_update = update_pdp(client, data, "")
-    assert req_update[0].status_code == 400
-    assert json.loads(req_update[0].data)["message"] == "Key: 'security_pipeline', [Empty Container]"
+    assert json.loads(req_update[0].data)["message"] == "Forbidden characters in string"

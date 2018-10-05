@@ -11,31 +11,11 @@ def get_rules(client, policy_id):
     return req, rules
 
 
-def add_rules(client):
-    sub_id, obj_id, act_id, meta_rule_id, policy_id = builder.create_new_policy("sub_cat" + uuid4().hex,
-                                                                                  "obj_cat" + uuid4().hex,
-                                                                                  "act_cat" + uuid4().hex)
-    sub_data_id = builder.create_subject_data(policy_id, sub_id)
-    obj_data_id = builder.create_object_data(policy_id, obj_id)
-    act_data_id = builder.create_action_data(policy_id, act_id)
+def add_rules_without_policy_id(client):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id = builder.create_new_meta_rule()
     data = {
         "meta_rule_id": meta_rule_id,
-        "rule": [sub_data_id, obj_data_id, act_data_id],
-        "instructions": (
-            {"decision": "grant"},
-        ),
-        "enabled": True
-    }
-    req = client.post("/policies/{}/rules".format(policy_id), data=json.dumps(data),
-                      headers={'Content-Type': 'application/json'})
-    rules = utilities.get_json(req.data)
-    return req, rules
-
-
-def add_rules_without_policy_id(client):
-    data = {
-        "meta_rule_id": "meta_rule_id",
-        "rule": ["sub_data_id", "obj_data_id", "act_data_id"],
+        "rule": [subject_category_id, object_category_id, action_category_id],
         "instructions": (
             {"decision": "grant"},
         ),
@@ -93,7 +73,7 @@ def test_get_rules():
 
 def test_add_rules():
     client = utilities.register_client()
-    req, rules = add_rules(client, )
+    req, rules, policy = builder.add_rules(client, )
     assert req.status_code == 200
 
 
@@ -103,13 +83,13 @@ def test_add_rules_without_policy_id():
     assert req.status_code == 400
     assert json.loads(req.data)["message"] == "400: Policy Unknown"
 
-
-def test_add_rules_without_meta_rule_id():
-    policy_id = utilities.get_policy_id()
-    client = utilities.register_client()
-    req, rules = add_rules_without_meta_rule_id(client, policy_id)
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'meta_rule_id', [Empty String]"
+#
+# def test_add_rules_without_meta_rule_id():
+#     policy_id = utilities.get_policy_id()
+#     client = utilities.register_client()
+#     req, rules = add_rules_without_meta_rule_id(client, policy_id)
+#     assert req.status_code == 400
+#     assert json.loads(req.data)["message"] == "Key: 'meta_rule_id', [Empty String]"
 
 
 def test_add_rules_without_rule():
@@ -122,8 +102,9 @@ def test_add_rules_without_rule():
 
 def test_delete_rules_with_invalid_parameters():
     client = utilities.register_client()
-    rules = delete_rules(client, "", "")
-    assert rules.status_code == 404
+    req = delete_rules(client, "", "")
+    assert req.status_code == 404
+   # assert json.loads(req.data)["message"] == 'Invalid Key :rule not found'
 
 
 def test_delete_rules_without_policy_id():

@@ -19,7 +19,8 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") }
-        }
+        },
+        required: ['name', 'description']
       };
       var pdp = { name: '', description: '' };
       var config = {
@@ -41,7 +42,8 @@
         properties: {
           name: { type: "string", minLength: 2, title: gettext("Name") },
           description: { type: "string", minLength: 2, title: gettext("Description") }
-        }
+        },
+        required: ['name', 'description']
       };
       var config = {
         title: gettext('Update PDP'),
@@ -66,7 +68,8 @@
         type: "object",
         properties: {
           id: { type: "string", title: gettext("Select a Policy:") }
-        }
+        },
+        required: ['id']
       };
       var titleMap = util.arrayToTitleMap(pdpService.policies)
       var config = {
@@ -97,7 +100,8 @@
         type: "object",
         properties: {
           id: { type: "string", title: gettext("Select a Project:") }
-        }
+        },
+        required: ['id']
       };
       var model = {id : pdp.keystone_project_id};
 

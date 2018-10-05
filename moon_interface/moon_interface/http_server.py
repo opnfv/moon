@@ -9,6 +9,7 @@ import logging
 from moon_interface import __version__
 from moon_interface.api.generic import Status, API
 from moon_interface.api.authz import Authz
+from moon_interface.api.update import Update
 from moon_interface.authz_requests import CACHE
 from python_moonutilities import configuration, exceptions
 
@@ -123,6 +124,15 @@ class HTTPServer(Server):
         for api in __API__:
             self.api.add_resource(api, *api.__urls__)
         self.api.add_resource(Authz, *Authz.__urls__,
+                              resource_class_kwargs={
+                                  "cache": CACHE,
+                                  "interface_name": self.host,
+                                  "manager_url": "http://{}:{}".format(
+                                      self.manager_hostname,
+                                      self.manager_port),
+                              }
+                              )
+        self.api.add_resource(Update, *Update.__urls__,
                               resource_class_kwargs={
                                   "cache": CACHE,
                                   "interface_name": self.host,

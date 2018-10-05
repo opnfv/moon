@@ -36,8 +36,8 @@ def add_subject_data(client, name):
     return req, subject_data
 
 
-def delete_subject_data(client, policy_id):
-    req = client.delete("/policies/{}/subject_data".format(policy_id))
+def delete_subject_data(client, policy_id, category_id, data_id):
+    req = client.delete("/policies/{}/subject_data/{}/{}".format(policy_id,category_id,data_id))
     return req
 
 
@@ -65,31 +65,24 @@ def test_add_subject_data():
 def test_delete_subject_data():
     client = utilities.register_client()
     subject_category_id, object_category_id, action_category_id, meta_rule_id,policy_id = builder.create_new_policy()
-    success_req = delete_subject_data(client, policy_id)
+    data_id = builder.create_subject_data(policy_id,subject_category_id)
+    success_req = delete_subject_data(client, policy_id, subject_category_id, data_id )
     assert success_req.status_code == 200
 
 
-def test_add_subject_data_with_empty_user():
+def test_add_subject_data_with_forbidden_char_in_user():
     client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "")
+    req, subject_data = add_subject_data(client, "<a>")
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
-
-
-def test_add_subject_data_with_user_contain_space():
-    client = utilities.register_client()
-    req, subject_data = add_subject_data(client, "test user")
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
 
 
 def test_delete_subject_data_without_policy_id():
     client = utilities.register_client()
-    success_req = delete_subject_data(client, "")
+    success_req = delete_subject_data(client, "", "", "")
     assert success_req.status_code == 404
 
 # ---------------------------------------------------------------------------
-
 # object_categories_test
 
 
@@ -118,8 +111,8 @@ def add_object_data(client, name):
     return req, object_data
 
 
-def delete_object_data(client, policy_id):
-    req = client.delete("/policies/{}/object_data".format(policy_id))
+def delete_object_data(client, policy_id, category_id, data_id):
+    req = client.delete("/policies/{}/object_data/{}/{}".format(policy_id, category_id, data_id))
     return req
 
 
@@ -139,42 +132,34 @@ def test_add_object_data():
     assert isinstance(object_data, dict)
     value = object_data["object_data"]['data']
     assert "object_data" in object_data
-    id = list(value.keys())[0]
-    print("-----------------------")
-    print(id)
-    print(value[id])
-    print("-----------------------")
-    assert value[id]['name'] == "testuser"
-    assert value[id]['description'] == "description of {}".format("testuser")
+    _id = list(value.keys())[0]
+    assert value[_id]['name'] == "testuser"
+    assert value[_id]['description'] == "description of {}".format("testuser")
 
 
 def test_delete_object_data():
     client = utilities.register_client()
-    policy_id = utilities.get_policy_id()
-    success_req = delete_object_data(client, policy_id)
+
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy()
+    data_id = builder.create_object_data(policy_id, object_category_id)
+
+    success_req = delete_object_data(client, policy_id, data_id, object_category_id)
     assert success_req.status_code == 200
 
 
-def test_add_object_data_with_empty_user():
+def test_add_object_data_with_forbidden_char_in_user():
     client = utilities.register_client()
-    req, subject_data = add_object_data(client, "")
+    req, subject_data = add_object_data(client, "<a>")
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
-
-
-def test_add_object_data_with_user_contain_space():
-    client = utilities.register_client()
-    req, object_data = add_object_data(client, "test user")
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
 
 
 def test_delete_object_data_without_policy_id():
     client = utilities.register_client()
-    success_req = delete_object_data(client, "")
+    success_req = delete_object_data(client, "", "", "")
     assert success_req.status_code == 404
-# ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
 # action_categories_test
 
 
@@ -203,8 +188,8 @@ def add_action_data(client, name):
     return req, action_data
 
 
-def delete_action_data(client, policy_id):
-    req = client.delete("/policies/{}/action_data".format(policy_id))
+def delete_action_data(client, policy_id, categorgy_id, data_id):
+    req = client.delete("/policies/{}/action_data/{}/{}".format(policy_id, categorgy_id, data_id))
     return req
 
 
@@ -231,27 +216,24 @@ def test_add_action_data():
 
 def test_delete_action_data():
     client = utilities.register_client()
-    policy_id = utilities.get_policy_id()
-    success_req = delete_action_data(client, policy_id)
+
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = builder.create_new_policy()
+    data_id = builder.create_action_data(policy_id, action_category_id)
+
+    success_req = delete_action_data(client, policy_id, data_id, action_category_id)
+
     assert success_req.status_code == 200
 
 
-def test_add_action_data_with_empty_user():
+def test_add_action_data_with_forbidden_char_in_user():
     client = utilities.register_client()
-    req, action_data = add_action_data(client, "")
+    req, action_data = add_action_data(client, "<a>")
     assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [Empty String]"
-
-
-def test_add_action_data_with_user_contain_space():
-    client = utilities.register_client()
-    req, action_data = add_action_data(client, "test user")
-    assert req.status_code == 400
-    assert json.loads(req.data)["message"] == "Key: 'name', [String contains space]"
+    assert json.loads(req.data)["message"] == "Key: 'name', [Forbidden characters in string]"
 
 
 def test_delete_action_data_without_policy_id():
     client = utilities.register_client()
-    success_req = delete_action_data(client, "")
+    success_req = delete_action_data(client, "", "", "")
     assert success_req.status_code == 404
 # ---------------------------------------------------------------------------

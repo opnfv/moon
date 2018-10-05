@@ -15,7 +15,7 @@ def add_action_data(policy_id, data_id=None, category_id=None, value=None):
 
 def delete_action_data(policy_id, data_id):
     from python_moondb.core import PolicyManager
-    PolicyManager.delete_action_data("", policy_id, data_id)
+    PolicyManager.delete_action_data("",policy_id=policy_id, data_id=data_id)
 
 
 def get_object_data(policy_id, data_id=None, category_id=None):
@@ -30,7 +30,7 @@ def add_object_data(policy_id, data_id=None, category_id=None, value=None):
 
 def delete_object_data(policy_id, data_id):
     from python_moondb.core import PolicyManager
-    PolicyManager.delete_object_data("", policy_id, data_id)
+    PolicyManager.delete_object_data("", policy_id=policy_id, data_id=data_id)
 
 
 def get_subject_data(policy_id, data_id=None, category_id=None):
@@ -45,7 +45,7 @@ def add_subject_data(policy_id, data_id=None, category_id=None, value=None):
 
 def delete_subject_data(policy_id, data_id):
     from python_moondb.core import PolicyManager
-    PolicyManager.delete_subject_data("", policy_id, data_id)
+    PolicyManager.delete_subject_data("", policy_id=policy_id, data_id=data_id)
 
 
 def get_actions(policy_id, perimeter_id=None):

@@ -6,7 +6,9 @@
 import helpers.mock_data as mock_data
 import policies.mock_data
 import helpers.data_helper as data_helper
+import helpers.assignment_helper as assignment_helper
 import pytest
+from uuid import uuid4
 import logging
 from python_moonutilities.exceptions import *
 
@@ -56,6 +58,21 @@ def test_add_action_data(db):
     assert len(action_data['data']) == 1
 
 
+def test_add_action_data_duplicate(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category1",
+        object_category_name="object_category1",
+        action_category_name="action_category1",
+        meta_rule_name="meta_rule_1")
+    value = {
+        "name": "action-type",
+        "description": {"vm-action": "", "storage-action": "", },
+    }
+    action_data = data_helper.add_action_data(policy_id=policy_id, category_id=action_category_id, value=value)
+    with pytest.raises(ActionScopeExisting) as exception_info:
+        action_data = data_helper.add_action_data(policy_id=policy_id, category_id=action_category_id, value=value)
+    assert str(exception_info.value) == '409: Action Scope Existing'
+
 def test_add_action_data_with_invalid_category_id(db):
     subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
         subject_category_name="subject_category1",
@@ -66,9 +83,9 @@ def test_add_action_data_with_invalid_category_id(db):
         "name": "action-type",
         "description": {"vm-action": "", "storage-action": "", },
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(ActionCategoryUnknown) as exception_info:
         data_helper.add_action_data(policy_id=policy_id, value=value).get('data')
-    assert str(exception_info.value) == 'Invalid category id'
+    assert str(exception_info.value) == '400: Action Category Unknown'
 
 
 def test_delete_action_data(db):
@@ -84,7 +101,7 @@ def test_delete_action_data(db):
     }
     action_data = data_helper.add_action_data(policy_id=policy_id, category_id=action_category_id, value=value)
     data_id = list(action_data["data"])[0]
-    data_helper.delete_action_data(policy_id, data_id)
+    data_helper.delete_action_data(policy_id=policy_id, data_id=data_id)
     new_action_data = data_helper.get_action_data(policy_id)
     assert len(new_action_data[0]['data']) == 0
 
@@ -144,9 +161,27 @@ def test_add_object_data_with_invalid_category_id(db):
         "name": "object-security-level",
         "description": {"low": "", "medium": "", "high": ""},
     }
-    with pytest.raises(MetaDataUnknown) as exception_info:
+    with pytest.raises(ObjectCategoryUnknown) as exception_info:
         data_helper.add_object_data(policy_id=policy_id, category_id="invalid", value=value).get('data')
-    assert str(exception_info.value) == '400: Meta data Unknown'
+    assert str(exception_info.value) == '400: Object Category Unknown'
+
+
+def test_add_object_data_duplicate(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category1",
+        object_category_name="object_category1",
+        action_category_name="action_category1",
+        meta_rule_name="meta_rule_1")
+    value = {
+        "name": "object-security-level",
+        "description": {"low": "", "medium": "", "high": ""},
+    }
+    object_data = data_helper.add_object_data(policy_id=policy_id, category_id=object_category_id, value=value).get(
+        'data')
+    with pytest.raises(ObjectScopeExisting) as exception_info:
+        data_helper.add_object_data(policy_id=policy_id, category_id=object_category_id, value=value).get(
+            'data')
+    assert str(exception_info.value) == '409: Object Scope Existing'
 
 
 def test_delete_object_data(db):
@@ -229,9 +264,28 @@ def test_add_subject_data_with_no_category_id(db):
         "name": "subject-security-level",
         "description": {"low": "", "medium": "", "high": ""},
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(SubjectCategoryUnknown) as exception_info:
         data_helper.add_subject_data(policy_id=policy_id, data_id=subject_category_id, value=value).get('data')
-    assert str(exception_info.value) == 'Invalid category id'
+    assert str(exception_info.value) == '400: Subject Category Unknown'
+
+
+def test_add_subject_data_duplicate(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category1",
+        object_category_name="object_category1",
+        action_category_name="action_category1",
+        meta_rule_name="meta_rule_1")
+    value = {
+        "name": "subject-security-level",
+        "description": {"low": "", "medium": "", "high": ""},
+    }
+    subject_data = data_helper.add_subject_data(policy_id=policy_id, category_id=subject_category_id, value=value).get(
+        'data')
+
+    with pytest.raises(SubjectScopeExisting) as exception_info:
+        subject_data = data_helper.add_subject_data(policy_id=policy_id, category_id=subject_category_id,
+                                                    value=value).get('data')
+    assert str(exception_info.value) == '409: Subject Scope Existing'
 
 
 def test_delete_subject_data(db):
@@ -247,7 +301,7 @@ def test_delete_subject_data(db):
     subject_data = data_helper.add_subject_data(policy_id=policy_id, category_id=subject_category_id, value=value).get(
         'data')
     subject_data_id = list(subject_data.keys())[0]
-    data_helper.delete_subject_data(subject_data[subject_data_id].get('policy_id'), subject_data_id)
+    data_helper.delete_subject_data(policy_id=subject_data[subject_data_id].get('policy_id'), data_id=subject_data_id)
     new_subject_data = data_helper.get_subject_data(policy_id)
     assert len(new_subject_data[0]['data']) == 0
 
@@ -297,8 +351,9 @@ def test_add_action_twice(db):
         "description": "test",
     }
     data_helper.add_action(policy_id=policy_id, value=value)
-    with pytest.raises(ActionExisting):
+    with pytest.raises(PolicyExisting) as exception_info:
         data_helper.add_action(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '409: Policy Already Exists'
 
 
 def test_add_action_blank_name(db):
@@ -307,9 +362,9 @@ def test_add_action_blank_name(db):
         "name": "",
         "description": "test",
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PerimeterContentError) as exception_info:
         data_helper.add_action(policy_id=policy_id, value=value)
-    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+    assert str(exception_info.value) == '400: Perimeter content is invalid.'
 
 
 def test_add_action_with_name_space(db):
@@ -318,9 +373,9 @@ def test_add_action_with_name_space(db):
         "name": "   ",
         "description": "test",
     }
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PerimeterContentError) as exception_info:
         data_helper.add_action(policy_id=policy_id, value=value)
-    assert str(exception_info.value) == '400: Perimeter Name is Invalid'
+    assert str(exception_info.value) == '400: Perimeter content is invalid.'
 
 
 def test_add_action_multiple_times(db):
@@ -377,7 +432,7 @@ def test_delete_action(db):
 def test_delete_action_with_invalid_perimeter_id(db):
     policy_id = "invalid"
     perimeter_id = "invalid"
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         data_helper.delete_action(policy_id, perimeter_id)
     assert str(exception_info.value) == '400: Policy Unknown'
 
@@ -400,7 +455,7 @@ def test_get_objects(db):
     assert objects[object_id].get('policy_list')[0] == policy_id
 
 
-def test_add_object(db):
+def test_add_object_with_same_policy_twice(db):
     subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
         subject_category_name="subject_category1",
         object_category_name="object_category1",
@@ -415,8 +470,9 @@ def test_add_object(db):
     object_id = list(added_object.keys())[0]
     assert len(added_object[object_id].get('policy_list')) == 1
 
-    with pytest.raises(ObjectExisting):
+    with pytest.raises(PolicyExisting) as exception_info:
         data_helper.add_object(policy_id=policy_id, value=value)
+    assert str(exception_info.value) == '409: Policy Already Exists'
 
 
 def test_add_objects_multiple_times(db):
@@ -470,7 +526,7 @@ def test_delete_object(db):
 def test_delete_object_with_invalid_perimeter_id(db):
     policy_id = "invalid"
     perimeter_id = "invalid"
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         data_helper.delete_object(policy_id, perimeter_id)
     assert str(exception_info.value) == '400: Policy Unknown'
 
@@ -504,11 +560,12 @@ def test_get_subjects_with_invalid_policy_id(db):
         "description": "test",
     }
     data_helper.add_subject(policy_id=policy_id, value=value)
-    with pytest.raises(PolicyUnknown):
+    with pytest.raises(PolicyUnknown) as exception_info:
         data_helper.get_subjects(policy_id="invalid")
+    assert str(exception_info.value) == '400: Policy Unknown'
 
 
-def test_add_subject(db):
+def test_add_subject_with_same_policy_twice(db):
     subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
         subject_category_name="subject_category1",
         object_category_name="object_category1",
@@ -522,9 +579,9 @@ def test_add_subject(db):
     assert subject
     subject_id = list(subject.keys())[0]
     assert len(subject[subject_id].get('policy_list')) == 1
-    with pytest.raises(SubjectExisting) as exception_info:
+    with pytest.raises(PolicyExisting) as exception_info:
         data_helper.add_subject(policy_id=policy_id, value=value)
-    assert str(exception_info.value) == '409: Subject Existing'
+    assert str(exception_info.value) == '409: Policy Already Exists'
 
 
 def test_add_subjects_multiple_times(db):
@@ -578,9 +635,57 @@ def test_delete_subject(db):
 def test_delete_subject_with_invalid_perimeter_id(db):
     policy_id = "invalid"
     perimeter_id = "invalid"
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         data_helper.delete_subject(policy_id, perimeter_id)
     assert str(exception_info.value) == '400: Policy Unknown'
+
+
+def test_delete_subject_with_assignment(db):
+
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category"+uuid4().hex,
+        object_category_name="object_category"+uuid4().hex,
+        action_category_name="action_category"+uuid4().hex,
+        meta_rule_name="meta_rule_"+uuid4().hex)
+
+    subject_id = mock_data.create_subject(policy_id)
+    data_id = mock_data.create_subject_data(policy_id=policy_id, category_id=subject_category_id)
+    assignment_helper.add_subject_assignment(policy_id, subject_id, subject_category_id, data_id)
+
+    with pytest.raises(DeletePerimeterWithAssignment) as exception_info:
+        data_helper.delete_subject(policy_id, subject_id)
+    assert '400: Perimeter With Assignment Error' == str(exception_info.value)
+
+
+def test_delete_object_with_assignment(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category" + uuid4().hex,
+        object_category_name="object_category" + uuid4().hex,
+        action_category_name="action_category" + uuid4().hex,
+        meta_rule_name="meta_rule_" + uuid4().hex)
+
+    object_id = mock_data.create_object(policy_id)
+    data_id = mock_data.create_object_data(policy_id=policy_id, category_id=object_category_id)
+    assignment_helper.add_object_assignment(policy_id, object_id, object_category_id, data_id)
+
+    with pytest.raises(DeletePerimeterWithAssignment) as exception_info:
+        data_helper.delete_object(policy_id, object_id)
+    assert '400: Perimeter With Assignment Error' == str(exception_info.value)
+
+def test_delete_action_with_assignment(db):
+    subject_category_id, object_category_id, action_category_id, meta_rule_id, policy_id = mock_data.create_new_policy(
+        subject_category_name="subject_category" + uuid4().hex,
+        object_category_name="object_category" + uuid4().hex,
+        action_category_name="action_category" + uuid4().hex,
+        meta_rule_name="meta_rule_" + uuid4().hex)
+
+    action_id = mock_data.create_action(policy_id)
+    data_id = mock_data.create_action_data(policy_id=policy_id, category_id=action_category_id)
+    assignment_helper.add_action_assignment(policy_id, action_id, action_category_id, data_id)
+
+    with pytest.raises(DeletePerimeterWithAssignment) as exception_info:
+        data_helper.delete_action(policy_id, action_id)
+    assert '400: Perimeter With Assignment Error' == str(exception_info.value)
 
 
 def test_get_available_metadata(db):
@@ -597,6 +702,6 @@ def test_get_available_metadata(db):
 
 
 def test_get_available_metadata_with_invalid_policy_id(db):
-    with pytest.raises(Exception) as exception_info:
+    with pytest.raises(PolicyUnknown) as exception_info:
         data_helper.get_available_metadata(policy_id='invalid')
     assert '400: Policy Unknown' == str(exception_info.value)

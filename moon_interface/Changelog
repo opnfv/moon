@@ -30,3 +30,7 @@ CHANGES
 4.3.3-1
 -----
 - Fix a bug in authz_requests
+
+4.4.0
+-----
+- Add the update API
