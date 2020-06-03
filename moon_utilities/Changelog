@@ -1,0 +1,54 @@
+# Copyright 2018 Orange and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
+
+CHANGES
+=======
+
+0.1
+---
+- First version of the moon_utilities library.
+
+0.2
+---
+- Delete Keystone references in exceptions
+- Update the user used to authenticate actions in moon (moon_user_id)
+
+0.3
+---
+- Adding validation function
+- Update enforce decorator
+- Refactoring by adding base exception and json utilities from manager to utilities
+
+0.4
+---
+- Move authentication function from moon_manager to moon_utilities
+- Adding invalided_functions
+- Fix a bug in security_functions.py
+- Add logout functionality
+- Add re-login functionality
+
+0.5
+---
+- Add script to automatically generate OpenStack RBAC policy from policy.json original files
+
+0.6
+---
+- Add a prompt to enter the password at user creation, -p option to set the password in clear in the CLI
+- Move the import functionality in moon_utilities
+- Fix some bugs in generate_opst_policy
+- Fix some bugs when importing directly in cache
+- Add the global attribute functionality
+- Fix of not relevant yields in invalided_functions
+
+0.7
+---
+- Add an installation script
+- Update import json to db and cache functions
+
+0.8
+---
+- Add a change password function
+- Add of a method connecting the user with environment variables

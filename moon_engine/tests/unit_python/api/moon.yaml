@@ -1,0 +1,54 @@
+type: "pipeline"
+uuid: "a64beb1c-c224-474f-b4ba-dd43173e7101"
+manager_url: "http://127.0.0.1:20000"
+incremental_updates: false
+api_token:
+data: conf/policy_example.json
+debug: true
+management:
+  token_file: moon_engine_users.json
+
+orchestration:
+  driver: moon_engine.plugins.pyorchestrator
+  connection: local
+  port: 20000...20100
+  config_dir: /tmp
+
+authorization:
+  driver: moon_engine.plugins.authz
+
+plugins:
+  directory: /tmp
+
+logging:
+  version: 1
+
+  formatters:
+    brief:
+      format: "%(levelname)s %(name)s %(message)-30s"
+    custom:
+      format: "%(asctime)-15s %(levelname)s %(name)s %(message)s"
+
+  handlers:
+    console:
+      class : logging.StreamHandler
+      formatter: custom
+      level   : INFO
+      stream  : ext://sys.stdout
+    file:
+      class : logging.handlers.RotatingFileHandler
+      formatter: custom
+      level   : DEBUG
+      filename: /tmp/moon_engine.log
+      maxBytes: 1048576
+      backupCount: 3
+
+  loggers:
+    moon:
+      level: DEBUG
+      handlers: [console, file]
+      propagate: no
+
+  root:
+    level: ERROR
+    handlers: [console]

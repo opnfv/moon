@@ -1,0 +1,61 @@
+# Copyright 2018 Orange and its contributors
+# This software is distributed under the terms and conditions of the 'Apache-2.0'
+# license which can be found in the file 'LICENSE' in this package distribution
+# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+
+
+CHANGES
+=======
+
+0.1
+---
+- First version of moon_engine
+
+0.2
+---
+- Add benchmark tests
+- Fix a bug when retrieving logging configuration
+- Update Configuration
+- Init Pipeline API
+- Init Wrapper API
+- Init Authz API
+- Add Configuration API
+- Add first authorization plugin
+- Adding authz API for wrapper and pipeline
+
+0.3
+---
+- Automatically load the API plugins at the server startup
+
+0.4
+---
+- Fix the issue in the plugin oslowrapper
+- Fix the communication issue between the Wrapper and the Pipeline
+
+0.5
+---
+- Fix subject retrieval from Oslo requests
+
+0.6
+---
+- Force the deletion of authorization requests
+- Fix the max 21 requests on Engine
+- Add performance tests
+- Fix error updating PDP with the dashboard
+- Fix update pipeline issue
+- Add the JSON import functionality
+- Fix the change of the wrapper's log after creation of a pipeline
+- Add the global attributes functionality
+
+0.7
+---
+- Adaptation following the removal of the field database > pwd_file in moon.yaml
+- Fix of pdp server deletion
+- Add of start / stop commands for standalone engine
+
+0.8
+---
+- Fix of a bug when handling requests from openstack
+- Fix of the pdp update
+- Fix of the pdp status retrieval
+- Add of a api allowing to reload the conf file of a wrapper (used by the manager after updating it)

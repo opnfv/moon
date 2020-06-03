@@ -1,0 +1,10 @@
+pytest
+pbr
+pytest-cov
+cliff
+requests_mock
+tinydb
+moon_manager
+moon_cache
+sqlalchemy
+pymysql

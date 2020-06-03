@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# moon
+*.pwd
+/.idea
+/tests/func_tests/reports

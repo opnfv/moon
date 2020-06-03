@@ -1,0 +1,5 @@
+hug!=2.5.0
+moon_utilities
+moon_cache
+requests_mock
+pytest-benchmark

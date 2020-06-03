@@ -1,0 +1,5078 @@
+{
+    "policies": [
+        {
+            "name": "OpenStack RBAC Policy",
+            "genre": "authz",
+            "description": "A RBAC policy similar of what you can find through policy.json files",
+            "model": {
+                "name": "OPST_RBAC"
+            },
+            "mandatory": true,
+            "override": true
+        }
+    ],
+    "models": [
+        {
+            "name": "OPST_RBAC",
+            "description": "",
+            "meta_rules": [
+                {
+                    "name": "rbac"
+                }
+            ],
+            "override": true
+        }
+    ],
+    "subjects": [
+        {
+            "name": "admin",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "OpenStack RBAC Policy"
+                }
+            ]
+        }
+    ],
+    "subject_categories": [
+        {
+            "name": "role",
+            "description": "a role in OpenStack"
+        }
+    ],
+    "subject_data": [
+        {
+            "name": "admin",
+            "description": "the admin role",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        },
+        {
+            "name": "member",
+            "description": "the member role",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        }
+    ],
+    "subject_assignments": [
+        {
+            "subject": {
+                "name": "admin"
+            },
+            "category": {
+                "name": "role"
+            },
+            "assignments": [
+                {
+                    "name": "admin"
+                },
+                {
+                    "name": "member"
+                }
+            ]
+        }
+    ],
+    "objects": [
+        {
+            "name": "all_vm",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "OpenStack RBAC Policy"
+                }
+            ]
+        }
+    ],
+    "object_categories": [
+        {
+            "name": "id",
+            "description": "the UID of each virtual machine"
+        }
+    ],
+    "object_data": [
+        {
+            "name": "all_vm",
+            "description": "represents all virtual machines in this project",
+            "policies": [],
+            "category": {
+                "name": "id"
+            }
+        }
+    ],
+    "object_assignments": [
+        {
+            "object": {
+                "name": "all_vm"
+            },
+            "category": {
+                "name": "id"
+            },
+            "assignments": [
+                {
+                    "name": "all_vm"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "volume:create",
+            "description": "volume:create action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:delete",
+            "description": "volume:delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get",
+            "description": "volume:get action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_all",
+            "description": "volume:get_all action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_volume_metadata",
+            "description": "volume:get_volume_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:delete_volume_metadata",
+            "description": "volume:delete_volume_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:update_volume_metadata",
+            "description": "volume:update_volume_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_volume_admin_metadata",
+            "description": "volume:get_volume_admin_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:update_volume_admin_metadata",
+            "description": "volume:update_volume_admin_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_snapshot",
+            "description": "volume:get_snapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_all_snapshots",
+            "description": "volume:get_all_snapshots action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:create_snapshot",
+            "description": "volume:create_snapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:delete_snapshot",
+            "description": "volume:delete_snapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:update_snapshot",
+            "description": "volume:update_snapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:extend",
+            "description": "volume:extend action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:update_readonly_flag",
+            "description": "volume:update_readonly_flag action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:retype",
+            "description": "volume:retype action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:update",
+            "description": "volume:update action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:types_manage",
+            "description": "volume_extension:types_manage action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:types_extra_specs",
+            "description": "volume_extension:types_extra_specs action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:access_types_qos_specs_id",
+            "description": "volume_extension:access_types_qos_specs_id action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:access_types_extra_specs",
+            "description": "volume_extension:access_types_extra_specs action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_type_access",
+            "description": "volume_extension:volume_type_access action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_type_access:addProjectAccess",
+            "description": "volume_extension:volume_type_access:addProjectAccess action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_type_access:removeProjectAccess",
+            "description": "volume_extension:volume_type_access:removeProjectAccess action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_type_encryption",
+            "description": "volume_extension:volume_type_encryption action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_encryption_metadata",
+            "description": "volume_extension:volume_encryption_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:extended_snapshot_attributes",
+            "description": "volume_extension:extended_snapshot_attributes action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_image_metadata",
+            "description": "volume_extension:volume_image_metadata action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:quotas:show",
+            "description": "volume_extension:quotas:show action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:quotas:update",
+            "description": "volume_extension:quotas:update action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:quotas:delete",
+            "description": "volume_extension:quotas:delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:quota_classes",
+            "description": "volume_extension:quota_classes action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:quota_classes:validate_setup_for_nested_quota_use",
+            "description": "volume_extension:quota_classes:validate_setup_for_nested_quota_use action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:reset_status",
+            "description": "volume_extension:volume_admin_actions:reset_status action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:snapshot_admin_actions:reset_status",
+            "description": "volume_extension:snapshot_admin_actions:reset_status action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:backup_admin_actions:reset_status",
+            "description": "volume_extension:backup_admin_actions:reset_status action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:force_delete",
+            "description": "volume_extension:volume_admin_actions:force_delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:force_detach",
+            "description": "volume_extension:volume_admin_actions:force_detach action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:snapshot_admin_actions:force_delete",
+            "description": "volume_extension:snapshot_admin_actions:force_delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:backup_admin_actions:force_delete",
+            "description": "volume_extension:backup_admin_actions:force_delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:migrate_volume",
+            "description": "volume_extension:volume_admin_actions:migrate_volume action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:migrate_volume_completion",
+            "description": "volume_extension:volume_admin_actions:migrate_volume_completion action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_host_attribute",
+            "description": "volume_extension:volume_host_attribute action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_tenant_attribute",
+            "description": "volume_extension:volume_tenant_attribute action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_mig_status_attribute",
+            "description": "volume_extension:volume_mig_status_attribute action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:hosts",
+            "description": "volume_extension:hosts action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:services:index",
+            "description": "volume_extension:services:index action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:services:update",
+            "description": "volume_extension:services:update action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_manage",
+            "description": "volume_extension:volume_manage action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:volume_unmanage",
+            "description": "volume_extension:volume_unmanage action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:capabilities",
+            "description": "volume_extension:capabilities action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:create_transfer",
+            "description": "volume:create_transfer action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:accept_transfer",
+            "description": "volume:accept_transfer action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:delete_transfer",
+            "description": "volume:delete_transfer action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:get_all_transfers",
+            "description": "volume:get_all_transfers action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:replication:promote",
+            "description": "volume_extension:replication:promote action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume_extension:replication:reenable",
+            "description": "volume_extension:replication:reenable action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:enable_replication",
+            "description": "volume:enable_replication action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:disable_replication",
+            "description": "volume:disable_replication action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:failover_replication",
+            "description": "volume:failover_replication action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "volume:list_replication_targets",
+            "description": "volume:list_replication_targets action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:create",
+            "description": "backup:create action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:delete",
+            "description": "backup:delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:get",
+            "description": "backup:get action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:get_all",
+            "description": "backup:get_all action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:restore",
+            "description": "backup:restore action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:backup-import",
+            "description": "backup:backup-import action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "backup:backup-export",
+            "description": "backup:backup-export action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "snapshot_extension:snapshot_actions:update_snapshot_status",
+            "description": "snapshot_extension:snapshot_actions:update_snapshot_status action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "snapshot_extension:snapshot_manage",
+            "description": "snapshot_extension:snapshot_manage action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "snapshot_extension:snapshot_unmanage",
+            "description": "snapshot_extension:snapshot_unmanage action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:create",
+            "description": "consistencygroup:create action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:delete",
+            "description": "consistencygroup:delete action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:update",
+            "description": "consistencygroup:update action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:get",
+            "description": "consistencygroup:get action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:get_all",
+            "description": "consistencygroup:get_all action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:create_cgsnapshot",
+            "description": "consistencygroup:create_cgsnapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:delete_cgsnapshot",
+            "description": "consistencygroup:delete_cgsnapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:get_cgsnapshot",
+            "description": "consistencygroup:get_cgsnapshot action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "consistencygroup:get_all_cgsnapshots",
+            "description": "consistencygroup:get_all_cgsnapshots action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        },
+        {
+            "name": "scheduler_extension:scheduler_stats:get_pools",
+            "description": "scheduler_extension:scheduler_stats:get_pools action for cinder",
+            "extra": {
+                "component": "cinder"
+            },
+            "policies": []
+        }
+    ],
+    "action_categories": [
+        {
+            "name": "action_id",
+            "description": ""
+        }
+    ],
+    "action_data": [
+        {
+            "name": "volume:create",
+            "description": "volume:create action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:delete",
+            "description": "volume:delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get",
+            "description": "volume:get action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_all",
+            "description": "volume:get_all action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_volume_metadata",
+            "description": "volume:get_volume_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:delete_volume_metadata",
+            "description": "volume:delete_volume_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:update_volume_metadata",
+            "description": "volume:update_volume_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_volume_admin_metadata",
+            "description": "volume:get_volume_admin_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:update_volume_admin_metadata",
+            "description": "volume:update_volume_admin_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_snapshot",
+            "description": "volume:get_snapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_all_snapshots",
+            "description": "volume:get_all_snapshots action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:create_snapshot",
+            "description": "volume:create_snapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:delete_snapshot",
+            "description": "volume:delete_snapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:update_snapshot",
+            "description": "volume:update_snapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:extend",
+            "description": "volume:extend action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:update_readonly_flag",
+            "description": "volume:update_readonly_flag action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:retype",
+            "description": "volume:retype action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:update",
+            "description": "volume:update action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:types_manage",
+            "description": "volume_extension:types_manage action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:types_extra_specs",
+            "description": "volume_extension:types_extra_specs action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:access_types_qos_specs_id",
+            "description": "volume_extension:access_types_qos_specs_id action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:access_types_extra_specs",
+            "description": "volume_extension:access_types_extra_specs action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_type_access",
+            "description": "volume_extension:volume_type_access action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_type_access:addProjectAccess",
+            "description": "volume_extension:volume_type_access:addProjectAccess action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_type_access:removeProjectAccess",
+            "description": "volume_extension:volume_type_access:removeProjectAccess action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_type_encryption",
+            "description": "volume_extension:volume_type_encryption action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_encryption_metadata",
+            "description": "volume_extension:volume_encryption_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:extended_snapshot_attributes",
+            "description": "volume_extension:extended_snapshot_attributes action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_image_metadata",
+            "description": "volume_extension:volume_image_metadata action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:quotas:show",
+            "description": "volume_extension:quotas:show action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:quotas:update",
+            "description": "volume_extension:quotas:update action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:quotas:delete",
+            "description": "volume_extension:quotas:delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:quota_classes",
+            "description": "volume_extension:quota_classes action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:quota_classes:validate_setup_for_nested_quota_use",
+            "description": "volume_extension:quota_classes:validate_setup_for_nested_quota_use action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:reset_status",
+            "description": "volume_extension:volume_admin_actions:reset_status action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:snapshot_admin_actions:reset_status",
+            "description": "volume_extension:snapshot_admin_actions:reset_status action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:backup_admin_actions:reset_status",
+            "description": "volume_extension:backup_admin_actions:reset_status action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:force_delete",
+            "description": "volume_extension:volume_admin_actions:force_delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:force_detach",
+            "description": "volume_extension:volume_admin_actions:force_detach action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:snapshot_admin_actions:force_delete",
+            "description": "volume_extension:snapshot_admin_actions:force_delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:backup_admin_actions:force_delete",
+            "description": "volume_extension:backup_admin_actions:force_delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:migrate_volume",
+            "description": "volume_extension:volume_admin_actions:migrate_volume action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_admin_actions:migrate_volume_completion",
+            "description": "volume_extension:volume_admin_actions:migrate_volume_completion action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_host_attribute",
+            "description": "volume_extension:volume_host_attribute action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_tenant_attribute",
+            "description": "volume_extension:volume_tenant_attribute action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_mig_status_attribute",
+            "description": "volume_extension:volume_mig_status_attribute action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:hosts",
+            "description": "volume_extension:hosts action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:services:index",
+            "description": "volume_extension:services:index action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:services:update",
+            "description": "volume_extension:services:update action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_manage",
+            "description": "volume_extension:volume_manage action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:volume_unmanage",
+            "description": "volume_extension:volume_unmanage action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:capabilities",
+            "description": "volume_extension:capabilities action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:create_transfer",
+            "description": "volume:create_transfer action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:accept_transfer",
+            "description": "volume:accept_transfer action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:delete_transfer",
+            "description": "volume:delete_transfer action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:get_all_transfers",
+            "description": "volume:get_all_transfers action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:replication:promote",
+            "description": "volume_extension:replication:promote action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume_extension:replication:reenable",
+            "description": "volume_extension:replication:reenable action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:enable_replication",
+            "description": "volume:enable_replication action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:disable_replication",
+            "description": "volume:disable_replication action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:failover_replication",
+            "description": "volume:failover_replication action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "volume:list_replication_targets",
+            "description": "volume:list_replication_targets action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:create",
+            "description": "backup:create action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:delete",
+            "description": "backup:delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:get",
+            "description": "backup:get action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:get_all",
+            "description": "backup:get_all action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:restore",
+            "description": "backup:restore action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:backup-import",
+            "description": "backup:backup-import action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "backup:backup-export",
+            "description": "backup:backup-export action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "snapshot_extension:snapshot_actions:update_snapshot_status",
+            "description": "snapshot_extension:snapshot_actions:update_snapshot_status action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "snapshot_extension:snapshot_manage",
+            "description": "snapshot_extension:snapshot_manage action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "snapshot_extension:snapshot_unmanage",
+            "description": "snapshot_extension:snapshot_unmanage action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:create",
+            "description": "consistencygroup:create action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:delete",
+            "description": "consistencygroup:delete action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:update",
+            "description": "consistencygroup:update action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:get",
+            "description": "consistencygroup:get action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:get_all",
+            "description": "consistencygroup:get_all action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:create_cgsnapshot",
+            "description": "consistencygroup:create_cgsnapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:delete_cgsnapshot",
+            "description": "consistencygroup:delete_cgsnapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:get_cgsnapshot",
+            "description": "consistencygroup:get_cgsnapshot action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "consistencygroup:get_all_cgsnapshots",
+            "description": "consistencygroup:get_all_cgsnapshots action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "scheduler_extension:scheduler_stats:get_pools",
+            "description": "scheduler_extension:scheduler_stats:get_pools action for cinder",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        }
+    ],
+    "action_assignments": [
+        {
+            "action": {
+                "name": "volume:create"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:create"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_all"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_all"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_volume_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_volume_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:delete_volume_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:delete_volume_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:update_volume_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:update_volume_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_volume_admin_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_volume_admin_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:update_volume_admin_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:update_volume_admin_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_snapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_snapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_all_snapshots"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_all_snapshots"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:create_snapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:create_snapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:delete_snapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:delete_snapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:update_snapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:update_snapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:extend"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:extend"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:update_readonly_flag"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:update_readonly_flag"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:retype"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:retype"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:update"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:update"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:types_manage"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:types_manage"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:types_extra_specs"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:types_extra_specs"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:access_types_qos_specs_id"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:access_types_qos_specs_id"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:access_types_extra_specs"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:access_types_extra_specs"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_type_access"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_type_access"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_type_access:addProjectAccess"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_type_access:addProjectAccess"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_type_access:removeProjectAccess"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_type_access:removeProjectAccess"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_type_encryption"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_type_encryption"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_encryption_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_encryption_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:extended_snapshot_attributes"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:extended_snapshot_attributes"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_image_metadata"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_image_metadata"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:quotas:show"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:quotas:show"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:quotas:update"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:quotas:update"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:quotas:delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:quotas:delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:quota_classes"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:quota_classes"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:quota_classes:validate_setup_for_nested_quota_use"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:quota_classes:validate_setup_for_nested_quota_use"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_admin_actions:reset_status"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_admin_actions:reset_status"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:snapshot_admin_actions:reset_status"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:snapshot_admin_actions:reset_status"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:backup_admin_actions:reset_status"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:backup_admin_actions:reset_status"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_admin_actions:force_delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_admin_actions:force_delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_admin_actions:force_detach"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_admin_actions:force_detach"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:snapshot_admin_actions:force_delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:snapshot_admin_actions:force_delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:backup_admin_actions:force_delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:backup_admin_actions:force_delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_admin_actions:migrate_volume"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_admin_actions:migrate_volume"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_admin_actions:migrate_volume_completion"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_admin_actions:migrate_volume_completion"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_host_attribute"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_host_attribute"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_tenant_attribute"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_tenant_attribute"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_mig_status_attribute"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_mig_status_attribute"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:hosts"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:hosts"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:services:index"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:services:index"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:services:update"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:services:update"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_manage"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_manage"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:volume_unmanage"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:volume_unmanage"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:capabilities"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:capabilities"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:create_transfer"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:create_transfer"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:accept_transfer"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:accept_transfer"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:delete_transfer"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:delete_transfer"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:get_all_transfers"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:get_all_transfers"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:replication:promote"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:replication:promote"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume_extension:replication:reenable"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume_extension:replication:reenable"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:enable_replication"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:enable_replication"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:disable_replication"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:disable_replication"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:failover_replication"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:failover_replication"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "volume:list_replication_targets"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "volume:list_replication_targets"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:create"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:create"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:get"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:get"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:get_all"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:get_all"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:restore"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:restore"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:backup-import"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:backup-import"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "backup:backup-export"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "backup:backup-export"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "snapshot_extension:snapshot_actions:update_snapshot_status"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "snapshot_extension:snapshot_actions:update_snapshot_status"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "snapshot_extension:snapshot_manage"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "snapshot_extension:snapshot_manage"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "snapshot_extension:snapshot_unmanage"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "snapshot_extension:snapshot_unmanage"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:create"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:create"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:delete"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:delete"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:update"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:update"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:get"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:get"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:get_all"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:get_all"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:create_cgsnapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:create_cgsnapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:delete_cgsnapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:delete_cgsnapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:get_cgsnapshot"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:get_cgsnapshot"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "consistencygroup:get_all_cgsnapshots"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "consistencygroup:get_all_cgsnapshots"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "scheduler_extension:scheduler_stats:get_pools"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "scheduler_extension:scheduler_stats:get_pools"
+                }
+            ]
+        }
+    ],
+    "meta_rules": [
+        {
+            "name": "rbac",
+            "description": "",
+            "subject_categories": [
+                {
+                    "name": "role"
+                }
+            ],
+            "object_categories": [
+                {
+                    "name": "id"
+                }
+            ],
+            "action_categories": [
+                {
+                    "name": "action_id"
+                }
+            ]
+        }
+    ],
+    "rules": [
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:create"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_all"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_volume_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:delete_volume_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:update_volume_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_volume_admin_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:update_volume_admin_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_snapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_all_snapshots"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:create_snapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:delete_snapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:update_snapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:extend"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:update_readonly_flag"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:retype"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:update"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:types_manage"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:types_extra_specs"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:access_types_qos_specs_id"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:access_types_extra_specs"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_type_access"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_type_access:addProjectAccess"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_type_access:removeProjectAccess"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_type_encryption"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_encryption_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:extended_snapshot_attributes"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_image_metadata"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:quotas:show"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:quotas:update"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:quotas:delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:quota_classes"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:quota_classes:validate_setup_for_nested_quota_use"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_admin_actions:reset_status"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:snapshot_admin_actions:reset_status"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:backup_admin_actions:reset_status"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_admin_actions:force_delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_admin_actions:force_detach"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:snapshot_admin_actions:force_delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:backup_admin_actions:force_delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_admin_actions:migrate_volume"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_admin_actions:migrate_volume_completion"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_host_attribute"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_tenant_attribute"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_mig_status_attribute"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:hosts"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:services:index"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:services:update"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_manage"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:volume_unmanage"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:capabilities"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:create_transfer"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:accept_transfer"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:delete_transfer"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:get_all_transfers"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:replication:promote"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume_extension:replication:reenable"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:enable_replication"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:disable_replication"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:failover_replication"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "volume:list_replication_targets"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:create"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:get"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:get_all"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:restore"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:backup-import"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "backup:backup-export"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "snapshot_extension:snapshot_actions:update_snapshot_status"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "snapshot_extension:snapshot_manage"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "snapshot_extension:snapshot_unmanage"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:create"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:delete"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:update"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:get"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:get_all"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:create_cgsnapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:delete_cgsnapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:get_cgsnapshot"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "consistencygroup:get_all_cgsnapshots"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all_vm"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "scheduler_extension:scheduler_stats:get_pools"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        }
+    ]
+}

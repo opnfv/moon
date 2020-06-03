@@ -1,0 +1,916 @@
+{
+	"info": {
+		"_postman_id": "b08759d2-c727-4dec-bff2-3858a28c6c5b",
+		"name": "Test Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "ec805426-ec88-4416-baed-992f3d2ffdfe",
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "000000000000000000000000000000000000000000000000000"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:8000/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Slave",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "93584814-9658-421c-abd8-7f9169eba774",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"slave_port\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].extra.port);",
+							"pm.globals.set(\"engine_api_key\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].extra.api_key);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"slave_test\",\n\t\"description\": \"...\",\n\t\"address\": \"local\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/slave",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"slave"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Slaves",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "93584814-9658-421c-abd8-7f9169eba774",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"slave_port\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].port);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"test\",\n\t\"description\": \"...\",\n\t\"address\": \"local\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/slaves",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"slaves"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Slaves",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"name\": \"test\",\n\t\"description\": \"...\",\n\t\"address\": \"local\"\n}"
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/slaves",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"slaves"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Tue, 27 Nov 2018 10:52:13 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "WSGIServer/0.2 CPython/3.6.6"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "content-length",
+							"value": "14"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"slaves\": {}\n}"
+				}
+			]
+		},
+		{
+			"name": "Status on slave",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ce404af6-6555-43a1-aed4-3d21f9562d24",
+						"exec": [
+							"setTimeout(function(){}, 2000);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd0f94e-8ced-4f0a-97fa-23e74e59a63f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "5cf62b3c-e6f3-4499-b87e-d34e37052e88",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:8000/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"policy_id\", Object.keys(jsonData.policies)[0]);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"policy_1\",\n\t\"description\": \"...\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Policy",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"policy_1\",\n\t\"description\": \"...\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies/{{policy_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies",
+						"{{policy_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Policies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"policy_1\",\n\t\"description\": \"...\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"policy_1\",\n\t\"description\": \"...\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"pdp_id\", Object.keys(jsonData.pdps)[0]);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get rules",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/rules",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"rules"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Subject Categories",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "bf2e2194-92e9-4e6f-8930-db19e42fb213",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {},
+				"url": {
+					"raw": "http://127.0.0.1:8000/subject_categories",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"subject_categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add pipeline on slave1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ce404af6-6555-43a1-aed4-3d21f9562d24",
+						"exec": [
+							"setTimeout(function(){}, 1000);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd0f94e-8ced-4f0a-97fa-23e74e59a63f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Api-key",
+						"value": "{{engine_api_key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/pipeline/ad7c3600d32c477f8b24dae62333bb5b",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"pipeline",
+						"ad7c3600d32c477f8b24dae62333bb5b"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get pipeline status",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ce404af6-6555-43a1-aed4-3d21f9562d24",
+						"exec": [
+							"setTimeout(function(){}, 1000);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd0f94e-8ced-4f0a-97fa-23e74e59a63f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-key",
+						"type": "text",
+						"value": "{{engine_api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:20000/status",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "20000",
+					"path": [
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp/{{pdp_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp",
+						"{{pdp_id}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

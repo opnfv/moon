@@ -1,0 +1,7 @@
+hug
+pyaml
+gunicorn
+
+# only needed if the SQL driver is used
+sqlalchemy
+pymysql

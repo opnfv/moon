@@ -1,0 +1,49 @@
+api_token: false
+data: ''
+database:
+  pwd_file: db.json
+incremental_updates: false
+logging:
+  formatters:
+    brief:
+      format: '%(levelname)s %(name)s %(message)-30s'
+    custom:
+      format: '%(asctime)-15s %(levelname)s %(name)s %(message)s'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: custom
+      level: 10
+      stream: ext://sys.stdout
+    file:
+      backupCount: 3
+      class: logging.handlers.RotatingFileHandler
+      filename: moon.log
+      formatter: custom
+      level: DEBUG
+      maxBytes: 1048576
+  loggers:
+    moon:
+      handlers:
+      - console
+      - file
+      level: DEBUG
+      propagate: false
+  root:
+    handlers:
+    - console
+    level: ERROR
+  version: 1
+management:
+  password: admin
+  url: http://127.0.0.1:8000
+  user: admin
+orchestration:
+  config_dir: /tmp
+  connection: local
+  driver: moon_engine.plugins.pyorchestrator
+  port: 20000...20100
+plugins:
+  directory: /var/moon/plugins
+type: wrapper
+uuid: 2dd13f3dd36048d88346962d62920ac6

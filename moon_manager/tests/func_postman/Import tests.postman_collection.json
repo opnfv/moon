@@ -1,0 +1,1476 @@
+{
+	"info": {
+		"_postman_id": "86591644-ffdd-4b59-87c1-64221dfa6deb",
+		"name": "Import tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Import",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "b2ac03b5-4862-46f0-8c04-a2b491d5534a",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Body matches string\", function () {",
+							"    pm.expect(pm.response.text()).to.include(\"Import ok !\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"policies\": [\n        {\n            \"name\": \"MLS Policy\",\n            \"genre\": \"authz\",\n            \"description\": \"MLS policy\",\n            \"model\": {\n                \"name\": \"MLS\"\n            },\n            \"mandatory\": true,\n            \"override\": true\n        }\n    ],\n    \"models\": [\n        {\n            \"name\": \"MLS\",\n            \"description\": \"\",\n            \"meta_rules\": [\n                {\n                    \"name\": \"mls\"\n                }\n            ],\n            \"override\": true\n        }\n    ],\n    \"subjects\": [\n        {\n            \"name\": \"admin\",\n            \"description\": \"\",\n            \"extra\": {},\n            \"policies\": [\n                {\n                    \"name\": \"MLS Policy\"\n                }\n            ]\n        },\n        {\n            \"name\": \"demo\",\n            \"description\": \"\",\n            \"extra\": {},\n            \"policies\": [\n                {\n                    \"name\": \"MLS Policy\"\n                }\n            ]\n        }\n    ],\n    \"subject_categories\": [\n        {\n            \"name\": \"level\",\n            \"description\": \"subject level\"\n        }\n    ],\n    \"subject_data\": [\n        {\n            \"name\": \"high\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        },\n        {\n            \"name\": \"medium\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        },\n        {\n            \"name\": \"low\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        }\n    ],\n    \"subject_assignments\": [\n        {\n            \"subject\": {\"name\": \"admin\"},\n            \"category\": {\"name\": \"level\"},\n            \"assignments\": [{\"name\": \"high\"}]\n        },\n        {\n            \"subject\": {\"name\": \"demo\"},\n            \"category\": {\"name\": \"level\"},\n            \"assignments\": [{\"name\": \"low\"}]\n        }\n    ],\n    \"objects\": [\n        {\n            \"name\": \"vm1\",\n            \"description\": \"\",\n            \"extra\": {},\n            \"policies\": [\n                {\n                    \"name\": \"MLS Policy\"\n                }\n            ]\n        },\n        {\n            \"name\": \"vm2\",\n            \"description\": \"\",\n            \"extra\": {},\n            \"policies\": [\n                {\n                    \"name\": \"MLS Policy\"\n                }\n            ]\n        },\n        {\n            \"name\": \"vm3\",\n            \"description\": \"\",\n            \"extra\": {},\n            \"policies\": [\n                {\n                    \"name\": \"MLS Policy\"\n                }\n            ]\n        }\n    ],\n    \"object_categories\": [\n        {\n            \"name\": \"level\",\n            \"description\": \"object level\"\n        }\n    ],\n    \"object_data\": [\n        {\n            \"name\": \"high\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        },\n        {\n            \"name\": \"medium\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        },\n        {\n            \"name\": \"low\",\n            \"description\": \"\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"level\"\n            }\n        }\n    ],\n    \"object_assignments\": [\n        {\n            \"object\": {\"name\": \"vm1\"},\n            \"category\": {\"name\": \"level\"},\n            \"assignments\": [{\"name\": \"high\"}]\n        },\n        {\n            \"object\": {\"name\": \"vm2\"},\n            \"category\": {\"name\": \"level\"},\n            \"assignments\": [{\"name\": \"medium\"}]\n        },\n        {\n            \"object\": {\"name\": \"vm3\"},\n            \"category\": {\"name\": \"level\"},\n            \"assignments\": [{\"name\": \"low\"}]\n        }\n    ],\n    \"actions\": [\n        {\n            \"name\": \"use_image\",\n            \"description\": \"use_image action for glance\",\n            \"extra\": {\n                \"component\": \"glance\"\n            },\n            \"policies\": []\n        },\n        {\n            \"name\": \"get_images\",\n            \"description\": \"get_images action for glance\",\n            \"extra\": {\n                \"component\": \"glance\"\n            },\n            \"policies\": []\n        },\n        {\n            \"name\": \"update_image\",\n            \"description\": \"update_image action for glance\",\n            \"extra\": {\n                \"component\": \"glance\"\n            },\n            \"policies\": []\n        },\n        {\n            \"name\": \"set_image\",\n            \"description\": \"set_image action for glance\",\n            \"extra\": {\n                \"component\": \"glance\"\n            },\n            \"policies\": []\n        }\n    ],\n    \"action_categories\": [\n        {\n            \"name\": \"type\",\n            \"description\": \"\"\n        }\n    ],\n    \"action_data\": [\n        {\n            \"name\": \"read\",\n            \"description\": \"read action\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"type\"\n            }\n        },\n        {\n            \"name\": \"write\",\n            \"description\": \"write action\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"type\"\n            }\n        },\n        {\n            \"name\": \"execute\",\n            \"description\": \"execute action\",\n            \"policies\": [],\n            \"category\": {\n                \"name\": \"type\"\n            }\n        }\n    ],\n    \"action_assignments\": [\n        {\n            \"action\": {\"name\": \"use_image\"},\n            \"category\": {\"name\": \"type\"},\n            \"assignments\": [{\"name\": \"read\"}, {\"name\": \"execute\"}]\n        },\n        {\n            \"action\": {\"name\": \"update_image\"},\n            \"category\": {\"name\": \"type\"},\n            \"assignments\": [{\"name\": \"read\"}, {\"name\": \"write\"}]\n        },\n        {\n            \"action\": {\"name\": \"set_image\"},\n            \"category\": {\"name\": \"type\"},\n            \"assignments\": [{\"name\": \"write\"}]\n        },\n        {\n            \"action\": {\"name\": \"get_images\"},\n            \"category\": {\"name\": \"type\"},\n            \"assignments\": [{\"name\": \"read\"}]\n        }\n    ],\n    \"meta_rules\": [\n        {\n            \"name\": \"mls\",\n            \"description\": \"\",\n            \"subject_categories\": [{\"name\": \"level\"}],\n            \"object_categories\": [{\"name\": \"level\"}],\n            \"action_categories\": [{\"name\": \"type\"}]\n        }\n    ],\n    \"rules\": [\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"high\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"low\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"read\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"high\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"low\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"write\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"high\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"high\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"medium\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"medium\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        },\n        {\n            \"meta_rule\": {\"name\": \"mls\"},\n            \"rule\": {\n                \"subject_data\": [{\"name\": \"low\"}],\n                \"object_data\": [{\"name\": \"low\"}],\n                \"action_data\": [{\"name\": \"execute\"}]\n            },\n            \"policy\": {\"name\": \"MLS Policy\"},\n            \"instructions\": [{\"decision\": \"grant\"}],\n            \"enabled\": true\n        }\n    ]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/import",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"import"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Policies",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "7a625729-6d09-4932-97ea-e7e5d8a2f2a7",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var policy_id = Object.keys(jsonData.policies)[0]",
+							"pm.globals.set(\"policy_id\", policy_id);",
+							"",
+							"pm.test(\"Get policy name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.policies[policy_id].name).to.eql(\"MLS Policy\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Models",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var model_id = Object.keys(jsonData.models)[0]",
+							"pm.globals.set(\"model_id\", model_id);",
+							"",
+							"pm.test(\"Get model name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.models[model_id].name).to.eql(\"MLS\");",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/models",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"models"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PDP",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get subjects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var subject_id0 = Object.keys(jsonData.subjects)[0]",
+							"var subject_id1 = Object.keys(jsonData.subjects)[1]",
+							"",
+							"pm.test(\"Check subject name 1\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.subjects[subject_id0].name).to.be.oneOf([\"admin\", \"demo\"]);",
+							"});",
+							"",
+							"pm.test(\"Check subject name 2\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.subjects[subject_id1].name).to.be.oneOf([\"admin\", \"demo\"]);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/subjects",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"subjects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get objects",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var object_id0 = Object.keys(jsonData.objects)[0]",
+							"var object_id1 = Object.keys(jsonData.objects)[1]",
+							"var object_id2 = Object.keys(jsonData.objects)[2]",
+							"",
+							"pm.test(\"Check object name 1\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.objects[object_id0].name).to.be.oneOf([\"vm1\", \"vm2\", \"vm3\"]);",
+							"});",
+							"",
+							"pm.test(\"Check object name 2\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.objects[object_id1].name).to.be.oneOf([\"vm1\", \"vm2\", \"vm3\"]);",
+							"});",
+							"",
+							"pm.test(\"Check object name 3\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.objects[object_id2].name).to.be.oneOf([\"vm1\", \"vm2\", \"vm3\"]);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/objects",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"objects"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get actions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"var action_id0 = Object.keys(jsonData.actions)[0]",
+							"var action_id1 = Object.keys(jsonData.actions)[1]",
+							"var action_id2 = Object.keys(jsonData.actions)[2]",
+							"var action_id3 = Object.keys(jsonData.actions)[3]",
+							"",
+							"pm.test(\"Check action name 1\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.actions[action_id0].name).to.be.oneOf([\"use_image\", \"update_image\", \"get_images\", \"set_image\"]);",
+							"});",
+							"",
+							"pm.test(\"Check action name 2\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.actions[action_id1].name).to.be.oneOf([\"use_image\", \"update_image\", \"get_images\", \"set_image\"]);",
+							"});",
+							"",
+							"pm.test(\"Check action name 3\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.actions[action_id2].name).to.be.oneOf([\"use_image\", \"update_image\", \"get_images\", \"set_image\"]);",
+							"});",
+							"",
+							"pm.test(\"Check action name 4\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.actions[action_id3].name).to.be.oneOf([\"use_image\", \"update_image\", \"get_images\", \"set_image\"]);",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/actions",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"actions"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get subjects Assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies/{{policy_id}}/subject_assignments",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies",
+						"{{policy_id}}",
+						"subject_assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get objects Assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies/{{policy_id}}/object_assignments",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies",
+						"{{policy_id}}",
+						"object_assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get actions Assignments",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "0d55b7e8-434a-4715-9966-866282b0d120",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/policies/{{policy_id}}/action_assignments",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"policies",
+						"{{policy_id}}",
+						"action_assignments"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create Slave",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "93584814-9658-421c-abd8-7f9169eba774",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"slave_port\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].extra.port);",
+							"pm.globals.set(\"engine_api_key\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].extra.api_key);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"slave_test\",\n\t\"description\": \"...\",\n\t\"address\": \"local\"\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/slave",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"slave"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Slaves",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "93584814-9658-421c-abd8-7f9169eba774",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"slave_port\", jsonData.slaves[Object.keys(jsonData.slaves)[0]].extra.port);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/slaves",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"slaves"
+					]
+				}
+			},
+			"response": [
+				{
+					"name": "Get Slaves",
+					"originalRequest": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"type": "text",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://127.0.0.1:8000/slaves",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "8000",
+							"path": [
+								"slaves"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Date",
+							"value": "Tue, 27 Nov 2018 10:52:13 GMT"
+						},
+						{
+							"key": "Server",
+							"value": "WSGIServer/0.2 CPython/3.6.6"
+						},
+						{
+							"key": "content-type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "content-length",
+							"value": "14"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"slaves\": {}\n}"
+				}
+			]
+		},
+		{
+			"name": "Create PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.globals.set(\"pdp_id\", Object.keys(jsonData.pdps)[0]);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "x-api-key",
+						"value": "{{X-Api-Key}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get PDP",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "d069a3e9-2497-40ab-99db-f2775eaf8c6d",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Check PDP name\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.pdps[Object.keys(jsonData.pdps)[0]].name).is.eq(\"pdp_1\");",
+							"});",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "X-Api-Key",
+						"type": "text",
+						"value": "{{X-Api-Key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:8000/pdp",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "8000",
+					"path": [
+						"pdp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add pipeline on slave1",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "ce404af6-6555-43a1-aed4-3d21f9562d24",
+						"exec": [
+							"setTimeout(function(){}, 1000);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "1cd0f94e-8ced-4f0a-97fa-23e74e59a63f",
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "X-Api-key",
+						"type": "text",
+						"value": "{{engine_api_key}}"
+					},
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"name\": \"pdp_1\",\n\t\"description\": \"...\",\n\t\"vim_project_id\": \"123456789\",\n\t\"security_pipeline\": [\"{{policy_id}}\"]\n}"
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/pipeline/{{pdp_id}}",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"pipeline",
+						"{{pdp_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz admin 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/admin/vm1/get_images",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"admin",
+						"vm1",
+						"get_images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz admin 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/admin/vm1/use_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"admin",
+						"vm1",
+						"use_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz admin 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/admin/vm1/update_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"admin",
+						"vm1",
+						"update_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz admin 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/admin/vm1/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"admin",
+						"vm1",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm3/get_images",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm3",
+						"get_images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm3/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm3",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 3",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 204\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm3/use_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm3",
+						"use_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 4",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm2/get_images",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm2",
+						"get_images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 5",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm2/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm2",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 6",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm2/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm2",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 7",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm1/get_images",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm1",
+						"get_images"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 8",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm1/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm1",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Test authz demo 9",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "a44804be-c5ae-440c-a4fb-b32cb522673b",
+						"exec": [
+							"pm.test(\"Status code is 403\", function () {",
+							"    pm.response.to.have.status(403);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "http://127.0.0.1:{{slave_port}}/authz/123456789/demo/vm1/set_image",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "{{slave_port}}",
+					"path": [
+						"authz",
+						"123456789",
+						"demo",
+						"vm1",
+						"set_image"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

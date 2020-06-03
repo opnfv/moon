@@ -1,4 +1,4 @@
-# Copyright 2018 Open Platform for NFV Project, Inc. and its contributors
+# Copyright 2018 Orange and its contributors
 # This software is distributed under the terms and conditions of the 'Apache-2.0'
 # license which can be found in the file 'LICENSE' in this package distribution
 # or at 'http://www.apache.org/licenses/LICENSE-2.0'.
@@ -7,67 +7,105 @@
 CHANGES
 =======
 
-1.0.0
------
+0.1
+---
 - First version of the manager
 
-2.0.0
------
-- Version built inside the Keystone component
+0.2
+---
+- Add the PIP plugin architecture and the OpenStack plugin
 
-3.0.0
------
-- Version built outside the Keystone component
+0.3
+---
+- Add the PDP API
+- Add the Policy API
+- Add the Perimeter API
+- Add the Slave API
+- Add the Meta Rule API
+- moon_manager/moon_manager/plugins/sql.py: allow the vim_project_id to be empty
+- Update Moon configuration file
+- Fix some bugs in moon_manager.api
+- Integrating  with keystone plugin
+- Fix requirements.txt yaml to pyyaml
+- Add exception handler
+- Add Assignment API
+- Add authentication system
+- Add Meta-Data API
+- Add Data API
+- Add Rules API
+- Add Model API
+- Add json_import API
+- Add json_export API
+- Integrate All APIs with auth
+- removing base_exception, json_utils to moon_utilities
 
-4.0.0
------
-- First micro-architecture version
+0.4
+---
+- Move the pipeline creation to the wrapper component
+- Move the authentication functions to moon_utilities
+- Add API key exchange functionality
+- Update Wrapper process creation
+- Update response from slave API
+- Adding invalid_function for all api
+- Fix the rule API bug
+- Fix the different responses between Get and Post slave APIs
+- Add the possibility to not use the pip plugin
+- Add a logout API
+- Add the re-authentication functionality
+- Updating deleting perimeter_assignment functionality to delete successfully
 
-4.5.2
------
-- use the threading capability of Flask app
-- set the number of manager to 1
-- update to the latest version of the python-moondb library
+0.5
+---
+- Add command lines for managing the Manager
 
-4.5.2-1
------
-- integrating validation to send mandatory key names
+0.6
+---
+- Force the use of Gunicorn as the production server
 
-4.5.3
------
-- Removing try catch from all requets to allow raised exception to be passed to http server, to send actual error to client side
-- fixing test cases to assert on the expected exception after removing try-catch
-- allow 404 to be catched from our side instead of flask itself
-- revert the params in the get/post/patch/delete to be by default = None, so that we could catch the param if it was None
-instead of having not found url if the param is mandatory
+0.7
+---
+- Fix the configuration directory issue in the Wrapper and Pipeline servers
+- Fix the import errors (multiple import of the same policy)
+- Add performance tests
+- Force Gunicorn to run as a daemon
+- Add an endpoint for the dashboard: /static/index.html
+- Move the import functionality to moon_utilities
+- Fix the no deletion of the slave server when deleting the slave, the pid file is created in config_dir
+- Add of CLI for pdp update
+- Add a command to run tests given in policy file
+- Fixing not to delete Perimeter when policy empty (except direct delete)
+- Fixing rule ['instruction'] to be array instead of object
+- Increase the speed of the rules command
+- Add of CLI for status + human / quiet options
+- Fix the perimeter gets while filtering on non string argument
+- Add the global attribute functionality
+- Can now create several models with empty meta rules
+- Adaptation following the removal of the field database > pwd_file in moon.yaml
+- Add of update CLI for the policies
 
-4.5.4
------
-- fixing test cases after validation dependencies added in moondb
+0.8
+---
+- Manager now retrieves api key and other data about slaves after restarting
+- Add cli to update the slaves
+- Add the grant_if_unknown_project parameter
+- Disallow to update model/meta-rule assigned to policy
+- Fix the system accepts invalid decision value “not grant”
+- Add plugin for nova
+- Add daemon to retrieve periodically subjects and objects from openstack
+- Add start/stop server and/or daemon in CLI
+- Fix subject/object_assignment deletion CLI
+- Fix Running moon_manager from another host
+- Fix and check CLI help string
+- Fix in models CLI : can now give the meta_rule at creation
 
-4.5.5
------
-- removing validation on meta_rule categories
-- Update to python_moonutilities 1.4.17 and fix tests
-- adding extra test cases for update requests
-- adding None to requests ( to avoid request not found)
-- removing validation on categories, meta_rules so that can be added empty
-
-4.5.5-1
--------
-- Update to python_moonutilities 1.4.18
-
-4.5.5-2
--------
-- Update to python_moonutilities 1.4.19
-
-4.5.6
-----
-apply pyLint
-adding extra test cases for policy update
-- separate perimeter add/update with validation
-
-4.6.0
------
-- Add a connection to the Update endpoint in Wrapper
->>>>>>> Stashed changes
+0.9
+---
+- Can now update the meta rules while their model is not linked to a policy
+- Moon users can now change their password
+- Add of the update decision of rule cli/api
+- Now logs the user who adds / patches / deletes a rule
+- Add the start/stop command for the web GUI
+- Status of the web GUI now visible with the status command
+- Fix the creation of slaves with -g option
+- Can now update a slave
+- CLIs now use env variables to authenticate the user

@@ -1,0 +1,7 @@
+pytest
+pytest-benchmark
+pbr
+pytest-cov
+cliff
+requests_mock
+moon_utilities

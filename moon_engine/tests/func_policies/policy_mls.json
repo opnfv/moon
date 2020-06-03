@@ -1,0 +1,495 @@
+{
+    "policies": [
+        {
+            "name": "MLS Policy",
+            "genre": "authz",
+            "description": "MLS policy",
+            "model": {
+                "name": "MLS"
+            },
+            "mandatory": true,
+            "override": true
+        }
+    ],
+    "models": [
+        {
+            "name": "MLS",
+            "description": "",
+            "meta_rules": [
+                {
+                    "name": "mls"
+                }
+            ],
+            "override": true
+        }
+    ],
+    "subjects": [
+        {
+            "name": "admin",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "MLS Policy"
+                }
+            ]
+        },
+        {
+            "name": "demo",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "MLS Policy"
+                }
+            ]
+        }
+    ],
+    "subject_categories": [
+        {
+            "name": "level",
+            "description": "subject level"
+        }
+    ],
+    "subject_data": [
+        {
+            "name": "high",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        },
+        {
+            "name": "medium",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        },
+        {
+            "name": "low",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        }
+    ],
+    "subject_assignments": [
+        {
+            "subject": {"name": "admin"},
+            "category": {"name": "level"},
+            "assignments": [{"name": "high"}]
+        },
+        {
+            "subject": {"name": "demo"},
+            "category": {"name": "level"},
+            "assignments": [{"name": "low"}]
+        }
+    ],
+    "objects": [
+        {
+            "name": "vm1",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "MLS Policy"
+                }
+            ]
+        },
+        {
+            "name": "vm2",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "MLS Policy"
+                }
+            ]
+        },
+        {
+            "name": "vm3",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "MLS Policy"
+                }
+            ]
+        }
+    ],
+    "object_categories": [
+        {
+            "name": "level",
+            "description": "object level"
+        }
+    ],
+    "object_data": [
+        {
+            "name": "high",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        },
+        {
+            "name": "medium",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        },
+        {
+            "name": "low",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "level"
+            }
+        }
+    ],
+    "object_assignments": [
+        {
+            "object": {"name": "vm1"},
+            "category": {"name": "level"},
+            "assignments": [{"name": "high"}]
+        },
+        {
+            "object": {"name": "vm2"},
+            "category": {"name": "level"},
+            "assignments": [{"name": "medium"}]
+        },
+        {
+            "object": {"name": "vm3"},
+            "category": {"name": "level"},
+            "assignments": [{"name": "low"}]
+        }
+    ],
+    "actions": [
+        {
+            "name": "use_image",
+            "description": "use_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_images",
+            "description": "get_images action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "update_image",
+            "description": "update_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "set_image",
+            "description": "set_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        }
+    ],
+    "action_categories": [
+        {
+            "name": "type",
+            "description": ""
+        }
+    ],
+    "action_data": [
+        {
+            "name": "read",
+            "description": "read action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        },
+        {
+            "name": "write",
+            "description": "write action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        },
+        {
+            "name": "execute",
+            "description": "execute action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        }
+    ],
+    "action_assignments": [
+        {
+            "action": {"name": "use_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}, {"name": "execute"}]
+        },
+        {
+            "action": {"name": "update_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}, {"name": "write"}]
+        },
+        {
+            "action": {"name": "set_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "write"}]
+        },
+        {
+            "action": {"name": "get_images"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}]
+        }
+    ],
+    "meta_rules": [
+        {
+            "name": "mls",
+            "description": "",
+            "subject_categories": [{"name": "level"}],
+            "object_categories": [{"name": "level"}],
+            "action_categories": [{"name": "type"}]
+        }
+    ],
+    "rules": [
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "high"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "low"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "high"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "low"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "high"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "high"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "medium"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "medium"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "mls"},
+            "rule": {
+                "subject_data": [{"name": "low"}],
+                "object_data": [{"name": "low"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "MLS Policy"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        }
+    ],
+    "checks": {
+        "granted": [
+            ["admin", "vm1", "get_images"],
+            ["admin", "vm1", "set_image"],
+            ["admin", "vm1", "use_image"],
+            ["admin", "vm2", "get_images"],
+            ["admin", "vm2", "set_image"],
+            ["admin", "vm3", "get_images"],
+            ["demo", "vm3", "get_images"],
+            ["demo", "vm3", "set_image"],
+            ["demo", "vm3", "get_images"],
+            ["demo", "vm3Unknown data with id", "get_images"]
+        ],
+        "denied": [
+            ["admin", "vm2", "update_image"],
+            ["admin", "vm3", "set_image"],
+            ["admin", "vm3", "update_image"],
+            ["demo", "vm1", "update_image"],
+            ["demo", "vm2", "set_image"],
+            ["demo", "vm2", "update_image"],
+            ["demo", "vm3", "get_images"],
+            ["demo", "vm3", "set_image"],
+            ["demo", "vm3", "update_image"]
+        ]
+    }
+}

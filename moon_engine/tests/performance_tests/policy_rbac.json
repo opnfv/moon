@@ -1,0 +1,411 @@
+{
+    "policies": [
+        {
+            "name": "Policy for Locust",
+            "genre": "authz",
+            "description": "Policy for Locust",
+            "model": {
+                "name": "RBAC"
+            },
+            "mandatory": true,
+            "override": true
+        }
+    ],
+    "models": [
+        {
+            "name": "RBAC",
+            "description": "",
+            "meta_rules": [
+                {
+                    "name": "rbac"
+                }
+            ],
+            "override": true
+        }
+    ],
+    "subjects": [
+        {
+            "name": "admin",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "demo",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        }
+    ],
+    "subject_categories": [
+        {
+            "name": "role",
+            "description": "role of a user"
+        }
+    ],
+    "subject_data": [
+        {
+            "name": "admin",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        },
+        {
+            "name": "user",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        }
+    ],
+    "subject_assignments": [
+        {
+            "subject": {"name": "admin"},
+            "category": {"name": "role"},
+            "assignments": [{"name": "admin"}]
+        },
+        {
+            "subject": {"name": "admin"},
+            "category": {"name": "role"},
+            "assignments": [{"name": "user"}]
+        },
+        {
+            "subject": {"name": "demo"},
+            "category": {"name": "role"},
+            "assignments": [{"name": "user"}]
+        }
+    ],
+    "objects": [
+        {
+            "name": "vm1",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "vm2",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "vm3",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        }
+    ],
+    "object_categories": [
+        {
+            "name": "id",
+            "description": "identification of the object"
+        }
+    ],
+    "object_data": [
+        {
+            "name": "vm1",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "id"
+            }
+        },
+        {
+            "name": "vm2",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "id"
+            }
+        },
+        {
+            "name": "vm3",
+            "description": "",
+            "policies": [],
+            "category": {
+                "name": "id"
+            }
+        }
+    ],
+    "object_assignments": [
+        {
+            "object": {"name": "vm1"},
+            "category": {"name": "id"},
+            "assignments": [{"name": "vm1"}]
+        },
+        {
+            "object": {"name": "vm2"},
+            "category": {"name": "id"},
+            "assignments": [{"name": "vm2"}]
+        },
+        {
+            "object": {"name": "vm3"},
+            "category": {"name": "id"},
+            "assignments": [{"name": "vm3"}]
+        }
+    ],
+    "actions": [
+        {
+            "name": "use_image",
+            "description": "use_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "get_images",
+            "description": "get_images action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "update_image",
+            "description": "update_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        },
+        {
+            "name": "set_image",
+            "description": "set_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": [
+                {
+                    "name": "Policy for Locust"
+                }
+            ]
+        }
+    ],
+    "action_categories": [
+        {
+            "name": "type",
+            "description": ""
+        }
+    ],
+    "action_data": [
+        {
+            "name": "read",
+            "description": "read action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        },
+        {
+            "name": "write",
+            "description": "write action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        },
+        {
+            "name": "execute",
+            "description": "execute action",
+            "policies": [],
+            "category": {
+                "name": "type"
+            }
+        }
+    ],
+    "action_assignments": [
+        {
+            "action": {"name": "use_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}, {"name": "execute"}]
+        },
+        {
+            "action": {"name": "update_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}, {"name": "write"}]
+        },
+        {
+            "action": {"name": "set_image"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "write"}]
+        },
+        {
+            "action": {"name": "get_images"},
+            "category": {"name": "type"},
+            "assignments": [{"name": "read"}]
+        }
+    ],
+    "meta_rules": [
+        {
+            "name": "rbac",
+            "description": "",
+            "subject_categories": [{"name": "role"}],
+            "object_categories": [{"name": "id"}],
+            "action_categories": [{"name": "type"}]
+        }
+    ],
+    "rules": [
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm1"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm1"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm1"}],
+                "action_data": [{"name": "execute"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm2"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm2"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "admin"}],
+                "object_data": [{"name": "vm3"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "user"}],
+                "object_data": [{"name": "vm1"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "user"}],
+                "object_data": [{"name": "vm1"}],
+                "action_data": [{"name": "write"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        },
+        {
+            "meta_rule": {"name": "rbac"},
+            "rule": {
+                "subject_data": [{"name": "user"}],
+                "object_data": [{"name": "vm2"}],
+                "action_data": [{"name": "read"}]
+            },
+            "policy": {"name": "Policy for Locust"},
+            "instructions": [{"decision": "grant"}],
+            "enabled": true
+        }
+    ],
+    "checks": {
+        "granted": [
+            ["admin", "vm1", "get_images"],
+            ["admin", "vm1", "set_image"],
+            ["admin", "vm1", "use_image"],
+            ["admin", "vm2", "get_images"],
+            ["admin", "vm2", "set_image"],
+            ["admin", "vm3", "get_images"],
+            ["user", "vm1", "get_images"],
+            ["user", "vm1", "set_image"],
+            ["user", "vm2", "get_images"],
+            ["user", "vm1", "get_images"]
+        ],
+        "denied": [
+            ["admin", "vm2", "update_image"],
+            ["admin", "vm3", "set_image"],
+            ["admin", "vm3", "update_image"],
+            ["user", "vm1", "update_image"],
+            ["user", "vm2", "set_image"],
+            ["user", "vm2", "update_image"],
+            ["user", "vm1", "use_image"],
+            ["user", "vm2", "use_image"],
+            ["user", "vm3", "get_images"],
+            ["user", "vm3", "set_image"],
+            ["user", "vm3", "update_image"]
+        ]
+    }
+}

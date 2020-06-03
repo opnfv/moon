@@ -1,5 +1,9 @@
-flask
-flask_restful
-flask_cors
-python_moonutilities
-python_moondb
+hug!=2.5.0
+pyyaml
+moon_utilities
+moon_engine
+tinydb
+gunicorn
+requests
+sqlalchemy
+pymysql

@@ -1,0 +1,24 @@
+{
+	"info": {
+		"_postman_id": "91449fd3-9f70-4e95-b3b7-84365cbc057d",
+		"name": "Test Authz through Wrapper",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get status",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": ""
+				}
+			},
+			"response": []
+		}
+	]
+}

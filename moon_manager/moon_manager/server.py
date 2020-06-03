@@ -1,39 +1,95 @@
-# Copyright 2015 Open Platform for NFV Project, Inc. and its contributors
-# This software is distributed under the terms and conditions of the 'Apache-2.0'
-# license which can be found in the file 'LICENSE' in this package distribution
-# or at 'http://www.apache.org/licenses/LICENSE-2.0'.
+# Software Name: MOON
 
+# Version: 5.4
+
+# SPDX-FileCopyrightText: Copyright (c) 2018-2020 Orange and its contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# This software is distributed under the 'Apache License 2.0',
+# the text of which is available at 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+# or see the "LICENSE" file for more details.
+
+
+
+import hug
 import logging
-from python_moonutilities import configuration, exceptions
-from moon_manager.http_server import HTTPServer
-
-logger = logging.getLogger("moon.manager.server")
-
-
-def create_server():
-    configuration.init_logging()
-    try:
-        conf = configuration.get_configuration("components/manager")
-        hostname = conf["components/manager"].get("hostname", "manager")
-        port = conf["components/manager"].get("port", 80)
-        bind = conf["components/manager"].get("bind", "127.0.0.1")
-    except exceptions.ConsulComponentNotFound:
-        hostname = "manager"
-        bind = "127.0.0.1"
-        port = 80
-        configuration.add_component(uuid="manager",
-                                    name=hostname,
-                                    port=port,
-                                    bind=bind)
-    logger.info("Starting server with IP {} on port {} bind to {}".format(
-        hostname, port, bind))
-    return HTTPServer(host=bind, port=port)
+from moon_manager.api import status, logs, configuration, pdp, policy, slave, auth, \
+    perimeter, assignments, meta_data, meta_rules, models, \
+    json_import, json_export, rules, data, attributes
+from moon_manager import db_driver,orchestration_driver
+from moon_utilities.auth_functions import init_db
+from falcon.http_error import HTTPError
+from moon_manager.api import ERROR_CODE
+from moon_utilities import exceptions
+LOGGER = logging.getLogger("moon.manager.server")
+configuration.init_logging()
 
 
-def run():
-    server = create_server()
-    server.run()
+@hug.response_middleware()
+def CORS(request, response, resource):
+    response.set_header('Access-Control-Allow-Origin', '*')
+    response.set_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, DELETE, PATCH')
+    response.set_header(
+        'Access-Control-Allow-Headers',
+        'Authorization,Keep-Alive,User-Agent,x-api-key'
+        'If-Modified-Since,Cache-Control,Content-Type,x-api-key'
+    )
+    response.set_header(
+        'Access-Control-Expose-Headers',
+        'Authorization,Keep-Alive,User-Agent,'
+        'If-Modified-Since,Cache-Control,Content-Type'
+    )
+    if request.method == 'OPTIONS':
+        response.set_header('Access-Control-Max-Age', 1728000)
+        response.set_header('Content-Type', 'text/plain charset=UTF-8')
+        response.set_header('Content-Length', 0)
+        response.status_code = hug.HTTP_204
 
 
-if __name__ == '__main__':
-    run()
+@hug.startup()
+def add_data(api):
+    """Adds initial data to the api on startup"""
+    LOGGER.warning("Starting the server and initializing data")
+    init_db(configuration.get_configuration("management").get("token_file"))
+    db_driver.init()
+    orchestration_driver.init()
+
+
+def __get_status_code(exception):
+    if isinstance(exception, HTTPError):
+        return exception.status
+    status_code = getattr(exception, "code", 500)
+    if status_code in ERROR_CODE:
+        status_code = ERROR_CODE[status_code]
+    else:
+        status_code = hug.HTTP_500
+    return status_code
+
+
+@hug.exception(exceptions.MoonError)
+def handle_custom_exceptions(exception, response):
+    response.status = __get_status_code(exception)
+    error_message = {"result": False,
+                     'message': str(exception),
+                     "code": getattr(exception, "code", 500)}
+    LOGGER.exception(exception)
+    return error_message
+
+
+@hug.exception(Exception)
+def handle_exception(exception, response):
+    response.status = __get_status_code(exception)
+    LOGGER.exception(exception)
+    return {"result": False, 'message': str(exception), "code": getattr(exception, "code", 500)}
+
+
+@hug.extend_api()
+def with_other_apis():
+    return [status, logs, configuration, pdp, policy, slave, auth,
+            perimeter, assignments, meta_data, meta_rules, models, json_import, json_export,
+            rules, data, attributes]
+
+
+@hug.static('/static')
+def static_front():
+    return (configuration.get_configuration("dashboard").get("root"), )

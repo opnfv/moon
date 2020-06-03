@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+if [[ "$#" -ne 2 ]]; then
+  echo "Usage : source moonrc <username> <password>"
+else
+
+    if [[ -n "$1" ]]; then
+      MOON_USERNAME="$1"
+    fi
+
+    if [[ -n "$2" ]]; then
+      MOON_PASSWORD="$2"
+    fi
+
+    export MOON_USERNAME=$MOON_USERNAME
+    export MOON_PASSWORD=$MOON_PASSWORD
+
+fi

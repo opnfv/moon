@@ -1,0 +1,2918 @@
+{
+    "policies": [
+        {
+            "name": "OpenStack RBAC Policy",
+            "genre": "authz",
+            "description": "A RBAC policy similar of what you can find through policy.json files",
+            "model": {
+                "name": "OPST_RBAC"
+            },
+            "mandatory": true,
+            "override": true
+        }
+    ],
+    "models": [
+        {
+            "name": "OPST_RBAC",
+            "description": "",
+            "meta_rules": [
+                {
+                    "name": "rbac"
+                }
+            ],
+            "override": true
+        }
+    ],
+    "subjects": [
+        {
+            "name": "admin",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "OpenStack RBAC Policy"
+                }
+            ]
+        }
+    ],
+    "subject_categories": [
+        {
+            "name": "role",
+            "description": "a role in OpenStack"
+        }
+    ],
+    "subject_data": [
+        {
+            "name": "admin",
+            "description": "the admin role",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        },
+        {
+            "name": "member",
+            "description": "the member role",
+            "policies": [],
+            "category": {
+                "name": "role"
+            }
+        }
+    ],
+    "subject_assignments": [
+        {
+            "subject": {
+                "name": "admin"
+            },
+            "category": {
+                "name": "role"
+            },
+            "assignments": [
+                {
+                    "name": "admin"
+                },
+                {
+                    "name": "member"
+                }
+            ]
+        }
+    ],
+    "objects": [
+        {
+            "name": "all",
+            "description": "",
+            "extra": {},
+            "policies": [
+                {
+                    "name": "OpenStack RBAC Policy"
+                }
+            ]
+        }
+    ],
+    "object_categories": [
+        {
+            "name": "id",
+            "description": "the UID of each virtual machine"
+        }
+    ],
+    "object_data": [
+        {
+            "name": "all",
+            "description": "represents all virtual machines in this project",
+            "policies": [],
+            "category": {
+                "name": "id"
+            }
+        }
+    ],
+    "object_assignments": [
+        {
+            "object": {
+                "name": "all"
+            },
+            "category": {
+                "name": "id"
+            },
+            "assignments": [
+                {
+                    "name": "all"
+                }
+            ]
+        }
+    ],
+    "actions": [
+        {
+            "name": "add_image",
+            "description": "add_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "delete_image",
+            "description": "delete_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_image",
+            "description": "get_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_images",
+            "description": "get_images action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_image",
+            "description": "modify_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "publicize_image",
+            "description": "publicize_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "communitize_image",
+            "description": "communitize_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "copy_from",
+            "description": "copy_from action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "download_image",
+            "description": "download_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "upload_image",
+            "description": "upload_image action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "delete_image_location",
+            "description": "delete_image_location action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_image_location",
+            "description": "get_image_location action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "set_image_location",
+            "description": "set_image_location action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_member",
+            "description": "add_member action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "delete_member",
+            "description": "delete_member action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_member",
+            "description": "get_member action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_members",
+            "description": "get_members action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_member",
+            "description": "modify_member action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "manage_image_cache",
+            "description": "manage_image_cache action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_task",
+            "description": "get_task action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_tasks",
+            "description": "get_tasks action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_task",
+            "description": "add_task action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_task",
+            "description": "modify_task action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "tasks_api_access",
+            "description": "tasks_api_access action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "deactivate",
+            "description": "deactivate action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "reactivate",
+            "description": "reactivate action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_namespace",
+            "description": "get_metadef_namespace action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_namespaces",
+            "description": "get_metadef_namespaces action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_metadef_namespace",
+            "description": "modify_metadef_namespace action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_namespace",
+            "description": "add_metadef_namespace action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_object",
+            "description": "get_metadef_object action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_objects",
+            "description": "get_metadef_objects action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_metadef_object",
+            "description": "modify_metadef_object action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_object",
+            "description": "add_metadef_object action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "list_metadef_resource_types",
+            "description": "list_metadef_resource_types action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_resource_type",
+            "description": "get_metadef_resource_type action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_resource_type_association",
+            "description": "add_metadef_resource_type_association action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_property",
+            "description": "get_metadef_property action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_properties",
+            "description": "get_metadef_properties action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_metadef_property",
+            "description": "modify_metadef_property action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_property",
+            "description": "add_metadef_property action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_tag",
+            "description": "get_metadef_tag action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "get_metadef_tags",
+            "description": "get_metadef_tags action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "modify_metadef_tag",
+            "description": "modify_metadef_tag action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_tag",
+            "description": "add_metadef_tag action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        },
+        {
+            "name": "add_metadef_tags",
+            "description": "add_metadef_tags action for glance",
+            "extra": {
+                "component": "glance"
+            },
+            "policies": []
+        }
+    ],
+    "action_categories": [
+        {
+            "name": "action_id",
+            "description": ""
+        }
+    ],
+    "action_data": [
+        {
+            "name": "add_image",
+            "description": "add_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "delete_image",
+            "description": "delete_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_image",
+            "description": "get_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_images",
+            "description": "get_images action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_image",
+            "description": "modify_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "publicize_image",
+            "description": "publicize_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "communitize_image",
+            "description": "communitize_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "copy_from",
+            "description": "copy_from action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "download_image",
+            "description": "download_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "upload_image",
+            "description": "upload_image action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "delete_image_location",
+            "description": "delete_image_location action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_image_location",
+            "description": "get_image_location action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "set_image_location",
+            "description": "set_image_location action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_member",
+            "description": "add_member action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "delete_member",
+            "description": "delete_member action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_member",
+            "description": "get_member action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_members",
+            "description": "get_members action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_member",
+            "description": "modify_member action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "manage_image_cache",
+            "description": "manage_image_cache action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_task",
+            "description": "get_task action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_tasks",
+            "description": "get_tasks action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_task",
+            "description": "add_task action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_task",
+            "description": "modify_task action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "tasks_api_access",
+            "description": "tasks_api_access action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "deactivate",
+            "description": "deactivate action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "reactivate",
+            "description": "reactivate action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_namespace",
+            "description": "get_metadef_namespace action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_namespaces",
+            "description": "get_metadef_namespaces action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_metadef_namespace",
+            "description": "modify_metadef_namespace action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_namespace",
+            "description": "add_metadef_namespace action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_object",
+            "description": "get_metadef_object action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_objects",
+            "description": "get_metadef_objects action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_metadef_object",
+            "description": "modify_metadef_object action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_object",
+            "description": "add_metadef_object action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "list_metadef_resource_types",
+            "description": "list_metadef_resource_types action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_resource_type",
+            "description": "get_metadef_resource_type action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_resource_type_association",
+            "description": "add_metadef_resource_type_association action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_property",
+            "description": "get_metadef_property action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_properties",
+            "description": "get_metadef_properties action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_metadef_property",
+            "description": "modify_metadef_property action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_property",
+            "description": "add_metadef_property action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_tag",
+            "description": "get_metadef_tag action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "get_metadef_tags",
+            "description": "get_metadef_tags action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "modify_metadef_tag",
+            "description": "modify_metadef_tag action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_tag",
+            "description": "add_metadef_tag action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        },
+        {
+            "name": "add_metadef_tags",
+            "description": "add_metadef_tags action for glance",
+            "policies": [],
+            "category": {
+                "name": "action_id"
+            }
+        }
+    ],
+    "action_assignments": [
+        {
+            "action": {
+                "name": "add_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "delete_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "delete_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_images"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_images"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "publicize_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "publicize_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "communitize_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "communitize_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "copy_from"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "copy_from"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "download_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "download_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "upload_image"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "upload_image"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "delete_image_location"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "delete_image_location"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_image_location"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_image_location"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "set_image_location"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "set_image_location"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_member"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_member"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "delete_member"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "delete_member"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_member"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_member"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_members"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_members"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_member"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_member"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "manage_image_cache"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "manage_image_cache"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_task"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_task"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_tasks"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_tasks"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_task"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_task"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_task"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_task"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "tasks_api_access"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "tasks_api_access"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "deactivate"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "deactivate"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "reactivate"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "reactivate"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_namespace"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_namespace"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_namespaces"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_namespaces"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_metadef_namespace"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_metadef_namespace"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_namespace"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_namespace"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_object"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_object"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_objects"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_objects"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_metadef_object"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_metadef_object"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_object"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_object"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "list_metadef_resource_types"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "list_metadef_resource_types"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_resource_type"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_resource_type"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_resource_type_association"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_resource_type_association"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_property"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_property"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_properties"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_properties"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_metadef_property"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_metadef_property"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_property"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_property"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_tag"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_tag"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "get_metadef_tags"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "get_metadef_tags"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "modify_metadef_tag"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "modify_metadef_tag"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_tag"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_tag"
+                }
+            ]
+        },
+        {
+            "action": {
+                "name": "add_metadef_tags"
+            },
+            "category": {
+                "name": "action_id"
+            },
+            "assignments": [
+                {
+                    "name": "add_metadef_tags"
+                }
+            ]
+        }
+    ],
+    "meta_rules": [
+        {
+            "name": "rbac",
+            "description": "",
+            "subject_categories": [
+                {
+                    "name": "role"
+                }
+            ],
+            "object_categories": [
+                {
+                    "name": "id"
+                }
+            ],
+            "action_categories": [
+                {
+                    "name": "action_id"
+                }
+            ]
+        }
+    ],
+    "rules": [
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "delete_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_images"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "publicize_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "communitize_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "copy_from"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "download_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "upload_image"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "delete_image_location"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_image_location"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "set_image_location"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_member"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "delete_member"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_member"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_members"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_member"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "manage_image_cache"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_task"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_tasks"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_task"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_task"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "tasks_api_access"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "deactivate"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "reactivate"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_namespace"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_namespaces"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_metadef_namespace"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_namespace"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_object"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_objects"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_metadef_object"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_object"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "list_metadef_resource_types"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_resource_type"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_resource_type_association"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_property"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_properties"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_metadef_property"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_property"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_tag"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "get_metadef_tags"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "modify_metadef_tag"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_tag"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        },
+        {
+            "meta_rule": {
+                "name": "rbac"
+            },
+            "rule": {
+                "subject_data": [
+                    {
+                        "name": "admin"
+                    }
+                ],
+                "object_data": [
+                    {
+                        "name": "all"
+                    }
+                ],
+                "action_data": [
+                    {
+                        "name": "add_metadef_tags"
+                    }
+                ]
+            },
+            "policy": {
+                "name": "OpenStack RBAC Policy"
+            },
+            "instructions": [
+                {
+                    "decision": "grant"
+                }
+            ],
+            "enabled": true
+        }
+    ]
+}

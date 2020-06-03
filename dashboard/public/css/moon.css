@@ -1,0 +1,98 @@
+.navbar .nav-item:first-child {
+    margin-left: 0 !important;
+}
+
+.inline {
+    display: inline;
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+summary{
+    outline:none;
+    margin-bottom: 10px;
+}
+
+details {
+    cursor: default;
+}
+
+.filter {
+    display: inline-block;
+    width: auto;
+    vertical-align: middle;
+}
+
+.categories {
+    min-height: 130px;
+}
+
+.categories td {
+    width: 33%;
+    vertical-align: top !important;
+}
+
+.width-200 {
+    width: 200px; 
+}
+
+.height-200 {
+    height: 200px;
+}
+
+.mh-100 {
+    min-height: 100px;
+}
+
+.border {
+    border: 1px #DDD solid;
+}
+
+.padding-10 {
+    padding: 10px;
+}
+
+.scroll {
+    overflow-y: auto;
+}
+
+.input-file {
+    display: none !important;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.selected-data {
+    background-color: #f16e00;
+    padding: 10px;
+    display: block;
+}
+
+.selected-data > span {
+    font-weight: bold;
+    color: #FFFFFF;
+}
+
+.nav, .pagination, .carousel, .panel-title a { 
+    cursor: pointer; 
+}
+
+.toast-background {
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: #444 !important;
+}
+
+.toast-body {
+    min-width: 600px;
+}
+
+.assignments-details, .icon-helpstring {
+    margin-left: 2%;
+}
+

@@ -1,254 +1,164 @@
-import base64
-import json
-import logging
+# Software Name: MOON
+
+# Version: 5.4
+
+# SPDX-FileCopyrightText: Copyright (c) 2018-2020 Orange and its contributors
+# SPDX-License-Identifier: Apache-2.0
+
+# This software is distributed under the 'Apache License 2.0',
+# the text of which is available at 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+# or see the "LICENSE" file for more details.
+
+
+import os
 import pytest
 import requests_mock
-
-CONF = {
-    "openstack": {
-        "keystone": {
-            "url": "http://keystone:5000/v3",
-            "user": "admin",
-            "check_token": False,
-            "password": "p4ssw0rd",
-            "domain": "default",
-            "certificate": False,
-            "project": "admin"
-        }
-    },
-    "components": {
-        "wrapper": {
-            "bind": "0.0.0.0",
-            "port": 8080,
-            "container": "wukongsun/moon_wrapper:v4.3",
-            "timeout": 5,
-            "hostname": "wrapper"
-        },
-        "manager": {
-            "bind": "0.0.0.0",
-            "port": 8082,
-            "container": "wukongsun/moon_manager:v4.3",
-            "hostname": "manager"
-        },
-        "port_start": 31001,
-        "orchestrator": {
-            "bind": "0.0.0.0",
-            "port": 8083,
-            "container": "wukongsun/moon_orchestrator:v4.3",
-            "hostname": "orchestrator"
-        },
-        "pipeline": {
-            "interface": {
-                "bind": "0.0.0.0",
-                "port": 8080,
-                "container": "wukongsun/moon_interface:v4.3",
-                "hostname": "interface"
-            },
-            "authz": {
-                "bind": "0.0.0.0",
-                "port": 8081,
-                "container": "wukongsun/moon_authz:v4.3",
-                "hostname": "authz"
-            },
-        }
-    },
-    "logging": {
-        "handlers": {
-            "file": {
-                "filename": "/tmp/moon.log",
-                "class": "logging.handlers.RotatingFileHandler",
-                "level": "DEBUG",
-                "formatter": "custom",
-                "backupCount": 3,
-                "maxBytes": 1048576
-            },
-            "console": {
-                "class": "logging.StreamHandler",
-                "formatter": "brief",
-                "level": "INFO",
-                "stream": "ext://sys.stdout"
-            }
-        },
-        "formatters": {
-            "brief": {
-                "format": "%(levelname)s %(name)s %(message)-30s"
-            },
-            "custom": {
-                "format": "%(asctime)-15s %(levelname)s %(name)s %(message)s"
-            }
-        },
-        "root": {
-            "handlers": [
-                "console"
-            ],
-            "level": "ERROR"
-        },
-        "version": 1,
-        "loggers": {
-            "moon": {
-                "handlers": [
-                    "console",
-                    "file"
-                ],
-                "propagate": False,
-                "level": "DEBUG"
-            }
-        }
-    },
-    "slave": {
-        "name": None,
-        "master": {
-            "url": None,
-            "login": None,
-            "password": None
-        }
-    },
-    "docker": {
-        "url": "tcp://172.88.88.1:2376",
-        "network": "moon"
-    },
-    "database": {
-        "url": "sqlite:///database.db",
-        # "url": "mysql+pymysql://moon:p4sswOrd1@db/moon",
-        "driver": "sql"
-    },
-    "messenger": {
-        "url": "rabbit://moon:p4sswOrd1@messenger:5672/moon"
-    },
-}
-
-COMPONENTS = (
-    "logging",
-    "openstack/keystone",
-    "database",
-    "slave",
-    "components/manager",
-    "components/orchestrator"
-)
-
-PODS = {
-    "pods": {
-        "721760dd-de5f-11e7-8001-3863bbb766f3": [
-            {
-                "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
-                "port": 8080,
-                "genre": "interface",
-                "name": "interface-paltry",
-                "keystone_project_id": "a64beb1cc224474fb4badd43173e7101",
-                "namespace": "moon",
-                "container": "wukongsun/moon_interface:v4.3"
-            },
-            {
-                "pdp_id": "b3d3e18abf3340e8b635fd49e6634ccd",
-                "meta_rule_id": "f8f49a779ceb47b3ac810f01ef71b4e0",
-                "port": 8081,
-                "genre": "authz",
-                "name": "authz-economic",
-                "policy_id": "f8f49a779ceb47b3ac810f01ef71b4e0",
-                "keystone_project_id": "a64beb1cc224474fb4badd43173e7101",
-                "namespace": "moon",
-                "container": "wukongsun/moon_authz:v4.3"
-            }
-        ]
-    }
-}
-
-SLAVES = {
-    "slaves": [
-        {
-            "context":
-                {
-                    "cluster": "kubernetes",
-                    "user": "kubernetes-admin"
-                },
-            "name": "kubernetes-admin@kubernetes",
-            "configured": True,
-            "wrapper_name": "mywrapper",
-            "ip": "NC",
-            "port": 31002,
-            "internal_port": 8080
-        }
-    ]
-}
+import yaml
+import mock_keystone
+import mock_nova
+import mock_engine
+import mock_slaves
 
 
-def get_b64_conf(component=None):
-    if component in CONF:
-        return base64.b64encode(
-            json.dumps(
-                CONF[component]).encode('utf-8') + b"\n").decode('utf-8')
-    elif "/" in component:
-        key1, _, key2 = component.partition("/")
-        return base64.b64encode(
-            json.dumps(
-                CONF[key1][key2]).encode('utf-8') + b"\n").decode('utf-8')
-    else:
-        return base64.b64encode(
-            json.dumps(CONF).encode('utf-8') + b"\n").decode('utf-8')
+__CONF = """
+database:
+  url: sqlite:////tmp/database_test.db
+  driver: moon_manager.plugins.sql
+  migration_dir: moon_manager.api.db.migrations
+
+management:
+  url: http://127.0.0.1:8000
+  user: admin
+  password: admin
+  token_file: db.json
+
+orchestration:
+  driver: moon_manager.plugins.pyorchestrator
+  connection: local
+  slaves:
+    port: 10000...10100
+  pipelines:
+    port: 20000...20100
+
+information:
+  user: admin
+  password: p4ssw0rd
+  domain: default
+  project: admin
+  check_token: false
+  certificate: false
+  url: http://keystone:5000/v3
+  subjects:
+    drivers:
+      moon_manager.plugins.moon_keystone_plugin:
+        url: http://keystone:5000/v3
+  objects:
+    drivers:
+      moon_manager.plugins.moon_nova_plugin:
+        url: http://keystone:5000/compute/v2.1
+
+  global_attrs:
+    driver: moon_manager.plugins.global_attrs
+    attributes:
+      mode:
+        values:
+          - build
+          - run
+        default: run
+        url: file:/tmp/mode
+        #url: https://127.0.0.1:8080/mode
+        #url: mysql+pymysql://moon:p4sswOrd1@db/moon_mode
+        #url: sqlite:////tmp/database.db
+        #url: driver://moon_manager.plugins.my_plugin
+
+plugins:
+  directory: /var/moon/plugins
+
+components:
+  manager:
+    port: 8080
+    bind: 0.0.0.0
+    hostname: manager
+
+logging:
+  version: 1
+
+  formatters:
+    brief:
+      format: "%(levelname)s %(name)s %(message)-30s"
+    custom:
+      format: "%(asctime)-15s %(levelname)s %(name)s %(message)s"
+
+  handlers:
+    console:
+      class : logging.StreamHandler
+      formatter: custom
+      level   : INFO
+      stream  : ext://sys.stdout
+    file:
+      class : logging.handlers.RotatingFileHandler
+      formatter: custom
+      level   : DEBUG
+      filename: /tmp/moon.log
+      maxBytes: 1048576
+      backupCount: 3
+
+  loggers:
+    moon:
+      level: DEBUG
+      handlers: [console, file]
+      propagate: no
+
+  root:
+    level: ERROR
+    handlers: [console]
+"""
 
 
 @pytest.fixture(autouse=True)
 def no_requests(monkeypatch):
     """ Modify the response from Requests module
     """
+    global manager_api_key
     with requests_mock.Mocker(real_http=True) as m:
-        for component in COMPONENTS:
-            m.register_uri(
-                'GET', 'http://consul:8500/v1/kv/{}'.format(component),
-                json=[{'Key': component, 'Value': get_b64_conf(component)}]
-            )
-        m.register_uri(
-            'POST', 'http://keystone:5000/v3/auth/tokens',
-            headers={'X-Subject-Token': "111111111"}
-        )
-        m.register_uri(
-            'DELETE', 'http://keystone:5000/v3/auth/tokens',
-            headers={'X-Subject-Token': "111111111"}
-        )
+        try:
+            os.remove("/tmp/database_test.db")
+        except FileNotFoundError:
+            pass
+        try:
+            os.remove("/tmp/moon.pwd")
+        except FileNotFoundError:
+            pass
+        print("Configure...")
+        from moon_manager.api.configuration import init_database, set_configuration
+        set_configuration(yaml.safe_load(__CONF))
+        print("Create a new user")
+        from moon_utilities.auth_functions import add_user, init_db, get_api_key_for_user
+        init_db()
+        try:
+            user = add_user("admin", "admin")
+            manager_api_key = user["api_key"]
+        except KeyError:
+            print("User already exists")
+            manager_api_key = get_api_key_for_user("admin")
+        print("Initialize the database")
+        init_database()
+        from moon_manager import db_driver, orchestration_driver
 
-        def match_request_text(request):
-            # request.url may be None, or '' prevents a TypeError.
-            return 'http://keystone:5000/v3/users?name=testuser' in request.url
+        db_driver.init()
+        orchestration_driver.init()
 
-        m.register_uri(
-            requests_mock.ANY, '/v3/users',
-            additional_matcher=match_request_text,
-            json={"users": {}}
-        )
-        m.register_uri(
-            'POST', 'http://keystone:5000/v3/users/',
-            json={"users": [{"id": "1111111111111"}]}
-        )
-        m.register_uri(
-            'POST', 'http://orchestrator:8083/pods',
-            json=PODS,
-            headers={"content-type": "application/json"}
-        )
-        m.register_uri(
-            'GET', 'http://orchestrator:8083/pods',
-            json=PODS
-        )
-        m.register_uri(
-            'GET', 'http://localhost/slaves',
-            json=SLAVES
-        )
-        m.register_uri(
-            'DELETE', 'http://orchestrator:8083/pods/{}'.format(list([PODS['pods'].keys()])[0]),
-            headers={"content-type": "application/json"}
-        )
+        mock_keystone.register_keystone(m)
+        mock_nova.register_nova(m)
+        mock_engine.register_engine(m)
+        mock_slaves.register_slaves(m)
 
-        print("Start populating the DB.")
-        from python_moondb.db_manager import init_engine, main
-        engine = init_engine()
-        print("engine={}".format(engine))
-        main("upgrade", logging.getLogger("db_manager"), engine)
-        print("End populating the DB.")
+        from moon_manager.pip_driver import InformationManager
+        for category in InformationManager:
+            for manager in InformationManager[category]:
+                manager.set_auth()
+
         yield m
-
-# @pytest.fixture(autouse=True, scope="session")
-# def manage_database():
-#     from moon_db.db_manager import init_engine, run
-#     engine = init_engine()
-#     run("upgrade", logging.getLogger("db_manager"), engine)
-#     yield
-#     print("Will close the DB")
+        for category in InformationManager:
+            for manager in InformationManager[category]:
+                manager.unset_auth()

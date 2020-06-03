@@ -1,5 +1,11 @@
-flask
-flask_cors
-flask_restful
-python_moondb==1.2.20
-python_moonutilities==1.4.20
+hug!=2.5.0
+moon_utilities
+sqlalchemy
+pymysql
+pytest-mock
+pytest-cov
+requests_mock
+tinydb
+pytest
+pytest-benchmark
+pyaml
